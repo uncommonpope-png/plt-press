@@ -103,6 +103,7 @@ a.btn-g{border-color:#2ecc71;color:#2ecc71}
 document.getElementById('t0').textContent = new Date().toLocaleTimeString();
 const BOT='8713808619:AAHeGVgqgRbEp8GW_AuvMJtV2XVoQcgmM3A', CID='8589507317';
 const RAW='https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json';
+const SERVER='https://plt-server.onrender.com';
 
 function addMsg(who,text,id){
   const m=document.getElementById('msgs');
@@ -153,6 +154,13 @@ function loadLog(){
   }).catch(()=>{});
 }
 loadLog();setInterval(loadLog,20000);
+let lastId=0;
+function pollChat(){
+  fetch(SERVER+'/chat?since='+lastId).then(r=>r.json()).then(msgs=>{
+    msgs.forEach(m=>{if(m.id>lastId)lastId=m.id;if(m.who==='seshat')addMsg('seshat',m.text,'cm'+m.id);});
+  }).catch(()=>{});
+}
+setInterval(pollChat,3000);
 </script>
 </body>
 </html>
