@@ -104,10 +104,12 @@ document.getElementById('t0').textContent = new Date().toLocaleTimeString();
 const BOT='8713808619:AAHeGVgqgRbEp8GW_AuvMJtV2XVoQcgmM3A', CID='8589507317';
 const RAW='https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json';
 
-function addMsg(who,text){
+function addMsg(who,text,id){
   const m=document.getElementById('msgs');
+  if(id&&document.getElementById(id))return;
   const d=document.createElement('div');
   d.className='msg '+who;
+  if(id)d.id=id;
   d.innerHTML=`<div class="msg-who">${who==='craig'?'Craig':'Seshat'}</div>${text}<div class="msg-t">${new Date().toLocaleTimeString()}</div>`;
   m.appendChild(d);m.scrollTop=m.scrollHeight;
 }
@@ -146,6 +148,7 @@ function loadLog(){
     if(d.updated)document.getElementById('upd').textContent=d.updated.slice(11,16);
     if(d.status)document.getElementById('statusBar').textContent='✅ '+d.status;
     if(d.activity)document.getElementById('log').innerHTML=d.activity.map(a=>`<div class="log-row"><span class="log-t">${a.time}</span><span class="log-m">${a.msg}</span></div>`).join('');
+    if(d.chat){d.chat.forEach(m=>{if(!document.getElementById('cm'+m.id)){addMsg('seshat',m.text,'cm'+m.id);}});}
     document.getElementById('ft').textContent='Refreshed '+new Date().toLocaleTimeString();
   }).catch(()=>{});
 }
