@@ -6,236 +6,150 @@
 <title>PLT — Mission Control</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--gold:#C9A84C;--dark:#050505;--card:#111;--border:#1f1f1f;--text:#E8E8E8;--muted:#555}
-body{background:var(--dark);color:var(--text);font-family:Georgia,serif;min-height:100vh;display:flex;flex-direction:column}
-header{display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.25rem;border-bottom:1px solid var(--border);background:#080808;position:sticky;top:0;z-index:10}
-.logo{font-size:.8rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase}
+body{background:#050505;color:#E8E8E8;font-family:Georgia,serif;max-width:600px;margin:0 auto;padding:1rem}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid #1f1f1f}
+.logo{font-size:.8rem;letter-spacing:.3em;color:#C9A84C;text-transform:uppercase}
 .live{font-size:.65rem;color:#2ecc71;display:flex;align-items:center;gap:.35rem}
-.dot{width:7px;height:7px;background:#2ecc71;border-radius:50%;animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
-.main{display:grid;grid-template-columns:1fr 340px;flex:1;height:calc(100vh - 46px)}
-.left{overflow-y:auto;padding:1rem;border-right:1px solid var(--border)}
-.right{display:flex;flex-direction:column;background:#080808}
-/* Stats */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1rem}
-.stat{background:var(--card);border:1px solid var(--border);padding:.75rem}
-.stat-label{font-size:.55rem;letter-spacing:.2em;color:#888;text-transform:uppercase;margin-bottom:.2rem}
-.stat-val{font-size:1.3rem;color:var(--gold)}
-.stat-sub{font-size:.65rem;color:var(--muted);margin-top:.1rem}
-/* Quick links */
-.links{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
-.btn{border:1px solid var(--gold);color:var(--gold);padding:.35rem .8rem;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;text-decoration:none;font-family:Georgia,serif;background:transparent;cursor:pointer}
-.btn:hover,.btn:active{background:var(--gold);color:var(--dark)}
-.btn-g{border-color:#2ecc71;color:#2ecc71}
-.btn-g:hover{background:#2ecc71;color:var(--dark)}
-/* Activity */
-.sec-label{font-size:.6rem;letter-spacing:.25em;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:.6rem}
-.log{background:var(--card);border:1px solid var(--border)}
-.log-item{padding:.6rem .9rem;border-bottom:1px solid #0f0f0f;font-size:.78rem;display:flex;gap:.6rem;align-items:flex-start}
-.log-item:last-child{border-bottom:none}
-.log-time{color:var(--muted);font-size:.65rem;min-width:38px;padding-top:.1rem}
-.log-msg{color:#ccc;line-height:1.4}
-/* Chat panel */
-.chat-header{padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.chat-title{font-size:.65rem;letter-spacing:.25em;color:var(--gold);text-transform:uppercase}
-.chat-status{font-size:.6rem;color:#2ecc71}
-.chat-msgs{flex:1;overflow-y:auto;padding:.75rem;display:flex;flex-direction:column;gap:.5rem}
+.dot{width:7px;height:7px;background:#2ecc71;border-radius:50%;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.status{background:#001800;border:1px solid #003300;color:#2ecc71;padding:.5rem .75rem;font-size:.72rem;margin-bottom:1rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem}
+.stat{background:#111;border:1px solid #1f1f1f;padding:.6rem .75rem}
+.stat-label{font-size:.55rem;letter-spacing:.2em;color:#888;text-transform:uppercase}
+.stat-val{font-size:1.2rem;color:#C9A84C}
+.links{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.25rem}
+a.btn{border:1px solid #C9A84C;color:#C9A84C;padding:.4rem .8rem;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;text-decoration:none}
+a.btn-g{border-color:#2ecc71;color:#2ecc71}
+
+/* CHAT */
+.chat-wrap{border:1px solid #C9A84C;margin-bottom:1.25rem}
+.chat-head{background:#111;padding:.6rem 1rem;display:flex;justify-content:space-between;border-bottom:1px solid #1f1f1f}
+.chat-title{font-size:.65rem;letter-spacing:.2em;color:#C9A84C;text-transform:uppercase}
+.chat-online{font-size:.6rem;color:#2ecc71}
+.chat-msgs{height:300px;overflow-y:auto;padding:.75rem;display:flex;flex-direction:column;gap:.5rem;background:#080808}
 .msg{padding:.5rem .75rem;font-size:.82rem;max-width:88%;line-height:1.45}
-.msg.craig{background:#12122a;color:var(--text);align-self:flex-end;border:1px solid #2a2a5a}
+.msg.craig{background:#12122a;align-self:flex-end;border:1px solid #2a2a5a}
 .msg.seshat{background:#0a1a0a;color:#ddd;align-self:flex-start;border:1px solid #1a3a1a}
-.msg-name{font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.2rem}
-.msg.craig .msg-name{color:#7878ff}
-.msg.seshat .msg-name{color:var(--gold)}
-.msg-time{font-size:.6rem;color:var(--muted);margin-top:.2rem;text-align:right}
-.chat-input{border-top:1px solid var(--border);background:#080808}
-.input-row{display:flex}
-.chat-input input{flex:1;background:transparent;border:none;color:var(--text);padding:.75rem .9rem;font-family:Georgia,serif;font-size:.85rem;outline:none}
-.chat-input input::placeholder{color:#333}
-.chat-input button{background:transparent;border:none;border-left:1px solid var(--border);color:var(--gold);padding:.75rem 1rem;cursor:pointer;font-family:Georgia,serif;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase}
-.chat-input button:hover{background:var(--gold);color:var(--dark)}
-.voice-bar{padding:.5rem .75rem;display:flex;align-items:center;gap:.6rem;border-top:1px solid var(--border)}
-.rec-btn{border:1px solid #e74c3c;color:#e74c3c;padding:.35rem .8rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;font-family:Georgia,serif;background:transparent;border-radius:0}
-.rec-btn.recording{background:#e74c3c;color:#fff;animation:pulse 1s infinite}
-.rec-btn:hover{background:#e74c3c;color:#fff}
-.rec-status{font-size:.65rem;color:var(--muted)}
-/* Status bar */
-.status-bar{background:#001800;border-bottom:1px solid #003300;color:#2ecc71;padding:.5rem 1rem;font-size:.72rem;letter-spacing:.04em}
-@media(max-width:700px){.main{grid-template-columns:1fr;height:auto}.left{max-height:350px}.right{height:500px;border-top:1px solid var(--border)}.stats{grid-template-columns:repeat(3,1fr)}}
+.msg-who{font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.2rem}
+.msg.craig .msg-who{color:#7878ff}
+.msg.seshat .msg-who{color:#C9A84C}
+.msg-t{font-size:.6rem;color:#555;margin-top:.2rem}
+.chat-input-row{display:flex;border-top:1px solid #1f1f1f}
+.chat-input-row input{flex:1;background:#0a0a0a;border:none;color:#E8E8E8;padding:.7rem .9rem;font-family:Georgia,serif;font-size:.85rem;outline:none}
+.chat-input-row button{background:transparent;border:none;border-left:1px solid #1f1f1f;color:#C9A84C;padding:.7rem 1rem;cursor:pointer;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;font-family:Georgia,serif}
+.chat-input-row button:hover{background:#C9A84C;color:#050505}
+.voice-row{display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;border-top:1px solid #1f1f1f;background:#080808}
+.rec{border:1px solid #e74c3c;color:#e74c3c;padding:.35rem .75rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;font-family:Georgia,serif;background:transparent}
+.rec.on{background:#e74c3c;color:#fff;animation:blink .8s infinite}
+.rec-info{font-size:.65rem;color:#555}
+
+/* Log */
+.sec{font-size:.6rem;letter-spacing:.25em;color:#C9A84C;text-transform:uppercase;display:block;margin-bottom:.5rem}
+.log{background:#111;border:1px solid #1f1f1f}
+.log-row{padding:.55rem .8rem;border-bottom:1px solid #0f0f0f;font-size:.78rem;display:flex;gap:.6rem}
+.log-row:last-child{border-bottom:none}
+.log-t{color:#555;font-size:.65rem;min-width:36px}
+.log-m{color:#ccc}
+.footer{font-size:.6rem;color:#333;text-align:center;padding:.75rem 0;margin-top:.5rem}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">P · L · T · Mission Control</div>
+<div class="header">
+  <div class="logo">P · L · T · Control</div>
   <div class="live"><div class="dot"></div>LIVE</div>
-</header>
+</div>
 
-<div class="status-bar" id="statusBar">✅ Store LIVE — real payments active via Stripe</div>
+<div class="status" id="statusBar">✅ Store LIVE — real payments active</div>
 
-<div class="main">
-  <!-- LEFT PANEL -->
-  <div class="left">
-    <div class="stats">
-      <div class="stat">
-        <div class="stat-label">Books</div>
-        <div class="stat-val">18</div>
-        <div class="stat-sub">All live</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Payments</div>
-        <div class="stat-val" style="color:#2ecc71">LIVE</div>
-        <div class="stat-sub">Stripe</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Updated</div>
-        <div class="stat-val" style="font-size:.9rem" id="lastUpdate">—</div>
-        <div class="stat-sub">Auto-refresh</div>
-      </div>
-    </div>
+<div class="stats">
+  <div class="stat"><div class="stat-label">Books</div><div class="stat-val">18</div></div>
+  <div class="stat"><div class="stat-label">Stripe</div><div class="stat-val" style="color:#2ecc71;font-size:.9rem">LIVE</div></div>
+  <div class="stat"><div class="stat-label">Updated</div><div class="stat-val" style="font-size:.85rem" id="upd">—</div></div>
+</div>
 
-    <div class="links" style="margin-bottom:1rem">
-      <a href="https://uncommonpope-png.github.io/plt-press/" class="btn" target="_blank">Store</a>
-      <a href="https://dashboard.stripe.com/payments" class="btn btn-g" target="_blank">Stripe Sales</a>
-      <a href="https://github.com/uncommonpope-png/plt-press" class="btn" target="_blank">GitHub</a>
-    </div>
+<div class="links">
+  <a href="https://uncommonpope-png.github.io/plt-press/" class="btn" target="_blank">Store</a>
+  <a href="https://dashboard.stripe.com/payments" class="btn btn-g" target="_blank">Sales</a>
+  <a href="https://github.com/uncommonpope-png/plt-press" class="btn" target="_blank">GitHub</a>
+</div>
 
-    <span class="sec-label">Activity Log <span style="color:var(--muted);font-size:.6rem;font-weight:normal;letter-spacing:0;text-transform:none" id="fetchTime"></span></span>
-    <div class="log" id="activityList">
-      <div class="log-item"><span class="log-time">—</span><span class="log-msg">Loading...</span></div>
-    </div>
+<!-- CHAT -->
+<div class="chat-wrap">
+  <div class="chat-head">
+    <div class="chat-title">💬 Chat with Seshat</div>
+    <div class="chat-online">● Online</div>
   </div>
-
-  <!-- RIGHT PANEL — CHAT -->
-  <div class="right">
-    <div class="chat-header">
-      <div class="chat-title">Seshat — AI Assistant</div>
-      <div class="chat-status" id="chatStatus">● Online</div>
-    </div>
-
-    <div class="chat-msgs" id="chatMsgs">
-      <div class="msg seshat">
-        <div class="msg-name">Seshat</div>
-        Ready. Type or record a voice note.
-        <div class="msg-time" id="initTime"></div>
-      </div>
-    </div>
-
-    <div class="chat-input">
-      <div class="input-row">
-        <input type="text" id="chatInput" placeholder="Message Seshat..." onkeydown="if(event.key==='Enter')sendText()">
-        <button onclick="sendText()">Send</button>
-      </div>
-      <div class="voice-bar">
-        <button class="rec-btn" id="recBtn" onclick="toggleRecord()">🎙 Record</button>
-        <span class="rec-status" id="recStatus">Tap to record a voice note</span>
-      </div>
-    </div>
+  <div class="chat-msgs" id="msgs">
+    <div class="msg seshat"><div class="msg-who">Seshat</div>Ready. Type or record a voice note below.<div class="msg-t" id="t0"></div></div>
+  </div>
+  <div class="chat-input-row">
+    <input type="text" id="inp" placeholder="Type a message..." onkeydown="if(event.key==='Enter')send()">
+    <button onclick="send()">Send</button>
+  </div>
+  <div class="voice-row">
+    <button class="rec" id="recBtn" onclick="toggleRec()">🎙 Record</button>
+    <span class="rec-info" id="recInfo">Tap to send a voice note</span>
   </div>
 </div>
 
+<!-- LOG -->
+<span class="sec">Activity Log</span>
+<div class="log" id="log"><div class="log-row"><span class="log-t">—</span><span class="log-m">Loading...</span></div></div>
+
+<div class="footer" id="ft"></div>
+
 <script>
-const BOT = '8713808619:AAHeGVgqgRbEp8GW_AuvMJtV2XVoQcgmM3A';
-const CHAT_ID = '8589507317';
-const RAW = 'https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json';
+document.getElementById('t0').textContent = new Date().toLocaleTimeString();
+const BOT='8713808619:AAHeGVgqgRbEp8GW_AuvMJtV2XVoQcgmM3A', CID='8589507317';
+const RAW='https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json';
 
-// Set init time
-document.getElementById('initTime').textContent = new Date().toLocaleTimeString();
-
-// Load activity log
-function loadLog() {
-  fetch(RAW + '?t=' + Date.now())
-    .then(r => r.json())
-    .then(d => {
-      if (d.updated) document.getElementById('lastUpdate').textContent = d.updated.slice(11,16)+' UTC';
-      if (d.status) document.getElementById('statusBar').textContent = '✅ ' + d.status;
-      if (d.activity) {
-        document.getElementById('activityList').innerHTML = d.activity.map(a =>
-          `<div class="log-item"><span class="log-time">${a.time}</span><span class="log-msg">${a.msg}</span></div>`
-        ).join('');
-      }
-      // Show Seshat responses from log
-      if (d.chat) {
-        d.chat.forEach(m => {
-          if (!document.getElementById('cm-'+m.id)) addMsg('seshat', m.text, m.time, 'cm-'+m.id);
-        });
-      }
-      document.getElementById('fetchTime').textContent = '· refreshed '+new Date().toLocaleTimeString();
-    })
-    .catch(()=>{});
-}
-loadLog();
-setInterval(loadLog, 20000);
-
-function addMsg(who, text, time, id) {
-  const msgs = document.getElementById('chatMsgs');
-  const d = document.createElement('div');
-  d.className = 'msg ' + who;
-  if (id) d.id = id;
-  d.innerHTML = `<div class="msg-name">${who==='craig'?'Craig':'Seshat'}</div>${text}<div class="msg-time">${time||new Date().toLocaleTimeString()}</div>`;
-  msgs.appendChild(d);
-  msgs.scrollTop = msgs.scrollHeight;
+function addMsg(who,text){
+  const m=document.getElementById('msgs');
+  const d=document.createElement('div');
+  d.className='msg '+who;
+  d.innerHTML=`<div class="msg-who">${who==='craig'?'Craig':'Seshat'}</div>${text}<div class="msg-t">${new Date().toLocaleTimeString()}</div>`;
+  m.appendChild(d);m.scrollTop=m.scrollHeight;
 }
 
-function sendText() {
-  const inp = document.getElementById('chatInput');
-  const text = inp.value.trim();
-  if (!text) return;
-  inp.value = '';
-  addMsg('craig', text);
-  fetch(`https://api.telegram.org/bot${BOT}/sendMessage`, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({chat_id: CHAT_ID, text: '📱 Dashboard: ' + text})
-  }).then(()=>{
-    addMsg('seshat','Message received. I\'ll respond via Telegram shortly.');
-  }).catch(()=>{
-    addMsg('seshat','Send failed — check connection.');
-  });
+function send(){
+  const i=document.getElementById('inp'),t=i.value.trim();
+  if(!t)return;i.value='';
+  addMsg('craig',t);
+  fetch(`https://api.telegram.org/bot${BOT}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:CID,text:'📱 Dashboard: '+t})})
+  .then(()=>addMsg('seshat','Got it. Responding via Telegram.'))
+  .catch(()=>addMsg('seshat','Error sending. Check connection.'));
 }
 
-// Voice recording
-let mediaRecorder, chunks = [];
-
-async function toggleRecord() {
-  const btn = document.getElementById('recBtn');
-  const status = document.getElementById('recStatus');
-
-  if (mediaRecorder && mediaRecorder.state === 'recording') {
-    mediaRecorder.stop();
-    btn.classList.remove('recording');
-    btn.textContent = '🎙 Record';
-    status.textContent = 'Processing...';
-    return;
-  }
-
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-    chunks = [];
-    mediaRecorder = new MediaRecorder(stream);
-    mediaRecorder.ondataavailable = e => chunks.push(e.data);
-    mediaRecorder.onstop = async () => {
-      const blob = new Blob(chunks, {type:'audio/ogg; codecs=opus'});
-      stream.getTracks().forEach(t => t.stop());
-      status.textContent = 'Sending...';
-      const form = new FormData();
-      form.append('chat_id', CHAT_ID);
-      form.append('voice', blob, 'voice.ogg');
-      form.append('caption', '📱 Dashboard voice note');
-      try {
-        await fetch(`https://api.telegram.org/bot${BOT}/sendVoice`, {method:'POST', body:form});
-        status.textContent = 'Voice note sent ✓';
-        addMsg('craig','🎙 [Voice note sent]');
-      } catch(e) {
-        status.textContent = 'Failed to send';
-      }
+let mr,chunks=[];
+async function toggleRec(){
+  const btn=document.getElementById('recBtn'),info=document.getElementById('recInfo');
+  if(mr&&mr.state==='recording'){mr.stop();btn.classList.remove('on');btn.textContent='🎙 Record';return;}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    chunks=[];mr=new MediaRecorder(stream);
+    mr.ondataavailable=e=>chunks.push(e.data);
+    mr.onstop=async()=>{
+      const blob=new Blob(chunks,{type:'audio/ogg; codecs=opus'});
+      stream.getTracks().forEach(t=>t.stop());
+      info.textContent='Sending...';
+      const f=new FormData();f.append('chat_id',CID);f.append('voice',blob,'voice.ogg');f.append('caption','📱 Dashboard voice note');
+      try{await fetch(`https://api.telegram.org/bot${BOT}/sendVoice`,{method:'POST',body:f});addMsg('craig','🎙 [Voice note sent]');info.textContent='Sent ✓';}
+      catch(e){info.textContent='Failed to send';}
     };
-    mediaRecorder.start();
-    btn.classList.add('recording');
-    btn.textContent = '⏹ Stop';
-    status.textContent = 'Recording... tap Stop when done';
-  } catch(e) {
-    status.textContent = 'Mic access denied';
-  }
+    mr.start();btn.classList.add('on');btn.textContent='⏹ Stop';info.textContent='Recording... tap Stop when done';
+  }catch(e){info.textContent='Mic access denied';}
 }
+
+function loadLog(){
+  fetch(RAW+'?t='+Date.now()).then(r=>r.json()).then(d=>{
+    if(d.updated)document.getElementById('upd').textContent=d.updated.slice(11,16);
+    if(d.status)document.getElementById('statusBar').textContent='✅ '+d.status;
+    if(d.activity)document.getElementById('log').innerHTML=d.activity.map(a=>`<div class="log-row"><span class="log-t">${a.time}</span><span class="log-m">${a.msg}</span></div>`).join('');
+    document.getElementById('ft').textContent='Refreshed '+new Date().toLocaleTimeString();
+  }).catch(()=>{});
+}
+loadLog();setInterval(loadLog,20000);
 </script>
 </body>
 </html>
