@@ -60,11 +60,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:.9r
 .rec-status{font-size:.65rem;color:var(--muted)}
 /* Status bar */
 .status-bar{background:#001800;border-bottom:1px solid #003300;color:#2ecc71;padding:.5rem 1rem;font-size:.72rem;letter-spacing:.04em}
-@media(max-width:700px){
-  .main{grid-template-columns:1fr;height:auto}
-  .right{height:480px;border-top:1px solid var(--border)}
-  .stats{grid-template-columns:repeat(3,1fr)}
-}
+@media(max-width:700px){.main{grid-template-columns:1fr;height:auto}.left{max-height:350px}.right{height:500px;border-top:1px solid var(--border)}.stats{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
