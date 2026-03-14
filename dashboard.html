@@ -127,9 +127,9 @@ function send(){
   const i=document.getElementById('inp'),t=i.value.trim();
   if(!t)return;i.value='';
   addMsg('craig',t);
-  fetch(`https://api.telegram.org/bot${BOT}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:CID,text:'📱 Dashboard: '+t})})
-  .then(()=>addMsg('seshat','Got it. Responding via Telegram.'))
-  .catch(()=>addMsg('seshat','Error sending. Check connection.'));
+  fetch(SERVER+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})})
+  .then(()=>{})
+  .catch(()=>addMsg('seshat','Error. Check connection.'));
 }
 
 let mr,chunks=[];
