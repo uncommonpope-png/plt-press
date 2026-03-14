@@ -96,10 +96,21 @@ a.btn-g{border-color:#2ecc71;color:#2ecc71}
 <!-- TABS -->
 <div style="display:flex;border-bottom:1px solid #1f1f1f;margin-bottom:.75rem">
   <button onclick="showTab('activity')" id="tab-activity" style="flex:1;background:transparent;border:none;border-bottom:2px solid #C9A84C;color:#C9A84C;padding:.5rem;font-family:Georgia,serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer">Activity</button>
+  <button onclick="showTab('revenue')" id="tab-revenue" style="flex:1;background:transparent;border:none;border-bottom:2px solid transparent;color:#555;padding:.5rem;font-family:Georgia,serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer">Revenue Plan</button>
+  <button onclick="showTab('live')" id="tab-live" style="flex:1;background:transparent;border:none;border-bottom:2px solid transparent;color:#555;padding:.5rem;font-family:Georgia,serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer">Live Feed</button>
   <button onclick="showTab('status')" id="tab-status" style="flex:1;background:transparent;border:none;border-bottom:2px solid transparent;color:#555;padding:.5rem;font-family:Georgia,serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer">Status Reports</button>
 </div>
 <div id="pane-activity">
   <div class="log" id="log"><div class="log-row"><span class="log-t">—</span><span class="log-m">Loading...</span></div></div>
+</div>
+
+<div id="pane-revenue" style="display:none">
+  <div class="log" id="revenuePlan"><div class="log-row"><span class="log-t">—</span><span class="log-m">Loading...</span></div></div>
+</div>
+<div id="pane-live" style="display:none">
+  <div class="log" id="liveFeed">
+    <div class="log-row"><span class="log-t" style="color:#2ecc71">NOW</span><span class="log-m" id="currentTask">Loading current task...</span></div>
+  </div>
 </div>
 <div id="pane-status" style="display:none">
   <div class="log" id="statusReports"><div class="log-row"><span class="log-t">—</span><span class="log-m">Loading...</span></div></div>
@@ -157,12 +168,41 @@ function loadLog(){
     if(d.updated)document.getElementById('upd').textContent=d.updated.slice(11,16);
     if(d.status)document.getElementById('statusBar').textContent='✅ '+d.status;
     if(d.activity)document.getElementById('log').innerHTML=d.activity.map(a=>`<div class="log-row"><span class="log-t">${a.time}</span><span class="log-m">${a.msg}</span></div>`).join('');
-    if(d.status_reports)document.getElementById('statusReports').innerHTML=d.status_reports.map(s=>`<div class="log-row" style="flex-direction:column;gap:.25rem"><span style="font-size:.6rem;color:#C9A84C">${s.time} · ${s.title}</span><span class="log-m">${s.body}</span></div>`).join('');
+    if(d.revenue_plan){
+    document.getElementById('revenuePlan').innerHTML=d.revenue_plan.map(p=>{
+      const color=p.type==='LIVE'?'#2ecc71':p.type==='BLOCKED'?'#e74c3c':'#C9A84C';
+      return `<div class="log-row" style="flex-direction:column;gap:.5rem;padding:.9rem">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:bold;font-size:.85rem">${p.phase}</span>
+          <span style="font-size:.6rem;color:${color};letter-spacing:.1em;text-transform:uppercase;border:1px solid ${color};padding:.15rem .4rem">${p.type}</span>
+        </div>
+        <span style="font-size:.75rem;color:#888">${p.desc}</span>
+        <div style="margin-top:.25rem">
+          <div style="font-size:.6rem;color:#555;margin-bottom:.2rem">POTENTIAL &nbsp;<span style="color:#C9A84C">${p.potential}%</span></div>
+          <div style="background:#0a0a0a;height:6px;border-radius:3px"><div style="background:#C9A84C;height:6px;border-radius:3px;width:${p.potential}%"></div></div>
+        </div>
+        <div>
+          <div style="font-size:.6rem;color:#555;margin-bottom:.2rem">GUARANTEED &nbsp;<span style="color:#2ecc71">${p.guaranteed}%</span></div>
+          <div style="background:#0a0a0a;height:6px;border-radius:3px"><div style="background:#2ecc71;height:6px;border-radius:3px;width:${p.guaranteed}%"></div></div>
+        </div>
+        <div style="font-size:.6rem;color:#555">Timeline: ${p.timeline}</div>
+      </div>`;
+    }).join('');}
+  if(d.current_task)document.getElementById('currentTask').textContent=d.current_task;
+  if(d.status_reports)document.getElementById('statusReports').innerHTML=d.status_reports.map(s=>`<div class="log-row" style="flex-direction:column;gap:.25rem"><span style="font-size:.6rem;color:#C9A84C">${s.time} · ${s.title}</span><span class="log-m">${s.body}</span></div>`).join('');
     if(d.chat){d.chat.forEach(m=>{if(!document.getElementById('cm'+m.id)){addMsg('seshat',m.text,'cm'+m.id);}});}
     document.getElementById('ft').textContent='Refreshed '+new Date().toLocaleTimeString();
   }).catch(()=>{});
 }
 function showTab(t){
+  ['activity','status','revenue','live'].forEach(id=>{
+    const pane=document.getElementById('pane-'+id);
+    const tab=document.getElementById('tab-'+id);
+    if(pane)pane.style.display=t===id?'block':'none';
+    if(tab)tab.style.cssText=`flex:1;background:transparent;border:none;border-bottom:2px solid ${t===id?'#C9A84C':'transparent'};color:${t===id?'#C9A84C':'#555'};padding:.5rem;font-family:Georgia,serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer`;
+  });
+}
+function showTab_old(t){
   document.getElementById('pane-activity').style.display=t==='activity'?'block':'none';
   document.getElementById('pane-status').style.display=t==='status'?'block':'none';
   document.getElementById('tab-activity').style.cssText=`flex:1;background:transparent;border:none;border-bottom:2px solid ${t==='activity'?'#C9A84C':'transparent'};color:${t==='activity'?'#C9A84C':'#555'};padding:.5rem;font-family:Georgia,serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer`;
