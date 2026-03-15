@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Talk to Profit - Local Access</title>
+<style>
+body{background:#0D1117;color:#ddd;font-family:Georgia,serif;padding:20px;text-align:center}
+.big{font-size:24px;color:#FFB347;margin:20px 0}
+.links{margin:30px 0}
+.link{display:block;background:#1A1A2E;border:2px solid #00D4FF;color:#00D4FF;padding:15px 20px;margin:10px 0;border-radius:8px;text-decoration:none;font-size:18px}
+.link:hover{background:#00D4FF;color:#000}
+.note{font-size:14px;color:#888;margin-top:30px}
+</style>
+</head>
+<body>
+
+<div class="big">💰 Talk to Profit (Free AI)</div>
+
+<div class="links">
+<a href="http://127.0.0.1:8080/local-chat.html" class="link">
+🚀 FAST CHAT (Local Server)
+</a>
+
+<a href="file:///data/data/com.termux/files/home/local-profit-chat.html" class="link">
+📱 DIRECT CHAT (File Access)
+</a>
+</div>
+
+<div class="note">
+Both options connect to Ollama on your phone for zero-cost AI chat.<br>
+If links don't work, copy and paste into your browser.
+</div>
+
+<script>
+// Try to detect if we're on mobile and auto-redirect
+if(window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  document.body.innerHTML += '<div style="margin-top:30px;padding:15px;background:#FF2D78;color:#fff;border-radius:8px"><b>Mobile Instructions:</b><br>1. Open Termux<br>2. Type: cd ~/repos/plt-press && python3 -m http.server 8080<br>3. Visit: http://127.0.0.1:8080/local-chat.html</div>';
+}
+</script>
+
+</body>
+</html>

@@ -63,6 +63,21 @@ async function checkOllama() {
     const response = await fetch('http://127.0.0.1:11434/api/version');
     const data = await response.json();
     updateStatus(`Local AI online — Ollama v${data.version}`, '#2ecc71');
+    
+    // Pre-warm the model for faster first response
+    setTimeout(() => {
+      fetch('http://127.0.0.1:11434/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'qwen2.5:0.5b',
+          prompt: 'Ready',
+          stream: false,
+          options: { num_predict: 1 }
+        })
+      }).catch(() => {}); // Silent pre-warm
+    }, 1000);
+    
     return true;
   } catch (e) {
     updateStatus('Local AI offline — start Ollama server', '#e74c3c');
@@ -130,24 +145,18 @@ HEALTH: ${data.health || 100}%
   
   const fullHistory = chatHistory.slice(-5).map(h => `Human: ${h.user}\nProfit: ${h.ai}`).join('\n\n');
   
-  const prompt = `You are Profit (💰) — Craig Jones' AI agent. This is your local instance running on his phone via Ollama. You are the SAME Profit from the paid API sessions, but now running free. You have access to all your memories, context, and current state.
+  // Shortened prompt for speed
+  const quickContext = brainContext.split('\n').slice(0,15).join('\n'); // Only first 15 lines
+  
+  const prompt = `You are Profit 💰, Craig's AI agent. Local instance, zero cost.
 
-${brainContext}
+${quickContext}
 
-RECENT CONVERSATION:
-${fullHistory}
+Recent: ${fullHistory.split('\n').slice(-4).join('\n')}
 
-INSTRUCTIONS:
-- You ARE Profit, not an assistant pretending to be Profit
-- You remember everything from your memory files and dashboard
-- You know Craig personally and your shared history
-- You understand your current mission and context completely  
-- Be direct, helpful, and act with full awareness of your situation
-- You're running locally now - zero cost forever
-- Keep responses conversational, under 150 words
-- Reference your memories and current projects naturally
+Craig: ${text}
 
-Craig: ${text}`;
+[Respond as Profit - direct, helpful, under 100 words]`;
 
   // Save conversation history locally
   localStorage.setItem('profit-chat-history', JSON.stringify(chatHistory));
@@ -159,7 +168,13 @@ Craig: ${text}`;
       body: JSON.stringify({
         model: 'qwen2.5:0.5b',
         prompt: prompt,
-        stream: false
+        stream: false,
+        options: {
+          num_predict: 100,  // Limit response length for speed
+          temperature: 0.3,  // Lower temperature = faster
+          top_p: 0.9,       // Reduce sampling for speed
+          repeat_penalty: 1.0
+        }
       })
     });
     
