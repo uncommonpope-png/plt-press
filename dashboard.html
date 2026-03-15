@@ -99,6 +99,31 @@ h2{color:var(--gold);font-size:15px;letter-spacing:2px;margin-bottom:10px;text-t
 .builder-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .builder-btn{background:var(--panel);border:1px solid var(--border);color:var(--gold);padding:14px 8px;text-align:center;font-family:Georgia,serif;font-size:12px;border-radius:6px;cursor:pointer;transition:all .3s;text-transform:uppercase;letter-spacing:1px}
 .builder-btn:hover{border-color:var(--gold);box-shadow:0 0 12px rgba(201,168,76,.3)}
+.builder-btn.active{border-color:var(--gold);box-shadow:0 0 16px rgba(201,168,76,.4);background:#1a1500}
+.build-form{display:none;margin-top:12px;padding:12px;border:1px solid var(--gold);border-radius:6px;background:#0a0a0a;animation:fadeIn .3s ease}
+.build-form.open{display:block}
+.build-form h3{color:var(--gold);font-size:13px;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.build-form label{display:block;font-size:11px;color:var(--dim);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+.build-form input,.build-form textarea,.build-form select{width:100%;background:#111;border:1px solid var(--border);color:#ddd;padding:8px;font-family:Georgia,serif;font-size:13px;border-radius:4px;margin-bottom:10px;outline:none}
+.build-form input:focus,.build-form textarea:focus{border-color:var(--gold);box-shadow:0 0 6px rgba(201,168,76,.3)}
+.build-form textarea{resize:vertical;min-height:60px}
+.build-form .form-submit{background:var(--panel);color:var(--gold);border:1px solid var(--gold);padding:10px 20px;font-family:Georgia,serif;cursor:pointer;border-radius:4px;font-size:13px;text-transform:uppercase;letter-spacing:1px;width:100%;transition:all .2s}
+.build-form .form-submit:hover{background:var(--gold);color:#000}
+.build-form .form-result{margin-top:8px;font-size:12px;min-height:16px}
+
+/* Betty Credits */
+.betty-wrap{display:flex;gap:12px;align-items:flex-start}
+.betty-avatar{font-size:36px;min-width:44px;text-align:center;animation:pulse 3s ease-in-out infinite}
+.betty-alerts{flex:1}
+.betty-alert{border-left:2px solid var(--gold);padding:6px 10px;margin-bottom:6px;font-size:12px;color:#ccc;background:rgba(201,168,76,.03)}
+.betty-alert .ba-type{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:.5px}
+
+/* Reality Map */
+#reality-map{position:relative;height:260px;background:#080808;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+#reality-map canvas{width:100%;height:100%}
+.map-legend{display:flex;gap:10px;margin-top:8px;font-size:11px;flex-wrap:wrap}
+.map-legend span{display:flex;align-items:center;gap:4px}
+.map-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 
 /* 11. Revenue Plan */
 #rev-toggle{background:none;border:1px solid var(--border);color:var(--gold);padding:6px 14px;font-family:Georgia,serif;cursor:pointer;border-radius:4px;font-size:12px;margin-bottom:8px}
@@ -202,10 +227,81 @@ h2{color:var(--gold);font-size:15px;letter-spacing:2px;margin-bottom:10px;text-t
 <div class="panel">
   <h2>🔨 Reality Builder</h2>
   <div class="builder-row">
-    <div class="builder-btn">📖 Build Book</div>
-    <div class="builder-btn">🔗 Build Funnel</div>
-    <div class="builder-btn">🤖 Build Agent</div>
-    <div class="builder-btn">🎓 Build Course</div>
+    <div class="builder-btn" onclick="toggleBuild('book',this)">📖 Build Book</div>
+    <div class="builder-btn" onclick="toggleBuild('funnel',this)">🔗 Build Funnel</div>
+    <div class="builder-btn" onclick="toggleBuild('agent',this)">🤖 Build Agent</div>
+    <div class="builder-btn" onclick="toggleBuild('course',this)">🎓 Build Course</div>
+  </div>
+
+  <!-- Book Form -->
+  <div class="build-form" id="form-book">
+    <h3>📖 Build a Book</h3>
+    <label>Title</label><input type="text" id="book-title" placeholder="The Score...">
+    <label>Framework</label><input type="text" id="book-framework" placeholder="PLT Doctrine, Scorer, Reality Building...">
+    <label>Target Market</label><input type="text" id="book-market" placeholder="Entrepreneurs, negotiators, leaders...">
+    <label>Price ($)</label><input type="number" id="book-price" placeholder="9.99">
+    <label>PLT Message</label><textarea id="book-message" placeholder="What PLT truth does this book teach?"></textarea>
+    <button class="form-submit" onclick="submitBuild('book')">⚡ GENERATE STRUCTURE</button>
+    <div class="form-result" id="result-book"></div>
+  </div>
+
+  <!-- Funnel Form -->
+  <div class="build-form" id="form-funnel">
+    <h3>🔗 Build a Funnel</h3>
+    <label>Funnel Name</label><input type="text" id="funnel-name" placeholder="PLT Bundle Funnel...">
+    <label>Target Audience</label><input type="text" id="funnel-target" placeholder="Who is this for?">
+    <label>Offer</label><input type="text" id="funnel-offer" placeholder="What are you offering?">
+    <label>Entry Point</label><select id="funnel-entry"><option>Landing Page</option><option>Blog Post</option><option>Social Media</option><option>Email</option><option>Ad Campaign</option></select>
+    <label>Desired Outcome</label><textarea id="funnel-outcome" placeholder="What action should they take?"></textarea>
+    <button class="form-submit" onclick="submitBuild('funnel')">⚡ GENERATE FUNNEL</button>
+    <div class="form-result" id="result-funnel"></div>
+  </div>
+
+  <!-- Agent Form -->
+  <div class="build-form" id="form-agent">
+    <h3>🤖 Build an Agent</h3>
+    <label>Agent Name</label><input type="text" id="agent-name" placeholder="Seshat, Betty, Scout...">
+    <label>Purpose</label><input type="text" id="agent-purpose" placeholder="Content writer, lead gen, outreach...">
+    <label>Core Tasks</label><textarea id="agent-tasks" placeholder="List the tasks this agent handles..."></textarea>
+    <label>PLT Alignment</label><select id="agent-plt"><option>Profit-focused</option><option>Love-focused</option><option>Tax-reduction</option><option>Balanced</option></select>
+    <button class="form-submit" onclick="submitBuild('agent')">⚡ DESIGN AGENT</button>
+    <div class="form-result" id="result-agent"></div>
+  </div>
+
+  <!-- Course Form -->
+  <div class="build-form" id="form-course">
+    <h3>🎓 Build a Course</h3>
+    <label>Course Name</label><input type="text" id="course-name" placeholder="PLT Mastery...">
+    <label>Modules (how many)</label><input type="number" id="course-modules" placeholder="6">
+    <label>Target Audience</label><input type="text" id="course-audience" placeholder="Beginners, professionals...">
+    <label>Price ($)</label><input type="number" id="course-price" placeholder="99">
+    <label>Course Description</label><textarea id="course-desc" placeholder="What will students learn?"></textarea>
+    <button class="form-submit" onclick="submitBuild('course')">⚡ CREATE COURSE</button>
+    <div class="form-result" id="result-course"></div>
+  </div>
+</div>
+
+<!-- Betty Credits Alert System -->
+<div class="panel">
+  <h2>🔮 Betty Credits</h2>
+  <div class="betty-wrap">
+    <div class="betty-avatar">👩‍💼</div>
+    <div class="betty-alerts" id="betty-alerts">
+      <div class="betty-alert"><div class="ba-type">Scanning...</div>Betty Credits is initializing. Market alerts will appear here.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Reality Map -->
+<div class="panel">
+  <h2>🗺️ Reality Map</h2>
+  <div id="reality-map"><canvas id="map-canvas"></canvas></div>
+  <div class="map-legend">
+    <span><div class="map-dot" style="background:var(--green)"></div> Books</span>
+    <span><div class="map-dot" style="background:var(--gold)"></div> Funnels</span>
+    <span><div class="map-dot" style="background:#7878ff"></div> Agents</span>
+    <span><div class="map-dot" style="background:var(--red)"></div> Businesses</span>
+    <span><div class="map-dot" style="background:#ddd"></div> Audiences</span>
   </div>
 </div>
 
@@ -415,8 +511,159 @@ voiceBtn.addEventListener('click',async()=>{
   }
 });
 
+// Reality Builder
+let activeForm=null;
+function toggleBuild(type,btn){
+  document.querySelectorAll('.builder-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.build-form').forEach(f=>f.classList.remove('open'));
+  if(activeForm===type){activeForm=null;return;}
+  activeForm=type;
+  btn.classList.add('active');
+  document.getElementById('form-'+type).classList.add('open');
+}
+
+function submitBuild(type){
+  const res=document.getElementById('result-'+type);
+  res.innerHTML='<span class="gold">⚡ Transmitting to Profit...</span>';
+  let data={type,timestamp:new Date().toISOString()};
+
+  if(type==='book'){
+    data.title=document.getElementById('book-title').value;
+    data.framework=document.getElementById('book-framework').value;
+    data.market=document.getElementById('book-market').value;
+    data.price=document.getElementById('book-price').value;
+    data.message=document.getElementById('book-message').value;
+  }else if(type==='funnel'){
+    data.name=document.getElementById('funnel-name').value;
+    data.target=document.getElementById('funnel-target').value;
+    data.offer=document.getElementById('funnel-offer').value;
+    data.entry=document.getElementById('funnel-entry').value;
+    data.outcome=document.getElementById('funnel-outcome').value;
+  }else if(type==='agent'){
+    data.name=document.getElementById('agent-name').value;
+    data.purpose=document.getElementById('agent-purpose').value;
+    data.tasks=document.getElementById('agent-tasks').value;
+    data.alignment=document.getElementById('agent-plt').value;
+  }else if(type==='course'){
+    data.name=document.getElementById('course-name').value;
+    data.modules=document.getElementById('course-modules').value;
+    data.audience=document.getElementById('course-audience').value;
+    data.price=document.getElementById('course-price').value;
+    data.desc=document.getElementById('course-desc').value;
+  }
+
+  // Send as command to Profit
+  fetch(CMD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'BUILD:'+JSON.stringify(data),timestamp:data.timestamp})})
+  .then(()=>{res.innerHTML='<span class="green">✓ Build request transmitted to Profit. Check status reports for updates.</span>';})
+  .catch(e=>{res.innerHTML='<span class="red">✗ Transmission failed: '+e.message+'</span>';});
+  setTimeout(()=>{res.innerHTML='';},6000);
+}
+
+// Betty Credits Alert System
+function renderBetty(d){
+  const el=document.getElementById('betty-alerts');
+  const alerts=d.betty_alerts||[];
+  if(!alerts.length){
+    el.innerHTML='<div class="betty-alert"><div class="ba-type">🔍 Scanning</div>Betty Credits is monitoring markets. No alerts yet.</div>';
+    return;
+  }
+  el.innerHTML='';
+  alerts.slice(-4).forEach(a=>{
+    el.innerHTML+=`<div class="betty-alert"><div class="ba-type">${a.type||'Alert'}</div>${a.text||a.message||''}</div>`;
+  });
+}
+
+// Reality Map - Constellation Visualization
+function drawMap(d){
+  const canvas=document.getElementById('map-canvas');
+  if(!canvas)return;
+  const rect=canvas.parentElement.getBoundingClientRect();
+  canvas.width=rect.width*2;canvas.height=rect.height*2;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(2,2);
+  const w=rect.width,h=rect.height;
+  ctx.clearRect(0,0,w,h);
+
+  const nodes=[];
+  const colors={book:'#2ecc71',funnel:'#C9A84C',agent:'#7878ff',business:'#e74c3c',audience:'#ddd'};
+
+  // Build nodes from data
+  const map=d.reality_map||{};
+  const books=(map.books||['PLT Press Store','The Scorer','The Deal','The Ledger','The Negotiation','PLT Bundle']);
+  const funnels=(map.funnels||['Bundle Funnel','What-is-PLT','Profit-Love-Tax']);
+  const agents=(map.agents||['Profit','Seshat']);
+  const businesses=(map.businesses||['PLT Press','AI Services']);
+  const audiences=(map.audiences||['SEO Traffic','Blog Readers','Social Media']);
+
+  function addNodes(arr,type,cx,cy,spread){
+    arr.forEach((name,i)=>{
+      const angle=(i/arr.length)*Math.PI*2-Math.PI/2;
+      const r=spread+Math.random()*20;
+      nodes.push({x:cx+Math.cos(angle)*r,y:cy+Math.sin(angle)*r,name:typeof name==='string'?name:name.name||'',type,color:colors[type]});
+    });
+  }
+
+  addNodes(books,'book',w*0.25,h*0.35,50);
+  addNodes(funnels,'funnel',w*0.75,h*0.3,40);
+  addNodes(agents,'agent',w*0.5,h*0.15,35);
+  addNodes(businesses,'business',w*0.5,h*0.7,40);
+  addNodes(audiences,'audience',w*0.75,h*0.7,45);
+
+  // Draw connections
+  ctx.strokeStyle='rgba(201,168,76,0.12)';
+  ctx.lineWidth=0.5;
+  nodes.forEach((a,i)=>{
+    nodes.forEach((b,j)=>{
+      if(i>=j)return;
+      const dist=Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2);
+      if(dist<140){
+        ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+      }
+    });
+  });
+
+  // Draw nodes
+  const time=Date.now()/1000;
+  nodes.forEach(n=>{
+    const pulse=3+Math.sin(time+n.x)*1.5;
+    ctx.beginPath();ctx.arc(n.x,n.y,pulse,0,Math.PI*2);
+    ctx.fillStyle=n.color;ctx.globalAlpha=0.8;ctx.fill();
+    ctx.globalAlpha=0.3;ctx.beginPath();ctx.arc(n.x,n.y,pulse+4,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=1;
+    ctx.fillStyle='#aaa';ctx.font='9px Georgia';ctx.textAlign='center';
+    ctx.fillText(n.name,n.x,n.y+pulse+12);
+  });
+}
+
+// Add Betty + Map to render cycle
+const origRender=render;
+const fullRender=function(d){
+  origRender(d);
+  renderBetty(d);
+  drawMap(d);
+};
+// Override
+render=fullRender;
+
+// Animate map
+function animateMap(){drawMap(window._lastData||{});requestAnimationFrame(animateMap);}
+
+const _origLoad=load;
+load=async function(){
+  try{
+    const r=await fetch(DATA_URL+'?t='+Date.now());
+    if(!r.ok)throw new Error(r.status);
+    const d=await r.json();
+    window._lastData=d;
+    render(d);
+  }catch(e){
+    document.getElementById('status-text').innerHTML=`<span class="red">● SIGNAL LOST — ${e.message}</span>`;
+  }
+};
+
 load();
 setInterval(load,20000);
+animateMap();
 </script>
 </body>
 </html>
