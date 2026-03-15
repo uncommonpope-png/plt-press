@@ -2,220 +2,421 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PLT — Mission Control</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>💰 PROFIT — Command Dashboard</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#050505;color:#E8E8E8;font-family:Georgia,serif;max-width:600px;margin:0 auto;padding:1rem}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid #1f1f1f}
-.logo{font-size:.8rem;letter-spacing:.3em;color:#C9A84C;text-transform:uppercase}
-.live{font-size:.65rem;color:#2ecc71;display:flex;align-items:center;gap:.35rem}
-.dot{width:7px;height:7px;background:#2ecc71;border-radius:50%;animation:blink 1.5s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.status{background:#001800;border:1px solid #003300;color:#2ecc71;padding:.5rem .75rem;font-size:.72rem;margin-bottom:1rem}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem}
-.stat{background:#111;border:1px solid #1f1f1f;padding:.6rem .75rem}
-.stat-label{font-size:.55rem;letter-spacing:.2em;color:#888;text-transform:uppercase}
-.stat-val{font-size:1.2rem;color:#C9A84C}
-.links{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.25rem}
-a.btn{border:1px solid #C9A84C;color:#C9A84C;padding:.4rem .8rem;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;text-decoration:none}
-a.btn-g{border-color:#2ecc71;color:#2ecc71}
+:root{--gold:#C9A84C;--green:#2ecc71;--red:#e74c3c;--bg:#050505;--panel:#111;--border:#1f1f1f;--dim:#555}
+body{background:var(--bg);color:#ddd;font-family:Georgia,serif;max-width:640px;margin:0 auto;padding:8px;min-height:100vh}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;animation:breathe 4s ease-in-out infinite}
+@keyframes breathe{0%,100%{box-shadow:0 0 4px rgba(201,168,76,.15)}50%{box-shadow:0 0 12px rgba(201,168,76,.3)}}
+@keyframes pulse{0%,100%{opacity:.85}50%{opacity:1}}
+@keyframes rotate{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes glow{0%,100%{text-shadow:0 0 8px rgba(201,168,76,.5)}50%{text-shadow:0 0 20px rgba(201,168,76,.9)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.gold{color:var(--gold)}.green{color:var(--green)}.red{color:var(--red)}
+h2{color:var(--gold);font-size:15px;letter-spacing:2px;margin-bottom:10px;text-transform:uppercase}
 
-/* CHAT */
-.chat-wrap{border:1px solid #C9A84C;margin-bottom:1.25rem}
-.chat-head{background:#111;padding:.6rem 1rem;display:flex;justify-content:space-between;border-bottom:1px solid #1f1f1f}
-.chat-title{font-size:.65rem;letter-spacing:.2em;color:#C9A84C;text-transform:uppercase}
-.chat-online{font-size:.6rem;color:#2ecc71}
-.chat-msgs{height:300px;overflow-y:auto;padding:.75rem;display:flex;flex-direction:column;gap:.5rem;background:#080808}
-.msg{padding:.5rem .75rem;font-size:.82rem;max-width:88%;line-height:1.45}
-.msg.craig{background:#12122a;align-self:flex-end;border:1px solid #2a2a5a}
-.msg.seshat{background:#0a1a0a;color:#ddd;align-self:flex-start;border:1px solid #1a3a1a}
-.msg-who{font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.2rem}
-.msg.craig .msg-who{color:#7878ff}
-.msg.seshat .msg-who{color:#C9A84C}
-.msg-t{font-size:.6rem;color:#555;margin-top:.2rem}
-.chat-input-row{display:flex;border-top:1px solid #1f1f1f}
-.chat-input-row input{flex:1;background:#0a0a0a;border:none;color:#E8E8E8;padding:.7rem .9rem;font-family:Georgia,serif;font-size:.85rem;outline:none}
-.chat-input-row button{background:transparent;border:none;border-left:1px solid #1f1f1f;color:#C9A84C;padding:.7rem 1rem;cursor:pointer;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;font-family:Georgia,serif}
-.chat-input-row button:hover{background:#C9A84C;color:#050505}
-.voice-row{display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;border-top:1px solid #1f1f1f;background:#080808}
-.rec{border:1px solid #e74c3c;color:#e74c3c;padding:.35rem .75rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;font-family:Georgia,serif;background:transparent}
-.rec.on{background:#e74c3c;color:#fff;animation:blink .8s infinite}
-.rec-info{font-size:.65rem;color:#555}
+/* 1. Status Bar */
+#status-bar{text-align:center;padding:18px 14px}
+#status-bar .name{font-size:28px;animation:glow 3s ease-in-out infinite;color:var(--gold);font-weight:bold}
+#status-bar .online{color:var(--green);font-size:13px;margin-top:6px}
+#status-bar .heartbeat{color:var(--dim);font-size:11px;margin-top:4px}
 
-/* Log */
-.sec{font-size:.6rem;letter-spacing:.25em;color:#C9A84C;text-transform:uppercase;display:block;margin-bottom:.5rem}
-.log{background:#111;border:1px solid #1f1f1f}
-.log-row{padding:.55rem .8rem;border-bottom:1px solid #0f0f0f;font-size:.78rem;display:flex;gap:.6rem}
-.log-row:last-child{border-bottom:none}
-.log-t{color:#555;font-size:.65rem;min-width:36px}
-.log-m{color:#ccc}
-.footer{font-size:.6rem;color:#333;text-align:center;padding:.75rem 0;margin-top:.5rem}
+/* 2. Collectors */
+#collectors{display:flex;justify-content:space-around;text-align:center;padding:10px 4px}
+#collectors .c{font-size:12px;color:var(--gold)}
+#collectors .c .icon{font-size:18px;display:block;margin-bottom:2px}
+#collectors .c .val{font-weight:bold;font-size:15px}
+
+/* 3. Trinity */
+#trinity{text-align:center;padding:16px 8px}
+.rings{display:flex;justify-content:center;gap:12px;margin-bottom:12px}
+.ring-wrap{position:relative;width:100px;height:100px}
+.ring-wrap svg{width:100px;height:100px}
+.ring-wrap .ring-bg{fill:none;stroke:#1a1a1a;stroke-width:8}
+.ring-wrap .ring-fg{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dasharray .8s ease}
+.ring-wrap .ring-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;font-size:11px;line-height:1.3}
+.ring-wrap .ring-label .num{font-size:22px;font-weight:bold;display:block}
+.ring-profit svg{animation:rotate 12s linear infinite}
+.ring-love .ring-fg{animation:pulse 2.5s ease-in-out infinite}
+.ring-tax .ring-fg{opacity:.8}
+#soul-score{font-size:13px;color:var(--dim);margin-top:4px}
+#soul-score span{font-size:28px;color:var(--gold);font-weight:bold;display:block;animation:glow 4s ease-in-out infinite}
+
+/* 4. Status Reports */
+.report{border-left:3px solid var(--gold);padding:8px 12px;margin-bottom:8px;background:rgba(201,168,76,.04);animation:fadeIn .5s ease}
+.report .r-head{color:var(--gold);font-size:12px;font-weight:bold;margin-bottom:4px}
+.report .r-body{font-size:13px;color:#ccc;line-height:1.5}
+
+/* 5. Missions */
+.mission{margin-bottom:10px;cursor:pointer;border:1px solid var(--border);border-radius:6px;padding:10px;transition:border-color .3s}
+.mission:hover{border-color:var(--gold)}
+.mission .m-head{display:flex;justify-content:space-between;align-items:center}
+.mission .m-name{font-weight:bold;font-size:14px}
+.badge{font-size:10px;padding:2px 8px;border-radius:10px;text-transform:uppercase;font-weight:bold}
+.badge-active{background:rgba(46,204,113,.2);color:var(--green)}
+.badge-building{background:rgba(201,168,76,.2);color:var(--gold)}
+.badge-blocked{background:rgba(231,76,60,.2);color:var(--red)}
+.prog-bar{height:6px;background:#1a1a1a;border-radius:3px;margin-top:6px;overflow:hidden}
+.prog-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .8s ease}
+.prog-pct{font-size:11px;color:var(--dim);margin-top:2px;text-align:right}
+.m-details{display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;color:#aaa}
+.m-details.open{display:block;animation:fadeIn .3s ease}
+.m-details li{margin:3px 0 3px 16px;list-style:disc}
+
+/* 6. Conversations */
+#conv-table{width:100%;border-collapse:collapse;font-size:13px}
+#conv-table th{color:var(--gold);text-align:left;padding:4px 6px;font-size:11px;border-bottom:1px solid var(--border)}
+#conv-table td{padding:5px 6px;border-bottom:1px solid #0d0d0d}
+#conv-table tr:hover{background:rgba(201,168,76,.06)}
+
+/* 7. Command Bridge */
+#cmd-input{width:100%;background:#0a0a0a;border:1px solid var(--gold);color:#ddd;padding:10px;font-family:Georgia,serif;font-size:14px;border-radius:4px;outline:none}
+#cmd-input:focus{box-shadow:0 0 8px rgba(201,168,76,.4)}
+.cmd-row{display:flex;gap:6px;margin-top:8px}
+#cmd-send{background:var(--panel);color:var(--gold);border:1px solid var(--gold);padding:8px 16px;font-family:Georgia,serif;cursor:pointer;border-radius:4px;transition:all .2s}
+#cmd-send:hover{background:var(--gold);color:#000}
+#cmd-voice{background:var(--panel);color:var(--red);border:1px solid var(--border);padding:8px 12px;font-family:Georgia,serif;cursor:pointer;border-radius:4px;transition:all .2s}
+#cmd-voice.recording{border-color:var(--red);box-shadow:0 0 10px rgba(231,76,60,.5);animation:pulse 1s infinite}
+#cmd-status{font-size:12px;margin-top:6px;min-height:16px}
+.cmd-hist{font-size:12px;color:var(--dim);margin-top:8px}
+.cmd-hist div{padding:3px 0;border-bottom:1px solid #0d0d0d}
+
+/* 8. Ledger */
+.ledger-row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid #0d0d0d;flex-wrap:wrap}
+.ledger-row .l-date{color:var(--dim);min-width:50px}
+.ledger-row .l-action{flex:1;padding:0 6px}
+.ledger-row .l-scores{display:flex;gap:8px}
+
+/* 9. Live Feed */
+#feed{max-height:180px;overflow-y:auto;font-size:12px;font-family:monospace;background:#080808;padding:8px;border-radius:4px}
+#feed::-webkit-scrollbar{width:4px}
+#feed::-webkit-scrollbar-thumb{background:var(--border)}
+.feed-line .ftime{color:var(--green)}
+
+/* 10. Builder */
+.builder-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.builder-btn{background:var(--panel);border:1px solid var(--border);color:var(--gold);padding:14px 8px;text-align:center;font-family:Georgia,serif;font-size:12px;border-radius:6px;cursor:pointer;transition:all .3s;text-transform:uppercase;letter-spacing:1px}
+.builder-btn:hover{border-color:var(--gold);box-shadow:0 0 12px rgba(201,168,76,.3)}
+
+/* 11. Revenue Plan */
+#rev-toggle{background:none;border:1px solid var(--border);color:var(--gold);padding:6px 14px;font-family:Georgia,serif;cursor:pointer;border-radius:4px;font-size:12px;margin-bottom:8px}
+#rev-content{display:none}
+#rev-content.open{display:block}
+.rev-phase{margin-bottom:10px;padding:8px;border:1px solid var(--border);border-radius:6px}
+.rev-phase .rp-name{font-weight:bold;font-size:13px}
+.rev-phase .rp-desc{font-size:12px;color:#aaa;margin:4px 0}
+.rev-bars{margin-top:6px}
+.rev-bar-label{font-size:10px;color:var(--dim);display:flex;justify-content:space-between}
+.rev-bar{height:5px;background:#1a1a1a;border-radius:3px;margin-bottom:6px;overflow:hidden}
+.rev-bar .rb-fill{height:100%;border-radius:3px;transition:width .8s ease}
+
+/* 12. Footer */
+#footer{text-align:center;color:var(--dim);font-size:11px;padding:16px 0 24px}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="logo">P · L · T · Control</div>
-  <div class="live"><div class="dot"></div>LIVE</div>
+<!-- 1. Status Bar -->
+<div id="status-bar" class="panel">
+  <div class="name">💰 PROFIT</div>
+  <div class="online" id="status-text">● CONNECTING...</div>
+  <div class="heartbeat" id="heartbeat">Last heartbeat: —</div>
 </div>
 
-<div class="status" id="statusBar">✅ Store LIVE — real payments active</div>
-
-<div class="stats">
-  <div class="stat"><div class="stat-label">Books</div><div class="stat-val">18</div></div>
-  <div class="stat"><div class="stat-label">Stripe</div><div class="stat-val" style="color:#2ecc71;font-size:.9rem">LIVE</div></div>
-  <div class="stat"><div class="stat-label">Updated</div><div class="stat-val" style="font-size:.85rem" id="upd">—</div></div>
+<!-- 2. Collectors -->
+<div id="collectors" class="panel">
+  <div class="c"><span class="icon">📚</span><span class="val" id="c-books">—</span></div>
+  <div class="c"><span class="icon">💬</span><span class="val" id="c-convos">—</span></div>
+  <div class="c"><span class="icon">👥</span><span class="val" id="c-leads">—</span></div>
+  <div class="c"><span class="icon">💰</span><span class="val" id="c-rev">—</span></div>
+  <div class="c"><span class="icon">🤖</span><span class="val" id="c-agents">—</span></div>
 </div>
 
-<div class="links">
-  <a href="https://uncommonpope-png.github.io/plt-press/" class="btn" target="_blank">Store</a>
-  <a href="https://dashboard.stripe.com/payments" class="btn btn-g" target="_blank">Sales</a>
-  <a href="https://github.com/uncommonpope-png/plt-press" class="btn" target="_blank">GitHub</a>
-</div>
-
-<!-- CHAT -->
-<div class="chat-wrap">
-  <div class="chat-head">
-    <div class="chat-title">💬 Chat with Seshat</div>
-    <div class="chat-online">● Online</div>
+<!-- 3. Trinity Engine -->
+<div id="trinity" class="panel">
+  <div class="rings">
+    <div class="ring-wrap ring-profit">
+      <svg viewBox="0 0 100 100"><circle class="ring-bg" cx="50" cy="50" r="40"/><circle class="ring-fg" id="r-profit" cx="50" cy="50" r="40" stroke="var(--green)" transform="rotate(-90 50 50)"/></svg>
+      <div class="ring-label"><span class="num green" id="v-profit">—</span>PROFIT</div>
+    </div>
+    <div class="ring-wrap ring-love">
+      <svg viewBox="0 0 100 100"><circle class="ring-bg" cx="50" cy="50" r="40"/><circle class="ring-fg" id="r-love" cx="50" cy="50" r="40" stroke="var(--gold)" transform="rotate(-90 50 50)"/></svg>
+      <div class="ring-label"><span class="num gold" id="v-love">—</span>LOVE</div>
+    </div>
+    <div class="ring-wrap ring-tax">
+      <svg viewBox="0 0 100 100"><circle class="ring-bg" cx="50" cy="50" r="40"/><circle class="ring-fg" id="r-tax" cx="50" cy="50" r="40" stroke="var(--red)" transform="rotate(-90 50 50)"/></svg>
+      <div class="ring-label"><span class="num red" id="v-tax">—</span>TAX</div>
+    </div>
   </div>
-  <div class="chat-msgs" id="msgs">
-    <div class="msg seshat"><div class="msg-who">Seshat</div>Ready. Type or record a voice note below.<div class="msg-t" id="t0"></div></div>
+  <div id="soul-score">SOUL PROFIT<span id="v-soul">—</span></div>
+</div>
+
+<!-- 4. Status Reports -->
+<div class="panel" id="reports-panel">
+  <h2>📡 Status Reports</h2>
+  <div id="reports"></div>
+</div>
+
+<!-- 5. Mission Console -->
+<div class="panel">
+  <h2>🎯 Mission Console</h2>
+  <div id="missions"></div>
+</div>
+
+<!-- 6. Conversation Engine -->
+<div class="panel">
+  <h2>💬 Conversation Engine</h2>
+  <table id="conv-table">
+    <thead><tr><th>PERSON</th><th>P</th><th>L</th><th>T</th><th>SCORE</th></tr></thead>
+    <tbody id="conv-body"></tbody>
+  </table>
+</div>
+
+<!-- 7. Command Bridge -->
+<div class="panel">
+  <h2>⚡ Command Profit</h2>
+  <input id="cmd-input" type="text" placeholder="Enter command...">
+  <div class="cmd-row">
+    <button id="cmd-send">TRANSMIT</button>
+    <button id="cmd-voice">🎙 Record</button>
   </div>
-  <div class="chat-input-row">
-    <input type="text" id="inp" placeholder="Type a message..." onkeydown="if(event.key==='Enter')send()">
-    <button onclick="send()">Send</button>
-  </div>
-  <div class="voice-row">
-    <button class="rec" id="recBtn" onclick="toggleRec()">🎙 Record</button>
-    <span class="rec-info" id="recInfo">Tap to send a voice note</span>
+  <div id="cmd-status"></div>
+  <div class="cmd-hist" id="cmd-hist"></div>
+</div>
+
+<!-- 8. Reality Ledger -->
+<div class="panel">
+  <h2>📒 Reality Ledger</h2>
+  <div id="ledger"></div>
+</div>
+
+<!-- 9. Live Feed -->
+<div class="panel">
+  <h2>📡 Live Feed</h2>
+  <div id="feed"></div>
+</div>
+
+<!-- 10. Reality Builder -->
+<div class="panel">
+  <h2>🔨 Reality Builder</h2>
+  <div class="builder-row">
+    <div class="builder-btn">📖 Build Book</div>
+    <div class="builder-btn">🔗 Build Funnel</div>
+    <div class="builder-btn">🤖 Build Agent</div>
+    <div class="builder-btn">🎓 Build Course</div>
   </div>
 </div>
 
-<!-- TABS -->
-<div style="display:flex;border-bottom:1px solid #1f1f1f;margin-bottom:.75rem">
-  <button onclick="showTab('activity')" id="tab-activity" style="flex:1;background:transparent;border:none;border-bottom:2px solid #C9A84C;color:#C9A84C;padding:.5rem;font-family:Georgia,serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer">Activity</button>
-  <button onclick="showTab('revenue')" id="tab-revenue" style="flex:1;background:transparent;border:none;border-bottom:2px solid transparent;color:#555;padding:.5rem;font-family:Georgia,serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer">Revenue Plan</button>
-  <button onclick="showTab('live')" id="tab-live" style="flex:1;background:transparent;border:none;border-bottom:2px solid transparent;color:#555;padding:.5rem;font-family:Georgia,serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer">Live Feed</button>
-  <button onclick="showTab('status')" id="tab-status" style="flex:1;background:transparent;border:none;border-bottom:2px solid transparent;color:#555;padding:.5rem;font-family:Georgia,serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer">Status Reports</button>
-</div>
-<div id="pane-activity">
-  <div class="log" id="log"><div class="log-row"><span class="log-t">—</span><span class="log-m">Loading...</span></div></div>
+<!-- 11. Revenue Plan -->
+<div class="panel">
+  <h2>💎 Revenue Plan</h2>
+  <button id="rev-toggle" onclick="document.getElementById('rev-content').classList.toggle('open');this.textContent=this.textContent==='▶ Expand'?'▼ Collapse':'▶ Expand'">▶ Expand</button>
+  <div id="rev-content"></div>
 </div>
 
-<div id="pane-revenue" style="display:none">
-  <div class="log" id="revenuePlan"><div class="log-row"><span class="log-t">—</span><span class="log-m">Loading...</span></div></div>
+<!-- 12. Footer -->
+<div id="footer">
+  PLT Operating System · Profit · Love · Tax<br>
+  <span id="refresh-ts">—</span>
 </div>
-<div id="pane-live" style="display:none">
-  <div class="log" id="liveFeed">
-    <div class="log-row"><span class="log-t" style="color:#2ecc71">NOW</span><span class="log-m" id="currentTask">Loading current task...</span></div>
-  </div>
-</div>
-<div id="pane-status" style="display:none">
-  <div class="log" id="statusReports"><div class="log-row"><span class="log-t">—</span><span class="log-m">Loading...</span></div></div>
-</div>
-
-<div class="footer" id="ft"></div>
 
 <script>
-document.getElementById('t0').textContent = new Date().toLocaleTimeString();
-const BOT='8713808619:AAHeGVgqgRbEp8GW_AuvMJtV2XVoQcgmM3A', CID='8589507317';
-const RAW='https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json';
-const SERVER='https://plt-server.onrender.com';
+const DATA_URL='https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json';
+const CMD_URL='https://plt-server.onrender.com/command';
+const CIRC=2*Math.PI*40;
 
-function addMsg(who,text,id){
-  const m=document.getElementById('msgs');
-  if(id&&document.getElementById(id))return;
-  const d=document.createElement('div');
-  d.className='msg '+who;
-  if(id)d.id=id;
-  d.innerHTML=`<div class="msg-who">${who==='craig'?'Craig':'Seshat'}</div>${text}<div class="msg-t">${new Date().toLocaleTimeString()}</div>`;
-  m.appendChild(d);m.scrollTop=m.scrollHeight;
+function setRing(id,val,max){
+  max=max||50;
+  const pct=Math.min(val/max,1);
+  const el=document.getElementById(id);
+  if(el){el.setAttribute('stroke-dasharray',`${pct*CIRC} ${CIRC}`);}
 }
 
-function send(){
-  const i=document.getElementById('inp'),t=i.value.trim();
-  if(!t)return;i.value='';
-  addMsg('craig',t);
-  fetch(SERVER+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})})
-  .then(()=>{})
-  .catch(()=>addMsg('seshat','Error. Check connection.'));
+function scoreColor(s){return s>=8?'var(--green)':s>=5?'var(--gold)':'var(--red)';}
+function deltaStr(n,label){
+  const c=n>0?'green':n<0?'red':'dim';
+  const sign=n>0?'+':'';
+  return `<span class="${c}">${label}:${sign}${n}</span>`;
+}
+function badgeClass(s){
+  const l=s.toLowerCase();
+  if(l==='active')return'badge-active';
+  if(l==='building'||l==='planned')return'badge-building';
+  return'badge-blocked';
 }
 
-let mr,chunks=[];
-async function toggleRec(){
-  const btn=document.getElementById('recBtn'),info=document.getElementById('recInfo');
-  if(mr&&mr.state==='recording'){mr.stop();btn.classList.remove('on');btn.textContent='🎙 Record';return;}
+function timeAgo(iso){
+  if(!iso)return'—';
+  const d=new Date(iso);
+  const s=Math.floor((Date.now()-d)/1000);
+  if(s<60)return s+'s ago';
+  if(s<3600)return Math.floor(s/60)+'m ago';
+  return d.toLocaleTimeString();
+}
+
+function render(d){
+  // 1. Status
+  document.getElementById('status-text').innerHTML=`● ONLINE — ${d.current_task||d.status||'Standby'}`;
+  document.getElementById('heartbeat').textContent=`Last heartbeat: ${timeAgo(d.updated)}`;
+
+  // 2. Collectors
+  const c=d.collectors||{};
+  document.getElementById('c-books').textContent=c.books_sold??0;
+  document.getElementById('c-convos').textContent=c.conversations_scored??0;
+  document.getElementById('c-leads').textContent=c.leads??0;
+  document.getElementById('c-rev').textContent='$'+(c.revenue??0);
+  document.getElementById('c-agents').textContent=c.agents??0;
+
+  // 3. Trinity
+  const ps=d.profit_score||0,ls=d.love_score||0,ts=d.tax_score||0;
+  document.getElementById('v-profit').textContent=ps;
+  document.getElementById('v-love').textContent=ls;
+  document.getElementById('v-tax').textContent=ts;
+  document.getElementById('v-soul').textContent=ps+ls-ts;
+  setRing('r-profit',ps);setRing('r-love',ls);setRing('r-tax',ts);
+
+  // 4. Reports
+  const reps=document.getElementById('reports');
+  reps.innerHTML='';
+  (d.status_reports||[]).slice(-3).reverse().forEach(r=>{
+    reps.innerHTML+=`<div class="report"><div class="r-head">${r.time||''} — ${r.title||''}</div><div class="r-body">${r.body||''}</div></div>`;
+  });
+  if(!d.status_reports||!d.status_reports.length)reps.innerHTML='<div style="color:var(--dim);font-size:12px">No reports yet.</div>';
+
+  // 5. Missions
+  const mis=document.getElementById('missions');
+  mis.innerHTML='';
+  (d.missions||[]).forEach((m,i)=>{
+    const bc=badgeClass(m.status);
+    const acts=(m.next_actions||[]).map(a=>`<li>${a}</li>`).join('');
+    mis.innerHTML+=`<div class="mission" onclick="this.querySelector('.m-details').classList.toggle('open')">
+      <div class="m-head"><span class="m-name">${m.name}</span><span class="badge ${bc}">${m.status}</span></div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${m.progress||0}%"></div></div>
+      <div class="prog-pct">${m.progress||0}%</div>
+      <div class="m-details">Leads: ${m.leads||0} · Convos: ${m.conversations||0} · Rev: $${m.revenue||0}<ul>${acts}</ul></div>
+    </div>`;
+  });
+
+  // 6. Conversations
+  const cb=document.getElementById('conv-body');
+  cb.innerHTML='';
+  (d.conversations||[]).forEach(cv=>{
+    cb.innerHTML+=`<tr><td>${cv.person}</td><td>${cv.profit}</td><td>${cv.love}</td><td>${cv.tax}</td><td style="color:${scoreColor(cv.score)};font-weight:bold">${cv.score}</td></tr>`;
+  });
+
+  // 7. Commands history
+  const ch=document.getElementById('cmd-hist');
+  ch.innerHTML='';
+  (d.commands||[]).slice(-5).reverse().forEach(cmd=>{
+    ch.innerHTML+=`<div>› ${typeof cmd==='string'?cmd:(cmd.text||JSON.stringify(cmd))}</div>`;
+  });
+
+  // 8. Ledger
+  const lg=document.getElementById('ledger');
+  lg.innerHTML='';
+  (d.ledger||[]).forEach(e=>{
+    lg.innerHTML+=`<div class="ledger-row"><span class="l-date">${e.date}</span><span class="l-action">${e.action}</span><span class="l-scores">${deltaStr(e.profit,'P')} ${deltaStr(e.love,'L')} ${deltaStr(e.tax,'T')} <span class="gold">Soul:${e.soul_score}</span></span></div>`;
+  });
+
+  // 9. Feed
+  const fd=document.getElementById('feed');
+  fd.innerHTML='';
+  (d.activity||[]).forEach(a=>{
+    fd.innerHTML+=`<div class="feed-line"><span class="ftime">${a.time}</span> ${a.msg}</div>`;
+  });
+  fd.scrollTop=fd.scrollHeight;
+
+  // 11. Revenue
+  const rc=document.getElementById('rev-content');
+  rc.innerHTML='';
+  (d.revenue_plan||[]).forEach(p=>{
+    const bc=badgeClass(p.type==='LIVE'?'Active':'Building');
+    rc.innerHTML+=`<div class="rev-phase">
+      <div class="rp-name">${p.phase} <span class="badge ${bc}">${p.type}</span></div>
+      <div class="rp-desc">${p.desc||''}</div>
+      <div class="rev-bars">
+        <div class="rev-bar-label"><span>Potential</span><span>${p.potential||0}%</span></div>
+        <div class="rev-bar"><div class="rb-fill" style="width:${p.potential||0}%;background:var(--gold)"></div></div>
+        <div class="rev-bar-label"><span>Guaranteed</span><span>${p.guaranteed||0}%</span></div>
+        <div class="rev-bar"><div class="rb-fill" style="width:${p.guaranteed||0}%;background:var(--green)"></div></div>
+      </div>
+      <div style="font-size:11px;color:var(--dim);margin-top:4px">⏱ ${p.timeline||''}</div>
+    </div>`;
+  });
+
+  // Footer
+  document.getElementById('refresh-ts').textContent='Refreshed: '+new Date().toLocaleTimeString();
+}
+
+async function load(){
+  try{
+    const r=await fetch(DATA_URL+'?t='+Date.now());
+    if(!r.ok)throw new Error(r.status);
+    render(await r.json());
+  }catch(e){
+    document.getElementById('status-text').innerHTML=`<span class="red">● SIGNAL LOST — ${e.message}</span>`;
+  }
+}
+
+// Command transmit
+document.getElementById('cmd-send').addEventListener('click',async()=>{
+  const inp=document.getElementById('cmd-input');
+  const txt=inp.value.trim();
+  if(!txt)return;
+  const st=document.getElementById('cmd-status');
+  st.innerHTML='<span class="gold">Transmitting...</span>';
+  try{
+    await fetch(CMD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt,timestamp:new Date().toISOString()})});
+    st.innerHTML='<span class="green">✓ Command transmitted</span>';
+    inp.value='';
+  }catch(e){
+    st.innerHTML=`<span class="red">✗ ${e.message}</span>`;
+  }
+  setTimeout(()=>{st.innerHTML='';},4000);
+});
+document.getElementById('cmd-input').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('cmd-send').click();});
+
+// Voice recording
+let mediaRec=null,audioChunks=[];
+const voiceBtn=document.getElementById('cmd-voice');
+voiceBtn.addEventListener('click',async()=>{
+  if(mediaRec&&mediaRec.state==='recording'){
+    mediaRec.stop();return;
+  }
   try{
     const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    chunks=[];mr=new MediaRecorder(stream);
-    mr.ondataavailable=e=>chunks.push(e.data);
-    mr.onstop=async()=>{
-      const blob=new Blob(chunks,{type:'audio/ogg; codecs=opus'});
+    audioChunks=[];
+    mediaRec=new MediaRecorder(stream,{mimeType:'audio/ogg;codecs=opus'});
+    mediaRec.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data);};
+    mediaRec.onstop=async()=>{
       stream.getTracks().forEach(t=>t.stop());
-      info.textContent='Sending...';
-      const f=new FormData();f.append('chat_id',CID);f.append('voice',blob,'voice.ogg');f.append('caption','📱 Dashboard voice note');
-      try{await fetch(`https://api.telegram.org/bot${BOT}/sendVoice`,{method:'POST',body:f});addMsg('craig','🎙 [Voice note sent]');info.textContent='Sent ✓';}
-      catch(e){info.textContent='Failed to send';}
+      voiceBtn.classList.remove('recording');
+      voiceBtn.textContent='🎙 Sending...';
+      const blob=new Blob(audioChunks,{type:'audio/ogg'});
+      const fd=new FormData();
+      fd.append('chat_id','8589507317');
+      fd.append('voice',blob,'voice.ogg');
+      try{
+        await fetch('https://api.telegram.org/bot8713808619:AAHeGVgqgRbEp8GW_AuvMJtV2XVoQcgmM3A/sendVoice',{method:'POST',body:fd});
+        document.getElementById('cmd-status').innerHTML='<span class="green">✓ Voice transmitted</span>';
+      }catch(e){
+        document.getElementById('cmd-status').innerHTML=`<span class="red">✗ Voice failed</span>`;
+      }
+      voiceBtn.textContent='🎙 Record';
+      setTimeout(()=>{document.getElementById('cmd-status').innerHTML='';},4000);
     };
-    mr.start();btn.classList.add('on');btn.textContent='⏹ Stop';info.textContent='Recording... tap Stop when done';
-  }catch(e){info.textContent='Mic access denied';}
-}
+    mediaRec.start();
+    voiceBtn.classList.add('recording');
+    voiceBtn.textContent='⏹ Stop';
+  }catch(e){
+    document.getElementById('cmd-status').innerHTML=`<span class="red">✗ Mic access denied</span>`;
+  }
+});
 
-function loadLog(){
-  fetch(RAW+'?t='+Date.now()).then(r=>r.json()).then(d=>{
-    if(d.updated)document.getElementById('upd').textContent=d.updated.slice(11,16);
-    if(d.status)document.getElementById('statusBar').textContent='✅ '+d.status;
-    if(d.activity)document.getElementById('log').innerHTML=d.activity.map(a=>`<div class="log-row"><span class="log-t">${a.time}</span><span class="log-m">${a.msg}</span></div>`).join('');
-    if(d.revenue_plan){
-    document.getElementById('revenuePlan').innerHTML=d.revenue_plan.map(p=>{
-      const color=p.type==='LIVE'?'#2ecc71':p.type==='BLOCKED'?'#e74c3c':'#C9A84C';
-      return `<div class="log-row" style="flex-direction:column;gap:.5rem;padding:.9rem">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span style="font-weight:bold;font-size:.85rem">${p.phase}</span>
-          <span style="font-size:.6rem;color:${color};letter-spacing:.1em;text-transform:uppercase;border:1px solid ${color};padding:.15rem .4rem">${p.type}</span>
-        </div>
-        <span style="font-size:.75rem;color:#888">${p.desc}</span>
-        <div style="margin-top:.25rem">
-          <div style="font-size:.6rem;color:#555;margin-bottom:.2rem">POTENTIAL &nbsp;<span style="color:#C9A84C">${p.potential}%</span></div>
-          <div style="background:#0a0a0a;height:6px;border-radius:3px"><div style="background:#C9A84C;height:6px;border-radius:3px;width:${p.potential}%"></div></div>
-        </div>
-        <div>
-          <div style="font-size:.6rem;color:#555;margin-bottom:.2rem">GUARANTEED &nbsp;<span style="color:#2ecc71">${p.guaranteed}%</span></div>
-          <div style="background:#0a0a0a;height:6px;border-radius:3px"><div style="background:#2ecc71;height:6px;border-radius:3px;width:${p.guaranteed}%"></div></div>
-        </div>
-        <div style="font-size:.6rem;color:#555">Timeline: ${p.timeline}</div>
-      </div>`;
-    }).join('');}
-  if(d.current_task)document.getElementById('currentTask').textContent=d.current_task;
-  if(d.status_reports)document.getElementById('statusReports').innerHTML=d.status_reports.map(s=>`<div class="log-row" style="flex-direction:column;gap:.25rem"><span style="font-size:.6rem;color:#C9A84C">${s.time} · ${s.title}</span><span class="log-m">${s.body}</span></div>`).join('');
-    if(d.chat){d.chat.forEach(m=>{if(!document.getElementById('cm'+m.id)){addMsg('seshat',m.text,'cm'+m.id);}});}
-    document.getElementById('ft').textContent='Refreshed '+new Date().toLocaleTimeString();
-  }).catch(()=>{});
-}
-function showTab(t){
-  ['activity','status','revenue','live'].forEach(id=>{
-    const pane=document.getElementById('pane-'+id);
-    const tab=document.getElementById('tab-'+id);
-    if(pane)pane.style.display=t===id?'block':'none';
-    if(tab)tab.style.cssText=`flex:1;background:transparent;border:none;border-bottom:2px solid ${t===id?'#C9A84C':'transparent'};color:${t===id?'#C9A84C':'#555'};padding:.5rem;font-family:Georgia,serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer`;
-  });
-}
-function showTab_old(t){
-  document.getElementById('pane-activity').style.display=t==='activity'?'block':'none';
-  document.getElementById('pane-status').style.display=t==='status'?'block':'none';
-  document.getElementById('tab-activity').style.cssText=`flex:1;background:transparent;border:none;border-bottom:2px solid ${t==='activity'?'#C9A84C':'transparent'};color:${t==='activity'?'#C9A84C':'#555'};padding:.5rem;font-family:Georgia,serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer`;
-  document.getElementById('tab-status').style.cssText=`flex:1;background:transparent;border:none;border-bottom:2px solid ${t==='status'?'#C9A84C':'transparent'};color:${t==='status'?'#C9A84C':'#555'};padding:.5rem;font-family:Georgia,serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer`;
-}
-loadLog();setInterval(loadLog,20000);
-let lastId=0;
-function pollChat(){
-  fetch(SERVER+'/chat?since='+lastId).then(r=>r.json()).then(msgs=>{
-    msgs.forEach(m=>{if(m.id>lastId)lastId=m.id;if(m.who==='seshat')addMsg('seshat',m.text,'cm'+m.id);});
-  }).catch(()=>{});
-}
-setInterval(pollChat,3000);
+load();
+setInterval(load,20000);
 </script>
 </body>
 </html>
