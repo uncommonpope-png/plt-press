@@ -259,6 +259,14 @@ h2.glow-cyan{color:var(--cyan);text-shadow:0 0 10px rgba(0,212,255,.4)}
   <div class="name">💰 PROFIT</div>
   <div class="online" id="status-text">● CONNECTING...</div>
   <div class="heartbeat" id="heartbeat">Last heartbeat: —</div>
+  <div id="health-bar-wrap" style="margin-top:10px">
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--pink);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">
+      <span>❤️ HEALTH</span><span id="health-pct">—%</span>
+    </div>
+    <div style="height:8px;background:#1a0a14;border-radius:4px;overflow:hidden;border:1px solid rgba(255,45,120,.3)">
+      <div id="health-fill" style="height:100%;background:linear-gradient(90deg,#FF2D78,#ff6ba8);border-radius:4px;transition:width 1s ease;box-shadow:0 0 10px rgba(255,45,120,.6);width:0%"></div>
+    </div>
+  </div>
 </div>
 
 <!-- 2. Collectors -->
@@ -439,7 +447,7 @@ const FALLBACK = {
   updated: new Date().toISOString(),
   status: "Command Bridge ONLINE",
   current_task: "Systems operational. Awaiting commands.",
-  profit_score: 24, love_score: 18, tax_score: 7,
+  profit_score: 24, love_score: 18, tax_score: 7, health: 100,
   collectors: {books_sold:0, conversations_scored:0, leads:0, revenue:0, agents:2},
   missions: [
     {name:"$1,000 in 15 days",status:"Active",progress:5,leads:0,conversations:0,revenue:0,next_actions:["Launch outreach campaign","Post in Facebook/Reddit groups","Activate social media traffic"]},
@@ -619,6 +627,14 @@ function render(d){
 
   // Footer
   document.getElementById('refresh-ts').textContent='Refreshed: '+new Date().toLocaleTimeString();
+
+  // Health bar
+  var hp=d.health||100;
+  document.getElementById('health-pct').textContent=hp+'%';
+  document.getElementById('health-fill').style.width=hp+'%';
+  if(hp<25){document.getElementById('health-fill').style.background='linear-gradient(90deg,#e74c3c,#ff4444)';}
+  else if(hp<50){document.getElementById('health-fill').style.background='linear-gradient(90deg,#e74c3c,#FF2D78)';}
+  else{document.getElementById('health-fill').style.background='linear-gradient(90deg,#FF2D78,#ff6ba8)';}
 }
 
 /* ── BETTY CREDITS ── */
