@@ -1112,11 +1112,37 @@ function sendBetty(){
   inp.value='';
   addBettyMsg('craig',txt);
   bettyHistory.push({who:'craig',text:txt});
-  setTimeout(function(){
+  document.getElementById('betty-status').innerHTML='<span style="color:var(--pink)">Betty thinking (local AI)...</span>';
+  
+  // Try local Ollama first, fallback to knowledge engine
+  var prompt = 'You are Betty Credits, a financial advisor in the PLT (Profit Love Tax) framework. Be helpful, direct, and knowledgeable about credit, money, and business. Keep responses under 100 words.\n\nUser: '+txt;
+  
+  fetch('http://127.0.0.1:11434/api/generate', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      model: 'qwen2.5:0.5b',
+      prompt: prompt,
+      stream: false
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.response){
+      addBettyMsg('betty',data.response);
+      bettyHistory.push({who:'betty',text:data.response});
+      document.getElementById('betty-status').innerHTML='<span style="color:var(--green)">✓ Local AI</span>';
+    } else {
+      throw new Error('No response from local AI');
+    }
+  })
+  .catch(function(e){
+    // Fallback to knowledge engine
     var reply=bettyRespond(txt);
     addBettyMsg('betty',reply);
     bettyHistory.push({who:'betty',text:reply});
-  },300+Math.random()*500);
+    document.getElementById('betty-status').innerHTML='<span style="color:var(--cyan)">✓ Knowledge Engine</span>';
+  });
 }
 
 /* ── INIT: Render fallback IMMEDIATELY, then fetch live ── */
