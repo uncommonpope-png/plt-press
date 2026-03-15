@@ -422,7 +422,7 @@ h2.glow-cyan{color:var(--cyan);text-shadow:0 0 10px rgba(0,212,255,.4)}
 
 <script>
 const DATA_URL='https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json';
-const CMD_URL='https://api.telegram.org/bot8713808619:AAHeGVgqgRbEp8GW_AuvMJtV2XVoQcgmM3A/sendMessage';
+const CMD_URL='https://plt-server.onrender.com/chat';
 const CIRC=2*Math.PI*40;
 
 /* ── FALLBACK DATA ── */
@@ -721,7 +721,7 @@ document.getElementById('cmd-send').addEventListener('click',async function(){
   var st=document.getElementById('cmd-status');
   st.innerHTML='<span class="gold">Transmitting...</span>';
   try{
-    await fetch(CMD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:'8589507317',text:'📡 COMMAND: '+txt})});
+    await fetch(CMD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'📡 COMMAND: '+txt})});
     st.innerHTML='<span class="green">✓ Command transmitted to Profit</span>';
     inp.value='';
   }catch(e){
@@ -813,7 +813,7 @@ function submitBuild(type){
   var ts=new Date().toLocaleString();
   var copyId='copy-btn-'+Date.now();
 
-  fetch(CMD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:'8589507317',text:'🔨 BUILD: '+JSON.stringify(data)})})
+  fetch(CMD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'🔨 BUILD: '+JSON.stringify(data)})})
   .then(function(){
     res.innerHTML='<div class="build-result-box">'
       +'<div class="result-check">✓ Build request transmitted to Profit</div>'
@@ -885,7 +885,7 @@ function submitFlag(){
   if(!txt)return;
   var st=document.getElementById('flag-status');
   st.innerHTML='<span class="gold">Flagging...</span>';
-  fetch(CMD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:'8589507317',text:'🚩 FLAG: '+txt})})
+  fetch(CMD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'🚩 FLAG: '+txt})})
   .then(function(){
     st.innerHTML='<span class="green">🚩 Flagged — Profit will see this</span>';
     inp.value='';
