@@ -1057,6 +1057,33 @@ function addBettyMsg(who,text){
   el.scrollTop=el.scrollHeight;
 }
 var bettyHistory=[];
+/* Betty Credits Knowledge Engine — zero cost, no server needed */
+var BETTY_KB={
+  plt:{what:"PLT = Profit · Love · Tax. Created by Craig Jones.\n\n💰 PROFIT = What you gain (money, leverage, position)\n❤️ LOVE = Relationship capital (trust, alliances)\n📉 TAX = The real cost (time, energy, money)\n\nSOUL PROFIT = PROFIT + LOVE - TAX\n\nApply it to any deal or decision.",profit:"PROFIT isn't just money. It's leverage, position, influence — anything that increases your power.",love:"LOVE is relationship capital. Trust built over time. Strategic Love is the most powerful force in business.",tax:"TAX kills silently. Time, energy, opportunity cost. Know what you're paying.",score:"Score any conversation:\n1. PROFIT 1-10\n2. LOVE 1-10\n3. TAX 1-10\nSOUL PROFIT = P + L - T\nAbove 10 = great. Below 5 = walk away."},
+  credit:{basics:"Credit = your financial reputation.\n• Payment history (35%)\n• Utilization (30%) — keep under 30%\n• History length (15%)\n• Credit mix (10%)\n• New inquiries (10%)",repair:"Credit repair:\n1. Pull all 3 reports free\n2. Dispute every error\n3. Negotiate pay-for-delete\n4. Become authorized user\n5. Get secured card, use 5-10%",business:"Business credit:\n1. Get EIN (free)\n2. DUNS number\n3. Business bank account\n4. Business credit card\n5. Pay net-30 vendors that report"},
+  money:{basics:"Financial literacy PLT style:\n• Save 20% of income\n• Invest in assets, not liabilities\n• Build relationships with money people\n• Track every dollar",invest:"Investment hierarchy:\n1. Emergency fund (3-6 months)\n2. High-yield savings\n3. Index funds (S&P 500)\n4. Real estate\n5. Business"},
+  greetings:["Hey! I'm Betty Credits. Ask me about credit, money, or PLT.","Betty Credits here. What's on your mind?","Welcome to Betty's desk. Let's talk money moves."],
+  books:"Craig Jones wrote 18 PLT books. Get all 18 for $49: uncommonpope-png.github.io/plt-press/bundle.html",
+  services:"PLT Press offers:\n• AI Agent Setup: $100\n• Social Media Package: $75\n• Email Automation: $75\n• Business Docs: $150"
+};
+function bettyRespond(t){
+  t=t.toLowerCase();
+  if(t.match(/^(hi|hey|hello|yo|sup|betty)/))return BETTY_KB.greetings[Math.floor(Math.random()*3)];
+  if(t.includes('what is plt')||t.includes("what's plt")||t.includes('explain plt'))return BETTY_KB.plt.what;
+  if(t.includes('profit')&&!t.includes('love')&&!t.includes('tax'))return BETTY_KB.plt.profit;
+  if(t.includes('love')&&!t.includes('profit'))return BETTY_KB.plt.love;
+  if(t.includes('tax')&&!t.includes('profit'))return BETTY_KB.plt.tax;
+  if(t.includes('score'))return BETTY_KB.plt.score;
+  if(t.includes('plt')||t.includes('framework'))return BETTY_KB.plt.what;
+  if(t.includes('repair')||t.includes('fix credit'))return BETTY_KB.credit.repair;
+  if(t.includes('business credit'))return BETTY_KB.credit.business;
+  if(t.includes('credit'))return BETTY_KB.credit.basics;
+  if(t.includes('invest'))return BETTY_KB.money.invest;
+  if(t.includes('money')||t.includes('financ')||t.includes('save'))return BETTY_KB.money.basics;
+  if(t.includes('book'))return BETTY_KB.books;
+  if(t.includes('service')||t.includes('hire'))return BETTY_KB.services;
+  return"Ask me about:\n• PLT framework\n• Credit repair & building\n• Business credit\n• Financial literacy\n• Investing\n• Craig Jones' books\n\nWhat do you want to know?";
+}
 function sendBetty(){
   var inp=document.getElementById('betty-input');
   var txt=inp.value.trim();
@@ -1064,21 +1091,11 @@ function sendBetty(){
   inp.value='';
   addBettyMsg('craig',txt);
   bettyHistory.push({who:'craig',text:txt});
-  document.getElementById('betty-status').innerHTML='<span style="color:var(--pink)">Betty is thinking...</span>';
-  fetch('https://plt-server.onrender.com/betty',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt,history:bettyHistory})})
-  .then(function(r){return r.json();})
-  .then(function(data){
-    if(data.ok&&data.reply){
-      addBettyMsg('betty',data.reply);
-      bettyHistory.push({who:'betty',text:data.reply});
-      document.getElementById('betty-status').innerHTML='';
-    }else{
-      document.getElementById('betty-status').innerHTML='<span class="red">✗ '+(data.error||'No response')+'</span>';
-    }
-  })
-  .catch(function(e){
-    document.getElementById('betty-status').innerHTML='<span class="red">✗ '+e.message+'</span>';
-  });
+  setTimeout(function(){
+    var reply=bettyRespond(txt);
+    addBettyMsg('betty',reply);
+    bettyHistory.push({who:'betty',text:reply});
+  },300+Math.random()*500);
 }
 
 /* ── INIT: Render fallback IMMEDIATELY, then fetch live ── */
