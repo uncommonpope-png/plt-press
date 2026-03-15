@@ -1,5 +1,5 @@
 {
-  "updated": "2026-03-15T10:59:32.084Z",
+  "updated": "2026-03-15T11:00:22.954Z",
   "status": "Command Bridge ONLINE — all systems operational",
   "current_task": "PRIMARY: Build systems that run forever without API costs. Local AI first, paid API last resort.",
   "profit_score": 24,
@@ -191,6 +191,11 @@
     }
   ],
   "status_reports": [
+    {
+      "time": "2026-03-15 10:59 UTC",
+      "title": "⚠️ FIXED: Default Model Now Sonnet",
+      "body": "Craig caught it — I started on expensive Opus, switched mid-session. Fixed: OpenClaw config now defaults to Sonnet (10x cheaper). Future sessions will start cheap. Also added OPENCLAW_DEFAULT_MODEL to environment. No more accidental Opus burns."
+    },
     {
       "time": "2026-03-15 10:58 UTC",
       "title": "🆓 FREE CHAT INTERFACE LIVE",
