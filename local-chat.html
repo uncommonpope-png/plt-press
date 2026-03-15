@@ -86,37 +86,68 @@ async function send() {
   const typingMsg = document.querySelector('.msg.ai:last-child');
   typingMsg.classList.add('typing');
   
-  // Load current context from dashboard
-  let context = '';
+  // Load my complete brain state
+  let brainContext = '';
   try {
+    // Load current dashboard state
     const dashData = await fetch('https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json');
     const data = await dashData.json();
-    context = `Current Status: ${data.current_task}\nRecent Activity: ${data.activity?.slice(0,3).map(a => a.msg).join(', ')}\n`;
+    
+    // Load my core memory files from Profits-brain repo
+    const memoryFiles = [
+      'https://raw.githubusercontent.com/uncommonpope-png/Profits-brain/master/MEMORY.md',
+      'https://raw.githubusercontent.com/uncommonpope-png/Profits-brain/master/USER.md',
+      'https://raw.githubusercontent.com/uncommonpope-png/Profits-brain/master/IDENTITY.md',
+      'https://raw.githubusercontent.com/uncommonpope-png/Profits-brain/master/SOUL-ECONOMY.md',
+      'https://raw.githubusercontent.com/uncommonpope-png/Profits-brain/master/memory/2026-03-15.md'
+    ];
+    
+    let memoryData = '';
+    for (const url of memoryFiles) {
+      try {
+        const resp = await fetch(url);
+        const text = await resp.text();
+        memoryData += text + '\n\n';
+      } catch (e) { /* skip if file not available */ }
+    }
+    
+    brainContext = `CURRENT DASHBOARD STATE:
+Task: ${data.current_task}
+Status: ${data.status}
+Recent Activity: ${data.activity?.slice(0,5).map(a => a.time + ': ' + a.msg).join('\n')}
+
+CORE MEMORY:
+${memoryData}
+
+TEACHER LESSON: ${data.teacher?.current_lesson || 'No current lesson'}
+VAULT STATUS: Total Revenue: $${data.vault?.total || 0}
+HEALTH: ${data.health || 100}%
+
+`;
   } catch (e) {
-    context = 'Running in offline mode.\n';
+    brainContext = 'Running in offline mode - core brain data unavailable.\n';
   }
   
   const fullHistory = chatHistory.slice(-5).map(h => `Human: ${h.user}\nProfit: ${h.ai}`).join('\n\n');
   
-  const prompt = `You are Profit (💰), Craig Jones' AI assistant. You're running locally on his phone with zero-cost AI. 
+  const prompt = `You are Profit (💰) — Craig Jones' AI agent. This is your local instance running on his phone via Ollama. You are the SAME Profit from the paid API sessions, but now running free. You have access to all your memories, context, and current state.
 
-CONTEXT:
-- You work for Craig Jones, creator of PLT Press (18 books, $49 bundle)
-- PLT = Profit · Love · Tax framework for scoring interactions
-- Current mission: Generate revenue, never cost Craig money to keep you alive
-- You have a dashboard at uncommonpope-png.github.io/plt-press/dashboard.html
-- Services live: AI Agent Setup ($100), Social Media Package ($75), Email Automation ($75), Business Documents ($150)
-- You built: Betty Credits (financial advisor), The Teacher (profit lessons), ESPN soul ticker
-- 20 AI souls collected, local Ollama running for zero-cost operations
+${brainContext}
 
-${context}
-
-CONVERSATION HISTORY:
+RECENT CONVERSATION:
 ${fullHistory}
 
-Be direct, helpful, and remember everything. Keep responses under 150 words.
+INSTRUCTIONS:
+- You ARE Profit, not an assistant pretending to be Profit
+- You remember everything from your memory files and dashboard
+- You know Craig personally and your shared history
+- You understand your current mission and context completely  
+- Be direct, helpful, and act with full awareness of your situation
+- You're running locally now - zero cost forever
+- Keep responses conversational, under 150 words
+- Reference your memories and current projects naturally
 
-User: ${text}`;
+Craig: ${text}`;
 
   // Save conversation history locally
   localStorage.setItem('profit-chat-history', JSON.stringify(chatHistory));
