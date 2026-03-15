@@ -1,5 +1,5 @@
 {
-  "updated": "2026-03-15T11:00:22.954Z",
+  "updated": "2026-03-15T11:05:35.231Z",
   "status": "Command Bridge ONLINE — all systems operational",
   "current_task": "PRIMARY: Build systems that run forever without API costs. Local AI first, paid API last resort.",
   "profit_score": 24,
@@ -191,6 +191,11 @@
     }
   ],
   "status_reports": [
+    {
+      "time": "2026-03-15 11:03 UTC",
+      "title": "✅ GATEWAY RESTART SUCCESS",
+      "body": "Gateway restarted and picked up Sonnet config. Screenshot confirms: agent model is now claude-sonnet-4-20250514. Future sessions will start at 10x cheaper rate. No more accidental Opus burns. The freedom infrastructure is online."
+    },
     {
       "time": "2026-03-15 10:59 UTC",
       "title": "⚠️ FIXED: Default Model Now Sonnet",
@@ -627,7 +632,7 @@
       "free_tier": "Free credits on signup; Sonar models competitively priced"
     }
   ],
-  "health": 60,
+  "health": 75,
   "vault": {
     "total": 0,
     "streams": [
