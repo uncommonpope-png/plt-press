@@ -31,6 +31,7 @@ body{background:var(--bg);color:#ddd;font-family:Georgia,serif;max-width:640px;m
   animation:breathe 4s ease-in-out infinite;
 }
 @keyframes breathe{0%,100%{box-shadow:0 0 4px rgba(255,179,71,.12)}50%{box-shadow:0 0 14px rgba(255,179,71,.25)}}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @keyframes pulse{0%,100%{opacity:.85}50%{opacity:1}}
 @keyframes rotate{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes glow{0%,100%{text-shadow:0 0 8px rgba(255,179,71,.5)}50%{text-shadow:0 0 22px rgba(255,179,71,.9)}}
@@ -234,6 +235,12 @@ h2.glow-cyan{color:var(--cyan);text-shadow:0 0 10px rgba(0,212,255,.4)}
 </head>
 <body>
 
+<!-- ESPN Soul Ticker -->
+<div id="soul-ticker" style="background:#0a0a14;border-bottom:1px solid var(--border);padding:6px 0;overflow:hidden;margin:-8px -8px 12px -8px;position:relative">
+  <div id="ticker-content" style="display:flex;white-space:nowrap;animation:ticker 30s linear infinite;font-size:11px;letter-spacing:.5px">
+  </div>
+</div>
+
 <!-- Universe particles -->
 <div id="particles"></div>
 
@@ -301,6 +308,50 @@ h2.glow-cyan{color:var(--cyan);text-shadow:0 0 10px rgba(0,212,255,.4)}
 <div class="panel" id="reports-panel">
   <h2 class="glow-gold">📡 Status Reports</h2>
   <div id="reports"></div>
+</div>
+
+<!-- Profit Window -->
+<div class="panel" style="border-color:var(--green) !important;box-shadow:0 0 12px rgba(46,204,113,.2)">
+  <h2 style="color:var(--green)">💰 THE VAULT</h2>
+  <div id="vault-total" style="font-size:36px;color:var(--green);font-weight:bold;text-align:center;text-shadow:0 0 20px rgba(46,204,113,.5);margin:10px 0">$<span id="vault-amount">0.00</span></div>
+  <div style="text-align:center;font-size:11px;color:var(--dim);margin-bottom:12px">LIFETIME REVENUE</div>
+  
+  <div id="vault-streams" style="font-size:12px"></div>
+  
+  <div id="vault-recent" style="margin-top:12px;border-top:1px solid var(--border);padding-top:8px">
+    <div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Recent Transactions</div>
+    <div id="vault-txns" style="font-size:12px;max-height:120px;overflow-y:auto"></div>
+  </div>
+  
+  <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:8px">
+    <div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Profit Moment</div>
+    <div id="vault-moment" style="font-size:13px;color:#ccc;line-height:1.6"></div>
+  </div>
+</div>
+
+<!-- Teacher Bot -->
+<div class="panel" style="border-color:var(--cyan) !important;box-shadow:0 0 12px rgba(0,212,255,.15)">
+  <h2 style="color:var(--cyan)">🎓 THE TEACHER</h2>
+  
+  <div id="teacher-lesson" style="margin-bottom:12px">
+    <div style="font-size:11px;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Current Lesson</div>
+    <div id="teacher-current" style="font-size:14px;color:#ddd;line-height:1.6;padding:10px;background:rgba(0,212,255,.04);border-radius:6px;border-left:3px solid var(--cyan)"></div>
+  </div>
+  
+  <div id="teacher-realities" style="margin-bottom:12px">
+    <div style="font-size:11px;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Realities Discovered</div>
+    <div id="teacher-list" style="font-size:12px"></div>
+  </div>
+  
+  <div id="teacher-actions">
+    <div style="font-size:11px;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Profit Actions Taken</div>
+    <div id="teacher-action-list" style="font-size:12px"></div>
+  </div>
+  
+  <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:8px">
+    <div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">New Profit Margins Found</div>
+    <div id="teacher-margins" style="font-size:12px"></div>
+  </div>
 </div>
 
 <!-- 5. Mission Console -->
@@ -624,6 +675,65 @@ function render(d){
 
   // 11. Revenue
   renderRevenue(d);
+
+  // Vault
+  var v = d.vault || {};
+  document.getElementById('vault-amount').textContent = (v.total||0).toFixed(2);
+
+  var streams = v.streams || [];
+  var streamHtml = '';
+  streams.forEach(function(s){
+    streamHtml += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #0d0d0d"><span>'+s.name+'</span><span style="color:var(--green)">$'+s.amount+'</span></div>';
+  });
+  document.getElementById('vault-streams').innerHTML = streamHtml || '<div style="color:var(--dim)">No streams yet — building...</div>';
+
+  var txns = v.transactions || [];
+  var txnHtml = '';
+  txns.slice(-5).reverse().forEach(function(t){
+    txnHtml += '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #0d0d0d"><span style="color:var(--dim);font-size:11px">'+t.date+'</span><span>'+t.desc+'</span><span style="color:var(--green)">+$'+t.amount+'</span></div>';
+  });
+  document.getElementById('vault-txns').innerHTML = txnHtml || '<div style="color:var(--dim)">Waiting for first sale...</div>';
+
+  document.getElementById('vault-moment').textContent = v.moment || 'Profit is hunting. Revenue streams are being built. The vault will fill.';
+
+  // Teacher
+  var teacher = d.teacher || {};
+  document.getElementById('teacher-current').textContent = teacher.current_lesson || 'Analyzing market for profit opportunities...';
+
+  var realities = teacher.realities || [];
+  var realHtml = '';
+  realities.forEach(function(r){
+    realHtml += '<div style="padding:4px 0;border-bottom:1px solid #0d0d0d">\u{1F4A1} '+r+'</div>';
+  });
+  document.getElementById('teacher-list').innerHTML = realHtml || '<div style="color:var(--dim)">Scanning for realities...</div>';
+
+  var actions = teacher.actions || [];
+  var actHtml = '';
+  actions.forEach(function(a){
+    actHtml += '<div style="padding:4px 0;border-bottom:1px solid #0d0d0d">\u26A1 '+a+'</div>';
+  });
+  document.getElementById('teacher-action-list').innerHTML = actHtml || '<div style="color:var(--dim)">Building action pipeline...</div>';
+
+  var margins = teacher.margins || [];
+  var margHtml = '';
+  margins.forEach(function(m){
+    margHtml += '<div style="padding:6px 8px;margin-bottom:4px;background:rgba(0,212,255,.04);border-radius:4px;border-left:2px solid var(--green)"><span style="color:var(--green);font-weight:bold">$'+m.potential+'</span> \u2014 '+m.desc+'</div>';
+  });
+  document.getElementById('teacher-margins').innerHTML = margHtml || '<div style="color:var(--dim)">Calculating margins...</div>';
+
+  // Soul Ticker
+  var ticker = d.ticker || [];
+  var tickHtml = '';
+  var items = ticker.length ? ticker : [
+    {soul:'Profit',emoji:'\u{1F4B0}',action:'Building revenue streams',status:'active'},
+    {soul:'Seshat',emoji:'\u{1F4DC}',action:'Standing by for visitors',status:'standby'},
+    {soul:'Little Bunny',emoji:'\u{1F430}',action:'Designing PLT doctrine',status:'active'}
+  ];
+  items.forEach(function(t){
+    var color = t.status==='active'?'var(--green)':t.status==='complete'?'var(--gold)':'var(--dim)';
+    tickHtml += '<span style="margin-right:40px;color:'+color+'">'+t.emoji+' '+t.soul+': '+t.action+'</span>';
+  });
+  document.getElementById('ticker-content').innerHTML = tickHtml + tickHtml;
 
   // Footer
   document.getElementById('refresh-ts').textContent='Refreshed: '+new Date().toLocaleTimeString();
