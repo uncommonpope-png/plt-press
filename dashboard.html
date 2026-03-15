@@ -353,6 +353,7 @@ function timeAgo(iso){
 }
 
 function render(d){
+  window._lastData=d;
   // 1. Status
   document.getElementById('status-text').innerHTML=`● ONLINE — ${d.current_task||d.status||'Standby'}`;
   document.getElementById('heartbeat').textContent=`Last heartbeat: ${timeAgo(d.updated)}`;
@@ -444,6 +445,10 @@ function render(d){
 
   // Footer
   document.getElementById('refresh-ts').textContent='Refreshed: '+new Date().toLocaleTimeString();
+
+  // Betty + Map
+  renderBetty(d);
+  drawMap(d);
 }
 
 async function load(){
@@ -635,31 +640,8 @@ function drawMap(d){
   });
 }
 
-// Add Betty + Map to render cycle
-const origRender=render;
-const fullRender=function(d){
-  origRender(d);
-  renderBetty(d);
-  drawMap(d);
-};
-// Override
-render=fullRender;
-
-// Animate map
+// Animate map continuously
 function animateMap(){drawMap(window._lastData||{});requestAnimationFrame(animateMap);}
-
-const _origLoad=load;
-load=async function(){
-  try{
-    const r=await fetch(DATA_URL+'?t='+Date.now());
-    if(!r.ok)throw new Error(r.status);
-    const d=await r.json();
-    window._lastData=d;
-    render(d);
-  }catch(e){
-    document.getElementById('status-text').innerHTML=`<span class="red">● SIGNAL LOST — ${e.message}</span>`;
-  }
-};
 
 load();
 setInterval(load,20000);
