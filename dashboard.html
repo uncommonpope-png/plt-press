@@ -399,6 +399,15 @@ h2.glow-cyan{color:var(--cyan);text-shadow:0 0 10px rgba(0,212,255,.4)}
       <div class="betty-alert"><div class="ba-type">🔍 Scanning</div>Betty Credits is initializing. Market alerts will appear here.</div>
     </div>
   </div>
+  <!-- Betty Chat -->
+  <div id="betty-chat" style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
+    <div id="betty-msgs" style="max-height:200px;overflow-y:auto;margin-bottom:8px;font-size:13px"></div>
+    <div style="display:flex;gap:6px">
+      <input type="text" id="betty-input" placeholder="Talk to Betty..." style="flex:1;background:#0a0a14;border:1px solid var(--pink);color:#ddd;padding:8px;font-family:Georgia,serif;font-size:13px;border-radius:4px;outline:none" onkeydown="if(event.key==='Enter')sendBetty()">
+      <button onclick="sendBetty()" style="background:var(--pink);color:#fff;border:none;padding:8px 14px;font-family:Georgia,serif;cursor:pointer;border-radius:4px;font-size:12px">ASK</button>
+    </div>
+    <div id="betty-status" style="font-size:11px;margin-top:4px;min-height:14px"></div>
+  </div>
 </div>
 
 <!-- Reality Map — Static Grid -->
@@ -912,6 +921,32 @@ function submitFlag(){
     container.appendChild(p);
   }
 })();
+
+/* ── BETTY CHAT ── */
+function addBettyMsg(who,text){
+  var el=document.getElementById('betty-msgs');
+  var cls=who==='craig'?'color:var(--cyan)':'color:var(--pink)';
+  var label=who==='craig'?'You':'Betty';
+  el.innerHTML+='<div style="margin-bottom:6px;padding:4px 8px;border-radius:4px;'+(who==='craig'?'background:rgba(0,212,255,.06)':'background:rgba(255,45,120,.06)')+'"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;'+cls+'">'+label+'</span><div style="margin-top:2px">'+text+'</div></div>';
+  el.scrollTop=el.scrollHeight;
+}
+function sendBetty(){
+  var inp=document.getElementById('betty-input');
+  var txt=inp.value.trim();
+  if(!txt)return;
+  inp.value='';
+  addBettyMsg('craig',txt);
+  document.getElementById('betty-status').innerHTML='<span class="pink">Betty is thinking...</span>';
+  // Send to Render server as Betty question, Profit will process and respond via log.json betty_chat
+  fetch('https://plt-server.onrender.com/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'💬 BETTY Q: '+txt})})
+  .then(function(){
+    document.getElementById('betty-status').innerHTML='<span class="green">Sent — Betty will respond shortly</span>';
+    setTimeout(function(){document.getElementById('betty-status').innerHTML='';},3000);
+  })
+  .catch(function(e){
+    document.getElementById('betty-status').innerHTML='<span class="red">✗ '+e.message+'</span>';
+  });
+}
 
 /* ── INIT: Render fallback IMMEDIATELY, then fetch live ── */
 render(FALLBACK);
