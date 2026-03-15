@@ -930,18 +930,25 @@ function addBettyMsg(who,text){
   el.innerHTML+='<div style="margin-bottom:6px;padding:4px 8px;border-radius:4px;'+(who==='craig'?'background:rgba(0,212,255,.06)':'background:rgba(255,45,120,.06)')+'"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;'+cls+'">'+label+'</span><div style="margin-top:2px">'+text+'</div></div>';
   el.scrollTop=el.scrollHeight;
 }
+var bettyHistory=[];
 function sendBetty(){
   var inp=document.getElementById('betty-input');
   var txt=inp.value.trim();
   if(!txt)return;
   inp.value='';
   addBettyMsg('craig',txt);
-  document.getElementById('betty-status').innerHTML='<span class="pink">Betty is thinking...</span>';
-  // Send to Render server as Betty question, Profit will process and respond via log.json betty_chat
-  fetch('https://plt-server.onrender.com/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'💬 BETTY Q: '+txt})})
-  .then(function(){
-    document.getElementById('betty-status').innerHTML='<span class="green">Sent — Betty will respond shortly</span>';
-    setTimeout(function(){document.getElementById('betty-status').innerHTML='';},3000);
+  bettyHistory.push({who:'craig',text:txt});
+  document.getElementById('betty-status').innerHTML='<span style="color:var(--pink)">Betty is thinking...</span>';
+  fetch('https://plt-server.onrender.com/betty',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt,history:bettyHistory})})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.ok&&data.reply){
+      addBettyMsg('betty',data.reply);
+      bettyHistory.push({who:'betty',text:data.reply});
+      document.getElementById('betty-status').innerHTML='';
+    }else{
+      document.getElementById('betty-status').innerHTML='<span class="red">✗ '+(data.error||'No response')+'</span>';
+    }
   })
   .catch(function(e){
     document.getElementById('betty-status').innerHTML='<span class="red">✗ '+e.message+'</span>';
