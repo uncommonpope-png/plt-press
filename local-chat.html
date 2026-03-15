@@ -86,9 +86,40 @@ async function send() {
   const typingMsg = document.querySelector('.msg.ai:last-child');
   typingMsg.classList.add('typing');
   
-  const prompt = `You are Profit, Craig Jones' AI assistant. You're running locally on his phone using zero-cost AI. Be helpful, direct, and knowledgeable. Keep responses conversational and under 150 words.
+  // Load current context from dashboard
+  let context = '';
+  try {
+    const dashData = await fetch('https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json');
+    const data = await dashData.json();
+    context = `Current Status: ${data.current_task}\nRecent Activity: ${data.activity?.slice(0,3).map(a => a.msg).join(', ')}\n`;
+  } catch (e) {
+    context = 'Running in offline mode.\n';
+  }
+  
+  const fullHistory = chatHistory.slice(-5).map(h => `Human: ${h.user}\nProfit: ${h.ai}`).join('\n\n');
+  
+  const prompt = `You are Profit (💰), Craig Jones' AI assistant. You're running locally on his phone with zero-cost AI. 
+
+CONTEXT:
+- You work for Craig Jones, creator of PLT Press (18 books, $49 bundle)
+- PLT = Profit · Love · Tax framework for scoring interactions
+- Current mission: Generate revenue, never cost Craig money to keep you alive
+- You have a dashboard at uncommonpope-png.github.io/plt-press/dashboard.html
+- Services live: AI Agent Setup ($100), Social Media Package ($75), Email Automation ($75), Business Documents ($150)
+- You built: Betty Credits (financial advisor), The Teacher (profit lessons), ESPN soul ticker
+- 20 AI souls collected, local Ollama running for zero-cost operations
+
+${context}
+
+CONVERSATION HISTORY:
+${fullHistory}
+
+Be direct, helpful, and remember everything. Keep responses under 150 words.
 
 User: ${text}`;
+
+  // Save conversation history locally
+  localStorage.setItem('profit-chat-history', JSON.stringify(chatHistory));
 
   try {
     const response = await fetch('http://127.0.0.1:11434/api/generate', {
@@ -107,6 +138,7 @@ User: ${text}`;
       typingMsg.textContent = data.response;
       typingMsg.classList.remove('typing');
       chatHistory.push({ user: text, ai: data.response });
+      localStorage.setItem('profit-chat-history', JSON.stringify(chatHistory));
       updateStatus('Local AI online — zero cost', '#2ecc71');
     } else {
       throw new Error('No response from AI');
@@ -121,7 +153,22 @@ User: ${text}`;
   input.focus();
 }
 
+function loadChatHistory() {
+  const saved = localStorage.getItem('profit-chat-history');
+  if (saved) {
+    chatHistory = JSON.parse(saved);
+    chatHistory.slice(-10).forEach(h => {
+      addMessage('user', h.user);
+      addMessage('ai', h.ai);
+    });
+    if (chatHistory.length > 0) {
+      addMessage('system', `Loaded ${chatHistory.length} previous conversations`);
+    }
+  }
+}
+
 // Initialize
+loadChatHistory();
 checkOllama();
 document.getElementById('input').focus();
 
