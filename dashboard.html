@@ -1097,6 +1097,10 @@ function addBettyMsg(who,text){
   el.innerHTML+='<div style="margin-bottom:6px;padding:4px 8px;border-radius:4px;'+(who==='craig'?'background:rgba(0,212,255,.06)':'background:rgba(255,45,120,.06)')+'"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;'+cls+'">'+label+'</span><div style="margin-top:2px">'+text+'</div></div>';
   el.scrollTop=el.scrollHeight;
 }
+// API endpoints
+var DATA_URL = 'https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json';
+var CMD_URL = 'https://pltcommands.onrender.com/execute';
+
 var bettyHistory=[];
 /* Betty Credits Knowledge Engine — zero cost, no server needed */
 var BETTY_KB={
