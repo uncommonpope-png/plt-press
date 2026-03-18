@@ -129,10 +129,24 @@
         <a href="#" class="share-btn" onclick="copyLink()">Copy Link</a>
     </div>
 
+    <div class="result">
+        <div class="score" id="plt-score">5</div>
+        <div class="interpretation" id="interpretation">
+            <strong>PLT Score:</strong> 5 + 5 - 5 = 5<br>
+            <span class="fair">Fair opportunity - consider optimizing</span>
+        </div>
+        <div id="ai-analysis" style="margin-top: 15px; padding: 15px; background: rgba(0,212,255,0.1); border-radius: 8px; display: none;">
+            <h4 style="color: #00D4FF; margin: 0 0 10px 0;">🤖 Smart Analysis</h4>
+            <div id="ai-content">Analyzing your decision...</div>
+        </div>
+        <button class="btn" onclick="getSmartAnalysis()" id="ai-btn" style="margin-top: 10px;">Get Smart Analysis</button>
+    </div>
+
     <div class="framework-link">
         <a href="bundle.html">📚 Get Complete PLT Framework - 18 Books for $49</a>
     </div>
 
+    <script src="simple-ai.js"></script>
     <script>
         function calculate() {
             const profit = parseInt(document.getElementById('profit').value);
@@ -260,6 +274,23 @@
 
         // Initialize
         calculate();
+
+        function getSmartAnalysis() {
+            const profit = parseInt(document.getElementById('profit').value);
+            const love = parseInt(document.getElementById('love').value);
+            const tax = parseInt(document.getElementById('tax').value);
+            
+            document.getElementById('ai-btn').textContent = 'Analyzing...';
+            document.getElementById('ai-analysis').style.display = 'block';
+            
+            // Use smart analysis function
+            const analysis = analyzeDecision(profit, love, tax);
+            
+            setTimeout(() => {
+                document.getElementById('ai-content').textContent = analysis;
+                document.getElementById('ai-btn').textContent = 'Get New Analysis';
+            }, 800); // Brief delay for effect
+        }
 
         // Track page view
         fetch('https://pltcommands.onrender.com/execute', {
