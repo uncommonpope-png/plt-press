@@ -1061,7 +1061,62 @@ function submitFlag(){
   if(!txt)return;
   var st=document.getElementById('flag-status');
   st.innerHTML='<span class="gold">Flagging...</span>';
-  fetch(CMD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'🚩 FLAG: '+txt})})
+  // FLAG logic redirected to Queue\n
+  if (!GITHUB_TOKEN) {
+    st.innerHTML = '<span class="red">✗ No GitHub Token. Add #token=... to URL</span>';
+    return;
+  }
+  
+  st.innerHTML = '<span class="gold">Queuing...</span>';
+  
+  const entry = {
+    id: 'cmd_' + Date.now(),
+    type: 'EXECUTE',
+    payload: { command: '🚩 FLAG: ' + txt, source: 'dashboard' },
+    ts: new Date().toISOString(),
+    consumed: false
+  };
+  
+  // 1. Get current file to get SHA
+  fetch(CMD_URL, {
+    headers: { 'Authorization': 'token ' + GITHUB_TOKEN }
+  })
+  .then(r => r.json())
+  .then(fileData => {
+    let currentContent = '';
+    let sha = '';
+    if (fileData.content) {
+      currentContent = atob(fileData.content);
+      sha = fileData.sha;
+    }
+    
+    const nextContent = currentContent + JSON.stringify(entry) + '\n';
+    
+    // 2. Update file
+    return fetch(CMD_URL, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + GITHUB_TOKEN,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'dashboard: queue command [skip ci]',
+        content: btoa(nextContent),
+        sha: sha,
+        branch: 'main'
+      })
+    });
+  })
+  .then(r => {
+    if (!r.ok) throw new Error('GitHub API Error: ' + r.status);
+    st.innerHTML = '<span class="green">✓ Queued — nreal loop will process</span>';
+    inp.value = '';
+    setTimeout(() => { st.innerHTML = ''; }, 3000);
+  })
+  .catch(e => {
+    st.innerHTML = '<span class="red">✗ ' + e.message + '</span>';
+  });
+
   .then(function(){
     st.innerHTML='<span class="green">🚩 Flagged — Profit will see this</span>';
     inp.value='';
@@ -1098,8 +1153,16 @@ function addBettyMsg(who,text){
   el.scrollTop=el.scrollHeight;
 }
 // API endpoints
-var DATA_URL = 'https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json';
-var CMD_URL = 'https://pltcommands.onrender.com/execute';
+var DATA_URL = 'https://raw.githubusercontent.com/uncommonpope-png/Profitlord/main/docs/state.json';
+var CMD_URL = 'https://api.github.com/repos/uncommonpope-png/Profitlord/contents/docs/queue.jsonl';
+var GITHUB_TOKEN = '';
+if (window.location.hash.includes('token=')) {
+  GITHUB_TOKEN = window.location.hash.split('token=')[1].split('&')[0];
+  localStorage.setItem('gh_token', GITHUB_TOKEN);
+} else {
+  GITHUB_TOKEN = localStorage.getItem('gh_token') || '';
+}
+
 
 var bettyHistory=[];
 /* Betty Credits Knowledge Engine — zero cost, no server needed */
