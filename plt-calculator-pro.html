@@ -53,34 +53,11 @@ body{font-family:Georgia,serif;background:#0D1117;color:#eee;line-height:1.6}
     <h2>Get Instant Access</h2>
     <p style="color:#aaa;margin-bottom:18px">Secure checkout powered by Stripe</p>
     <div id="btn-wrapper">
-      <button onclick="buy()" class="cta-btn" style="width:100%;font-size:1.2em">Get PLT Calculator Pro — $19</button>
+      <a href="https://buy.stripe.com/28o5kl47gbMscy4fYZ" class="cta-btn" style="width:100%;font-size:1.2em;display:block">Get PLT Calculator Pro — $19</a>
     </div>
     <p class="guarantee">✅ 30-day money back guarantee</p>
   </div>
 </div>
 <div class="footer"><p>© 2026 PLT Press · <a href="mailto:support@pltpress.com" style="color:#555">support@pltpress.com</a></p></div>
-<script src="https://js.stripe.com/v3/"></script>
-<script>
-var stripe = Stripe('pk_live_51TAROQDShQE8HQTtuvgUbXP2rHBRk1mwPGJyJG0ASbTZtKj3JIaSjmQ83HBvzyN3flGQl0vHc2e3ORgVhngFheSw00oODQ8i90');
-async function buy() {
-  var btn = document.querySelector('#btn-wrapper button');
-  btn.textContent = 'Loading secure checkout...';
-  btn.disabled = true;
-  try {
-    var r = await fetch('https://plt-server.onrender.com/checkout', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({product:'plt-calculator-pro', price:'price_plt_calc_pro', success_url: window.location.origin+'/success.html', cancel_url: window.location.href})
-    });
-    var session = await r.json();
-    if (session.url) window.location.href = session.url;
-    else stripe.redirectToCheckout({sessionId: session.id});
-  } catch(e) {
-    btn.textContent = 'Get PLT Calculator Pro — $19';
-    btn.disabled = false;
-    alert('Checkout temporarily unavailable. Please try again.');
-  }
-}
-</script>
 </body>
 </html>
