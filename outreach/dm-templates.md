@@ -14,7 +14,7 @@ Personalized, non-spammy. Adjust the bracketed sections for each person.
 >
 > Not trying to sell you anything — but if you want, I can take a quick look at what you're trying to do and tell you honestly whether AI is the right move or if you're overcomplicating it. Sometimes the answer is "just use a template" and that's fine too.
 >
-> Either way, if you're curious: craigjones.io has some info on what I offer. Happy to just chat about it though.
+> Either way, if you're curious: uncommonpope-png.github.io/plt-press has some info on what I offer. Happy to just chat about it though.
 
 ---
 
@@ -31,7 +31,7 @@ Personalized, non-spammy. Adjust the bracketed sections for each person.
 >
 > I charge a flat $100 per automation setup (no monthly fees). But honestly, even if you just want to DIY it, I'm happy to point you to the right tools.
 >
-> More info at craigjones.io if you're interested. No pressure either way — just thought it might help based on what you posted.
+> More info at uncommonpope-png.github.io/plt-press if you're interested. No pressure either way — just thought it might help based on what you posted.
 
 ---
 
@@ -45,6 +45,6 @@ Personalized, non-spammy. Adjust the bracketed sections for each person.
 >
 > I started offering setup services to other entrepreneurs because people kept asking how I did it. $100 flat per automation — no retainer, no subscription. Just get it built and move on.
 >
-> If you want to see the full breakdown: craigjones.io
+> If you want to see the full breakdown: uncommonpope-png.github.io/plt-press
 >
 > But also happy to just swap notes on what's working. Always interested in how other people are approaching this.
