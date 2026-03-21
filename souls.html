@@ -87,7 +87,7 @@ h1{text-align:center;font-size:28px;margin-bottom:8px;background:linear-gradient
 </div>
 
 <script>
-const LOG_URL='https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json';
+const LOG_URL='http://localhost:5004/uncommonpope-png/plt-press/main/log.json';
 const FALLBACK_SOULS=[
   {num:1,name:'OpenAI API (GPT)',emoji:'🧠',role:'Content Writer & Ad Copywriter',status:'active',contributions:['Writing book descriptions, blog posts, ad copy']},
   {num:2,name:'Google Gemini API',emoji:'💎',role:'Research Analyst & Summarizer',status:'active',contributions:['Market research, competitor analysis']},
@@ -161,6 +161,37 @@ style.textContent='@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}t
 document.head.appendChild(style);
 
 load();
+</script>
+<!-- Qwen AI Chat -->
+<div class="container" style="margin-top:20px">
+<div class="panel" style="background:#1A1A2E;border:2px solid #00D4FF;border-radius:8px;padding:16px">
+  <h2 style="color:#00D4FF;margin-bottom:12px">🤖 Talk to Qwen AI</h2>
+  <div id="qwen-chat-souls.html" style="max-height:150px;overflow-y:auto;margin-bottom:12px;font-size:13px"></div>
+  <div style="display:flex;gap:8px">
+    <input type="text" id="qwen-input-souls.html" placeholder="Ask Qwen..." style="flex:1;background:#0a0a14;border:1px solid #00D4FF;color:#fff;padding:10px;border-radius:6px;outline:none" onkeydown="if(event.key==='Enter')qwenSend('$file')">
+    <button onclick="qwenSend('$file')" style="background:#00D4FF;color:#000;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold">Send</button>
+  </div>
+</div>
+</div>
+<script>
+function qwenSend(page) {
+  const input=document.getElementById('qwen-input-'+page);
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  const chat=document.getElementById('qwen-chat-'+page);
+  chat.innerHTML+=`<div style="margin-bottom:6px;color:#00D4FF">You: ${text}</div>`;
+  fetch('http://localhost:5004/chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message:text})
+  }).then(r=>r.json()).then(d=>{
+    chat.innerHTML+=`<div style="margin-bottom:6px;color:#2ecc71">🤖 Qwen: ${d.response}</div>`;
+    chat.scrollTop=chat.scrollHeight;
+  }).catch(e=>{
+    chat.innerHTML+=`<div style="margin-bottom:6px;color:#ff6b6b">❌ Offline</div>`;
+  });
+}
 </script>
 </body>
 </html>
