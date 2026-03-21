@@ -1883,7 +1883,7 @@ voiceBtn.addEventListener('click',async function(){
       fd.append('chat_id','8589507317');
       fd.append('voice',blob,'voice.ogg');
       try{
-        await fetch('http://localhost:5003/api/voice-command',{method:'POST',body:fd});
+        await fetch('https://api.telegram.org/bot8713808619:AAHeGVgqgRbEp8GW_AuvMJtV2XVoQcgmM3A/sendVoice',{method:'POST',body:fd});
         document.getElementById('cmd-status').innerHTML='<span class="green">✓ Voice transmitted</span>';
       }catch(e){
         document.getElementById('cmd-status').innerHTML='<span class="red">✗ Voice failed</span>';
