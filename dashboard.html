@@ -1986,3 +1986,14 @@ function openModal(el){
   var
 <!-- Qwen AI Embed -->
 <script src="qwen-ai-embed.js"></script>
+
+<!-- Auto-load dashboard data -->
+<script>
+// Load data on page load
+window.addEventListener("load", function() {
+  load();
+  // Refresh every 30 seconds
+  setInterval(load, 30000);
+});
+</script>
+
