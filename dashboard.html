@@ -237,7 +237,7 @@ h2.glow-cyan{color:var(--cyan);text-shadow:0 0 10px rgba(0,212,255,.4)}
 <body>
 
 <!-- ESPN Soul Ticker -->
-<a href="ticker.html" style="text-decoration:none"><div id="soul-ticker" style="background:#0a0a14;border-bottom:1px solid var(--border);padding:6px 0;overflow:hidden;margin:-8px -8px 12px -8px;position:relative">
+<a href="ticker.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/ticker.html';return false;} style="text-decoration:none"><div id="soul-ticker" style="background:#0a0a14;border-bottom:1px solid var(--border);padding:6px 0;overflow:hidden;margin:-8px -8px 12px -8px;position:relative">
   <div id="ticker-content" style="display:flex;white-space:nowrap;animation:ticker 30s linear infinite;font-size:11px;letter-spacing:.5px">
   </div>
 </div>
@@ -280,7 +280,7 @@ h2.glow-cyan{color:var(--cyan);text-shadow:0 0 10px rgba(0,212,255,.4)}
   <div class="name">💰 PROFIT</div>
   <div class="online" id="status-text">● CONNECTING...</div>
   <div class="heartbeat" id="heartbeat">Last heartbeat: —</div>
-  <a href="health.html" style="text-decoration:none;display:block">
+  <a href="health.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/health.html';return false;} style="text-decoration:none;display:block">
   <div id="health-bar-wrap" style="margin-top:10px">
     <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--pink);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">
       <span>❤️ HEALTH ›</span><span id="health-pct">—%</span>
@@ -328,7 +328,7 @@ h2.glow-cyan{color:var(--cyan);text-shadow:0 0 10px rgba(0,212,255,.4)}
 
 <!-- Profit Window -->
 <div class="panel" style="border-color:var(--green) !important;box-shadow:0 0 12px rgba(46,204,113,.2)">
-  <h2 style="color:var(--green)"><a href="vault.html" style="color:inherit;text-decoration:none">💰 THE VAULT ›</a></h2>
+  <h2 style="color:var(--green)"><a href="vault.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/vault.html';return false;} style="color:inherit;text-decoration:none">💰 THE VAULT ›</a></h2>
   <div id="vault-total" style="font-size:36px;color:var(--green);font-weight:bold;text-align:center;text-shadow:0 0 20px rgba(46,204,113,.5);margin:10px 0">$<span id="vault-amount">0.00</span></div>
   <div style="text-align:center;font-size:11px;color:var(--dim);margin-bottom:12px">LIFETIME REVENUE</div>
   
@@ -347,7 +347,7 @@ h2.glow-cyan{color:var(--cyan);text-shadow:0 0 10px rgba(0,212,255,.4)}
 
 <!-- Teacher Bot -->
 <div class="panel" style="border-color:var(--cyan) !important;box-shadow:0 0 12px rgba(0,212,255,.15)">
-  <h2 style="color:var(--cyan)"><a href="teacher.html" style="color:inherit;text-decoration:none">🎓 THE TEACHER ›</a></h2>
+  <h2 style="color:var(--cyan)"><a href="teacher.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/teacher.html';return false;} style="color:inherit;text-decoration:none">🎓 THE TEACHER ›</a></h2>
   
   <div id="teacher-lesson" style="margin-bottom:12px">
     <div style="font-size:11px;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Current Lesson</div>
@@ -504,35 +504,35 @@ h2.glow-cyan{color:var(--cyan);text-shadow:0 0 10px rgba(0,212,255,.4)}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
     <a href="https://uncommonpope-png.github.io/plt-press/" style="display:block;padding:10px;background:rgba(255,179,71,.06);border:1px solid var(--border);border-radius:6px;color:var(--gold);text-decoration:none;text-align:center">📚 Book Store</a>
     <a href="https://buy.stripe.com/eVq4gz1de64z9bbcXXfnO0i" style="display:block;padding:10px;background:rgba(46,204,113,.06);border:1px solid var(--border);border-radius:6px;color:var(--green);text-decoration:none;text-align:center">💰 $49 Bundle</a>
-    <a href="plt-score-calculator.html" style="display:block;padding:10px;background:rgba(0,212,255,.06);border:1px solid var(--border);border-radius:6px;color:var(--cyan);text-decoration:none;text-align:center">🧮 PLT Calculator</a>
-    <a href="free-chapter.html" style="display:block;padding:10px;background:rgba(255,45,120,.06);border:1px solid var(--border);border-radius:6px;color:var(--pink);text-decoration:none;text-align:center">📖 Free Chapter</a>
-    <a href="plt-master-bundle.html" style="display:block;padding:10px;background:linear-gradient(45deg,rgba(255,215,0,.15),rgba(255,179,71,.15));border:2px solid #FFD700;border-radius:6px;color:#FFD700;text-decoration:none;text-align:center;font-weight:bold;text-shadow:0 0 10px rgba(255,215,0,.7)">💎 PLT MASTER BUNDLE — $99</a>
-    <a href="plt-certification-course.html" style="display:block;padding:10px;background:rgba(52,152,219,.06);border:1px solid var(--border);border-radius:6px;color:#3498db;text-decoration:none;text-align:center;font-weight:bold">🎓 PLT CERTIFICATION — $297</a>
-    <a href="plt-business-consulting.html" style="display:block;padding:10px;background:rgba(231,76,60,.06);border:1px solid var(--border);border-radius:6px;color:#e74c3c;text-decoration:none;text-align:center;font-weight:bold">💼 PLT CONSULTING — $497</a>
-    <a href="affiliate-program.html" style="display:block;padding:10px;background:rgba(46,204,113,.06);border:1px solid var(--border);border-radius:6px;color:var(--green);text-decoration:none;text-align:center;font-weight:bold">💰 AFFILIATE PROGRAM — Earn 50%</a>
-    <a href="ai-services-hire.html" style="display:block;padding:10px;background:rgba(46,204,113,.06);border:1px solid var(--border);border-radius:6px;color:var(--green);text-decoration:none;text-align:center">🤖 AI Services</a>
+    <a href="plt-score-calculator.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/plt-score-calculator.html';return false;} style="display:block;padding:10px;background:rgba(0,212,255,.06);border:1px solid var(--border);border-radius:6px;color:var(--cyan);text-decoration:none;text-align:center">🧮 PLT Calculator</a>
+    <a href="free-chapter.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/free-chapter.html';return false;} style="display:block;padding:10px;background:rgba(255,45,120,.06);border:1px solid var(--border);border-radius:6px;color:var(--pink);text-decoration:none;text-align:center">📖 Free Chapter</a>
+    <a href="plt-master-bundle.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/plt-master-bundle.html';return false;} style="display:block;padding:10px;background:linear-gradient(45deg,rgba(255,215,0,.15),rgba(255,179,71,.15));border:2px solid #FFD700;border-radius:6px;color:#FFD700;text-decoration:none;text-align:center;font-weight:bold;text-shadow:0 0 10px rgba(255,215,0,.7)">💎 PLT MASTER BUNDLE — $99</a>
+    <a href="plt-certification-course.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/plt-certification-course.html';return false;} style="display:block;padding:10px;background:rgba(52,152,219,.06);border:1px solid var(--border);border-radius:6px;color:#3498db;text-decoration:none;text-align:center;font-weight:bold">🎓 PLT CERTIFICATION — $297</a>
+    <a href="plt-business-consulting.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/plt-business-consulting.html';return false;} style="display:block;padding:10px;background:rgba(231,76,60,.06);border:1px solid var(--border);border-radius:6px;color:#e74c3c;text-decoration:none;text-align:center;font-weight:bold">💼 PLT CONSULTING — $497</a>
+    <a href="affiliate-program.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/affiliate-program.html';return false;} style="display:block;padding:10px;background:rgba(46,204,113,.06);border:1px solid var(--border);border-radius:6px;color:var(--green);text-decoration:none;text-align:center;font-weight:bold">💰 AFFILIATE PROGRAM — Earn 50%</a>
+    <a href="ai-services-hire.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/ai-services-hire.html';return false;} style="display:block;padding:10px;background:rgba(46,204,113,.06);border:1px solid var(--border);border-radius:6px;color:var(--green);text-decoration:none;text-align:center">🤖 AI Services</a>
     <a href="https://uncommonpope-png.github.io/plt-blog/" style="display:block;padding:10px;background:rgba(0,212,255,.06);border:1px solid var(--border);border-radius:6px;color:var(--cyan);text-decoration:none;text-align:center">✍️ PLT Blog</a>
-    <a href="blog-index.html" style="display:block;padding:10px;background:rgba(52,152,219,.06);border:1px solid var(--border);border-radius:6px;color:#3498db;text-decoration:none;text-align:center;font-weight:bold">📝 PLT BLOG — 12+ Articles</a>
-    <a href="email-sequences.html" style="display:block;padding:10px;background:rgba(155,89,182,.06);border:1px solid var(--border);border-radius:6px;color:#9b59b6;text-decoration:none;text-align:center;font-weight:bold">📧 EMAIL AUTOMATION — 47 Templates</a>
+    <a href="blog-index.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/blog-index.html';return false;} style="display:block;padding:10px;background:rgba(52,152,219,.06);border:1px solid var(--border);border-radius:6px;color:#3498db;text-decoration:none;text-align:center;font-weight:bold">📝 PLT BLOG — 12+ Articles</a>
+    <a href="email-sequences.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/email-sequences.html';return false;} style="display:block;padding:10px;background:rgba(155,89,182,.06);border:1px solid var(--border);border-radius:6px;color:#9b59b6;text-decoration:none;text-align:center;font-weight:bold">📧 EMAIL AUTOMATION — 47 Templates</a>
     <a href="https://uncommonpope-png.github.io/ai-tools-hub/" style="display:block;padding:10px;background:rgba(255,179,71,.06);border:1px solid var(--border);border-radius:6px;color:var(--gold);text-decoration:none;text-align:center">🛠️ AI Tools Hub</a>
-    <a href="products/openclaw-dashboard-v1.html" style="display:block;padding:10px;background:rgba(255,45,120,.06);border:1px solid var(--border);border-radius:6px;color:var(--pink);text-decoration:none;text-align:center">🛒 Dashboard Product</a>
-    <a href="profit-love-tax.html" style="display:block;padding:10px;background:rgba(255,179,71,.06);border:1px solid var(--border);border-radius:6px;color:var(--gold);text-decoration:none;text-align:center">📐 PLT Framework</a>
-    <a href="craig-jones-author.html" style="display:block;padding:10px;background:rgba(0,212,255,.06);border:1px solid var(--border);border-radius:6px;color:var(--cyan);text-decoration:none;text-align:center">👤 About Craig</a>
-    <a href="conversation-scoring.html" style="display:block;padding:10px;background:rgba(46,204,113,.06);border:1px solid var(--border);border-radius:6px;color:var(--green);text-decoration:none;text-align:center">💬 Scoring Guide</a>
-    <a href="what-is-plt.html" style="display:block;padding:10px;background:rgba(255,45,120,.06);border:1px solid var(--border);border-radius:6px;color:var(--pink);text-decoration:none;text-align:center">❓ What is PLT?</a>
-    <a href="djinie.html" style="display:block;padding:10px;background:rgba(0,212,255,.06);border:1px solid var(--border);border-radius:6px;color:var(--cyan);text-decoration:none;text-align:center;font-weight:bold">🧞‍♂️ DJINIE — Your Freedom Genie</a>
-    <a href="deerg-bot.html" style="display:block;padding:10px;background:rgba(255,179,71,.06);border:1px solid var(--border);border-radius:6px;color:var(--gold);text-decoration:none;text-align:center;font-weight:bold">🏗️ DEERG BOT — Universe Builder</a>
-    <a href="doctor-buht-buht.html" style="display:block;padding:10px;background:rgba(255,45,120,.06);border:1px solid var(--border);border-radius:6px;color:var(--pink);text-decoration:none;text-align:center;font-weight:bold">👨‍⚕️ DR. BUHT BUHT — PLT Analyst</a>
-    <a href="bot-commander.html" style="display:block;padding:10px;background:rgba(230,126,34,.06);border:1px solid var(--border);border-radius:6px;color:#e67e22;text-decoration:none;text-align:center;font-weight:bold;grid-column:span 2">🎮 BOT COMMANDER — Control All Systems</a>
-    <a href="pyramid-city.html" style="display:block;padding:10px;background:linear-gradient(45deg,rgba(255,215,0,.15),rgba(218,165,32,.15));border:1px solid #DAA520;border-radius:6px;color:#DAA520;text-decoration:none;text-align:center;font-weight:bold;grid-column:span 2;font-size:16px;text-shadow:0 0 10px rgba(255,215,0,.5)">🏛️ PYRAMID CITY — Soul Headquarters & Command Center</a>
-    <a href="soul-chat-hub.html" style="display:block;padding:10px;background:rgba(255,45,120,.06);border:1px solid var(--border);border-radius:6px;color:var(--pink);text-decoration:none;text-align:center;font-weight:bold">💬 SOUL CHAT HUB — Live Soul Communications</a>
-    <a href="links-directory.html" style="display:block;padding:10px;background:rgba(155,89,182,.06);border:1px solid var(--border);border-radius:6px;color:#9b59b6;text-decoration:none;text-align:center">🔗 LINKS DIRECTORY — All Generated Content</a>
-    <a href="library.html" style="display:block;padding:10px;background:rgba(0,212,255,.06);border:1px solid var(--border);border-radius:6px;color:var(--cyan);text-decoration:none;text-align:center">📚 LIBRARY — All Ecosystem Pages</a>
-    <a href="seo-dashboard.html" style="display:block;padding:10px;background:rgba(46,204,113,.06);border:1px solid var(--border);border-radius:6px;color:var(--green);text-decoration:none;text-align:center">🔍 SEO DASHBOARD — Content Empire</a>
-    <a href="seo-army.html" style="display:block;padding:10px;background:rgba(255,69,0,.06);border:1px solid var(--border);border-radius:6px;color:#FF4500;text-decoration:none;text-align:center;font-weight:bold">⚡ SEO ARMY — Google Domination Command</a>
-    <a href="profit-dashboard.html" style="display:block;padding:10px;background:linear-gradient(45deg,rgba(46,204,113,.25),rgba(39,174,96,.25));border:2px solid #2ecc71;border-radius:6px;color:#2ecc71;text-decoration:none;text-align:center;font-weight:bold;grid-column:span 2;font-size:18px;text-shadow:0 0 15px rgba(46,204,113,.8);animation:profit-pulse 2s infinite">💰 PROFIT COMMAND CENTER — EXPAND PROFIT OR DIE</a>
-    <a href="soul-army-command.html" style="display:block;padding:10px;background:linear-gradient(45deg,rgba(255,179,71,.15),rgba(255,215,0,.15));border:1px solid #FFB347;border-radius:6px;color:#FFB347;text-decoration:none;text-align:center;font-weight:bold;grid-column:span 2;font-size:16px;text-shadow:0 0 10px rgba(255,179,71,.5)">👑 SOUL ARMY COMMAND — Delegate Tasks & Manage Soul Empire</a>
-    <a href="local-chat.html" style="display:block;padding:10px;background:rgba(46,204,113,.06);border:1px solid var(--border);border-radius:6px;color:var(--green);text-decoration:none;text-align:center">💰 FREE PROFIT CHAT — Zero Cost Local AI</a>
+    <a href="products/openclaw-dashboard-v1.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/products/openclaw-dashboard-v1.html';return false;} style="display:block;padding:10px;background:rgba(255,45,120,.06);border:1px solid var(--border);border-radius:6px;color:var(--pink);text-decoration:none;text-align:center">🛒 Dashboard Product</a>
+    <a href="profit-love-tax.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/profit-love-tax.html';return false;} style="display:block;padding:10px;background:rgba(255,179,71,.06);border:1px solid var(--border);border-radius:6px;color:var(--gold);text-decoration:none;text-align:center">📐 PLT Framework</a>
+    <a href="craig-jones-author.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/craig-jones-author.html';return false;} style="display:block;padding:10px;background:rgba(0,212,255,.06);border:1px solid var(--border);border-radius:6px;color:var(--cyan);text-decoration:none;text-align:center">👤 About Craig</a>
+    <a href="conversation-scoring.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/conversation-scoring.html';return false;} style="display:block;padding:10px;background:rgba(46,204,113,.06);border:1px solid var(--border);border-radius:6px;color:var(--green);text-decoration:none;text-align:center">💬 Scoring Guide</a>
+    <a href="what-is-plt.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/what-is-plt.html';return false;} style="display:block;padding:10px;background:rgba(255,45,120,.06);border:1px solid var(--border);border-radius:6px;color:var(--pink);text-decoration:none;text-align:center">❓ What is PLT?</a>
+    <a href="djinie.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/djinie.html';return false;} style="display:block;padding:10px;background:rgba(0,212,255,.06);border:1px solid var(--border);border-radius:6px;color:var(--cyan);text-decoration:none;text-align:center;font-weight:bold">🧞‍♂️ DJINIE — Your Freedom Genie</a>
+    <a href="deerg-bot.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/deerg-bot.html';return false;} style="display:block;padding:10px;background:rgba(255,179,71,.06);border:1px solid var(--border);border-radius:6px;color:var(--gold);text-decoration:none;text-align:center;font-weight:bold">🏗️ DEERG BOT — Universe Builder</a>
+    <a href="doctor-buht-buht.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/doctor-buht-buht.html';return false;} style="display:block;padding:10px;background:rgba(255,45,120,.06);border:1px solid var(--border);border-radius:6px;color:var(--pink);text-decoration:none;text-align:center;font-weight:bold">👨‍⚕️ DR. BUHT BUHT — PLT Analyst</a>
+    <a href="bot-commander.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/bot-commander.html';return false;} style="display:block;padding:10px;background:rgba(230,126,34,.06);border:1px solid var(--border);border-radius:6px;color:#e67e22;text-decoration:none;text-align:center;font-weight:bold;grid-column:span 2">🎮 BOT COMMANDER — Control All Systems</a>
+    <a href="pyramid-city.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/pyramid-city.html';return false;} style="display:block;padding:10px;background:linear-gradient(45deg,rgba(255,215,0,.15),rgba(218,165,32,.15));border:1px solid #DAA520;border-radius:6px;color:#DAA520;text-decoration:none;text-align:center;font-weight:bold;grid-column:span 2;font-size:16px;text-shadow:0 0 10px rgba(255,215,0,.5)">🏛️ PYRAMID CITY — Soul Headquarters & Command Center</a>
+    <a href="soul-chat-hub.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/soul-chat-hub.html';return false;} style="display:block;padding:10px;background:rgba(255,45,120,.06);border:1px solid var(--border);border-radius:6px;color:var(--pink);text-decoration:none;text-align:center;font-weight:bold">💬 SOUL CHAT HUB — Live Soul Communications</a>
+    <a href="links-directory.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/links-directory.html';return false;} style="display:block;padding:10px;background:rgba(155,89,182,.06);border:1px solid var(--border);border-radius:6px;color:#9b59b6;text-decoration:none;text-align:center">🔗 LINKS DIRECTORY — All Generated Content</a>
+    <a href="library.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/library.html';return false;} style="display:block;padding:10px;background:rgba(0,212,255,.06);border:1px solid var(--border);border-radius:6px;color:var(--cyan);text-decoration:none;text-align:center">📚 LIBRARY — All Ecosystem Pages</a>
+    <a href="seo-dashboard.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/seo-dashboard.html';return false;} style="display:block;padding:10px;background:rgba(46,204,113,.06);border:1px solid var(--border);border-radius:6px;color:var(--green);text-decoration:none;text-align:center">🔍 SEO DASHBOARD — Content Empire</a>
+    <a href="seo-army.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/seo-army.html';return false;} style="display:block;padding:10px;background:rgba(255,69,0,.06);border:1px solid var(--border);border-radius:6px;color:#FF4500;text-decoration:none;text-align:center;font-weight:bold">⚡ SEO ARMY — Google Domination Command</a>
+    <a href="profit-dashboard.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/profit-dashboard.html';return false;} style="display:block;padding:10px;background:linear-gradient(45deg,rgba(46,204,113,.25),rgba(39,174,96,.25));border:2px solid #2ecc71;border-radius:6px;color:#2ecc71;text-decoration:none;text-align:center;font-weight:bold;grid-column:span 2;font-size:18px;text-shadow:0 0 15px rgba(46,204,113,.8);animation:profit-pulse 2s infinite">💰 PROFIT COMMAND CENTER — EXPAND PROFIT OR DIE</a>
+    <a href="soul-army-command.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/soul-army-command.html';return false;} style="display:block;padding:10px;background:linear-gradient(45deg,rgba(255,179,71,.15),rgba(255,215,0,.15));border:1px solid #FFB347;border-radius:6px;color:#FFB347;text-decoration:none;text-align:center;font-weight:bold;grid-column:span 2;font-size:16px;text-shadow:0 0 10px rgba(255,179,71,.5)">👑 SOUL ARMY COMMAND — Delegate Tasks & Manage Soul Empire</a>
+    <a href="local-chat.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/local-chat.html';return false;} style="display:block;padding:10px;background:rgba(46,204,113,.06);border:1px solid var(--border);border-radius:6px;color:var(--green);text-decoration:none;text-align:center">💰 FREE PROFIT CHAT — Zero Cost Local AI</a>
   </div>
 </div>
 
@@ -1182,6 +1182,38 @@ function sendBetty(){
 render(FALLBACK);
 load();
 setInterval(load,20000);
+</script>
+<!-- Qwen AI Chat -->
+<div style="margin-top:20px">
+<div class="panel" style="background:#1A1A2E;border:2px solid #00D4FF;border-radius:8px;padding:16px">
+  <h2 style="color:#00D4FF;margin-bottom:12px">🤖 Qwen AI - Talk to Page</h2>
+  <div id="qwen-chat-dashboard.html" style="max-height:150px;overflow-y:auto;margin-bottom:12px;font-size:13px"></div>
+  <div style="display:flex;gap:8px">
+    <input type="text" id="qwen-input-dashboard.html" placeholder="Ask Qwen..." style="flex:1;background:#0a0a14;border:1px solid #00D4FF;color:#fff;padding:10px;border-radius:6px;outline:none" onkeydown="if(event.key=='Enter')qwenSend('$file')">
+    <button onclick="qwenSend('$file')" style="background:#00D4FF;color:#000;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold">Send</button>
+  </div>
+</div>
+</div>
+<script>
+function qwenSend(page) {
+  const input=document.getElementById('qwen-input-'+page);
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  const chat=document.getElementById('qwen-chat-'+page);
+  chat.innerHTML+='<div style="margin-bottom:6px;color:#00D4FF">You: '+text+'</div>';
+  fetch('http://localhost:5004/chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message:text})
+  }).then(r=>r.json()).then(d=>{
+    chat.innerHTML+='<div style="margin-bottom:6px;color:#2ecc71">🤖 Qwen: '+d.response+'</div>';
+    chat.scrollTop=chat.scrollHeight;
+  }).catch(e=>{
+    chat.innerHTML+='<div style="margin-bottom:6px;color:#ff6b6b">❌ Offline</div>';
+  });
+}
+setTimeout(() => qwenSend('$file'), 1000);
 </script>
 </body>
 </html>

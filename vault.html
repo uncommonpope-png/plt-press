@@ -63,7 +63,7 @@ h1{text-align:center;font-size:28px;margin-bottom:8px;background:linear-gradient
 </head>
 <body>
 <div class="container">
-<a href="dashboard.html" class="back">← Back to Dashboard</a>
+<a href="dashboard.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/dashboard.html';return false;} onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/dashboard.html';return false;} class="back">← Back to Dashboard</a>
 <h1>🏦 The Vault</h1>
 <p class="subtitle">Full Revenue Command Center</p>
 
@@ -101,8 +101,8 @@ h1{text-align:center;font-size:28px;margin-bottom:8px;background:linear-gradient
 <h2>🛒 Buy Now</h2>
 <div class="buy-grid">
 <a href="https://buy.stripe.com/eVq4gz1de64z9bbcXXfnO0i" class="buy-card buy-bundle" target="_blank">📦 Complete PLT Bundle — $49</a>
-<a href="store.html" class="buy-card buy-books">📚 Individual Books</a>
-<a href="services.html" class="buy-card buy-services">🤖 AI Services</a>
+<a href="store.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/store.html';return false;} class="buy-card buy-books">📚 Individual Books</a>
+<a href="services.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/services.html';return false;} class="buy-card buy-services">🤖 AI Services</a>
 </div>
 </div>
 </div>
@@ -187,6 +187,38 @@ function animateCounter(target){
 }
 
 load();
+</script>
+<!-- Qwen AI Chat -->
+<div style="margin-top:20px">
+<div class="panel" style="background:#1A1A2E;border:2px solid #00D4FF;border-radius:8px;padding:16px">
+  <h2 style="color:#00D4FF;margin-bottom:12px">🤖 Qwen AI - Talk to Page</h2>
+  <div id="qwen-chat-vault.html" style="max-height:150px;overflow-y:auto;margin-bottom:12px;font-size:13px"></div>
+  <div style="display:flex;gap:8px">
+    <input type="text" id="qwen-input-vault.html" placeholder="Ask Qwen..." style="flex:1;background:#0a0a14;border:1px solid #00D4FF;color:#fff;padding:10px;border-radius:6px;outline:none" onkeydown="if(event.key=='Enter')qwenSend('$file')">
+    <button onclick="qwenSend('$file')" style="background:#00D4FF;color:#000;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold">Send</button>
+  </div>
+</div>
+</div>
+<script>
+function qwenSend(page) {
+  const input=document.getElementById('qwen-input-'+page);
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  const chat=document.getElementById('qwen-chat-'+page);
+  chat.innerHTML+='<div style="margin-bottom:6px;color:#00D4FF">You: '+text+'</div>';
+  fetch('http://localhost:5004/chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message:text})
+  }).then(r=>r.json()).then(d=>{
+    chat.innerHTML+='<div style="margin-bottom:6px;color:#2ecc71">🤖 Qwen: '+d.response+'</div>';
+    chat.scrollTop=chat.scrollHeight;
+  }).catch(e=>{
+    chat.innerHTML+='<div style="margin-bottom:6px;color:#ff6b6b">❌ Offline</div>';
+  });
+}
+setTimeout(() => qwenSend('$file'), 1000);
 </script>
 </body>
 </html>

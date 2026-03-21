@@ -12,7 +12,7 @@
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://uncommonpope-png.github.io/plt-press/ai-productivity-tools.html">
     
-    <link rel="canonical" href="https://uncommonpope-png.github.io/plt-press/ai-productivity-tools.html">
+    <link rel="canonical" href="https://uncommonpope-png.github.io/plt-press/ai-productivity-tools.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/https://uncommonpope-png.github.io/plt-press/ai-productivity-tools.html';return false;}>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -823,7 +823,7 @@
                     <strong>$49</strong>
                 </a>
                 
-                <a href="https://uncommonpope-png.github.io/plt-press/services.html" class="cta-button">
+                <a href="https://uncommonpope-png.github.io/plt-press/services.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/https://uncommonpope-png.github.io/plt-press/services.html';return false;} class="cta-button">
                     Consulting Packages<br>
                     <small>Done-for-you AI integration</small><br>
                     <strong>From $75</strong>
@@ -833,10 +833,10 @@
 
         <div class="internal-links">
             <h3>Related AI Productivity Resources</h3>
-            <a href="ai-business-automation.html">AI Business Automation Tools 2026</a>
-            <a href="automate-small-business.html">How to Automate Small Business Processes</a>
-            <a href="business-automation-guide.html">Business Automation Guide for Entrepreneurs</a>
-            <a href="ai-workflow-automation.html">AI Workflow Automation Software</a>
+            <a href="ai-business-automation.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/ai-business-automation.html';return false;}>AI Business Automation Tools 2026</a>
+            <a href="automate-small-business.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/automate-small-business.html';return false;}>How to Automate Small Business Processes</a>
+            <a href="business-automation-guide.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/business-automation-guide.html';return false;}>Business Automation Guide for Entrepreneurs</a>
+            <a href="ai-workflow-automation.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/ai-workflow-automation.html';return false;}>AI Workflow Automation Software</a>
         </div>
     </main>
 
@@ -844,5 +844,37 @@
         <div class="logo">PLT Press</div>
         <p>&copy; 2026 PLT Press. All rights reserved. | <a href="https://uncommonpope-png.github.io/plt-press/" style="color: var(--cyan);">Home</a></p>
     </footer>
+<!-- Qwen AI Chat -->
+<div style="margin-top:20px">
+<div class="panel" style="background:#1A1A2E;border:2px solid #00D4FF;border-radius:8px;padding:16px">
+  <h2 style="color:#00D4FF;margin-bottom:12px">🤖 Qwen AI - Talk to Page</h2>
+  <div id="qwen-chat-ai-productivity-tools.html" style="max-height:150px;overflow-y:auto;margin-bottom:12px;font-size:13px"></div>
+  <div style="display:flex;gap:8px">
+    <input type="text" id="qwen-input-ai-productivity-tools.html" placeholder="Ask Qwen..." style="flex:1;background:#0a0a14;border:1px solid #00D4FF;color:#fff;padding:10px;border-radius:6px;outline:none" onkeydown="if(event.key=='Enter')qwenSend('$file')">
+    <button onclick="qwenSend('$file')" style="background:#00D4FF;color:#000;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold">Send</button>
+  </div>
+</div>
+</div>
+<script>
+function qwenSend(page) {
+  const input=document.getElementById('qwen-input-'+page);
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  const chat=document.getElementById('qwen-chat-'+page);
+  chat.innerHTML+='<div style="margin-bottom:6px;color:#00D4FF">You: '+text+'</div>';
+  fetch('http://localhost:5004/chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message:text})
+  }).then(r=>r.json()).then(d=>{
+    chat.innerHTML+='<div style="margin-bottom:6px;color:#2ecc71">🤖 Qwen: '+d.response+'</div>';
+    chat.scrollTop=chat.scrollHeight;
+  }).catch(e=>{
+    chat.innerHTML+='<div style="margin-bottom:6px;color:#ff6b6b">❌ Offline</div>';
+  });
+}
+setTimeout(() => qwenSend('$file'), 1000);
+</script>
 </body>
 </html>

@@ -11,7 +11,7 @@
 <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#050505;color:#E8E8E8;font-family:Georgia,serif;line-height:1.8;max-width:720px;margin:0 auto;padding:2rem 1.5rem}h1{font-size:2rem;font-weight:normal;color:#C9A84C;margin-bottom:1rem}h2{font-size:1.4rem;margin:2rem 0 .8rem;color:#C9A84C}h3{font-size:1.1rem;margin:1.2rem 0 .5rem;color:#E8E8E8}p{color:#aaa;margin-bottom:1rem;font-size:.95rem}ul,ol{color:#aaa;margin:0 0 1rem 1.5rem;font-size:.95rem}ul li,ol li{margin-bottom:.5rem}blockquote{border-left:2px solid #C9A84C;padding:.5rem 1.25rem;margin:1.25rem 0;font-style:italic;color:#888}.cta{display:block;background:#C9A84C;color:#050505;text-align:center;padding:.9rem;text-decoration:none;font-weight:bold;margin:2rem 0;border-radius:3px}.scenario{border:1px solid #222;padding:1rem 1.25rem;margin:1rem 0;border-radius:4px;background:#0a0a0a}.scenario strong{color:#C9A84C}.score{display:inline-block;padding:2px 8px;border-radius:3px;font-size:.85rem;font-weight:bold;margin:2px}.score-p{background:#1a2e1a;color:#4CAF50}.score-l{background:#2e1a1a;color:#e57373}.score-t{background:#2e2a1a;color:#C9A84C}nav{margin-bottom:1.5rem}a{color:#C9A84C}</style>
 </head>
 <body>
-<nav><a href="index.html" style="text-decoration:none">← PLT Press</a></nav>
+<nav><a href="index.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/index.html';return false;} style="text-decoration:none">← PLT Press</a></nav>
 
 <h1>How to Negotiate: A Complete Guide Using the PLT Framework</h1>
 
@@ -130,7 +130,7 @@
 
 <p>All three are available individually, or as part of the complete 18-book PLT library.</p>
 
-<a href="bundle.html" class="cta">Get the Complete PLT Library — 18 Books for $49 →</a>
+<a href="bundle.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/bundle.html';return false;} class="cta">Get the Complete PLT Library — 18 Books for $49 →</a>
 
 <h2>Start Scoring Your Negotiations Today</h2>
 
@@ -146,7 +146,39 @@
 
 <p>That awareness — seeing the score — is where better negotiation starts.</p>
 
-<p style="text-align:center"><a href="index.html" style="font-size:.85rem">Browse all PLT titles →</a></p>
+<p style="text-align:center"><a href="index.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/index.html';return false;} style="font-size:.85rem">Browse all PLT titles →</a></p>
 
+<!-- Qwen AI Chat -->
+<div style="margin-top:20px">
+<div class="panel" style="background:#1A1A2E;border:2px solid #00D4FF;border-radius:8px;padding:16px">
+  <h2 style="color:#00D4FF;margin-bottom:12px">🤖 Qwen AI - Talk to Page</h2>
+  <div id="qwen-chat-how-to-negotiate.html" style="max-height:150px;overflow-y:auto;margin-bottom:12px;font-size:13px"></div>
+  <div style="display:flex;gap:8px">
+    <input type="text" id="qwen-input-how-to-negotiate.html" placeholder="Ask Qwen..." style="flex:1;background:#0a0a14;border:1px solid #00D4FF;color:#fff;padding:10px;border-radius:6px;outline:none" onkeydown="if(event.key=='Enter')qwenSend('$file')">
+    <button onclick="qwenSend('$file')" style="background:#00D4FF;color:#000;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold">Send</button>
+  </div>
+</div>
+</div>
+<script>
+function qwenSend(page) {
+  const input=document.getElementById('qwen-input-'+page);
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  const chat=document.getElementById('qwen-chat-'+page);
+  chat.innerHTML+='<div style="margin-bottom:6px;color:#00D4FF">You: '+text+'</div>';
+  fetch('http://localhost:5004/chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message:text})
+  }).then(r=>r.json()).then(d=>{
+    chat.innerHTML+='<div style="margin-bottom:6px;color:#2ecc71">🤖 Qwen: '+d.response+'</div>';
+    chat.scrollTop=chat.scrollHeight;
+  }).catch(e=>{
+    chat.innerHTML+='<div style="margin-bottom:6px;color:#ff6b6b">❌ Offline</div>';
+  });
+}
+setTimeout(() => qwenSend('$file'), 1000);
+</script>
 </body>
 </html>

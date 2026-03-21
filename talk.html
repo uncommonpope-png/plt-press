@@ -34,8 +34,8 @@ footer p{font-size:.7rem;color:#444;letter-spacing:.1em}
 </head>
 <body>
 <nav>
-  <a href="index.html" class="logo">PLT Press</a>
-  <a href="index.html" style="font-size:.8rem;color:var(--muted);text-decoration:none">← Back</a>
+  <a href="index.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/index.html';return false;} class="logo">PLT Press</a>
+  <a href="index.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/index.html';return false;} style="font-size:.8rem;color:var(--muted);text-decoration:none">← Back</a>
 </nav>
 <div class="hero">
   <div class="eyebrow">PLT Press</div>
@@ -44,37 +44,37 @@ footer p{font-size:.7rem;color:#444;letter-spacing:.1em}
   <div class="divider"></div>
 </div>
 <div class="grid">
-  <a href="plt-calculator.html" class="card">
+  <a href="plt-calculator.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/plt-calculator.html';return false;} class="card">
     <div class="card-icon">📐</div>
     <div class="card-title">PLT Calculator</div>
     <div class="card-desc">Score any business decision or opportunity using the Profit · Love · Tax framework. Instant results, zero cost.</div>
     <span class="card-tag free-tag">Free</span>
   </a>
-  <a href="plt-score-calculator.html" class="card">
+  <a href="plt-score-calculator.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/plt-score-calculator.html';return false;} class="card">
     <div class="card-icon">🎯</div>
     <div class="card-title">Conversation Scorer</div>
     <div class="card-desc">Rate any conversation — sales call, negotiation, relationship — and get a PLT breakdown on the spot.</div>
     <span class="card-tag free-tag">Free</span>
   </a>
-  <a href="teacher.html" class="card">
+  <a href="teacher.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/teacher.html';return false;} class="card">
     <div class="card-icon">📚</div>
     <div class="card-title">The Teacher</div>
     <div class="card-desc">Interactive PLT framework lessons. Learn to score every conversation and decision with the PLT system.</div>
     <span class="card-tag free-tag">Free</span>
   </a>
-  <a href="soul-chat-hub.html" class="card">
+  <a href="soul-chat-hub.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/soul-chat-hub.html';return false;} class="card">
     <div class="card-icon">💬</div>
     <div class="card-title">Soul Chat Hub</div>
     <div class="card-desc">Connect with PLT's AI soul network. Engage with specialist agents across the entire ecosystem.</div>
     <span class="card-tag">Ecosystem</span>
   </a>
-  <a href="djinie.html" class="card">
+  <a href="djinie.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/djinie.html';return false;} class="card">
     <div class="card-icon">🧞</div>
     <div class="card-title">Djinie</div>
     <div class="card-desc">Your freedom genie. Ask anything about PLT, business strategy, or making better decisions.</div>
     <span class="card-tag">AI Agent</span>
   </a>
-  <a href="local-chat.html" class="card">
+  <a href="local-chat.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/local-chat.html';return false;} class="card">
     <div class="card-icon">⚡</div>
     <div class="card-title">Local Chat (Ollama)</div>
     <div class="card-desc">Running Ollama locally? Connect to your local AI model for zero-cost, private PLT conversations.</div>
@@ -83,9 +83,41 @@ footer p{font-size:.7rem;color:#444;letter-spacing:.1em}
 </div>
 <div class="cta-section">
   <p style="color:var(--muted);font-size:.85rem;margin-bottom:1.5rem">Want to go deeper? Get the full PLT framework in book form.</p>
-  <a href="free-chapter.html" class="cta-btn">Read a Free Chapter</a>
-  <a href="bundle.html" class="cta-btn">Get All 18 Books — $49</a>
+  <a href="free-chapter.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/free-chapter.html';return false;} class="cta-btn">Read a Free Chapter</a>
+  <a href="bundle.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/bundle.html';return false;} class="cta-btn">Get All 18 Books — $49</a>
 </div>
 <footer><p>© 2026 PLT Press · Profit · Love · Tax</p></footer>
+<!-- Qwen AI Chat -->
+<div style="margin-top:20px">
+<div class="panel" style="background:#1A1A2E;border:2px solid #00D4FF;border-radius:8px;padding:16px">
+  <h2 style="color:#00D4FF;margin-bottom:12px">🤖 Qwen AI - Talk to Page</h2>
+  <div id="qwen-chat-talk.html" style="max-height:150px;overflow-y:auto;margin-bottom:12px;font-size:13px"></div>
+  <div style="display:flex;gap:8px">
+    <input type="text" id="qwen-input-talk.html" placeholder="Ask Qwen..." style="flex:1;background:#0a0a14;border:1px solid #00D4FF;color:#fff;padding:10px;border-radius:6px;outline:none" onkeydown="if(event.key=='Enter')qwenSend('$file')">
+    <button onclick="qwenSend('$file')" style="background:#00D4FF;color:#000;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold">Send</button>
+  </div>
+</div>
+</div>
+<script>
+function qwenSend(page) {
+  const input=document.getElementById('qwen-input-'+page);
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  const chat=document.getElementById('qwen-chat-'+page);
+  chat.innerHTML+='<div style="margin-bottom:6px;color:#00D4FF">You: '+text+'</div>';
+  fetch('http://localhost:5004/chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message:text})
+  }).then(r=>r.json()).then(d=>{
+    chat.innerHTML+='<div style="margin-bottom:6px;color:#2ecc71">🤖 Qwen: '+d.response+'</div>';
+    chat.scrollTop=chat.scrollHeight;
+  }).catch(e=>{
+    chat.innerHTML+='<div style="margin-bottom:6px;color:#ff6b6b">❌ Offline</div>';
+  });
+}
+setTimeout(() => qwenSend('$file'), 1000);
+</script>
 </body>
 </html>

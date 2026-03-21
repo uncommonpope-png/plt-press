@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Craig Jones — Author, Entrepreneur & Creator of PLT — PLT Press</title>
 <meta name="description" content="Craig Jones is the author of 18 books and creator of the PLT (Profit Love Tax) framework. Entrepreneur, writer, and founder of PLT Press.">
-<link rel="canonical" href="https://uncommonpope-png.github.io/plt-press/craig-jones-author.html">
+<link rel="canonical" href="https://uncommonpope-png.github.io/plt-press/craig-jones-author.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/https://uncommonpope-png.github.io/plt-press/craig-jones-author.html';return false;}>
 <meta property="og:title" content="Craig Jones — Author, Entrepreneur & Creator of PLT">
 <meta property="og:description" content="Craig Jones is the author of 18 books and creator of the PLT (Profit Love Tax) framework. Entrepreneur, writer, and founder of PLT Press.">
 <meta property="og:url" content="https://uncommonpope-png.github.io/plt-press/craig-jones-author.html">
@@ -203,20 +203,52 @@ ul,ol{margin:0 0 1rem 1.5rem;line-height:1.8}
 
 <p>The entire library — all 18 books — is available as individual titles or as a complete bundle. Jones's position is straightforward: the framework is one system. The books are best read as a complete body of work, but each one stands alone for readers who want to start with a specific arena.</p>
 
-<a href="bundle.html" class="cta">Get All 18 Books — $49 →</a>
+<a href="bundle.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/bundle.html';return false;} class="cta">Get All 18 Books — $49 →</a>
 
-<p style="margin-top:.5rem"><a href="index.html" style="font-size:.9rem">Browse individual titles →</a></p>
+<p style="margin-top:.5rem"><a href="index.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/index.html';return false;} style="font-size:.9rem">Browse individual titles →</a></p>
 
 <h2>Connect</h2>
 
 <p>Craig Jones and PLT Press can be found at:</p>
 <ul>
-<li><a href="index.html">PLT Press — Full Book Library</a></li>
-<li><a href="plt-framework.html">The Complete PLT Framework Guide</a></li>
-<li><a href="conversation-scoring.html">How to Score Any Conversation</a></li>
-<li><a href="profit-love-tax.html">Profit Love Tax Explained</a></li>
+<li><a href="index.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/index.html';return false;}>PLT Press — Full Book Library</a></li>
+<li><a href="plt-framework.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/plt-framework.html';return false;}>The Complete PLT Framework Guide</a></li>
+<li><a href="conversation-scoring.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/conversation-scoring.html';return false;}>How to Score Any Conversation</a></li>
+<li><a href="profit-love-tax.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/profit-love-tax.html';return false;}>Profit Love Tax Explained</a></li>
 </ul>
 
-<div class="footer">© 2026 PLT Press · Craig Jones · <a href="bundle.html">Get All 18 Books for $49</a></div>
+<div class="footer">© 2026 PLT Press · Craig Jones · <a href="bundle.html" onclick="if(!window.location.href.includes('plt-press')){window.location='https://uncommonpope-png.github.io/plt-press/bundle.html';return false;}>Get All 18 Books for $49</a></div>
+<!-- Qwen AI Chat -->
+<div style="margin-top:20px">
+<div class="panel" style="background:#1A1A2E;border:2px solid #00D4FF;border-radius:8px;padding:16px">
+  <h2 style="color:#00D4FF;margin-bottom:12px">🤖 Qwen AI - Talk to Page</h2>
+  <div id="qwen-chat-craig-jones-author.html" style="max-height:150px;overflow-y:auto;margin-bottom:12px;font-size:13px"></div>
+  <div style="display:flex;gap:8px">
+    <input type="text" id="qwen-input-craig-jones-author.html" placeholder="Ask Qwen..." style="flex:1;background:#0a0a14;border:1px solid #00D4FF;color:#fff;padding:10px;border-radius:6px;outline:none" onkeydown="if(event.key=='Enter')qwenSend('$file')">
+    <button onclick="qwenSend('$file')" style="background:#00D4FF;color:#000;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold">Send</button>
+  </div>
+</div>
+</div>
+<script>
+function qwenSend(page) {
+  const input=document.getElementById('qwen-input-'+page);
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  const chat=document.getElementById('qwen-chat-'+page);
+  chat.innerHTML+='<div style="margin-bottom:6px;color:#00D4FF">You: '+text+'</div>';
+  fetch('http://localhost:5004/chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message:text})
+  }).then(r=>r.json()).then(d=>{
+    chat.innerHTML+='<div style="margin-bottom:6px;color:#2ecc71">🤖 Qwen: '+d.response+'</div>';
+    chat.scrollTop=chat.scrollHeight;
+  }).catch(e=>{
+    chat.innerHTML+='<div style="margin-bottom:6px;color:#ff6b6b">❌ Offline</div>';
+  });
+}
+setTimeout(() => qwenSend('$file'), 1000);
+</script>
 </body>
 </html>
