@@ -1215,5 +1215,116 @@ function qwenSend(page) {
 }
 setTimeout(() => qwenSend('$file'), 1000);
 </script>
-</body>
+<script>console.log("✅ Links fixed for dashboard.html");</script></body>
 </html>
+
+<!-- FIXED BUTTON HANDLERS -->
+<script>
+// Fix submitBuild to actually work
+function submitBuild(type){
+  var res=document.getElementById('result-'+type);
+  if(!res){
+    res=document.createElement('div');
+    res.id='result-'+type;
+    res.style.marginTop='15px';
+    res.style.padding='15px';
+    res.style.background='rgba(0,212,255,0.1)';
+    res.style.borderRadius='8px';
+    document.getElementById('form-'+type).appendChild(res);
+  }
+  
+  res.innerHTML='<span style="color:#00D4FF">⚡ Building with Qwen AI...</span>';
+  
+  var data={type:type,timestamp:new Date().toISOString()};
+  
+  if(type==='book'){
+    var titleEl=document.getElementById('book-title');
+    var frameworkEl=document.getElementById('book-framework');
+    var marketEl=document.getElementById('book-market');
+    var priceEl=document.getElementById('book-price');
+    var messageEl=document.getElementById('book-message');
+    
+    data.title=titleEl?titleEl.value:'Untitled Book';
+    data.framework=frameworkEl?frameworkEl.value:'PLT';
+    data.market=marketEl?marketEl.value:'Entrepreneurs';
+    data.price=priceEl?priceEl.value:'49';
+    data.message=messageEl?messageEl.value:'Complete guide';
+  }
+  
+  // Call backend API
+  fetch('http://localhost:5004/chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      message:'Build this '+type+': '+JSON.stringify(data)+'. Create the actual files.'
+    })
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    res.innerHTML='<div style="color:#2ecc71">✅ Built! Qwen says:</div>'+
+      '<div style="margin-top:10px;white-space:pre-wrap;color:#ddd">'+(d.response||'Done')+'</div>';
+  })
+  .catch(e=>{
+    res.innerHTML='<div style="color:#ff6b6b">❌ Error: '+e.message+'</div>'+
+      '<div style="margin-top:10px;color:#888;font-size:12px">Make sure backend is running: python3 dashboard-backend.py</div>';
+  });
+}
+
+// Fix toggleBuild
+function toggleBuild(type,btn){
+  document.querySelectorAll('.builder-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.build-form').forEach(f=>f.style.display='none');
+  
+  if(btn) btn.classList.add('active');
+  
+  var form=document.getElementById('form-'+type);
+  if(form){
+    form.style.display=form.style.display==='none'||form.style.display===''?'block':'none';
+  }
+}
+
+// Fix Betty send
+function sendBetty(){
+  var input=document.getElementById('betty-input');
+  if(!input) return;
+  
+  var txt=input.value.trim();
+  if(!txt) return;
+  
+  var box=document.getElementById('betty-msgs');
+  if(!box) return;
+  
+  box.innerHTML+='<div style="margin-bottom:10px;color:#00D4FF">You: '+txt+'</div>';
+  input.value='';
+  
+  fetch('http://localhost:5004/chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message:'Betty: '+txt})
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    box.innerHTML+='<div style="margin-bottom:10px;color:#2ecc71">🤖 Betty: '+d.response+'</div>';
+    box.scrollTop=box.scrollHeight;
+  })
+  .catch(e=>{
+    box.innerHTML+='<div style="margin-bottom:10px;color:#ff6b6b">❌ Offline</div>';
+  });
+}
+
+// Fix all links to work from GitHub Pages
+document.querySelectorAll('a[href]').forEach(link=>{
+  var href=link.getAttribute('href');
+  if(href && href.endsWith('.html') && !href.startsWith('http')){
+    link.onclick=function(e){
+      if(!window.location.href.includes('plt-press')){
+        e.preventDefault();
+        window.location='https://uncommonpope-png.github.io/plt-press/'+href;
+        return false;
+      }
+    };
+  }
+});
+
+console.log('✅ Dashboard buttons and links fixed!');
+</script>
