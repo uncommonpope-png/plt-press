@@ -2,5 +2,15 @@ User-agent: *
 Allow: /
 
 Sitemap: https://uncommonpope-png.github.io/plt-press/sitemap.xml
-Sitemap: https://uncommonpope-png.github.io/plt-blog/sitemap.xml
-Sitemap: https://uncommonpope-png.github.io/ai-tools-hub/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
+
+# Block admin/private areas
+Disallow: /admin/
+Disallow: /private/
+Disallow: /drafts/
+
+# Allow all content pages
+Allow: /*.html
+Allow: /sitemap.xml
