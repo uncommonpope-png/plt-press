@@ -32,7 +32,7 @@ I charge $100 for a single automation setup (pick one from above or tell me what
 
 I built all of this for my own business (PLT Press — I publish books and run a digital store). Once I had the systems working, it felt dumb not to offer it to others. I'm not an agency. It's just me.
 
-Happy to answer questions about any of this. If you want to see what I offer, my services page is at [craigjones.io](https://craigjones.io) — but genuinely, ask me anything here first. No pressure.
+Happy to answer questions about any of this. If you want to see what I offer, my services page is at [uncommonpope-png.github.io/plt-press](https://uncommonpope-png.github.io/plt-press) — but genuinely, ask me anything here first. No pressure.
 
 ---
 
@@ -76,7 +76,7 @@ Now? About 80% of that runs on autopilot. Here's exactly what I automated and ho
 
 **The tools:** Mostly Claude/GPT APIs, Make.com, n8n, GitHub Actions, and some custom scripts. Nothing exotic. Total monthly cost for all automations is under $50.
 
-I started helping other entrepreneurs set up similar systems because people kept asking how I did it. If you're curious, I offer setup services starting at $100 — details at [craigjones.io](https://craigjones.io).
+I started helping other entrepreneurs set up similar systems because people kept asking how I did it. If you're curious, I offer setup services starting at $100 — details at [uncommonpope-png.github.io/plt-press](https://uncommonpope-png.github.io/plt-press).
 
 But really, the point of this post is: if you're a solo operator doing everything manually, you're leaving massive time on the table. Happy to answer specific questions about any of the above.
 
@@ -109,6 +109,6 @@ Got tired of every "best AI tools" article being a thinly veiled affiliate link 
 
 **Still building it out** — adding more tools and comparisons regularly. If there's a tool or comparison you want to see, drop it in the comments and I'll prioritize it.
 
-Check it out: [AI Tools Hub on craigjones.io](https://craigjones.io)
+Check it out: [AI Tools Hub on uncommonpope-png.github.io/plt-press](https://uncommonpope-png.github.io/plt-press)
 
 No signup, no paywall, no newsletter popup. Just info.
