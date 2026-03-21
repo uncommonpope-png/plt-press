@@ -957,28 +957,6 @@ h2::before{
   </a>
 </div>
 
-<!-- QWEN AI CHAT PANEL -->
-<div class="panel" id="qwen-chat-panel" style="border:2px solid var(--cyan);background:linear-gradient(145deg, rgba(0,229,255,0.05) 0%, rgba(0,229,255,0.02) 100%)">
-  <h2 class="glow-cyan">
-    <svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-      <circle cx="12" cy="12" r="5"/>
-    </svg>
-    🧠 QWEN AI - Talk to Your Dashboard
-  </h2>
-  <div id="qwen-chat-messages" style="max-height:200px;overflow-y:auto;margin-bottom:16px;font-size:14px;line-height:1.6"></div>
-  <div style="display:flex;gap:8px;align-items:center">
-    <input type="text" id="qwen-chat-input" placeholder="Ask Qwen anything..." style="flex:1;background:rgba(0,0,0,0.4);border:2px solid var(--cyan);color:var(--text);padding:12px 16px;font-family:inherit;font-size:14px;border-radius:8px;outline:none" onkeydown="if(event.key==='Enter')qwenChatSend()">
-    <button onclick="qwenChatSend()" style="background:linear-gradient(135deg, var(--cyan), var(--cyan-bright));color:#000;border:none;padding:12px 24px;border-radius:8px;font-weight:bold;cursor:pointer;font-size:14px">💬 Send</button>
-  </div>
-  <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-    <button onclick="qwenChatQuick('Show my files')" style="background:rgba(0,229,255,0.1);border:1px solid var(--cyan);color:var(--cyan);padding:6px 12px;border-radius:12px;cursor:pointer;font-size:12px">📁 Files</button>
-    <button onclick="qwenChatQuick('Check revenue')" style="background:rgba(0,255,136,0.1);border:1px solid var(--green);color:var(--green);padding:6px 12px;border-radius:12px;cursor:pointer;font-size:12px">💰 Revenue</button>
-    <button onclick="qwenChatQuick('!git status')" style="background:rgba(139,92,246,0.1);border:1px solid var(--purple);color:var(--purple);padding:6px 12px;border-radius:12px;cursor:pointer;font-size:12px">🔀 Git</button>
-    <button onclick="qwenChatQuick('What can you do?')" style="background:rgba(255,184,77,0.1);border:1px solid var(--gold);color:var(--gold);padding:6px 12px;border-radius:12px;cursor:pointer;font-size:12px">❓ Help</button>
-  </div>
-</div>
-
 <!-- 2. Collectors -->
 <div class="panel">
   <h2 class="glow-gold">
@@ -2008,62 +1986,6 @@ function openModal(el){
   var
 <!-- Qwen AI Embed -->
 <script src="qwen-ai-embed.js"></script>
-
-
-<!-- Qwen AI Chat Functions -->
-<script>
-// Qwen AI Chat
-function qwenChatAddMessage(text, isUser) {
-  const container = document.getElementById('qwen-chat-messages');
-  const div = document.createElement('div');
-  div.style.padding = '8px 12px';
-  div.style.marginBottom = '8px';
-  div.style.borderRadius = '8px';
-  div.style.maxWidth = '80%';
-  div.style.wordWrap = 'break-word';
-  if (isUser) {
-    div.style.background = 'rgba(0,229,255,0.2)';
-    div.style.color = 'var(--cyan)';
-    div.style.marginLeft = 'auto';
-    div.textContent = '$ ' + text;
-  } else {
-    div.style.background = 'rgba(0,255,136,0.1)';
-    div.style.color = 'var(--green)';
-    div.textContent = '🧠 Qwen: ' + text;
-  }
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
-}
-
-async function qwenChatSend() {
-  const input = document.getElementById('qwen-chat-input');
-  const text = input.value.trim();
-  if (!text) return;
-  qwenChatAddMessage(text, true);
-  input.value = '';
-  try {
-    const r = await fetch('http://localhost:5003/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text })
-    });
-    const d = await r.json();
-    qwenChatAddMessage(d.response, false);
-  } catch (e) {
-    qwenChatAddMessage('❌ Qwen unavailable - start API server', false);
-  }
-}
-
-function qwenChatQuick(text) {
-  document.getElementById('qwen-chat-input').value = text;
-  qwenChatSend();
-}
-
-// Welcome message
-setTimeout(function() {
-  qwenChatAddMessage('🧠 Hey Craig! I'm Qwen, your dashboard AI. Ask me anything!', false);
-}, 1000);
-</script>
 
 <!-- Auto-load dashboard data -->
 <script>
