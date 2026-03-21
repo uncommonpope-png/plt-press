@@ -257,5 +257,46 @@ setInterval(updateLibrary, 120000); // Update every 2 minutes
 document.getElementById('search').addEventListener('input', filterPages);
 </script>
 
+<!-- Qwen AI Chat -->
+<div style="margin-top:20px">
+<div class="category" style="border:2px solid #00D4FF">
+  <h2 style="color:#00D4FF">🤖 Qwen AI - Library Assistant</h2>
+  <div id="qwen-chat-library" style="max-height:150px;overflow-y:auto;margin-bottom:12px;font-size:13px"></div>
+  <div style="display:flex;gap:8px">
+    <input type="text" id="qwen-input-library" placeholder="Ask about the library..." style="flex:1;background:#0a0a14;border:1px solid #00D4FF;color:#fff;padding:10px;border-radius:6px;outline:none" onkeydown="if(event.key=='Enter')qwenSend('library')">
+    <button onclick="qwenSend('library')" style="background:#00D4FF;color:#000;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold">Send</button>
+  </div>
+  <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+    <button onclick="qwenQuick('Show all pages')" style="background:rgba(0,212,255,0.1);border:1px solid #00D4FF;color:#00D4FF;padding:6px 12px;border-radius:12px;cursor:pointer;font-size:11px">📄 Pages</button>
+    <button onclick="qwenQuick('Search for...')" style="background:rgba(0,212,255,0.1);border:1px solid #00D4FF;color:#00D4FF;padding:6px 12px;border-radius:12px;cursor:pointer;font-size:11px">🔍 Search</button>
+    <button onclick="qwenQuick('Show stats')" style="background:rgba(0,212,255,0.1);border:1px solid #00D4FF;color:#00D4FF;padding:6px 12px;border-radius:12px;cursor:pointer;font-size:11px">📊 Stats</button>
+  </div>
+</div>
+</div>
+<script>
+function qwenSend(page) {
+  const input=document.getElementById('qwen-input-'+page);
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  const chat=document.getElementById('qwen-chat-'+page);
+  chat.innerHTML+='<div style="margin-bottom:6px;color:#00D4FF">You: '+text+'</div>';
+  fetch('http://localhost:5004/chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message:"Library: "+text})
+  }).then(r=>r.json()).then(d=>{
+    chat.innerHTML+='<div style="margin-bottom:6px;color:#2ecc71">🤖 Qwen: '+d.response+'</div>';
+    chat.scrollTop=chat.scrollHeight;
+  }).catch(e=>{
+    chat.innerHTML+='<div style="margin-bottom:6px;color:#ff6b6b">❌ Offline</div>';
+  });
+}
+function qwenQuick(text) {
+  document.getElementById('qwen-input-library').value=text;
+  qwenSend('library');
+}
+setTimeout(() => qwenSend('library'), 1000);
+</script>
 </body>
 </html>
