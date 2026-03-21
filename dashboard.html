@@ -1002,7 +1002,7 @@ function submitBuild(type){
   var ts=new Date().toLocaleString();
   var copyId='copy-btn-'+Date.now();
 
-  fetch(CMD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'🔨 BUILD: '+JSON.stringify(data)})})
+  fetch('http://localhost:5004/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:`Build this ${type}: ${JSON.stringify(data)}. Create the actual files and content.`})}).then(r=>r.json()).then(d=>{
   .then(function(){
     res.innerHTML='<div class="build-result-box">'
       +'<div class="result-check">✓ Build request transmitted to Profit</div>'
