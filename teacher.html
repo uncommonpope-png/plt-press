@@ -62,6 +62,7 @@ h1{text-align:center;font-size:28px;margin-bottom:8px;background:linear-gradient
 <div class="container">
 <a href="dashboard.html" class="back">← Back to Dashboard</a>
 <h1>🎓 The Teacher</h1>
+<div style="text-align:center;color:#00D4FF;font-size:12px;margin-bottom:16px">🤖 Powered by Qwen AI - Real Profit Intelligence</div>
 <p class="subtitle">Your Profit Intelligence Engine</p>
 
 <div class="panel">
@@ -107,7 +108,7 @@ h1{text-align:center;font-size:28px;margin-bottom:8px;background:linear-gradient
 </div>
 
 <script>
-const LOG_URL='https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json';
+const LOG_URL='http://localhost:5004/log.json';
 const FALLBACK={
   teacher:{
     current_lesson:'Every system you build is a sellable product. The dashboard, the framework, the process — all monetizable.',
@@ -168,6 +169,31 @@ async function load(){
 }
 
 function sendChat(){
+  // Use Qwen AI for real answers
+  const input=document.getElementById('chatInput');
+  const msg=input.value.trim();
+  if(!msg)return;
+  input.value='';
+  const box=document.getElementById('chatMessages');
+  box.innerHTML+=`<div class="chat-msg user"><div class="bubble">${msg}</div></div>`;
+  fetch('http://localhost:5004/chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message:`Teacher, answer this profit question: ${msg}`})
+  }).then(r=>r.json()).then(d=>{
+    setTimeout(()=>{
+      box.innerHTML+=`<div class="chat-msg bot"><div class="bubble">🤖 Qwen Teacher: ${d.response}</div></div>`;
+      box.scrollTop=box.scrollHeight;
+    },500);
+  }).catch(e=>{
+    setTimeout(()=>{
+      box.innerHTML+=`<div class="chat-msg bot"><div class="bubble">❌ Teacher offline</div></div>`;
+      box.scrollTop=box.scrollHeight;
+    },500);
+  });
+  return;
+  // Old static code below
+  const lower=msg.toLowerCase();
   const input=document.getElementById('chatInput');
   const msg=input.value.trim();
   if(!msg)return;
