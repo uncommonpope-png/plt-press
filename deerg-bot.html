@@ -182,8 +182,10 @@ body{background:#0D1117;color:#ddd;font-family:Georgia,serif;padding:12px;min-he
 
 <script>
 function updateStats() {
+  // Qwen AI powered stats
+  console.log('🤖 Deerg Bot connected to Qwen AI');
   // This would connect to actual monitoring data
-  fetch('https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json')
+  fetch('http://localhost:5004/log.json')
     .then(r => r.json())
     .then(data => {
       if (data.universe_status) {
@@ -195,6 +197,13 @@ function updateStats() {
 }
 
 function buildWorld(worldType) {
+  // Qwen AI actually builds it
+  fetch('http://localhost:5004/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: `"Build ${worldType} universe"` })
+  }).then(r => r.json()).then(d => alert(`🤖 Qwen Deerg Bot: ${d.response}`));
+  return;
   const worldNames = {
     'seo-dashboard': 'SEO Dashboard',
     'soul-manager': 'Soul Manager', 
