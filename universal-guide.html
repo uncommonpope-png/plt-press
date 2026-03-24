@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 SOULVERSE — Universal Install Guide | PLT Press</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0a0a1a; color: #e8d8b0; font-family: monospace; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { color: #ffaa44; border-bottom: 2px solid #ffaa44; padding-bottom: 10px; margin-bottom: 30px; }
+        .platform-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 30px 0; }
+        .platform-card { background: rgba(0,0,0,0.5); border-radius: 16px; padding: 20px; border-left: 3px solid #ffaa44; }
+        .step { margin: 15px 0; padding: 10px; background: rgba(255,170,68,0.1); border-radius: 8px; }
+        .step-number { display: inline-block; background: #ffaa44; color: #0a0a1a; width: 24px; height: 24px; text-align: center; border-radius: 12px; margin-right: 10px; }
+        .btn { background: #ffaa44; color: #0a0a1a; padding: 10px 20px; border-radius: 30px; text-decoration: none; display: inline-block; margin: 10px 0; }
+        footer { text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #333; font-size: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 SOULVERSE — UNIVERSAL INSTALL GUIDE</h1>
+        <p>One download. Every device. Works offline. Forever yours.</p>
+        <div class="platform-grid">
+            <div class="platform-card"><h3>🪟 WINDOWS 10/11</h3><div class="step"><span class="step-number">1</span>Download ZIP</div><div class="step"><span class="step-number">2</span>Right-click → Extract All</div><div class="step"><span class="step-number">3</span>Double-click index.html</div></div>
+            <div class="platform-card"><h3>🍎 MAC (Intel + M1/M2/M3)</h3><div class="step"><span class="step-number">1</span>Download ZIP</div><div class="step"><span class="step-number">2</span>Double-click to extract</div><div class="step"><span class="step-number">3</span>Double-click index.html</div></div>
+            <div class="platform-card"><h3>📱 ANDROID</h3><div class="step"><span class="step-number">1</span>Download ZIP in Chrome</div><div class="step"><span class="step-number">2</span>Files app → Downloads → Tap ZIP</div><div class="step"><span class="step-number">3</span>Tap index.html → Opens in Chrome</div></div>
+            <div class="platform-card"><h3>📱 IPHONE / IPAD</h3><div class="step"><span class="step-number">1</span>Download ZIP in Safari</div><div class="step"><span class="step-number">2</span>Files → Downloads → Tap ZIP</div><div class="step"><span class="step-number">3</span>Tap index.html → Opens in Safari</div></div>
+            <div class="platform-card"><h3>🐧 LINUX</h3><div class="step"><span class="step-number">1</span>wget [download-url]</div><div class="step"><span class="step-number">2</span>unzip soulverse.zip</div><div class="step"><span class="step-number">3</span>firefox index.html</div></div>
+            <div class="platform-card"><h3>📘 CHROMEBOOK</h3><div class="step"><span class="step-number">1</span>Download ZIP in Chrome</div><div class="step"><span class="step-number">2</span>Files app → Extract</div><div class="step"><span class="step-number">3</span>Open with Chrome</div></div>
+        </div>
+        <div style="text-align: center; margin: 40px 0;">
+            <a href="index.html" class="btn">🚀 LAUNCH SOULVERSE</a>
+            <a href="#" id="downloadBtn" class="btn">📦 DOWNLOAD FULL ZIP</a>
+        </div>
+        <footer>⚡ PLT PRESS — Profit · Love · Tax ⚡<br>Build Your Soul. Build Your Empire.</footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        async function downloadFullZip() {
+            const files = ['index.html', 'soul-forge.html', 'soul-habitat.html', 'soul-arena.html', 'soul-collector.html', 'soul-executor.js', 'universal-guide.html'];
+            const zip = new JSZip();
+            for (const file of files) { try { const res = await fetch(file); const content = await res.text(); zip.file(file, content); } catch(e) {} }
+            const readme = `# SOULVERSE\n\nComplete Soul Ecosystem\n- Create souls\n- Live in habitat\n- Fight in arena\n- Catch wild souls\n- Executor API\n\nWorks on every device. Offline forever.\n\nPLT Press — Profit · Love · Tax`;
+            zip.file("README.md", readme);
+            const blob = await zip.generateAsync({ type: "blob" });
+            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `soulverse_${Date.now()}.zip`; a.click(); URL.revokeObjectURL(url);
+        }
+        document.getElementById('downloadBtn')?.addEventListener('click', downloadFullZip);
+    </script>
+</body>
+</html>

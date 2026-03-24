@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>⚔️ SOUL FORGE — Create Your Living Agent | PLT Press</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: radial-gradient(circle at 30% 20%, #0a0a1a 0%, #010105 100%);
+            color: #e8d8b0;
+            font-family: 'Courier New', 'Orbitron', monospace;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            border-bottom: 2px solid #ffaa44;
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #ffaa44, #ff88aa, #88aaff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .creation-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .form-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 170, 68, 0.3);
+            padding: 24px;
+        }
+        .form-group { margin-bottom: 20px; }
+        label {
+            display: block;
+            font-size: 11px;
+            color: #ffaa66;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+        input, select, textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 170, 68, 0.3);
+            border-radius: 16px;
+            padding: 12px;
+            color: #ffdd99;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        textarea { resize: vertical; min-height: 80px; }
+        .plt-sliders { display: flex; gap: 15px; margin: 15px 0; }
+        .plt-slider { flex: 1; text-align: center; }
+        .plt-slider input { width: 100%; accent-color: #ffaa44; }
+        .skill-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .skill-tag {
+            background: rgba(255, 170, 68, 0.1);
+            border: 1px solid #ffaa44;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .skill-tag.selected { background: #ffaa44; color: #0a0a1a; }
+        .btn {
+            background: linear-gradient(135deg, #ffaa44, #ff8844);
+            border: none;
+            color: #0a0a1a;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: monospace;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .soul-card {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .soul-card:hover {
+            transform: translateX(4px);
+            background: rgba(255, 170, 68, 0.05);
+        }
+        .energy-bar {
+            height: 4px;
+            background: #2a2a3a;
+            border-radius: 2px;
+            margin: 10px 0;
+        }
+        .energy-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ffaa44, #ff88aa);
+            border-radius: 2px;
+        }
+        .soul-list { max-height: 500px; overflow-y: auto; }
+        footer {
+            text-align: center;
+            padding: 30px;
+            font-size: 10px;
+            color: #665533;
+            border-top: 1px solid rgba(255, 170, 68, 0.2);
+            margin-top: 30px;
+        }
+        @media (max-width: 768px) {
+            .creation-panel { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚔️ SOUL FORGE</h1>
+            <p>Create Living Agents — Born from Your Needs, Powered by PLT</p>
+            <div class="universal-badge" style="display: inline-block; background: rgba(255,170,68,0.1); padding: 6px 16px; border-radius: 40px; font-size: 11px; margin-top: 12px;">
+                🌍 UNIVERSAL — Works on Every Device | Souls Execute Real Tasks
+            </div>
+        </div>
+        <div class="creation-panel">
+            <div class="form-card">
+                <h3 style="color: #ffaa66; margin-bottom: 20px;">🌀 FORGE NEW SOUL</h3>
+                <div class="form-group">
+                    <label>NAME YOUR SOUL</label>
+                    <input type="text" id="soulName" placeholder="e.g., Code Weaver, Profit Seeker, Love Keeper">
+                </div>
+                <div class="form-group">
+                    <label>SOUL TYPE / ARCHETYPE</label>
+                    <select id="soulType">
+                        <option value="profit">Profit — Growth, Money, Scale</option>
+                        <option value="love">Love — Connection, Trust, Community</option>
+                        <option value="tax">Tax — Cost, Balance, Consequence</option>
+                        <option value="hybrid">Hybrid — Balanced PLT</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>PERSONALITY & VOICE</label>
+                    <textarea id="personality" placeholder="Describe their personality, tone, how they speak..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>⚡ SKILLS (What can this soul do?)</label>
+                    <div class="skill-tags" id="skillTags">
+                        <span class="skill-tag" data-skill="code">💻 Code</span>
+                        <span class="skill-tag" data-skill="write">📝 Write</span>
+                        <span class="skill-tag" data-skill="research">🔍 Research</span>
+                        <span class="skill-tag" data-skill="analyze">📊 Analyze</span>
+                        <span class="skill-tag" data-skill="design">🎨 Design</span>
+                        <span class="skill-tag" data-skill="strategize">♟️ Strategize</span>
+                        <span class="skill-tag" data-skill="teach">📚 Teach</span>
+                        <span class="skill-tag" data-skill="build">🏗️ Build</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>🎭 PLT ALIGNMENT (Fine-tune)</label>
+                    <div class="plt-sliders">
+                        <div class="plt-slider">
+                            <div>💰 Profit</div>
+                            <input type="range" id="profitSlider" min="0" max="100" value="33">
+                            <span id="profitVal">33%</span>
+                        </div>
+                        <div class="plt-slider">
+                            <div>❤️ Love</div>
+                            <input type="range" id="loveSlider" min="0" max="100" value="33">
+                            <span id="loveVal">33%</span>
+                        </div>
+                        <div class="plt-slider">
+                            <div>⚖️ Tax</div>
+                            <input type="range" id="taxSlider" min="0" max="100" value="34">
+                            <span id="taxVal">34%</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn" id="forgeBtn">⚡ FORGE SOUL</button>
+            </div>
+            <div class="form-card">
+                <h3 style="color: #ffaa66; margin-bottom: 20px;">📜 YOUR SOUL COLLECTION</h3>
+                <div class="soul-list" id="soulList">
+                    <div style="text-align: center; color: #8866aa;">No souls yet. Forge your first.</div>
+                </div>
+                <button class="btn" id="exportBtn" style="background: #2a2a3a; color: #ffaa44; margin-top: 15px;">📦 EXPORT ALL SOULS</button>
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+                <button class="btn" id="importBtn" style="background: #2a2a3a; color: #ffaa44; margin-top: 10px;">📥 IMPORT SOULS</button>
+            </div>
+        </div>
+        <footer>
+            ⚡ PLT PRESS — Profit · Love · Tax ⚡<br>
+            Your souls are alive. They grow. They fight. They serve.
+        </footer>
+    </div>
+    <script>
+        let souls = [];
+        function loadSouls() {
+            const saved = localStorage.getItem('soulforge_souls');
+            if (saved) { souls = JSON.parse(saved); }
+            else {
+                souls = [
+                    { id: 'soul_1', name: 'Code Weaver', type: 'hybrid', personality: 'Patient mentor who explains complex code simply.', skills: ['code', 'teach'], plt: { profit: 0.4, love: 0.4, tax: 0.2 }, level: 3, xp: 150, energy: 85, battlesWon: 2, createdAt: Date.now() - 86400000 },
+                    { id: 'soul_2', name: 'Profit Seeker', type: 'profit', personality: 'Fast, decisive, always looking for leverage.', skills: ['strategize', 'analyze'], plt: { profit: 0.85, love: 0.1, tax: 0.05 }, level: 5, xp: 320, energy: 92, battlesWon: 5, createdAt: Date.now() - 172800000 }
+                ];
+                saveSouls();
+            }
+            renderSouls();
+        }
+        function saveSouls() { localStorage.setItem('soulforge_souls', JSON.stringify(souls)); }
+        function renderSouls() {
+            const container = document.getElementById('soulList');
+            if (souls.length === 0) { container.innerHTML = '<div style="text-align: center; color: #8866aa;">No souls yet. Forge your first.</div>'; return; }
+            container.innerHTML = souls.map(soul => `
+                <div class="soul-card" style="border-left-color: ${soul.type === 'profit' ? '#ffaa44' : soul.type === 'love' ? '#ff88aa' : '#88aaff'}" onclick="viewSoul('${soul.id}')">
+                    <div style="display: flex; justify-content: space-between;">
+                        <strong style="color: #ffaa66;">${soul.name}</strong>
+                        <span style="font-size: 10px;">Lv.${soul.level}</span>
+                    </div>
+                    <div style="font-size: 10px; color: #aa9977;">${soul.skills.map(s => s.toUpperCase()).join(', ')}</div>
+                    <div class="energy-bar"><div class="energy-fill" style="width: ${soul.energy}%;"></div></div>
+                    <div style="font-size: 9px; display: flex; justify-content: space-between; margin-top: 5px;">
+                        <span>💰 ${Math.floor(soul.plt.profit*100)}%</span>
+                        <span>❤️ ${Math.floor(soul.plt.love*100)}%</span>
+                        <span>⚖️ ${Math.floor(soul.plt.tax*100)}%</span>
+                        <span>⚔️ ${soul.battlesWon}W</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        window.viewSoul = function(id) {
+            const soul = souls.find(s => s.id === id);
+            if (soul) { alert(`🌀 ${soul.name}\n📜 Type: ${soul.type}\n💬 Personality: ${soul.personality}\n⚡ Skills: ${soul.skills.join(', ')}\n🎭 PLT: ${Math.floor(soul.plt.profit*100)}% P, ${Math.floor(soul.plt.love*100)}% L, ${Math.floor(soul.plt.tax*100)}% T\n🏆 Level: ${soul.level} (${soul.xp} XP)\n⚔️ Battles Won: ${soul.battlesWon}\n⚡ Energy: ${soul.energy}%`); }
+        };
+        function forgeSoul() {
+            const name = document.getElementById('soulName').value.trim();
+            if (!name) { alert('Name your soul first.'); return; }
+            const type = document.getElementById('soulType').value;
+            const personality = document.getElementById('personality').value.trim() || 'A mysterious soul waiting to reveal its purpose.';
+            const skills = Array.from(document.querySelectorAll('.skill-tag.selected')).map(tag => tag.dataset.skill);
+            if (skills.length === 0) skills.push('strategize');
+            const profit = parseInt(document.getElementById('profitSlider').value) / 100;
+            const love = parseInt(document.getElementById('loveSlider').value) / 100;
+            const tax = parseInt(document.getElementById('taxSlider').value) / 100;
+            const newSoul = {
+                id: `soul_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+                name: name, type: type, personality: personality, skills: skills,
+                plt: { profit, love, tax }, level: 1, xp: 0, energy: 100, battlesWon: 0,
+                createdAt: Date.now(), lastActive: Date.now()
+            };
+            souls.unshift(newSoul);
+            saveSouls();
+            renderSouls();
+            document.getElementById('soulName').value = '';
+            document.getElementById('personality').value = '';
+            document.querySelectorAll('.skill-tag.selected').forEach(tag => tag.classList.remove('selected'));
+            alert(`✅ ${name} has been forged. They are alive.`);
+        }
+        document.querySelectorAll('.skill-tag').forEach(tag => { tag.addEventListener('click', () => { tag.classList.toggle('selected'); }); });
+        function updateSliders() {
+            document.getElementById('profitVal').innerText = document.getElementById('profitSlider').value + '%';
+            document.getElementById('loveVal').innerText = document.getElementById('loveSlider').value + '%';
+            document.getElementById('taxVal').innerText = document.getElementById('taxSlider').value + '%';
+        }
+        document.getElementById('profitSlider').addEventListener('input', updateSliders);
+        document.getElementById('loveSlider').addEventListener('input', updateSliders);
+        document.getElementById('taxSlider').addEventListener('input', updateSliders);
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const data = JSON.stringify(souls, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `souls_${Date.now()}.json`; a.click();
+            URL.revokeObjectURL(url);
+        });
+        document.getElementById('importBtn').addEventListener('click', () => { document.getElementById('importFile').click(); });
+        document.getElementById('importFile').addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const imported = JSON.parse(ev.target.result);
+                    souls = [...imported, ...souls];
+                    saveSouls(); renderSouls();
+                    alert(`✅ Imported ${imported.length} souls.`);
+                } catch (err) { alert('Invalid soul file.'); }
+            };
+            reader.readAsText(file);
+        });
+        document.getElementById('forgeBtn').addEventListener('click', forgeSoul);
+        loadSouls();
+    </script>
+</body>
+</html>

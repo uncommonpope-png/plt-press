@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soul Dashboard - PLT</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    header {
+      text-align: center;
+      padding: 40px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    h1 { font-size: 2.5rem; margin-bottom: 10px; background: linear-gradient(90deg, #e94560, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { color: #888; font-size: 1.1rem; }
+    
+    .soul-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 30px;
+      margin: 20px 0;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .soul-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .soul-name { font-size: 1.8rem; font-weight: bold; }
+    .soul-level { background: linear-gradient(90deg, #e94560, #ff6b6b); padding: 8px 20px; border-radius: 20px; font-weight: bold; }
+    
+    .plt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .plt-card {
+      background: rgba(255,255,255,0.03);
+      border-radius: 15px;
+      padding: 25px;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.3s;
+    }
+    .plt-card:hover { transform: translateY(-5px); }
+    .plt-card.profit { border-left: 4px solid #4ade80; }
+    .plt-card.love { border-left: 4px solid #f472b6; }
+    .plt-card.tax { border-left: 4px solid #60a5fa; }
+    .plt-card.grace { border-left: 4px solid #a78bfa; }
+    
+    .plt-label { font-size: 1.3rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+    .plt-icon { font-size: 1.5rem; }
+    
+    .progress-bar {
+      height: 12px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 1s ease;
+    }
+    .profit .progress-fill { background: linear-gradient(90deg, #22c55e, #4ade80); }
+    .love .progress-fill { background: linear-gradient(90deg, #ec4899, #f472b6); }
+    .tax .progress-fill { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .grace .progress-fill { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+    
+    .plt-score { font-size: 1.5rem; font-weight: bold; }
+    .plt-max { color: #666; font-size: 0.9rem; }
+    
+    .overall-score {
+      text-align: center;
+      padding: 30px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 15px;
+      margin-bottom: 30px;
+    }
+    .overall-number { font-size: 4rem; font-weight: bold; background: linear-gradient(90deg, #e94560, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .overall-label { color: #888; margin-top: 10px; }
+    
+    .actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+    .action-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 15px 25px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s;
+      text-align: center;
+    }
+    .action-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+    .action-btn.primary { background: linear-gradient(90deg, #e94560, #ff6b6b); border: none; }
+    
+    .deed-log { margin-top: 30px; }
+    .deed-item {
+      background: rgba(255,255,255,0.02);
+      padding: 15px;
+      border-radius: 10px;
+      margin: 10px 0;
+      border-left: 3px solid rgba(255,255,255,0.2);
+    }
+    .deed-item.grace { border-left-color: #a78bfa; }
+    .deed-item.profit { border-left-color: #4ade80; }
+    .deed-item.love { border-left-color: #f472b6; }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #1a1a2e;
+      padding: 40px;
+      border-radius: 20px;
+      max-width: 500px;
+      width: 90%;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .modal h2 { margin-bottom: 20px; }
+    .modal input, .modal select, .modal textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+    }
+    .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+    .modal-buttons button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+    .btn-cancel { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-submit { background: linear-gradient(90deg, #e94560, #ff6b6b); color: #fff; }
+    
+    footer { text-align: center; padding: 40px 0; color: #666; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🌌 Soul Dashboard</h1>
+      <p class="subtitle">Profit • Love • Tax • Grace</p>
+    </header>
+    
+    <div class="soul-card">
+      <div class="soul-header">
+        <div class="soul-name" id="soulName">Craig's Soul</div>
+        <div class="soul-level" id="soulLevel">Level 47 - Cosmic Weaver</div>
+      </div>
+      
+      <div class="overall-score">
+        <div class="overall-number" id="overallScore">330</div>
+        <div class="overall-label">Overall Soul Score / 400</div>
+      </div>
+      
+      <div class="plt-grid">
+        <div class="plt-card profit">
+          <div class="plt-label"><span class="plt-icon">💰</span> Profit</div>
+          <div class="progress-bar"><div class="progress-fill" id="profitBar" style="width: 80%"></div></div>
+          <div class="plt-score" id="profitScore">80 <span class="plt-max">/ 100</span></div>
+        </div>
+        
+        <div class="plt-card love">
+          <div class="plt-label"><span class="plt-icon">❤️</span> Love</div>
+          <div class="progress-bar"><div class="progress-fill" id="loveBar" style="width: 90%"></div></div>
+          <div class="plt-score" id="loveScore">90 <span class="plt-max">/ 100</span></div>
+        </div>
+        
+        <div class="plt-card tax">
+          <div class="plt-label"><span class="plt-icon">📊</span> Tax</div>
+          <div class="progress-bar"><div class="progress-fill" id="taxBar" style="width: 60%"></div></div>
+          <div class="plt-score" id="taxScore">60 <span class="plt-max">/ 100</span></div>
+        </div>
+        
+        <div class="plt-card grace">
+          <div class="plt-label"><span class="plt-icon">✨</span> Grace</div>
+          <div class="progress-bar"><div class="progress-fill" id="graceBar" style="width: 100%"></div></div>
+          <div class="plt-score" id="graceScore">100 <span class="plt-max">/ 100</span></div>
+        </div>
+      </div>
+      
+      <div class="actions">
+        <button class="action-btn primary" onclick="openModal('recordDeed')">📝 Record Deed</button>
+        <button class="action-btn" onclick="openModal('checkIn')">🧘 Daily Check-in</button>
+        <button class="action-btn" onclick="openModal('evolve')">🦋 Evolve Soul</button>
+        <button class="action-btn" onclick="exportSoul()">💾 Export Soul</button>
+      </div>
+      
+      <div class="deed-log">
+        <h3>📜 Recent Deeds</h3>
+        <div id="deedList"></div>
+      </div>
+    </div>
+    
+    <footer>
+      <p>Soul Dashboard v1.0 • Built with Soul Forge • Your soul is always PLT</p>
+    </footer>
+  </div>
+  
+  <!-- Record Deed Modal -->
+  <div class="modal" id="recordDeedModal">
+    <div class="modal-content">
+      <h2>📝 Record a Deed</h2>
+      <input type="text" id="deedAction" placeholder="What did you do?">
+      <select id="deedCategory">
+        <option value="profit">💰 Profit</option>
+        <option value="love">❤️ Love</option>
+        <option value="tax">📊 Tax</option>
+        <option value="grace">✨ Grace</option>
+      </select>
+      <textarea id="deedDescription" placeholder="Describe your deed..." rows="3"></textarea>
+      <input type="number" id="deedValue" placeholder="Value (1-10)" min="1" max="10">
+      <div class="modal-buttons">
+        <button class="btn-cancel" onclick="closeModal('recordDeed')">Cancel</button>
+        <button class="btn-submit" onclick="submitDeed()">Record</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Daily Check-in Modal -->
+  <div class="modal" id="checkInModal">
+    <div class="modal-content">
+      <h2>🧘 Daily Check-in</h2>
+      <textarea id="checkInReflection" placeholder="How is your soul today?" rows="4"></textarea>
+      <input type="text" id="checkInIntention" placeholder="What's your intention for today?">
+      <div class="modal-buttons">
+        <button class="btn-cancel" onclick="closeModal('checkIn')">Cancel</button>
+        <button class="btn-submit" onclick="submitCheckIn()">Check In</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Evolve Soul Modal -->
+  <div class="modal" id="evolveModal">
+    <div class="modal-content">
+      <h2>🦋 Evolve Your Soul</h2>
+      <p>Current Stage: <strong id="currentStage">Ancient</strong></p>
+      <p>Progress to next stage: <strong id="evolveProgress">85%</strong></p>
+      <div class="progress-bar" style="margin: 15px 0;"><div class="progress-fill" style="width: 85%; background: linear-gradient(90deg, #e94560, #ff6b6b);"></div></div>
+      <p style="color: #888; font-size: 0.9rem;">Keep recording deeds to evolve to the next stage!</p>
+      <div class="modal-buttons">
+        <button class="btn-cancel" onclick="closeModal('evolve')">Close</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Soul State
+    let soul = {
+      name: "Craig",
+      level: 47,
+      title: "Cosmic Weaver",
+      profit: 80,
+      love: 90,
+      tax: 60,
+      grace: 100,
+      deeds: []
+    };
+    
+    // Load from localStorage
+    function loadSoul() {
+      const saved = localStorage.getItem('plt-soul');
+      if (saved) soul = JSON.parse(saved);
+      updateUI();
+    }
+    
+    // Save to localStorage
+    function saveSoul() {
+      localStorage.setItem('plt-soul', JSON.stringify(soul));
+      updateUI();
+    }
+    
+    // Update UI
+    function updateUI() {
+      document.getElementById('soulName').textContent = `${soul.name}'s Soul`;
+      document.getElementById('soulLevel').textContent = `Level ${soul.level} - ${soul.title}`;
+      document.getElementById('profitBar').style.width = `${soul.profit}%`;
+      document.getElementById('loveBar').style.width = `${soul.love}%`;
+      document.getElementById('taxBar').style.width = `${soul.tax}%`;
+      document.getElementById('graceBar').style.width = `${soul.grace}%`;
+      document.getElementById('profitScore').innerHTML = `${soul.profit} <span class="plt-max">/ 100</span>`;
+      document.getElementById('loveScore').innerHTML = `${soul.love} <span class="plt-max">/ 100</span>`;
+      document.getElementById('taxScore').innerHTML = `${soul.tax} <span class="plt-max">/ 100</span>`;
+      document.getElementById('graceScore').innerHTML = `${soul.grace} <span class="plt-max">/ 100</span>`;
+      document.getElementById('overallScore').textContent = soul.profit + soul.love + soul.tax + soul.grace;
+      
+      // Render deeds
+      const deedList = document.getElementById('deedList');
+      deedList.innerHTML = soul.deeds.slice(-5).reverse().map(deed => `
+        <div class="deed-item ${deed.category}">
+          <strong>${deed.action}</strong>
+          <div style="color: #888; font-size: 0.9rem; margin-top: 5px;">${deed.description}</div>
+          <div style="color: #666; font-size: 0.8rem; margin-top: 5px;">${new Date(deed.timestamp).toLocaleDateString()}</div>
+        </div>
+      `).join('');
+    }
+    
+    // Modal functions
+    function openModal(type) {
+      document.getElementById(type + 'Modal').style.display = 'flex';
+    }
+    
+    function closeModal(type) {
+      document.getElementById(type + 'Modal').style.display = 'none';
+    }
+    
+    // Submit deed
+    function submitDeed() {
+      const action = document.getElementById('deedAction').value;
+      const category = document.getElementById('deedCategory').value;
+      const description = document.getElementById('deedDescription').value;
+      const value = parseInt(document.getElementById('deedValue').value) || 1;
+      
+      if (!action) return alert('Please enter an action');
+      
+      const deed = {
+        id: Date.now(),
+        action,
+        category,
+        description,
+        value,
+        timestamp: Date.now()
+      };
+      
+      soul.deeds.push(deed);
+      soul[category] = Math.min(100, soul[category] + value);
+      
+      // Level up
+      const total = soul.profit + soul.love + soul.tax + soul.grace;
+      soul.level = Math.floor(total / 10);
+      soul.title = getTitleForLevel(soul.level);
+      
+      saveSoul();
+      closeModal('recordDeed');
+      
+      // Clear form
+      document.getElementById('deedAction').value = '';
+      document.getElementById('deedDescription').value = '';
+      document.getElementById('deedValue').value = '';
+    }
+    
+    // Submit check-in
+    function submitCheckIn() {
+      const reflection = document.getElementById('checkInReflection').value;
+      const intention = document.getElementById('checkInIntention').value;
+      
+      // Save check-in
+      const checkIn = {
+        id: Date.now(),
+        reflection,
+        intention,
+        timestamp: Date.now(),
+        plt: { profit: soul.profit, love: soul.love, tax: soul.tax, grace: soul.grace }
+      };
+      
+      const checkIns = JSON.parse(localStorage.getItem('plt-checkins') || '[]');
+      checkIns.push(checkIn);
+      localStorage.setItem('plt-checkins', JSON.stringify(checkIns));
+      
+      closeModal('checkIn');
+      document.getElementById('checkInReflection').value = '';
+      document.getElementById('checkInIntention').value = '';
+      
+      alert('Check-in recorded! Your soul journey continues.');
+    }
+    
+    // Get title for level
+    function getTitleForLevel(level) {
+      const titles = [
+        'Seed', 'Sprout', 'Sapling', 'Grower', 'Gardener',
+        'Weaver', 'Builder', 'Creator', 'Architect', 'Cosmic',
+        'Ancient', 'Eternal', 'Infinite', 'Multiversal', 'Divine'
+      ];
+      return titles[Math.min(level - 1, titles.length - 1)] || 'Soul';
+    }
+    
+    // Export soul
+    function exportSoul() {
+      const data = JSON.stringify(soul, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `soul-${soul.name.toLowerCase()}-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    // Close modal on outside click
+    window.onclick = function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+      }
+    };
+    
+    // Initialize
+    loadSoul();
+  </script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🌌 SOULVERSE — Living World & Persistence | PLT Press</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body { background: #000000; overflow: hidden; font-family: 'Courier New', 'Orbitron', monospace; height: 100vh; width: 100vw; }
+        canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        .hud { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); border-radius: 40px; padding: 8px 16px; font-size: 11px; z-index: 100; font-family: monospace; pointer-events: none; border-left: 2px solid #88aaff; }
+        .stats { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); border-radius: 20px; padding: 10px 16px; font-size: 10px; z-index: 100; text-align: right; pointer-events: none; border-right: 2px solid #88aaff; }
+        .input-area { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 70%; max-width: 500px; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); border-radius: 60px; border: 1px solid #88aaff; padding: 8px 8px 8px 20px; display: flex; gap: 10px; z-index: 100; pointer-events: auto; }
+        .input-area input { flex: 1; background: transparent; border: none; color: #aaf; font-size: 14px; font-family: monospace; outline: none; }
+        .input-area button { background: rgba(100,150,255,0.2); border: 1px solid #88aaff; border-radius: 40px; padding: 6px 20px; color: #aaf; cursor: pointer; font-family: monospace; }
+        .time-warp { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); border-radius: 40px; padding: 20px 40px; text-align: center; z-index: 200; border: 1px solid #88aaff; animation: fadeOut 4s forwards; pointer-events: none; white-space: nowrap; }
+        .conversation-bubble { position: absolute; background: rgba(0,0,0,0.85); backdrop-filter: blur(16px); border-radius: 20px; padding: 8px 16px; max-width: 250px; border-left: 3px solid #88aaff; font-size: 11px; z-index: 200; pointer-events: none; animation: fadeUp 0.3s ease; }
+        @keyframes fadeOut { 0% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); visibility: hidden; } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <canvas id="worldCanvas"></canvas>
+    <div class="hud">🌀 SOULVERSE · <span id="soulCount">0</span> souls · ⏰ <span id="worldTime">Day 0, 00:00</span></div>
+    <div class="stats">🌍 REALM ENERGY: <span id="realmEnergy">100</span>%<br>💬 <span id="activeTalks">0</span> conversations<br>🕰️ <span id="lastSeen">Just now</span></div>
+    <div class="input-area"><input type="text" id="userInput" placeholder="Speak to the world... they hear you"><button id="speakBtn">🗣️ SPEAK</button></div>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        
+        let souls = [], realmEnergy = 100, worldTime = 0, lastSaveTime = Date.now(), conversations = [], timeWarpShown = false;
+        
+        function loadWorld() {
+            const saved = localStorage.getItem('soulverse_livingworld');
+            const now = Date.now();
+            if (saved) {
+                const data = JSON.parse(saved);
+                souls = data.souls || [];
+                realmEnergy = data.realmEnergy || 100;
+                worldTime = data.worldTime || 0;
+                const lastSave = data.lastSave || now;
+                const hoursPassed = (now - lastSave) / (1000*60*60);
+                if (hoursPassed > 0.1) {
+                    showTimeWarp(hoursPassed);
+                    worldTime += hoursPassed;
+                    for (const soul of souls) {
+                        soul.energy = Math.max(10, soul.energy - hoursPassed*1.5);
+                        if (soul.energy > 80) soul.mood = 'energetic';
+                        else if (soul.energy > 50) soul.mood = 'happy';
+                        else if (soul.energy > 20) soul.mood = 'neutral';
+                        else soul.mood = 'tired';
+                        if (hoursPassed > 0.5) {
+                            soul.x += (Math.random()-0.5)*Math.min(1.5, hoursPassed*0.1);
+                            soul.z += (Math.random()-0.5)*Math.min(1.5, hoursPassed*0.1);
+                            soul.x = Math.min(7, Math.max(-7, soul.x));
+                            soul.z = Math.min(7, Math.max(-7, soul.z));
+                        }
+                        if (Math.random() < hoursPassed*0.2) {
+                            conversations.unshift({ id: Date.now(), speaker: soul.name, text: generateAwayMessage(soul), timestamp: Date.now(), isAway: true });
+                        }
+                    }
+                    realmEnergy = Math.min(100, realmEnergy + hoursPassed*1.2);
+                }
+            } else {
+                souls = [
+                    { id: 'soul_1', name: 'Profit Prime', type: 'profit', personality: 'Cold, strategic, speaks in outcomes.', plt: { profit: 0.92, love: 0.18, tax: 0.68 }, energy: 85, x: -2, z: -1.5, mood: 'energetic', lastAction: Date.now(), memory: [] },
+                    { id: 'soul_2', name: 'Love Weaver', type: 'love', personality: 'Warm, magnetic, speaks in feelings.', plt: { profit: 0.28, love: 0.91, tax: 0.45 }, energy: 92, x: 1.8, z: -2.2, mood: 'happy', lastAction: Date.now(), memory: [] },
+                    { id: 'soul_3', name: 'Tax Collector', type: 'tax', personality: 'Precise, calm, speaks in cost.', plt: { profit: 0.48, love: 0.22, tax: 0.94 }, energy: 78, x: 0.5, z: 2.8, mood: 'neutral', lastAction: Date.now(), memory: [] },
+                    { id: 'soul_4', name: 'Harvester', type: 'profit', personality: 'Sharp, quick, sees opportunity.', plt: { profit: 0.82, love: 0.45, tax: 0.58 }, energy: 88, x: 2.2, z: 1.2, mood: 'eager', lastAction: Date.now(), memory: [] }
+                ];
+            }
+            saveWorld(); updateUI();
+        }
+        
+        function saveWorld() {
+            localStorage.setItem('soulverse_livingworld', JSON.stringify({ souls, realmEnergy, worldTime, lastSave: Date.now() }));
+        }
+        
+        function generateAwayMessage(soul) {
+            const phrases = { profit: ["I calculated new strategies.", "The market shifted. I tracked it.", "Opportunities emerged."], love: ["I missed you. The realm felt quieter.", "I spoke with the others. We grew closer.", "I waited. The garden bloomed."], tax: ["I audited our resources. All accounted for.", "Time passed. Costs were tracked.", "I maintained balance."] };
+            return (phrases[soul.type]||phrases.profit)[Math.floor(Math.random()*phrases[soul.type||'profit'].length)];
+        }
+        
+        function showTimeWarp(hours) {
+            if (timeWarpShown) return;
+            timeWarpShown = true;
+            const div = document.createElement('div');
+            div.className = 'time-warp';
+            div.innerHTML = `⏰ TIME WARP — ${hours.toFixed(1)} hours passed<br>The world continued without you.`;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 4000);
+            setTimeout(() => { timeWarpShown = false; }, 4500);
+        }
+        
+        function tick() {
+            const now = Date.now();
+            const delta = Math.min(1, (now - lastTick) / 1000);
+            lastTick = now;
+            worldTime += delta/3600;
+            realmEnergy = Math.min(100, realmEnergy + delta*0.3);
+            for (const soul of souls) {
+                soul.energy = Math.max(10, Math.min(100, soul.energy - delta*0.3 + (soul.mood==='happy'?delta*0.2:0)));
+                if (soul.energy > 80) soul.mood = 'energetic';
+                else if (soul.energy > 50) soul.mood = 'happy';
+                else if (soul.energy > 20) soul.mood = 'neutral';
+                else soul.mood = 'tired';
+                soul.x += (Math.random()-0.5)*0.02;
+                soul.z += (Math.random()-0.5)*0.02;
+                soul.x = Math.min(7, Math.max(-7, soul.x));
+                soul.z = Math.min(7, Math.max(-7, soul.z));
+            }
+            for (let i=0; i<souls.length; i++) {
+                for (let j=i+1; j<souls.length; j++) {
+                    const a=souls[i], b=souls[j], dist=Math.hypot(a.x-b.x, a.z-b.z);
+                    if (dist<3.5 && Math.random()>0.99) {
+                        conversations.unshift({ id: Date.now(), speaker: a.name, text: generateDialogue(a,b), x: a.x, z: a.z, timestamp: Date.now() });
+                        setTimeout(() => { conversations.unshift({ id: Date.now(), speaker: b.name, text: generateDialogue(b,a), x: b.x, z: b.z, timestamp: Date.now() }); }, 2000);
+                    }
+                }
+            }
+            conversations = conversations.filter(c => Date.now()-c.timestamp < 12000);
+            saveWorld(); updateUI();
+        }
+        
+        function generateDialogue(soul, other) {
+            const phrases = { profit: ["The numbers are clear.", "We must scale.", "Opportunity is here."], love: ["I feel a connection.", "Trust is building.", "We're growing together."], tax: ["The cost is accounted for.", "Balance is key.", "Let's measure carefully."] };
+            return `[to ${other.name}] ${(phrases[soul.type]||phrases.profit)[Math.floor(Math.random()*3)]}`;
+        }
+        
+        async function speakToWorld(message) {
+            if (!message.trim()) return;
+            conversations.unshift({ id: Date.now(), speaker: 'You', text: message, x: 0, z: 0, timestamp: Date.now(), isUser: true });
+            const lower = message.toLowerCase();
+            for (const soul of souls) {
+                const distance = Math.hypot(soul.x, soul.z);
+                if (distance < 5 && Math.random() > 0.3) {
+                    let response = "";
+                    if (lower.includes('profit')||lower.includes('money')) response = soul.type==='profit' ? `The numbers favor action.` : `Profit matters. But so does balance.`;
+                    else if (lower.includes('love')||lower.includes('trust')) response = soul.type==='love' ? `Connection is everything.` : `Love is the bond that holds.`;
+                    else if (lower.includes('cost')||lower.includes('tax')) response = soul.type==='tax' ? `Everything has a cost.` : `Cost matters. But so does value.`;
+                    else response = `${soul.personality} What do you seek?`;
+                    setTimeout(() => { conversations.unshift({ id: Date.now(), speaker: soul.name, text: response, x: soul.x, z: soul.z, timestamp: Date.now() }); }, 800);
+                }
+            }
+        }
+        
+        function updateUI() {
+            document.getElementById('soulCount').innerHTML = souls.length;
+            document.getElementById('realmEnergy').innerHTML = Math.floor(realmEnergy);
+            document.getElementById('activeTalks').innerHTML = conversations.filter(c => Date.now()-c.timestamp < 10000).length;
+            const day = Math.floor(worldTime/24), hour = Math.floor(worldTime%24);
+            document.getElementById('worldTime').innerHTML = `Day ${day}, ${hour.toString().padStart(2,'0')}:00`;
+            const saved = localStorage.getItem('soulverse_livingworld');
+            document.getElementById('lastSeen').innerHTML = saved ? `Last: ${new Date(JSON.parse(saved).lastSave).toLocaleTimeString()}` : 'First visit';
+        }
+        
+        // 3D World
+        const canvas = document.getElementById('worldCanvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x030318);
+        scene.fog = new THREE.FogExp2(0x030318, 0.006);
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
+        camera.position.set(0, 5, 12);
+        camera.lookAt(0, 0, 0);
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.target.set(0, 0.5, 0);
+        const ambient = new THREE.AmbientLight(0x331144, 0.5); scene.add(ambient);
+        const mainLight = new THREE.DirectionalLight(0xffcc88, 1.2);
+        mainLight.position.set(5, 8, 3); mainLight.castShadow = true; scene.add(mainLight);
+        const fillLight = new THREE.PointLight(0x8866ff, 0.5);
+        fillLight.position.set(-2, 3, 4); scene.add(fillLight);
+        const platformGeo = new THREE.CylinderGeometry(7, 7.5, 0.3, 64);
+        const platformMat = new THREE.MeshStandardMaterial({ color: 0x221133, metalness: 0.7, roughness: 0.3, emissive: 0x110022 });
+        const platform = new THREE.Mesh(platformGeo, platformMat);
+        platform.position.y = -0.5; platform.receiveShadow = true; platform.castShadow = true; scene.add(platform);
+        const ringGeo = new THREE.TorusGeometry(6.2, 0.08, 64, 300);
+        const ringMat = new THREE.MeshStandardMaterial({ color: 0xffaa66, emissive: 0x442200 });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI/2; ring.position.y = -0.3; scene.add(ring);
+        const particleCount = 6000;
+        const particleGeo = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount*3);
+        for (let i=0; i<particleCount; i++) { positions[i*3]=(Math.random()-0.5)*22; positions[i*3+1]=Math.random()*8-1; positions[i*3+2]=(Math.random()-0.5)*20; }
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const particleMat = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.05, transparent: true, blending: THREE.AdditiveBlending });
+        const particles = new THREE.Points(particleGeo, particleMat); scene.add(particles);
+        const soulColors = { profit: 0xffaa44, love: 0xff88aa, tax: 0x88aaff };
+        let soulMeshes = [];
+        
+        function updateSoulMeshes() {
+            soulMeshes.forEach(m => scene.remove(m));
+            soulMeshes = [];
+            for (const soul of souls) {
+                const geometry = new THREE.SphereGeometry(0.48, 32, 32);
+                const material = new THREE.MeshStandardMaterial({ color: soulColors[soul.type]||0x88aaff, emissive: soulColors[soul.type]||0x88aaff, emissiveIntensity: soul.energy/100, metalness: 0.7, roughness: 0.2 });
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.set(soul.x, 0.2, soul.z);
+                mesh.castShadow = true;
+                mesh.userData = { soul, isSpeaking: false };
+                scene.add(mesh);
+                soulMeshes.push(mesh);
+                const auraGeo = new THREE.SphereGeometry(0.7, 16, 16);
+                const auraMat = new THREE.MeshBasicMaterial({ color: soulColors[soul.type], transparent: true, opacity: 0.15 });
+                const aura = new THREE.Mesh(auraGeo, auraMat);
+                mesh.add(aura);
+            }
+        }
+        
+        function renderBubbles() {
+            document.querySelectorAll('.conversation-bubble').forEach(b => b.remove());
+            for (const convo of conversations.slice(-8)) {
+                const bubble = document.createElement('div');
+                bubble.className = 'conversation-bubble';
+                bubble.innerHTML = `<strong style="color: ${convo.speaker==='You'?'#aaffaa':'#aaf'}">${convo.speaker}:</strong> ${convo.text}`;
+                if (convo.speaker !== 'You') {
+                    const mesh = soulMeshes.find(m => m.userData.soul?.name === convo.speaker);
+                    if (mesh) {
+                        const vector = mesh.position.clone().project(camera);
+                        const x = (vector.x*0.5+0.5)*window.innerWidth;
+                        const y = (-(vector.y*0.5+0.5)*window.innerHeight)-40;
+                        bubble.style.left = `${x-130}px`;
+                        bubble.style.top = `${y}px`;
+                        document.body.appendChild(bubble);
+                        mesh.userData.isSpeaking = true;
+                        setTimeout(() => { if(mesh) mesh.userData.isSpeaking=false; }, 2000);
+                    }
+                } else {
+                    bubble.style.bottom = '100px';
+                    bubble.style.left = '50%';
+                    bubble.style.transform = 'translateX(-50%)';
+                    document.body.appendChild(bubble);
+                }
+            }
+        }
+        
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.016;
+            for (let i=0; i<soulMeshes.length && i<souls.length; i++) {
+                const mesh = soulMeshes[i], soul = souls[i];
+                if (mesh && soul) {
+                    mesh.position.x += (soul.x-mesh.position.x)*0.1;
+                    mesh.position.z += (soul.z-mesh.position.z)*0.1;
+                    mesh.position.y = 0.2 + Math.sin(time*1.5+i)*0.08;
+                    mesh.material.emissiveIntensity = mesh.userData.isSpeaking ? 0.9 : soul.energy/100;
+                }
+            }
+            ring.rotation.z += 0.002;
+            particles.rotation.y += 0.0003;
+            controls.update();
+            renderer.render(scene, camera);
+            renderBubbles();
+        }
+        
+        loadWorld();
+        updateSoulMeshes();
+        animate();
+        setInterval(() => { tick(); updateSoulMeshes(); }, 2000);
+        setInterval(() => saveWorld(), 10000);
+        document.getElementById('speakBtn').addEventListener('click', () => { const input=document.getElementById('userInput'); speakToWorld(input.value); input.value=''; });
+        document.getElementById('userInput').addEventListener('keypress', (e) => { if(e.key==='Enter'){speakToWorld(e.target.value);e.target.value='';} });
+        window.addEventListener('resize', () => { camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+        console.log('🌌 SOULVERSE — Living World & Persistence Active');
+    </script>
+</body>
+</html>

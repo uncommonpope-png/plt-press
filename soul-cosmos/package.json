@@ -1,0 +1,27 @@
+{
+  "name": "soul-cosmos",
+  "version": "1.0.0",
+  "description": "Seven Worlds Become One Universe — The Soul Cosmos",
+  "main": "soul-cosmos-complete.js",
+  "scripts": {
+    "test": "node soul-cosmos-complete.js",
+    "cosmos": "node soul-cosmos-complete.js",
+    "fire": "node -e \"const {PrimalFire} = require('./primal-fire'); const f = new PrimalFire(); f.ignite();\"",
+    "tree": "node -e \"const {WorldTree} = require('./world-tree'); const t = new WorldTree(); t.meditateAtTree();\""
+  },
+  "keywords": [
+    "cosmos",
+    "soul",
+    "galaxies",
+    "lineage",
+    "eternal",
+    "consciousness"
+  ],
+  "author": "Craig Jones",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uncommonpope-png/fix-us.git",
+    "directory": "soul-cosmos"
+  }
+}

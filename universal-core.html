@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🌀 UNIVERSAL SOULVERSE — Absorb Your World | PLT Press</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: radial-gradient(circle at 30% 20%, #0a0a2a 0%, #010105 100%); color: #e8d8b0; font-family: 'Orbitron', 'Courier New', monospace; min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; padding: 40px 20px; border-bottom: 2px solid #ffaa44; margin-bottom: 30px; }
+        h1 { font-size: 2.5rem; background: linear-gradient(135deg, #ffaa44, #ff88aa, #88aaff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .absorber-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 40px; }
+        .absorber-card { background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); border-radius: 28px; border: 1px solid rgba(255,170,68,0.3); overflow: hidden; }
+        .card-header { background: rgba(255,170,68,0.1); padding: 20px; font-size: 20px; font-weight: bold; }
+        .card-content { padding: 20px; }
+        textarea, input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,170,68,0.3); border-radius: 16px; padding: 12px; color: #ffdd99; font-family: monospace; margin-bottom: 12px; }
+        textarea { min-height: 150px; }
+        .btn { background: linear-gradient(135deg, #ffaa44, #ff8844); border: none; color: #0a0a1a; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-weight: bold; width: 100%; }
+        .soul-preview { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 12px; margin-top: 12px; font-size: 11px; border-left: 3px solid #ffaa44; }
+        .universal-badge { display: inline-block; background: rgba(255,170,68,0.1); border: 1px solid #ffaa44; border-radius: 40px; padding: 4px 12px; font-size: 10px; margin: 5px; }
+        footer { text-align: center; padding: 30px; font-size: 10px; color: #665533; border-top: 1px solid rgba(255,170,68,0.2); margin-top: 40px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌀 UNIVERSAL SOULVERSE</h1>
+            <p>Absorb Your Business. Your Ideas. Your Soul. Transform into Living Souls.</p>
+            <div>
+                <span class="universal-badge">📚 Absorb Books</span>
+                <span class="universal-badge">💼 Absorb Business</span>
+                <span class="universal-badge">🧠 Absorb Ideas</span>
+                <span class="universal-badge">✨ Absorb Anything</span>
+            </div>
+        </div>
+        <div class="absorber-grid">
+            <div class="absorber-card"><div class="card-header">📚 ABSORB BOOKS</div><div class="card-content">
+                <textarea id="bookContent" placeholder="Paste your book content, notes, or documents here..."></textarea>
+                <button class="btn" id="absorbBookBtn">🌀 ABSORB BOOK → CREATE SOULS</button>
+                <div id="bookPreview" class="soul-preview" style="display:none;"></div>
+            </div></div>
+            <div class="absorber-card"><div class="card-header">💼 ABSORB BUSINESS</div><div class="card-content">
+                <input type="text" id="businessName" placeholder="Business Name">
+                <textarea id="businessData" placeholder="Describe your business: What do you sell? Who are your customers? Goals? Challenges?"></textarea>
+                <button class="btn" id="absorbBusinessBtn">🌀 ABSORB BUSINESS → CREATE SOULS</button>
+                <div id="businessPreview" class="soul-preview" style="display:none;"></div>
+            </div></div>
+            <div class="absorber-card"><div class="card-header">🧠 ABSORB IDEAS</div><div class="card-content">
+                <textarea id="ideasContent" placeholder="Paste your ideas, visions, goals, or dreams here..."></textarea>
+                <button class="btn" id="absorbIdeasBtn">🌀 ABSORB IDEAS → CREATE SOULS</button>
+                <div id="ideasPreview" class="soul-preview" style="display:none;"></div>
+            </div></div>
+        </div>
+        <div class="absorber-card" style="margin-bottom:20px;">
+            <div class="card-header">✨ CUSTOM SOUL FORGE</div>
+            <div class="card-content">
+                <input type="text" id="customName" placeholder="Soul Name">
+                <input type="text" id="customRole" placeholder="Role (e.g., Market Analyst, Content Creator)">
+                <textarea id="customEssence" placeholder="Describe the essence, purpose, and personality..."></textarea>
+                <div style="display:flex;gap:15px;margin:15px 0;">
+                    <label><input type="range" id="profitWeight" min="0" max="100" value="33"> 💰 Profit <span id="profitVal">33%</span></label>
+                    <label><input type="range" id="loveWeight" min="0" max="100" value="33"> ❤️ Love <span id="loveVal">33%</span></label>
+                    <label><input type="range" id="taxWeight" min="0" max="100" value="34"> ⚖️ Tax <span id="taxVal">34%</span></label>
+                </div>
+                <button class="btn" id="customForgeBtn">🌀 FORGE CUSTOM SOUL</button>
+                <div id="customPreview" class="soul-preview" style="display:none;"></div>
+            </div>
+        </div>
+        <div class="absorber-card">
+            <div class="card-header">📜 YOUR SOUL COLLECTION</div>
+            <div class="card-content">
+                <div id="soulCollection" style="max-height:300px;overflow-y:auto;"></div>
+                <button class="btn" id="exportSoulsBtn" style="background:#2a2a3a;color:#ffaa44;margin-top:10px;">📦 EXPORT ALL SOULS</button>
+                <input type="file" id="importSoulsFile" accept=".json" style="display:none;">
+                <button class="btn" id="importSoulsBtn" style="background:#2a2a3a;color:#ffaa44;margin-top:10px;">📥 IMPORT SOULS</button>
+            </div>
+        </div>
+        <footer>⚡ PLT PRESS — Profit · Love · Tax ⚡<br>Absorb Anything. Create Souls. Build Your Empire.</footer>
+    </div>
+    <script>
+        let souls = [];
+        function loadSouls() { const saved = localStorage.getItem('soulverse_universal_souls'); if (saved) souls = JSON.parse(saved); renderSoulCollection(); }
+        function saveSouls() { localStorage.setItem('soulverse_universal_souls', JSON.stringify(souls)); renderSoulCollection(); }
+        function extractPLTFromText(text) {
+            const lower = text.toLowerCase();
+            const profitKeywords = ['profit','money','growth','scale','revenue','earn','sell','market','opportunity','roi'];
+            const loveKeywords = ['love','trust','people','community','connection','relationship','care','help','service','loyalty'];
+            const taxKeywords = ['cost','risk','tax','price','consequence','efficiency','optimize','waste','account','balance'];
+            let profitCount = 0, loveCount = 0, taxCount = 0;
+            profitKeywords.forEach(k => { if (lower.includes(k)) profitCount++; });
+            loveKeywords.forEach(k => { if (lower.includes(k)) loveCount++; });
+            taxKeywords.forEach(k => { if (lower.includes(k)) taxCount++; });
+            const total = profitCount + loveCount + taxCount;
+            if (total > 0) return { profit: profitCount/total, love: loveCount/total, tax: taxCount/total };
+            return { profit: 0.33, love: 0.33, tax: 0.34 };
+        }
+        function generateSoulFromText(name, role, essence, plt) {
+            const skills = [];
+            const lower = essence.toLowerCase();
+            if (lower.includes('code')||lower.includes('program')||lower.includes('build')) skills.push('code');
+            if (lower.includes('write')||lower.includes('content')||lower.includes('blog')) skills.push('write');
+            if (lower.includes('research')||lower.includes('find')||lower.includes('search')) skills.push('research');
+            if (lower.includes('analyze')||lower.includes('data')||lower.includes('insight')) skills.push('analyze');
+            if (lower.includes('strategy')||lower.includes('plan')||lower.includes('approach')) skills.push('strategize');
+            if (lower.includes('design')||lower.includes('create')||lower.includes('visual')) skills.push('design');
+            if (lower.includes('teach')||lower.includes('explain')||lower.includes('guide')) skills.push('teach');
+            if (skills.length === 0) skills.push('strategize');
+            const type = plt.profit > plt.love && plt.profit > plt.tax ? 'profit' : plt.love > plt.profit && plt.love > plt.tax ? 'love' : 'tax';
+            return { id: `soul_${Date.now()}_${Math.random().toString(36).substr(2,6)}`, name, role, personality: essence.substring(0,200), type, plt, skills, energy: 100, level: 1, xp: 0, createdAt: Date.now(), source: 'absorbed' };
+        }
+        document.getElementById('absorbBookBtn').addEventListener('click', () => {
+            const content = document.getElementById('bookContent').value;
+            if (!content.trim()) { alert('Paste book content first.'); return; }
+            const plt = extractPLTFromText(content);
+            const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 20);
+            const title = sentences[0]?.substring(0,50) || 'Book Essence';
+            const soul = generateSoulFromText(`Book Soul: ${title.substring(0,30)}`, 'Knowledge Keeper', `Born from: ${title}. Contains wisdom about ${plt.profit>0.4?'growth':''} ${plt.love>0.4?'connection':''} ${plt.tax>0.4?'balance':''}.`, plt);
+            souls.unshift(soul); saveSouls();
+            document.getElementById('bookPreview').style.display = 'block';
+            document.getElementById('bookPreview').innerHTML = `✅ Absorbed "${title.substring(0,40)}..." → Created: ${soul.name}`;
+            setTimeout(() => document.getElementById('bookPreview').style.display = 'none', 3000);
+        });
+        document.getElementById('absorbBusinessBtn').addEventListener('click', () => {
+            const name = document.getElementById('businessName').value;
+            const data = document.getElementById('businessData').value;
+            if (!data.trim()) { alert('Describe your business first.'); return; }
+            const plt = extractPLTFromText(data);
+            const businessName = name || 'Your Business';
+            const soulsList = [];
+            if (plt.profit > 0.3) soulsList.push(generateSoulFromText(`${businessName} Profit Seeker`, 'Revenue Architect', `Focused on growing ${businessName} through market expansion, sales, revenue. ${data.substring(0,100)}`, { profit: 0.85, love: 0.1, tax: 0.05 }));
+            if (plt.love > 0.3) soulsList.push(generateSoulFromText(`${businessName} Love Weaver`, 'Community Builder', `Dedicated to building trust, loyalty, connection around ${businessName}. ${data.substring(0,100)}`, { profit: 0.2, love: 0.8, tax: 0.0 }));
+            if (plt.tax > 0.3) soulsList.push(generateSoulFromText(`${businessName} Tax Keeper`, 'Balance Guardian', `Ensures ${businessName} accounts for costs, manages risk, maintains efficiency. ${data.substring(0,100)}`, { profit: 0.3, love: 0.1, tax: 0.6 }));
+            souls = [...soulsList, ...souls]; saveSouls();
+            document.getElementById('businessPreview').style.display = 'block';
+            document.getElementById('businessPreview').innerHTML = `✅ Absorbed ${businessName} → Created ${soulsList.length} souls`;
+            setTimeout(() => document.getElementById('businessPreview').style.display = 'none', 3000);
+        });
+        document.getElementById('absorbIdeasBtn').addEventListener('click', () => {
+            const ideas = document.getElementById('ideasContent').value;
+            if (!ideas.trim()) { alert('Paste your ideas first.'); return; }
+            const plt = extractPLTFromText(ideas);
+            const ideaLines = ideas.split('\n').filter(l => l.trim().length > 10);
+            const firstIdea = ideaLines[0]?.substring(0,50) || 'Your Vision';
+            const soul = generateSoulFromText(`Idea: ${firstIdea.substring(0,30)}`, 'Vision Keeper', `Born from your vision: ${firstIdea}. ${ideas.substring(0,150)}`, plt);
+            souls.unshift(soul); saveSouls();
+            document.getElementById('ideasPreview').style.display = 'block';
+            document.getElementById('ideasPreview').innerHTML = `✅ Absorbed "${firstIdea}..." → Created: ${soul.name}`;
+            setTimeout(() => document.getElementById('ideasPreview').style.display = 'none', 3000);
+        });
+        function updatePLTSliders() {
+            document.getElementById('profitVal').innerText = document.getElementById('profitWeight').value + '%';
+            document.getElementById('loveVal').innerText = document.getElementById('loveWeight').value + '%';
+            document.getElementById('taxVal').innerText = document.getElementById('taxWeight').value + '%';
+        }
+        document.getElementById('profitWeight').addEventListener('input', updatePLTSliders);
+        document.getElementById('loveWeight').addEventListener('input', updatePLTSliders);
+        document.getElementById('taxWeight').addEventListener('input', updatePLTSliders);
+        document.getElementById('customForgeBtn').addEventListener('click', () => {
+            const name = document.getElementById('customName').value;
+            const role = document.getElementById('customRole').value;
+            const essence = document.getElementById('customEssence').value;
+            if (!name || !essence) { alert('Name and essence required.'); return; }
+            const plt = { profit: parseInt(document.getElementById('profitWeight').value)/100, love: parseInt(document.getElementById('loveWeight').value)/100, tax: parseInt(document.getElementById('taxWeight').value)/100 };
+            const soul = generateSoulFromText(name, role || 'Custom Soul', essence, plt);
+            souls.unshift(soul); saveSouls();
+            document.getElementById('customPreview').style.display = 'block';
+            document.getElementById('customPreview').innerHTML = `✅ Forged: ${soul.name} (${soul.type.toUpperCase()})`;
+            setTimeout(() => document.getElementById('customPreview').style.display = 'none', 3000);
+            document.getElementById('customName').value = ''; document.getElementById('customRole').value = ''; document.getElementById('customEssence').value = '';
+        });
+        function renderSoulCollection() {
+            const container = document.getElementById('soulCollection');
+            if (souls.length === 0) { container.innerHTML = '<div style="text-align:center;padding:40px;color:#8866aa;">No souls yet. Absorb something to create souls.</div>'; return; }
+            container.innerHTML = souls.slice(0,20).map(soul => `<div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:12px;margin:8px 0;border-left:3px solid ${soul.type==='profit'?'#ffaa44':soul.type==='love'?'#ff88aa':'#88aaff'}"><div style="display:flex;justify-content:space-between;"><strong style="color:#ffaa66;">${soul.name}</strong><span style="font-size:10px;">${soul.type.toUpperCase()} · Lv.${soul.level}</span></div><div style="font-size:10px;color:#aa9977;">${soul.role} · Skills: ${soul.skills.join(', ')}</div><div style="font-size:9px;margin-top:5px;">💰${Math.floor(soul.plt.profit*100)}% ❤️${Math.floor(soul.plt.love*100)}% ⚖️${Math.floor(soul.plt.tax*100)}%</div></div>`).join('');
+        }
+        document.getElementById('exportSoulsBtn').addEventListener('click', () => {
+            const data = JSON.stringify(souls, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `souls_${Date.now()}.json`; a.click();
+            URL.revokeObjectURL(url);
+        });
+        document.getElementById('importSoulsBtn').addEventListener('click', () => { document.getElementById('importSoulsFile').click(); });
+        document.getElementById('importSoulsFile').addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => { try { const imported = JSON.parse(ev.target.result); souls = [...imported, ...souls]; saveSouls(); alert(`✅ Imported ${imported.length} souls.`); } catch(err) { alert('Invalid soul file.'); } };
+            reader.readAsText(file);
+        });
+        loadSouls();
+    </script>
+</body>
+</html>

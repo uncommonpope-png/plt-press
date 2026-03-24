@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soul Forge Products - Build Your Soul. Build Your Empire.</title>
+  <meta name="description" content="Downloadable soul growth products. Track Profit, Love, Tax, Grace. Level up your soul.">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0a0a0f;
+      color: #fff;
+      line-height: 1.6;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    
+    /* Navigation */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .logo { font-size: 1.5rem; font-weight: bold; background: linear-gradient(90deg, #e94560, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-links { display: flex; gap: 30px; }
+    .nav-links a { color: #888; text-decoration: none; transition: color 0.3s; }
+    .nav-links a:hover { color: #fff; }
+    
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 100px 20px;
+      background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 100%);
+    }
+    .hero h1 {
+      font-size: 3.5rem;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #e94560, #ff6b6b, #feca57);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p { font-size: 1.3rem; color: #888; max-width: 600px; margin: 0 auto 40px; }
+    
+    /* Products Grid */
+    .products-section { padding: 80px 20px; }
+    .section-title { text-align: center; font-size: 2.5rem; margin-bottom: 20px; }
+    .section-subtitle { text-align: center; color: #888; margin-bottom: 60px; }
+    
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; }
+    
+    .product-card {
+      background: rgba(255,255,255,0.03);
+      border-radius: 20px;
+      padding: 40px;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .product-card:hover {
+      transform: translateY(-10px);
+      border-color: rgba(233, 69, 96, 0.5);
+      box-shadow: 0 20px 60px rgba(233, 69, 96, 0.2);
+    }
+    .product-card.featured {
+      border: 2px solid #e94560;
+      box-shadow: 0 0 60px rgba(233, 69, 96, 0.3);
+    }
+    .product-card.featured::before {
+      content: 'BEST VALUE';
+      position: absolute;
+      top: 20px;
+      right: -35px;
+      background: linear-gradient(90deg, #e94560, #ff6b6b);
+      padding: 5px 40px;
+      transform: rotate(45deg);
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    
+    .product-icon { font-size: 4rem; margin-bottom: 20px; }
+    .product-card h3 { font-size: 1.8rem; margin-bottom: 10px; }
+    .product-card .price { font-size: 3rem; font-weight: bold; margin-bottom: 5px; }
+    .product-card .price span { font-size: 1rem; color: #666; font-weight: normal; }
+    .product-card .tagline { color: #888; margin-bottom: 25px; font-style: italic; }
+    
+    .product-features { list-style: none; margin-bottom: 30px; }
+    .product-features li {
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .product-features li:last-child { border: none; }
+    .product-features li::before { content: '✓'; color: #4ade80; font-weight: bold; }
+    
+    .btn {
+      display: inline-block;
+      width: 100%;
+      padding: 18px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, #e94560, #ff6b6b);
+      color: #fff;
+      box-shadow: 0 10px 40px rgba(233, 69, 96, 0.3);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 20px 60px rgba(233, 69, 96, 0.5);
+      transform: translateY(-2px);
+    }
+    .btn-outline {
+      background: transparent;
+      border: 2px solid rgba(255,255,255,0.2);
+      color: #fff;
+    }
+    .btn-outline:hover {
+      border-color: #e94560;
+      background: rgba(233, 69, 96, 0.1);
+    }
+    
+    /* Bundle Section */
+    .bundle-section {
+      padding: 80px 20px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 30px;
+      margin: 80px 20px;
+    }
+    .bundle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .bundle-content h2 { font-size: 2.5rem; margin-bottom: 20px; }
+    .bundle-price { font-size: 4rem; font-weight: bold; margin-bottom: 10px; }
+    .bundle-price .original { font-size: 1.5rem; color: #666; text-decoration: line-through; }
+    .bundle-save { color: #4ade80; font-weight: bold; margin-bottom: 30px; }
+    
+    /* Testimonials */
+    .testimonials { padding: 80px 20px; }
+    .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+    .testimonial-card {
+      background: rgba(255,255,255,0.03);
+      padding: 30px;
+      border-radius: 15px;
+      border-left: 4px solid #e94560;
+    }
+    .testimonial-card p { font-style: italic; margin-bottom: 20px; color: #ccc; }
+    .testimonial-author { display: flex; align-items: center; gap: 15px; }
+    .author-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, #e94560, #ff6b6b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    
+    /* FAQ */
+    .faq { padding: 80px 20px; background: #0f0f1a; }
+    .faq-item {
+      background: rgba(255,255,255,0.03);
+      margin-bottom: 15px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .faq-question {
+      padding: 25px;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .faq-question:hover { background: rgba(255,255,255,0.05); }
+    .faq-answer {
+      padding: 0 25px 25px;
+      color: #888;
+      display: none;
+    }
+    .faq-item.active .faq-answer { display: block; }
+    .faq-item.active .faq-question { color: #e94560; }
+    
+    /* Guarantee */
+    .guarantee {
+      text-align: center;
+      padding: 80px 20px;
+      background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 100%);
+    }
+    .guarantee-icon { font-size: 5rem; margin-bottom: 20px; }
+    .guarantee-box {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 20px;
+      border: 2px solid #4ade80;
+    }
+    
+    /* Footer */
+    footer {
+      padding: 60px 20px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
+      color: #666;
+    }
+    .footer-links { display: flex; justify-content: center; gap: 30px; margin-bottom: 30px; }
+    .footer-links a { color: #666; text-decoration: none; }
+    .footer-links a:hover { color: #fff; }
+    
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #1a1a2e;
+      padding: 50px;
+      border-radius: 20px;
+      max-width: 500px;
+      width: 90%;
+      border: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
+    }
+    .modal-content h2 { margin-bottom: 20px; }
+    .modal-content p { color: #888; margin-bottom: 30px; }
+    .modal-buttons { display: flex; gap: 15px; justify-content: center; }
+    .modal-buttons button { flex: 1; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+    .btn-cancel { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-confirm { background: linear-gradient(90deg, #e94560, #ff6b6b); color: #fff; }
+    
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.5rem; }
+      .bundle-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <div class="logo">🌌 Soul Forge</div>
+      <div class="nav-links">
+        <a href="#products">Products</a>
+        <a href="#bundle">Bundles</a>
+        <a href="#testimonials">Reviews</a>
+        <a href="#faq">FAQ</a>
+      </div>
+    </nav>
+  </div>
+  
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <h1>Build Your Soul. Build Your Empire.</h1>
+      <p>Downloadable soul growth products. Track Profit, Love, Tax, Grace. Level up from Seed to Divine.</p>
+      <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+        <a href="#products" class="btn btn-primary" style="max-width: 200px;">View Products</a>
+        <a href="#bundle" class="btn btn-outline" style="max-width: 200px;">Save 70%</a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Products -->
+  <section class="products-section" id="products">
+    <div class="container">
+      <h2 class="section-title">Choose Your Path</h2>
+      <p class="section-subtitle">One-time payment. Lifetime access. No subscriptions.</p>
+      
+      <div class="products-grid">
+        <!-- Starter -->
+        <div class="product-card">
+          <div class="product-icon">🌱</div>
+          <h3>Soul Forge Starter</h3>
+          <div class="price">$27 <span>USD</span></div>
+          <p class="tagline">Perfect for beginning your soul journey</p>
+          
+          <ul class="product-features">
+            <li>Soul Ledger CLI System</li>
+            <li>Visual PLT Dashboard</li>
+            <li>Daily Check-in System</li>
+            <li>Soul Evolution Tracking</li>
+            <li>Export Your Data</li>
+            <li>Email Support</li>
+            <li>Lifetime Updates</li>
+          </ul>
+          
+          <button class="btn btn-primary" onclick="openBuyModal('Starter', 27)">Buy Now</button>
+        </div>
+        
+        <!-- Pro -->
+        <div class="product-card featured">
+          <div class="product-icon">🚀</div>
+          <h3>Soul Forge Pro</h3>
+          <div class="price">$67 <span>USD</span></div>
+          <p class="tagline">For serious soul builders</p>
+          
+          <ul class="product-features">
+            <li><strong>Everything in Starter, plus:</strong></li>
+            <li>Advanced Analytics Dashboard</li>
+            <li>Soul Spectrum Analysis</li>
+            <li>PLT Journal Templates</li>
+            <li>Private Community Access</li>
+            <li>Priority Email Support</li>
+            <li>Monthly Group Coaching Calls</li>
+            <li>Soul Type Quiz (Premium)</li>
+          </ul>
+          
+          <button class="btn btn-primary" onclick="openBuyModal('Pro', 67)">Buy Now</button>
+        </div>
+        
+        <!-- Enterprise -->
+        <div class="product-card">
+          <div class="product-icon">👑</div>
+          <h3>Soul Forge Enterprise</h3>
+          <div class="price">$197 <span>USD</span></div>
+          <p class="tagline">For coaches and businesses</p>
+          
+          <ul class="product-features">
+            <li><strong>Everything in Pro, plus:</strong></li>
+            <li>Commercial License</li>
+            <li>API Access</li>
+            <li>White Label Rights</li>
+            <li>Client Dashboard Access</li>
+            <li>1-on-1 Onboarding Call</li>
+            <li>Resell Rights</li>
+            <li>Lifetime Priority Support</li>
+          </ul>
+          
+          <button class="btn btn-primary" onclick="openBuyModal('Enterprise', 197)">Buy Now</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Bundle -->
+  <section class="bundle-section" id="bundle">
+    <div class="container">
+      <div class="bundle-grid">
+        <div class="bundle-content">
+          <h2>🎁 Complete Soul Multiverse Bundle</h2>
+          <div class="bundle-price">
+            $97 <span class="original">$291</span>
+          </div>
+          <p class="bundle-save">💰 Save $194 (70% OFF)</p>
+          
+          <p style="color: #888; margin-bottom: 30px;">Get EVERYTHING. All current products + all future releases. Forever.</p>
+          
+          <ul class="product-features" style="margin-bottom: 30px;">
+            <li>Soul Forge Starter ($27 value)</li>
+            <li>Soul Forge Pro ($67 value)</li>
+            <li>Soul Forge Enterprise ($197 value)</li>
+            <li>Soul Cosmos Explorer (Future release)</li>
+            <li>Soul Spectrum Analysis (Future release)</li>
+            <li>All future products (Forever)</li>
+          </ul>
+          
+          <button class="btn btn-primary" onclick="openBuyModal('Complete Bundle', 97)">Get Complete Bundle - $97</button>
+          
+          <p style="margin-top: 20px; color: #4ade80; font-size: 0.9rem;">
+            🔒 30-day money-back guarantee
+          </p>
+        </div>
+        
+        <div class="bundle-image" style="text-align: center;">
+          <div style="font-size: 10rem;">🌌</div>
+          <p style="color: #888;">Infinite Possibilities Included</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Testimonials -->
+  <section class="testimonials" id="testimonials">
+    <div class="container">
+      <h2 class="section-title">What Soul Builders Say</h2>
+      <div class="testimonial-grid">
+        <div class="testimonial-card">
+          <p>"This changed how I see my life. The PLT framework is genius. I've gone from Seed to Weaver in 3 months. My business doubled."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">SK</div>
+            <div>
+              <div class="author-name">Sarah K.</div>
+              <div class="author-title">Life Coach</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <p>"Finally, a system that tracks what actually matters. My soul score went from 180 to 340. This is life-changing."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">MR</div>
+            <div>
+              <div class="author-name">Mike R.</div>
+              <div class="author-title">Developer</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <p>"I use this with all my coaching clients. The visual dashboard makes progress tangible. Worth every penny and more."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">JT</div>
+            <div>
+              <div class="author-name">Jessica T.</div>
+              <div class="author-title">Entrepreneur</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- FAQ -->
+  <section class="faq" id="faq">
+    <div class="container">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      
+      <div class="faq-item">
+        <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+          What exactly do I get?
+          <span>+</span>
+        </div>
+        <div class="faq-answer">
+          You get instant digital download access to the complete Soul Forge system: Soul Ledger for tracking deeds, PLT Dashboard for visualization, Daily Check-in system, Soul Evolution tracking, and full data export capabilities. Bonuses vary by tier.
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+          Is this a subscription?
+          <span>+</span>
+        </div>
+        <div class="faq-answer">
+          No! One-time payment, lifetime access. Your soul data is yours forever. No monthly fees, no tracking, no BS. Ever.
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+          Can I use this commercially?
+          <span>+</span>
+        </div>
+        <div class="faq-answer">
+          With the Enterprise license ($197) or Complete Bundle ($97), yes! You get commercial rights, white label options, and can use it with your clients or resell it.
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+          What's the refund policy?
+          <span>+</span>
+        </div>
+        <div class="faq-answer">
+          30-day money-back guarantee. If your soul doesn't feel more aligned, full refund. No questions asked. We trust you.
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+          How do I receive the product?
+          <span>+</span>
+        </div>
+        <div class="faq-answer">
+          Instant digital download. After payment, you'll get a download link immediately via email. Includes all files + setup instructions + video tutorials.
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+          What is the PLT framework?
+          <span>+</span>
+        </div>
+        <div class="faq-answer">
+          PLT = Profit, Love, Tax. We added Grace. Track your progress in 4 dimensions: building wealth (Profit), relationships (Love), giving back (Tax), and spiritual growth (Grace). Complete soul development.
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Guarantee -->
+  <section class="guarantee">
+    <div class="container">
+      <div class="guarantee-box">
+        <div class="guarantee-icon">🔒</div>
+        <h2>30-Day Money-Back Guarantee</h2>
+        <p style="margin-top: 20px; color: #888;">
+          If your soul doesn't feel more aligned in 30 days, we'll refund every penny. 
+          No questions. No hard feelings. Your journey matters more than our money.
+        </p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="#">Terms of Service</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Refund Policy</a>
+        <a href="#">Contact</a>
+      </div>
+      <p>&copy; 2026 Soul Forge. All rights reserved.</p>
+      <p style="margin-top: 10px; font-size: 0.9rem;">
+        Built with 🌌 Soul Forge • Your soul is always PLT
+      </p>
+    </div>
+  </footer>
+  
+  <!-- Buy Modal -->
+  <div class="modal" id="buyModal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Complete Your Purchase</h2>
+      <p id="modalDesc">You're about to transform your soul</p>
+      
+      <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        <p style="color: #fff; margin-bottom: 10px;">You'll receive:</p>
+        <ul style="text-align: left; color: #888; list-style: none;">
+          <li style="padding: 5px 0;">✓ Instant download link</li>
+          <li style="padding: 5px 0;">✓ Lifetime access</li>
+          <li style="padding: 5px 0;">✓ All future updates</li>
+          <li style="padding: 5px 0;">✓ 30-day guarantee</li>
+        </ul>
+      </div>
+      
+      <div class="modal-buttons">
+        <button class="btn-cancel" onclick="closeBuyModal()">Continue Shopping</button>
+        <button class="btn-confirm" onclick="proceedToCheckout()">Proceed to Checkout</button>
+      </div>
+      
+      <p style="margin-top: 20px; font-size: 0.8rem; color: #666;">
+        🔒 Secure checkout powered by Stripe
+      </p>
+    </div>
+  </div>
+  
+  <script>
+    let selectedProduct = '';
+    let selectedPrice = 0;
+    
+    function openBuyModal(product, price) {
+      selectedProduct = product;
+      selectedPrice = price;
+      
+      document.getElementById('modalTitle').textContent = `${product} - $${price}`;
+      document.getElementById('modalDesc').textContent = 'You\'re about to transform your soul';
+      document.getElementById('buyModal').style.display = 'flex';
+    }
+    
+    function closeBuyModal() {
+      document.getElementById('buyModal').style.display = 'none';
+    }
+    
+    function proceedToCheckout() {
+      // TODO: Replace with actual checkout URL (Gumroad/Stripe/LemonSqueezy)
+      alert(`Redirecting to checkout for ${selectedProduct} ($${selectedPrice})...\n\nTo complete setup:\n1. Create payment link on Gumroad/Stripe\n2. Replace this alert with actual redirect\n3. Set up auto-delivery`);
+      
+      // Example redirect:
+      // window.location.href = 'https://gumroad.com/l/your-product-link';
+    }
+    
+    // Close modal on outside click
+    window.onclick = function(event) {
+      const modal = document.getElementById('buyModal');
+      if (event.target === modal) {
+        closeBuyModal();
+      }
+    };
+    
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>

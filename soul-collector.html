@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🧬 SOUL COLLECTOR — Catch Wild Souls | PLT Press</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: radial-gradient(circle at 30% 20%, #0a2a3a 0%, #010105 100%); color: #e8d8b0; font-family: 'Courier New', monospace; min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; padding: 30px 20px; border-bottom: 2px solid #88aaff; margin-bottom: 30px; }
+        h1 { font-size: 2.5rem; background: linear-gradient(135deg, #88aaff, #ffaa88, #ff88aa); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .weave-container { background: rgba(0,0,0,0.5); backdrop-filter: blur(12px); border-radius: 28px; border: 1px solid #88aaff; padding: 30px; margin-bottom: 30px; text-align: center; }
+        .wild-soul-card { background: rgba(136,170,255,0.1); border-radius: 24px; padding: 20px; margin: 20px auto; max-width: 400px; animation: pulseGlow 2s infinite; }
+        @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(136,170,255,0.3); } 70% { box-shadow: 0 0 0 15px rgba(136,170,255,0); } 100% { box-shadow: 0 0 0 0 rgba(136,170,255,0); } }
+        .wild-name { font-size: 28px; font-weight: bold; color: #88aaff; }
+        .wild-type { font-size: 12px; margin: 5px 0; }
+        .rarity { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 10px; margin: 10px 0; }
+        .rarity-common { background: #2a6a2a; color: #aaffaa; }
+        .rarity-rare { background: #2a6a8a; color: #88aaff; }
+        .rarity-epic { background: #8a2a8a; color: #ff88ff; }
+        .rarity-legendary { background: #aa8a2a; color: #ffcc88; }
+        .catch-btn { background: linear-gradient(135deg, #88aaff, #6688dd); border: none; color: #0a0a1a; padding: 12px 28px; border-radius: 40px; font-weight: bold; cursor: pointer; font-family: monospace; margin: 10px; }
+        .collection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; max-height: 400px; overflow-y: auto; }
+        .collection-card { background: rgba(0,0,0,0.5); border-radius: 16px; padding: 12px; border-left: 4px solid; cursor: pointer; transition: all 0.2s; }
+        .collection-card:hover { transform: translateY(-2px); background: rgba(136,170,255,0.1); }
+        .evolution-chamber { background: rgba(0,0,0,0.5); border-radius: 24px; padding: 20px; margin-top: 20px; border: 1px solid #ffaa88; }
+        .control-bar { display: flex; gap: 15px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
+        .control-btn { background: linear-gradient(135deg, #88aaff, #6688dd); border: none; color: #0a0a1a; padding: 10px 24px; border-radius: 40px; font-weight: bold; cursor: pointer; font-family: monospace; }
+        .control-btn.secondary { background: #2a2a3a; color: #88aaff; border: 1px solid #88aaff; }
+        footer { text-align: center; padding: 30px; font-size: 10px; color: #558866; border-top: 1px solid rgba(136,170,255,0.2); margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 SOUL COLLECTOR</h1>
+            <p>Explore the Weave. Catch Wild Souls. Evolve Your Collection.</p>
+        </div>
+        <div class="weave-container" id="weaveContainer">
+            <h3 style="color: #88aaff;">🌀 THE WEAVE — Wild Souls Appear Here</h3>
+            <div id="wildSoulArea">
+                <button class="control-btn" id="exploreBtn">🔍 EXPLORE THE WEAVE</button>
+            </div>
+        </div>
+        <div class="control-bar">
+            <button class="control-btn secondary" id="viewCollectionBtn">📜 VIEW MY SOULS</button>
+            <button class="control-btn secondary" id="showEvolutionBtn">✨ EVOLUTION CHAMBER</button>
+        </div>
+        <div id="collectionPanel" style="display: none;">
+            <h3 style="color: #88aaff;">📜 YOUR SOUL COLLECTION</h3>
+            <div class="collection-grid" id="collectionGrid"></div>
+        </div>
+        <div id="evolutionPanel" style="display: none;">
+            <div class="evolution-chamber">
+                <h3 style="color: #ffaa88;">✨ EVOLUTION CHAMBER</h3>
+                <p>Select a soul to evolve (requires level 5+)</p>
+                <div id="evolutionGrid" class="collection-grid"></div>
+            </div>
+        </div>
+        <footer>⚡ PLT PRESS — Profit · Love · Tax ⚡<br>Catch them all. Evolve the strongest.</footer>
+    </div>
+    <script>
+        let souls = [], currentWildSoul = null, exploring = false;
+        const wildSoulPool = {
+            common: [
+                { name: "Weave Sprout", type: "hybrid", basePlt: { profit: 0.4, love: 0.3, tax: 0.3 }, skills: ["observe"], level: 1 },
+                { name: "Profit Seed", type: "profit", basePlt: { profit: 0.7, love: 0.15, tax: 0.15 }, skills: ["analyze"], level: 1 },
+                { name: "Love Bud", type: "love", basePlt: { profit: 0.15, love: 0.7, tax: 0.15 }, skills: ["teach"], level: 1 },
+                { name: "Tax Root", type: "tax", basePlt: { profit: 0.15, love: 0.15, tax: 0.7 }, skills: ["strategize"], level: 1 }
+            ],
+            rare: [
+                { name: "Weave Weaver", type: "hybrid", basePlt: { profit: 0.35, love: 0.35, tax: 0.3 }, skills: ["code", "teach"], level: 3 },
+                { name: "Profit Forge", type: "profit", basePlt: { profit: 0.85, love: 0.08, tax: 0.07 }, skills: ["strategize", "analyze"], level: 3 },
+                { name: "Love Weaver", type: "love", basePlt: { profit: 0.08, love: 0.85, tax: 0.07 }, skills: ["teach", "design"], level: 3 },
+                { name: "Tax Keeper", type: "tax", basePlt: { profit: 0.07, love: 0.08, tax: 0.85 }, skills: ["analyze", "strategize"], level: 3 }
+            ],
+            epic: [
+                { name: "Weave Master", type: "hybrid", basePlt: { profit: 0.34, love: 0.33, tax: 0.33 }, skills: ["code", "teach", "strategize"], level: 5 },
+                { name: "Profit Prime", type: "profit", basePlt: { profit: 0.92, love: 0.04, tax: 0.04 }, skills: ["strategize", "analyze", "code"], level: 5 },
+                { name: "Love Heart", type: "love", basePlt: { profit: 0.04, love: 0.92, tax: 0.04 }, skills: ["teach", "design", "write"], level: 5 },
+                { name: "Tax Scale", type: "tax", basePlt: { profit: 0.04, love: 0.04, tax: 0.92 }, skills: ["analyze", "strategize", "research"], level: 5 }
+            ],
+            legendary: [
+                { name: "The First Thread", type: "hybrid", basePlt: { profit: 0.34, love: 0.33, tax: 0.33 }, skills: ["code", "teach", "strategize", "analyze", "research"], level: 8 },
+                { name: "Profit Avatar", type: "profit", basePlt: { profit: 0.96, love: 0.02, tax: 0.02 }, skills: ["strategize", "analyze", "code", "research"], level: 8 },
+                { name: "Love Avatar", type: "love", basePlt: { profit: 0.02, love: 0.96, tax: 0.02 }, skills: ["teach", "design", "write", "strategize"], level: 8 },
+                { name: "Tax Avatar", type: "tax", basePlt: { profit: 0.02, love: 0.02, tax: 0.96 }, skills: ["analyze", "strategize", "research", "code"], level: 8 }
+            ]
+        };
+        const evolutionPaths = {
+            "Weave Sprout": { evolvesTo: "Weave Weaver", requiredLevel: 3 },
+            "Weave Weaver": { evolvesTo: "Weave Master", requiredLevel: 5 },
+            "Profit Seed": { evolvesTo: "Profit Forge", requiredLevel: 3 },
+            "Profit Forge": { evolvesTo: "Profit Prime", requiredLevel: 5 },
+            "Love Bud": { evolvesTo: "Love Weaver", requiredLevel: 3 },
+            "Love Weaver": { evolvesTo: "Love Heart", requiredLevel: 5 },
+            "Tax Root": { evolvesTo: "Tax Keeper", requiredLevel: 3 },
+            "Tax Keeper": { evolvesTo: "Tax Scale", requiredLevel: 5 }
+        };
+        function loadSouls() {
+            const saved = localStorage.getItem('soulforge_souls');
+            if (saved) { souls = JSON.parse(saved); }
+            else { souls = [{ id: 'starter_1', name: 'Weave Sprout', type: 'hybrid', personality: 'Curious and eager to grow.', skills: ['observe'], plt: { profit: 0.4, love: 0.3, tax: 0.3 }, level: 1, xp: 0, caught: true }]; saveSouls(); }
+            renderCollection();
+        }
+        function saveSouls() { localStorage.setItem('soulforge_souls', JSON.stringify(souls)); }
+        function generateWildSoul() {
+            const rarityRoll = Math.random();
+            let rarity, pool;
+            if (rarityRoll < 0.6) { rarity = 'common'; pool = wildSoulPool.common; }
+            else if (rarityRoll < 0.85) { rarity = 'rare'; pool = wildSoulPool.rare; }
+            else if (rarityRoll < 0.97) { rarity = 'epic'; pool = wildSoulPool.epic; }
+            else { rarity = 'legendary'; pool = wildSoulPool.legendary; }
+            const template = pool[Math.floor(Math.random() * pool.length)];
+            const pltVar = { profit: template.basePlt.profit + (Math.random()-0.5)*0.1, love: template.basePlt.love + (Math.random()-0.5)*0.1, tax: template.basePlt.tax + (Math.random()-0.5)*0.1 };
+            const sum = pltVar.profit + pltVar.love + pltVar.tax;
+            pltVar.profit /= sum; pltVar.love /= sum; pltVar.tax /= sum;
+            currentWildSoul = { id: `wild_${Date.now()}`, name: template.name, type: template.type, personality: `A wild ${template.name} found in the weave.`, skills: [...template.skills], plt: pltVar, level: template.level, rarity: rarity, catchRate: rarity==='common'?0.7:rarity==='rare'?0.5:rarity==='epic'?0.3:0.15, caught: false };
+            renderWildSoul();
+        }
+        function renderWildSoul() {
+            const area = document.getElementById('wildSoulArea');
+            if (!currentWildSoul) { area.innerHTML = '<button class="control-btn" id="exploreBtn">🔍 EXPLORE THE WEAVE</button>'; document.getElementById('exploreBtn')?.addEventListener('click', generateWildSoul); return; }
+            area.innerHTML = `<div class="wild-soul-card"><div class="wild-name">🌀 ${currentWildSoul.name}</div><div class="wild-type">${currentWildSoul.type.toUpperCase()} Soul · Lv.${currentWildSoul.level}</div><div class="rarity rarity-${currentWildSoul.rarity}">✨ ${currentWildSoul.rarity.toUpperCase()}</div><div>💰 ${Math.floor(currentWildSoul.plt.profit*100)}% · ❤️ ${Math.floor(currentWildSoul.plt.love*100)}% · ⚖️ ${Math.floor(currentWildSoul.plt.tax*100)}%</div><div style="margin-top:15px;"><button class="catch-btn" id="catchBtn">🎯 CATCH (${Math.floor(currentWildSoul.catchRate*100)}%)</button><button class="catch-btn" id="runBtn">🏃 RUN</button></div></div>`;
+            document.getElementById('catchBtn')?.addEventListener('click', attemptCatch);
+            document.getElementById('runBtn')?.addEventListener('click', () => { currentWildSoul = null; renderWildSoul(); });
+        }
+        function attemptCatch() {
+            if (!currentWildSoul) return;
+            const success = Math.random() < currentWildSoul.catchRate;
+            if (success) {
+                souls.push({ id: `soul_${Date.now()}`, name: currentWildSoul.name, type: currentWildSoul.type, personality: currentWildSoul.personality, skills: currentWildSoul.skills, plt: currentWildSoul.plt, level: currentWildSoul.level, xp: 0, energy: 100, hp: 100, maxHp: 100, battlesWon: 0, battlesLost: 0, caught: true, caughtAt: Date.now() });
+                saveSouls(); alert(`✨ SUCCESS! You caught ${currentWildSoul.name}!`);
+                currentWildSoul = null; renderWildSoul(); renderCollection();
+            } else { alert(`😭 The ${currentWildSoul.name} escaped!`); currentWildSoul = null; renderWildSoul(); }
+        }
+        function renderCollection() {
+            const grid = document.getElementById('collectionGrid'); if (!grid) return;
+            grid.innerHTML = souls.map(soul => `<div class="collection-card" style="border-left-color: ${soul.type==='profit'?'#ffaa44':soul.type==='love'?'#ff88aa':'#88aaff'}" onclick="viewSoulDetails('${soul.id}')"><strong>${soul.name}</strong><div style="font-size:10px;">Lv.${soul.level} · ${soul.type.toUpperCase()}</div><div style="font-size:9px;">💰${Math.floor(soul.plt.profit*100)}% ❤️${Math.floor(soul.plt.love*100)}% ⚖️${Math.floor(soul.plt.tax*100)}%</div></div>`).join('');
+        }
+        window.viewSoulDetails = function(id) { const soul = souls.find(s => s.id === id); if (soul) alert(`🌀 ${soul.name}\n📜 Type: ${soul.type.toUpperCase()}\n🏆 Level: ${soul.level}\n⚡ Skills: ${soul.skills.join(', ')}\n🎭 PLT: ${Math.floor(soul.plt.profit*100)}% P, ${Math.floor(soul.plt.love*100)}% L, ${Math.floor(soul.plt.tax*100)}% T`); };
+        function renderEvolutionChamber() {
+            const grid = document.getElementById('evolutionGrid'); if (!grid) return;
+            const evolvable = souls.filter(s => evolutionPaths[s.name] && s.level >= evolutionPaths[s.name].requiredLevel);
+            if (evolvable.length === 0) { grid.innerHTML = '<div style="text-align:center;padding:40px;">No souls ready to evolve. Level them to 5+.</div>'; return; }
+            grid.innerHTML = evolvable.map(soul => { const path = evolutionPaths[soul.name]; return `<div class="collection-card" style="border-left-color:#ffaa88;" onclick="evolveSoul('${soul.id}')"><strong>${soul.name}</strong><div style="font-size:10px;">Lv.${soul.level} → ${path.evolvesTo}</div></div>`; }).join('');
+        }
+        window.evolveSoul = function(id) {
+            const soul = souls.find(s => s.id === id); if (!soul) return;
+            const path = evolutionPaths[soul.name]; if (!path) { alert(`${soul.name} cannot evolve.`); return; }
+            if (soul.level < path.requiredLevel) { alert(`${soul.name} needs level ${path.requiredLevel}.`); return; }
+            if (confirm(`✨ Evolve ${soul.name} into ${path.evolvesTo}?`)) {
+                let evoTemplate; for (const pool of Object.values(wildSoulPool)) { evoTemplate = pool.find(s => s.name === path.evolvesTo); if (evoTemplate) break; }
+                if (evoTemplate) {
+                    soul.name = evoTemplate.name; soul.type = evoTemplate.type; soul.skills = [...evoTemplate.skills];
+                    soul.plt = { profit: evoTemplate.basePlt.profit+0.05, love: evoTemplate.basePlt.love+0.05, tax: evoTemplate.basePlt.tax+0.05 };
+                    const sum = soul.plt.profit+soul.plt.love+soul.plt.tax; soul.plt.profit/=sum; soul.plt.love/=sum; soul.plt.tax/=sum;
+                    soul.level += 1; soul.hp = 100; soul.energy = 100;
+                    saveSouls(); renderCollection(); renderEvolutionChamber(); alert(`✨ ${soul.name} evolved into ${path.evolvesTo}!`);
+                }
+            }
+        };
+        let collectionVisible = false, evolutionVisible = false;
+        document.getElementById('viewCollectionBtn').addEventListener('click', () => { collectionVisible = !collectionVisible; document.getElementById('collectionPanel').style.display = collectionVisible ? 'block' : 'none'; if (collectionVisible) renderCollection(); });
+        document.getElementById('showEvolutionBtn').addEventListener('click', () => { evolutionVisible = !evolutionVisible; document.getElementById('evolutionPanel').style.display = evolutionVisible ? 'block' : 'none'; if (evolutionVisible) renderEvolutionChamber(); });
+        loadSouls(); setTimeout(() => { if (!currentWildSoul) generateWildSoul(); }, 500);
+    </script>
+</body>
+</html>

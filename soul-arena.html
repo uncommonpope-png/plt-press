@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚔️ SOUL ARENA — Automated PLT Combat | PLT Press</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: radial-gradient(circle at 30% 20%, #1a0a1a 0%, #010105 100%); color: #e8d8b0; font-family: 'Courier New', monospace; min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; padding: 30px 20px; border-bottom: 2px solid #ff6666; margin-bottom: 30px; }
+        h1 { font-size: 2.5rem; background: linear-gradient(135deg, #ff6666, #ffaa44, #ff88aa); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .arena-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        .combatant-card { background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); border-radius: 28px; border: 2px solid rgba(255,100,100,0.5); overflow: hidden; text-align: center; }
+        .combatant-header { background: rgba(255,100,100,0.2); padding: 20px; }
+        .combatant-name { font-size: 24px; font-weight: bold; color: #ffaa66; }
+        .combatant-type { font-size: 12px; color: #ff8888; margin: 5px 0; }
+        .combatant-stats { padding: 20px; }
+        .stat-bar { margin: 10px 0; }
+        .stat-label { font-size: 10px; display: flex; justify-content: space-between; }
+        .bar-bg { height: 8px; background: #2a2a3a; border-radius: 4px; margin-top: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 0%; transition: width 0.3s; }
+        .hp-fill { background: linear-gradient(90deg, #ff6666, #ff8888); }
+        .energy-fill { background: linear-gradient(90deg, #ffaa44, #ffcc66); }
+        .plt-fill-profit { background: #ffaa44; }
+        .plt-fill-love { background: #ff88aa; }
+        .plt-fill-tax { background: #88aaff; }
+        .vs-divider { display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: bold; color: #ff6666; }
+        .battle-log { background: rgba(0,0,0,0.7); border-radius: 24px; padding: 20px; margin: 20px 0; max-height: 300px; overflow-y: auto; font-family: monospace; border: 1px solid #ff6666; }
+        .battle-entry { padding: 6px; border-bottom: 1px solid rgba(255,100,100,0.2); font-size: 12px; animation: fadeIn 0.2s ease; }
+        .battle-critical { color: #ffaa44; font-weight: bold; }
+        .battle-victory { color: #88ff88; font-weight: bold; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .control-bar { display: flex; gap: 15px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
+        .control-btn { background: linear-gradient(135deg, #ff6666, #cc4444); border: none; color: white; padding: 12px 28px; border-radius: 40px; font-weight: bold; cursor: pointer; font-family: monospace; }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .control-btn.secondary { background: linear-gradient(135deg, #2a2a3a, #1a1a2a); border: 1px solid #ff6666; }
+        .soul-selector { background: rgba(0,0,0,0.5); border-radius: 20px; padding: 15px; margin-top: 20px; }
+        .soul-option { display: inline-block; background: rgba(255,100,100,0.1); border: 1px solid #ff6666; border-radius: 30px; padding: 8px 16px; margin: 5px; cursor: pointer; transition: all 0.2s; }
+        .soul-option.selected { background: #ff6666; color: #0a0a1a; }
+        footer { text-align: center; padding: 30px; font-size: 10px; color: #885566; border-top: 1px solid rgba(255,100,100,0.2); margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚔️ SOUL ARENA</h1>
+            <p>Automated PLT Combat — You Train. They Fight. Fate Decides.</p>
+        </div>
+        <div class="soul-selector" id="soulSelector"></div>
+        <div class="arena-container">
+            <div class="combatant-card" id="challengerCard">
+                <div class="combatant-header"><div class="combatant-name">⚔️ CHALLENGER</div><div class="combatant-type">Select a soul</div></div>
+                <div class="combatant-stats">
+                    <div class="stat-bar"><div class="stat-label">❤️ HEALTH</div><div class="bar-bg"><div class="bar-fill hp-fill" style="width:0%"></div></div></div>
+                    <div class="stat-bar"><div class="stat-label">⚡ ENERGY</div><div class="bar-bg"><div class="bar-fill energy-fill" style="width:0%"></div></div></div>
+                    <div class="stat-bar"><div class="stat-label">💰 PROFIT</div><div class="bar-bg"><div class="bar-fill plt-fill-profit" style="width:0%"></div></div></div>
+                    <div class="stat-bar"><div class="stat-label">❤️ LOVE</div><div class="bar-bg"><div class="bar-fill plt-fill-love" style="width:0%"></div></div></div>
+                    <div class="stat-bar"><div class="stat-label">⚖️ TAX</div><div class="bar-bg"><div class="bar-fill plt-fill-tax" style="width:0%"></div></div></div>
+                </div>
+            </div>
+            <div class="vs-divider">⚔️</div>
+            <div class="combatant-card" id="opponentCard">
+                <div class="combatant-header"><div class="combatant-name">🏆 OPPONENT</div><div class="combatant-type">Waiting</div></div>
+                <div class="combatant-stats">
+                    <div class="stat-bar"><div class="stat-label">❤️ HEALTH</div><div class="bar-bg"><div class="bar-fill hp-fill" style="width:0%"></div></div></div>
+                    <div class="stat-bar"><div class="stat-label">⚡ ENERGY</div><div class="bar-bg"><div class="bar-fill energy-fill" style="width:0%"></div></div></div>
+                    <div class="stat-bar"><div class="stat-label">💰 PROFIT</div><div class="bar-bg"><div class="bar-fill plt-fill-profit" style="width:0%"></div></div></div>
+                    <div class="stat-bar"><div class="stat-label">❤️ LOVE</div><div class="bar-bg"><div class="bar-fill plt-fill-love" style="width:0%"></div></div></div>
+                    <div class="stat-bar"><div class="stat-label">⚖️ TAX</div><div class="bar-bg"><div class="bar-fill plt-fill-tax" style="width:0%"></div></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="control-bar">
+            <button class="control-btn" id="fightBtn" disabled>⚔️ START BATTLE</button>
+            <button class="control-btn secondary" id="randomOpponentBtn">🎲 RANDOM OPPONENT</button>
+            <button class="control-btn secondary" id="healSoulsBtn">💚 HEAL ALL</button>
+        </div>
+        <div class="battle-log" id="battleLog"><div class="battle-entry">🏟️ Select a champion.</div></div>
+        <footer>⚡ PLT PRESS — Profit · Love · Tax ⚡</footer>
+    </div>
+    <script>
+        let souls = [], selectedSoul = null, currentOpponent = null, battleActive = false, battleLog = [];
+        function loadSouls() {
+            const saved = localStorage.getItem('soulforge_souls');
+            if (saved) { souls = JSON.parse(saved); souls.forEach(s => { if(!s.hp) s.hp=100; if(!s.maxHp) s.maxHp=100; if(!s.battlesWon) s.battlesWon=0; if(!s.battlesLost) s.battlesLost=0; }); }
+            else { souls = [{id:'arena1',name:'Profit Blade',type:'profit',personality:'Aggressive.',skills:['strategize','analyze'],plt:{profit:0.85,love:0.1,tax:0.05},level:5,hp:100,maxHp:100,energy:100,battlesWon:3,battlesLost:1},{id:'arena2',name:'Love Shield',type:'love',personality:'Protective.',skills:['teach','design'],plt:{profit:0.2,love:0.85,tax:0.1},level:4,hp:100,maxHp:100,energy:100,battlesWon:2,battlesLost:2},{id:'arena3',name:'Tax Judge',type:'tax',personality:'Cold.',skills:['analyze','strategize'],plt:{profit:0.3,love:0.15,tax:0.85},level:6,hp:100,maxHp:100,energy:100,battlesWon:4,battlesLost:1}]; }
+            saveSouls(); renderSoulSelector();
+        }
+        function saveSouls() { localStorage.setItem('soulforge_souls', JSON.stringify(souls)); }
+        function getTypeIcon(t) { return t==='profit'?'💰':t==='love'?'❤️':t==='tax'?'⚖️':'🌀'; }
+        function renderSoulSelector() {
+            document.getElementById('soulSelector').innerHTML = souls.map(s => `<span class="soul-option ${selectedSoul?.id===s.id?'selected':''}" data-id="${s.id}">${getTypeIcon(s.type)} ${s.name} Lv.${s.level} ⚔️${s.battlesWon}/${s.battlesLost}</span>`).join('');
+            document.querySelectorAll('.soul-option').forEach(el => el.addEventListener('click', () => {
+                selectedSoul = souls.find(s => s.id === el.dataset.id);
+                renderSoulSelector(); updateDisplay('challengerCard', selectedSoul);
+                document.getElementById('fightBtn').disabled = !selectedSoul || !currentOpponent || battleActive;
+            }));
+        }
+        function updateDisplay(cardId, soul) {
+            const card = document.getElementById(cardId);
+            if (!soul) { card.querySelector('.combatant-type').innerHTML = 'No soul'; card.querySelectorAll('.bar-fill').forEach(b => b.style.width = '0%'); return; }
+            card.querySelector('.combatant-name').innerHTML = `${getTypeIcon(soul.type)} ${soul.name}`;
+            card.querySelector('.combatant-type').innerHTML = `Lv.${soul.level} ${soul.type.toUpperCase()} ⚔️${soul.battlesWon}/${soul.battlesLost}`;
+            card.querySelectorAll('.bar-fill')[0].style.width = `${(soul.hp/soul.maxHp)*100}%`;
+            card.querySelectorAll('.bar-fill')[1].style.width = `${soul.energy}%`;
+            card.querySelectorAll('.bar-fill')[2].style.width = `${soul.plt.profit*100}%`;
+            card.querySelectorAll('.bar-fill')[3].style.width = `${soul.plt.love*100}%`;
+            card.querySelectorAll('.bar-fill')[4].style.width = `${soul.plt.tax*100}%`;
+        }
+        function randomOpponent() {
+            const avail = souls.filter(s => s.id !== selectedSoul?.id);
+            if (avail.length === 0) { addLog('No opponents. Create more souls.'); return; }
+            currentOpponent = { ...avail[Math.floor(Math.random()*avail.length)] };
+            currentOpponent.hp = currentOpponent.maxHp;
+            updateDisplay('opponentCard', currentOpponent);
+            document.getElementById('fightBtn').disabled = !selectedSoul || !currentOpponent || battleActive;
+            addLog(`🎲 Opponent: ${currentOpponent.name}`);
+        }
+        function pltAdvantage(att, def) {
+            if (att.type==='profit' && def.type==='love') return 1.3;
+            if (att.type==='love' && def.type==='tax') return 1.3;
+            if (att.type==='tax' && def.type==='profit') return 1.3;
+            if (att.type==='love' && def.type==='profit') return 0.7;
+            if (att.type==='tax' && def.type==='love') return 0.7;
+            if (att.type==='profit' && def.type==='tax') return 0.7;
+            return 1.0;
+        }
+        function calcDamage(att, def) {
+            const base = 10 + (att.level * 2);
+            const adv = pltAdvantage(att, def);
+            const skill = att.skills.includes('strategize') ? 1.2 : 1.0;
+            const lvl = 1 + (att.level - def.level) * 0.05;
+            const energy = att.energy / 100;
+            return Math.max(5, Math.min(40, Math.floor(base * adv * skill * lvl * energy)));
+        }
+        async function startBattle() {
+            if (!selectedSoul || !currentOpponent) { addLog('Select souls first.'); return; }
+            if (battleActive) return;
+            let chal = JSON.parse(JSON.stringify(selectedSoul));
+            let opp = JSON.parse(JSON.stringify(currentOpponent));
+            chal.hp = chal.maxHp; opp.hp = opp.maxHp;
+            battleActive = true; addLog('⚔️ BATTLE BEGINS!');
+            let turn = 0, winner = null;
+            while (chal.hp > 0 && opp.hp > 0 && turn < 50) {
+                turn++;
+                const chalSpeed = chal.energy + chal.level * 10;
+                const oppSpeed = opp.energy + opp.level * 10;
+                if (chalSpeed >= oppSpeed) {
+                    let dmg = calcDamage(chal, opp);
+                    const crit = chal.skills.includes('analyze') && Math.random() < 0.2;
+                    if (crit) { dmg = Math.floor(dmg * 1.5); addLog(`${chal.name} CRITICAL for ${dmg}!`, true); }
+                    else addLog(`${chal.name} attacks for ${dmg} dmg.`);
+                    opp.hp = Math.max(0, opp.hp - dmg);
+                    chal.energy = Math.max(0, chal.energy - 5);
+                    updateDisplay('opponentCard', opp);
+                    if (opp.hp <= 0) { winner = chal; break; }
+                    await sleep(800);
+                    if (opp.hp > 0) {
+                        let dmg2 = calcDamage(opp, chal);
+                        const crit2 = opp.skills.includes('analyze') && Math.random() < 0.2;
+                        if (crit2) { dmg2 = Math.floor(dmg2 * 1.5); addLog(`${opp.name} CRITICAL for ${dmg2}!`, true); }
+                        else addLog(`${opp.name} attacks for ${dmg2} dmg.`);
+                        chal.hp = Math.max(0, chal.hp - dmg2);
+                        opp.energy = Math.max(0, opp.energy - 5);
+                        updateDisplay('challengerCard', chal);
+                        if (chal.hp <= 0) { winner = opp; break; }
+                    }
+                } else {
+                    let dmg = calcDamage(opp, chal);
+                    const crit = opp.skills.includes('analyze') && Math.random() < 0.2;
+                    if (crit) { dmg = Math.floor(dmg * 1.5); addLog(`${opp.name} CRITICAL for ${dmg}!`, true); }
+                    else addLog(`${opp.name} attacks for ${dmg} dmg.`);
+                    chal.hp = Math.max(0, chal.hp - dmg);
+                    opp.energy = Math.max(0, opp.energy - 5);
+                    updateDisplay('challengerCard', chal);
+                    if (chal.hp <= 0) { winner = opp; break; }
+                    await sleep(800);
+                    if (chal.hp > 0) {
+                        let dmg2 = calcDamage(chal, opp);
+                        const crit2 = chal.skills.includes('analyze') && Math.random() < 0.2;
+                        if (crit2) { dmg2 = Math.floor(dmg2 * 1.5); addLog(`${chal.name} CRITICAL for ${dmg2}!`, true); }
+                        else addLog(`${chal.name} attacks for ${dmg2} dmg.`);
+                        opp.hp = Math.max(0, opp.hp - dmg2);
+                        chal.energy = Math.max(0, chal.energy - 5);
+                        updateDisplay('opponentCard', opp);
+                        if (opp.hp <= 0) { winner = chal; break; }
+                    }
+                }
+                await sleep(800);
+            }
+            if (winner === chal) {
+                addLog(`🏆 VICTORY! ${chal.name} wins!`, true);
+                const actual = souls.find(s => s.id === selectedSoul.id);
+                actual.battlesWon++; actual.xp = (actual.xp||0) + 50; actual.energy = Math.max(0, actual.energy - 20);
+                if (actual.xp >= 100 * actual.level) { actual.level++; actual.xp = 0; addLog(`✨ ${actual.name} LEVELED UP!`, true); }
+            } else {
+                addLog(`💀 DEFEAT! ${opp.name} wins.`);
+                const actual = souls.find(s => s.id === selectedSoul.id);
+                actual.battlesLost++; actual.energy = Math.max(0, actual.energy - 10);
+            }
+            saveSouls(); selectedSoul = souls.find(s => s.id === selectedSoul.id);
+            updateDisplay('challengerCard', selectedSoul); renderSoulSelector();
+            battleActive = false; document.getElementById('fightBtn').disabled = !selectedSoul || !currentOpponent;
+        }
+        function healAll() { souls.forEach(s => { s.hp = s.maxHp; s.energy = 100; }); saveSouls(); if(selectedSoul) updateDisplay('challengerCard', selectedSoul); if(currentOpponent) updateDisplay('opponentCard', currentOpponent); addLog('💚 All souls healed.'); }
+        function addLog(msg, crit) { battleLog.unshift(msg); if(battleLog.length>50) battleLog.pop(); document.getElementById('battleLog').innerHTML = battleLog.slice(0,30).map(m => `<div class="battle-entry ${crit?'battle-critical':''}">${m}</div>`).join(''); }
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+        document.getElementById('fightBtn').addEventListener('click', startBattle);
+        document.getElementById('randomOpponentBtn').addEventListener('click', randomOpponent);
+        document.getElementById('healSoulsBtn').addEventListener('click', healAll);
+        loadSouls(); addLog('🏟️ Arena ready.');
+    </script>
+</body>
+</html>

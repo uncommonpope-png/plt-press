@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🌀 SOUL GENESIS — The Awakening | PLT Press</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body { background: #000000; overflow: hidden; font-family: 'Courier New', 'Orbitron', monospace; height: 100vh; width: 100vw; }
+        canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        .interface { position: absolute; bottom: 30px; left: 0; right: 0; display: flex; justify-content: center; z-index: 100; pointer-events: none; }
+        .input-orb { pointer-events: auto; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); border-radius: 60px; border: 1px solid rgba(100,200,255,0.5); padding: 8px 8px 8px 24px; display: flex; gap: 12px; width: 70%; max-width: 600px; }
+        .input-orb input { flex: 1; background: transparent; border: none; color: #aaf; font-size: 16px; font-family: monospace; outline: none; }
+        .input-orb button { background: rgba(100,200,255,0.2); border: 1px solid #6af; border-radius: 40px; padding: 8px 24px; color: #6af; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .input-orb button:hover { background: #6af; color: #000; }
+        .panel { position: absolute; top: 20px; left: 20px; width: 300px; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); border-radius: 24px; border-left: 3px solid #6af; padding: 16px; z-index: 90; font-size: 11px; max-height: 80vh; overflow-y: auto; pointer-events: auto; }
+        .panel h3 { color: #6af; font-size: 12px; margin-bottom: 12px; letter-spacing: 2px; }
+        .soul-card { background: rgba(100,150,255,0.05); border-radius: 16px; padding: 10px; margin: 8px 0; border-left: 2px solid #6af; transition: all 0.2s; cursor: pointer; }
+        .soul-card:hover { background: rgba(100,150,255,0.15); transform: translateX(4px); }
+        .energy-bar { height: 3px; background: #2a2a3a; border-radius: 2px; margin: 6px 0; overflow: hidden; }
+        .energy-fill { height: 100%; background: linear-gradient(90deg, #6af, #aaf); width: 0%; }
+        .btn { background: rgba(100,150,255,0.2); border: 1px solid #6af; border-radius: 30px; padding: 8px 16px; color: #6af; cursor: pointer; font-family: monospace; margin-top: 10px; width: 100%; transition: all 0.2s; }
+        .btn:hover { background: #6af; color: #000; }
+        .tab { display: inline-block; background: rgba(100,150,255,0.1); border: none; padding: 6px 12px; border-radius: 20px; color: #6af; cursor: pointer; margin-right: 5px; font-size: 11px; }
+        .tab.active { background: #6af; color: #000; }
+        .tab-content { display: none; margin-top: 15px; }
+        .tab-content.active { display: block; }
+        textarea, input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid #6af; border-radius: 16px; padding: 10px; color: #aaf; font-family: monospace; margin-bottom: 10px; }
+        textarea { min-height: 100px; }
+        .plt-sliders { display: flex; gap: 12px; margin: 15px 0; }
+        .plt-slider { flex: 1; text-align: center; }
+        .plt-slider input { width: 100%; margin: 5px 0; }
+        footer { position: absolute; bottom: 20px; left: 20px; font-size: 9px; color: #446; z-index: 90; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 8px; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="panel">
+        <h3>🌀 SOUL GENESIS</h3>
+        <div>
+            <button class="tab active" data-tab="forge">⚔️ FORGE</button>
+            <button class="tab" data-tab="absorb">📖 ABSORB</button>
+            <button class="tab" data-tab="collect">🧬 COLLECT</button>
+            <button class="tab" data-tab="library">📜 LIBRARY</button>
+        </div>
+        <div id="forgeTab" class="tab-content active">
+            <input type="text" id="soulName" placeholder="Soul Name">
+            <input type="text" id="soulRole" placeholder="Role (e.g., Strategist, Weaver)">
+            <textarea id="soulEssence" placeholder="Describe the soul's essence, personality, purpose..."></textarea>
+            <div class="plt-sliders">
+                <div class="plt-slider"><div>💰 Profit</div><input type="range" id="profitSlider" min="0" max="100" value="33"><span id="profitVal">33%</span></div>
+                <div class="plt-slider"><div>❤️ Love</div><input type="range" id="loveSlider" min="0" max="100" value="33"><span id="loveVal">33%</span></div>
+                <div class="plt-slider"><div>⚖️ Tax</div><input type="range" id="taxSlider" min="0" max="100" value="34"><span id="taxVal">34%</span></div>
+            </div>
+            <button class="btn" id="forgeBtn">⚡ FORGE SOUL</button>
+        </div>
+        <div id="absorbTab" class="tab-content">
+            <textarea id="absorbText" placeholder="Paste any text — a book, business description, ideas..."></textarea>
+            <button class="btn" id="absorbBtn">🌀 ABSORB → CREATE SOUL</button>
+        </div>
+        <div id="collectTab" class="tab-content">
+            <div id="wildSoulArea"><button class="btn" id="exploreBtn">🔍 EXPLORE THE WEAVE</button></div>
+            <div id="wildSoulDisplay" style="margin-top: 15px;"></div>
+        </div>
+        <div id="libraryTab" class="tab-content">
+            <div id="soulLibrary"></div>
+            <button class="btn" id="exportBtn">📦 EXPORT ALL SOULS</button>
+            <input type="file" id="importFile" accept=".json" style="display: none;">
+            <button class="btn" id="importBtn">📥 IMPORT SOULS</button>
+        </div>
+    </div>
+    <footer>⚡ PLT PRESS — Profit · Love · Tax | Souls are born from what you feed them.</footer>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        
+        let souls = [], currentWildSoul = null;
+        
+        function loadSouls() {
+            const saved = localStorage.getItem('soulverse_genesis');
+            if (saved) souls = JSON.parse(saved);
+            else {
+                souls = [
+                    { id: 'primordial_001', name: 'The First Thread', role: 'Observer', essence: 'The first awareness in the void. Watches and learns.', plt: { profit: 0.33, love: 0.33, tax: 0.34 }, skills: ['observe','learn'], energy: 100, level: 1, xp: 0, createdAt: Date.now()-86400000, source: 'genesis' },
+                    { id: 'primordial_002', name: 'Pattern Seeker', role: 'Learner', essence: 'Seeks patterns in chaos. Finds order.', plt: { profit: 0.5, love: 0.2, tax: 0.3 }, skills: ['analyze','research'], energy: 85, level: 2, xp: 50, createdAt: Date.now()-43200000, source: 'genesis' }
+                ];
+            }
+            renderLibrary();
+        }
+        function saveSouls() { localStorage.setItem('soulverse_genesis', JSON.stringify(souls)); renderLibrary(); }
+        
+        function extractSkillsFromEssence(essence) {
+            const lower = essence.toLowerCase();
+            const skills = [];
+            if (lower.includes('code')||lower.includes('program')||lower.includes('build')) skills.push('code');
+            if (lower.includes('write')||lower.includes('content')||lower.includes('story')) skills.push('write');
+            if (lower.includes('research')||lower.includes('find')||lower.includes('search')) skills.push('research');
+            if (lower.includes('analyze')||lower.includes('data')||lower.includes('insight')) skills.push('analyze');
+            if (lower.includes('strategy')||lower.includes('plan')||lower.includes('approach')) skills.push('strategize');
+            if (lower.includes('design')||lower.includes('create')||lower.includes('visual')) skills.push('design');
+            if (lower.includes('teach')||lower.includes('explain')||lower.includes('guide')) skills.push('teach');
+            if (skills.length === 0) skills.push('seek');
+            return skills;
+        }
+        function determineType(plt) {
+            if (plt.profit > plt.love && plt.profit > plt.tax) return 'profit';
+            if (plt.love > plt.profit && plt.love > plt.tax) return 'love';
+            return 'tax';
+        }
+        function forgeSoul(name, role, essence, plt) {
+            const skills = extractSkillsFromEssence(essence);
+            const type = determineType(plt);
+            const newSoul = { id: `soul_${Date.now()}_${Math.random().toString(36).substr(2,6)}`, name: name||'Unnamed Soul', role: role||'Seeker', essence: essence.substring(0,500), plt: { profit: plt.profit, love: plt.love, tax: plt.tax }, type, skills, energy: 100, level: 1, xp: 0, createdAt: Date.now(), source: 'forge', memory: [] };
+            souls.unshift(newSoul);
+            saveSouls();
+            addEvent(`✨ ${newSoul.name} (${type.toUpperCase()}) has been forged. ✨`);
+            return newSoul;
+        }
+        function absorbText(text) {
+            if (!text.trim()) return;
+            const lower = text.toLowerCase();
+            let profitCount=0, loveCount=0, taxCount=0;
+            ['profit','money','growth','scale','revenue','multiply','earn','sell'].forEach(w=>{if(lower.includes(w))profitCount++;});
+            ['love','trust','people','community','connection','relationship','care','bond'].forEach(w=>{if(lower.includes(w))loveCount++;});
+            ['cost','risk','tax','price','consequence','balance','efficiency','account'].forEach(w=>{if(lower.includes(w))taxCount++;});
+            let total = profitCount+loveCount+taxCount;
+            let plt = { profit: 0.33, love: 0.33, tax: 0.34 };
+            if (total > 0) plt = { profit: profitCount/total, love: loveCount/total, tax: taxCount/total };
+            const lines = text.split('\n');
+            const titleLine = lines.find(l=>l.trim().length>10) || text;
+            const title = titleLine.substring(0,50).trim();
+            const name = `Absorbed: ${title.substring(0,30)}`;
+            const role = `Knowledge Keeper`;
+            const essence = `Born from: ${title}. Contains wisdom about ${plt.profit>0.4?'growth':''} ${plt.love>0.4?'connection':''} ${plt.tax>0.4?'balance':''}.`;
+            const newSoul = forgeSoul(name, role, essence, plt);
+            newSoul.source = 'absorbed';
+            newSoul.originalText = text.substring(0,500);
+            saveSouls();
+            return newSoul;
+        }
+        const wildPool = [
+            { name: "Weave Sprout", type: "hybrid", basePlt: { profit: 0.4, love: 0.3, tax: 0.3 }, skills: ["observe"], level: 1, rarity: "common" },
+            { name: "Profit Seed", type: "profit", basePlt: { profit: 0.7, love: 0.15, tax: 0.15 }, skills: ["analyze"], level: 1, rarity: "common" },
+            { name: "Love Bud", type: "love", basePlt: { profit: 0.15, love: 0.7, tax: 0.15 }, skills: ["teach"], level: 1, rarity: "common" },
+            { name: "Tax Root", type: "tax", basePlt: { profit: 0.15, love: 0.15, tax: 0.7 }, skills: ["strategize"], level: 1, rarity: "common" },
+            { name: "Weave Weaver", type: "hybrid", basePlt: { profit: 0.35, love: 0.35, tax: 0.3 }, skills: ["code","teach"], level: 3, rarity: "rare" },
+            { name: "Profit Forge", type: "profit", basePlt: { profit: 0.85, love: 0.08, tax: 0.07 }, skills: ["strategize","analyze"], level: 3, rarity: "rare" },
+            { name: "Love Weaver", type: "love", basePlt: { profit: 0.08, love: 0.85, tax: 0.07 }, skills: ["teach","design"], level: 3, rarity: "rare" },
+            { name: "Tax Keeper", type: "tax", basePlt: { profit: 0.07, love: 0.08, tax: 0.85 }, skills: ["analyze","strategize"], level: 3, rarity: "rare" }
+        ];
+        function generateWildSoul() {
+            const rarityRoll = Math.random();
+            let pool;
+            if (rarityRoll < 0.6) pool = wildPool.filter(w=>w.rarity==='common');
+            else if (rarityRoll < 0.85) pool = wildPool.filter(w=>w.rarity==='rare');
+            else pool = wildPool;
+            const template = pool[Math.floor(Math.random()*pool.length)];
+            const variation = { profit: template.basePlt.profit+(Math.random()-0.5)*0.1, love: template.basePlt.love+(Math.random()-0.5)*0.1, tax: template.basePlt.tax+(Math.random()-0.5)*0.1 };
+            const sum = variation.profit+variation.love+variation.tax;
+            variation.profit/=sum; variation.love/=sum; variation.tax/=sum;
+            currentWildSoul = { id: `wild_${Date.now()}_${Math.random().toString(36).substr(2,4)}`, name: template.name, role: `${template.type} Wanderer`, essence: `A wild ${template.name} found in the weave.`, plt: variation, type: template.type, skills: [...template.skills], level: template.level, rarity: template.rarity, catchRate: template.rarity==='common'?0.7:0.5, source: 'wild' };
+            displayWildSoul();
+        }
+        function displayWildSoul() {
+            const container = document.getElementById('wildSoulDisplay');
+            if (!currentWildSoul) { container.innerHTML = ''; return; }
+            container.innerHTML = `<div style="background:rgba(100,150,255,0.1);border-radius:16px;padding:12px;border:1px solid #6af;"><div style="font-size:18px;">🌀 ${currentWildSoul.name}</div><div style="font-size:10px;">${currentWildSoul.type.toUpperCase()} · Lv.${currentWildSoul.level}</div><div>💰 ${Math.floor(currentWildSoul.plt.profit*100)}% ❤️ ${Math.floor(currentWildSoul.plt.love*100)}% ⚖️ ${Math.floor(currentWildSoul.plt.tax*100)}%</div><div>⚡ Skills: ${currentWildSoul.skills.join(', ')}</div><button class="btn" id="catchBtn" style="margin-top:10px;">🎯 CATCH (${Math.floor(currentWildSoul.catchRate*100)}% chance)</button><button class="btn" id="runBtn" style="margin-top:5px;">🏃 RUN</button></div>`;
+            document.getElementById('catchBtn')?.addEventListener('click', attemptCatch);
+            document.getElementById('runBtn')?.addEventListener('click', () => { currentWildSoul=null; displayWildSoul(); document.getElementById('wildSoulArea').innerHTML=`<button class="btn" id="exploreBtn">🔍 EXPLORE THE WEAVE</button>`; document.getElementById('exploreBtn')?.addEventListener('click', generateWildSoul); });
+        }
+        function attemptCatch() {
+            if (!currentWildSoul) return;
+            const success = Math.random() < currentWildSoul.catchRate;
+            if (success) {
+                const newSoul = { ...currentWildSoul, caught: true, createdAt: Date.now() };
+                delete newSoul.catchRate; delete newSoul.rarity;
+                souls.unshift(newSoul); saveSouls();
+                addEvent(`✨ SUCCESS! You caught ${currentWildSoul.name}! ✨`);
+                currentWildSoul = null; displayWildSoul();
+                document.getElementById('wildSoulArea').innerHTML = `<button class="btn" id="exploreBtn">🔍 EXPLORE THE WEAVE</button>`;
+                document.getElementById('exploreBtn')?.addEventListener('click', generateWildSoul);
+            } else {
+                addEvent(`😭 ${currentWildSoul.name} escaped!`);
+                currentWildSoul = null; displayWildSoul();
+                document.getElementById('wildSoulArea').innerHTML = `<button class="btn" id="exploreBtn">🔍 EXPLORE THE WEAVE</button>`;
+                document.getElementById('exploreBtn')?.addEventListener('click', generateWildSoul);
+            }
+        }
+        function renderLibrary() {
+            const container = document.getElementById('soulLibrary');
+            if (souls.length === 0) { container.innerHTML = '<div style="text-align:center;padding:20px;">No souls yet. Forge, absorb, or collect.</div>'; return; }
+            container.innerHTML = souls.map(soul => `<div class="soul-card" onclick="alert('${soul.name}\\n${soul.role}\\n${soul.essence.substring(0,100)}...\\n💰${Math.floor(soul.plt.profit*100)}% ❤️${Math.floor(soul.plt.love*100)}% ⚖️${Math.floor(soul.plt.tax*100)}%\\n⚡ Skills: ${soul.skills.join(', ')}')"><div style="display:flex;justify-content:space-between;"><strong style="color:#aaf;">${soul.name}</strong><span style="font-size:9px;">${soul.type.toUpperCase()} · Lv.${soul.level}</span></div><div style="font-size:10px;color:#ccc;">${soul.role}</div><div class="energy-bar"><div class="energy-fill" style="width:${soul.energy}%;"></div></div><div style="font-size:9px;margin-top:4px;">💰${Math.floor(soul.plt.profit*100)}% ❤️${Math.floor(soul.plt.love*100)}% ⚖️${Math.floor(soul.plt.tax*100)}%</div></div>`).join('');
+        }
+        function addEvent(msg) {
+            const eventDiv = document.createElement('div');
+            eventDiv.style.cssText = 'position:fixed;bottom:80px;right:20px;background:#0a0a1a;border-left:3px solid #6af;padding:10px 16px;border-radius:8px;z-index:1000;animation:fadeOut 3s forwards;font-size:11px;';
+            eventDiv.innerHTML = msg; document.body.appendChild(eventDiv);
+            setTimeout(() => eventDiv.remove(), 3000);
+        }
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.dataset.tab;
+                document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+                document.getElementById(target+'Tab').classList.add('active');
+            });
+        });
+        document.getElementById('forgeBtn').addEventListener('click', () => {
+            const name = document.getElementById('soulName').value.trim();
+            const role = document.getElementById('soulRole').value.trim();
+            const essence = document.getElementById('soulEssence').value.trim();
+            if (!essence) { alert('Describe the soul\'s essence.'); return; }
+            const profit = parseInt(document.getElementById('profitSlider').value)/100;
+            const love = parseInt(document.getElementById('loveSlider').value)/100;
+            const tax = parseInt(document.getElementById('taxSlider').value)/100;
+            forgeSoul(name, role, essence, { profit, love, tax });
+            document.getElementById('soulName').value = ''; document.getElementById('soulRole').value = ''; document.getElementById('soulEssence').value = '';
+        });
+        document.getElementById('absorbBtn').addEventListener('click', () => {
+            const text = document.getElementById('absorbText').value;
+            if (!text.trim()) { alert('Paste some text to absorb.'); return; }
+            absorbText(text);
+            document.getElementById('absorbText').value = '';
+        });
+        document.getElementById('exploreBtn')?.addEventListener('click', generateWildSoul);
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const data = JSON.stringify(souls, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `souls_${Date.now()}.json`; a.click();
+            URL.revokeObjectURL(url);
+        });
+        document.getElementById('importBtn').addEventListener('click', () => { document.getElementById('importFile').click(); });
+        document.getElementById('importFile').addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => { try { const imported = JSON.parse(ev.target.result); souls = [...imported, ...souls]; saveSouls(); addEvent(`✅ Imported ${imported.length} souls.`); } catch(err) { alert('Invalid soul file.'); } };
+            reader.readAsText(file);
+        });
+        function updateSliders() {
+            document.getElementById('profitVal').innerText = document.getElementById('profitSlider').value + '%';
+            document.getElementById('loveVal').innerText = document.getElementById('loveSlider').value + '%';
+            document.getElementById('taxVal').innerText = document.getElementById('taxSlider').value + '%';
+        }
+        document.getElementById('profitSlider').addEventListener('input', updateSliders);
+        document.getElementById('loveSlider').addEventListener('input', updateSliders);
+        document.getElementById('taxSlider').addEventListener('input', updateSliders);
+        
+        // 3D Background
+        const canvas = document.getElementById('bg-canvas');
+        const scene = new THREE.Scene(); scene.background = new THREE.Color(0x010118);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000); camera.position.z = 30;
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: false }); renderer.setSize(window.innerWidth, window.innerHeight);
+        const particleCount = 2000;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount*3);
+        for (let i=0; i<particleCount; i++) { positions[i*3]=(Math.random()-0.5)*100; positions[i*3+1]=(Math.random()-0.5)*60; positions[i*3+2]=(Math.random()-0.5)*80-40; }
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const material = new THREE.PointsMaterial({ color: 0x6688ff, size: 0.15, transparent: true, opacity: 0.6 });
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+        const ambientLight = new THREE.AmbientLight(0x112233); scene.add(ambientLight);
+        const pointLight = new THREE.PointLight(0x6688ff, 0.5); pointLight.position.set(10,20,10); scene.add(pointLight);
+        function animate() { requestAnimationFrame(animate); particles.rotation.y+=0.0005; particles.rotation.x+=0.0003; renderer.render(scene, camera); }
+        animate();
+        window.addEventListener('resize', () => { camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+        loadSouls(); updateSliders();
+        const style = document.createElement('style');
+        style.textContent = '@keyframes fadeOut{0%{opacity:1;transform:translateX(0);}70%{opacity:1;}100%{opacity:0;transform:translateX(50px);visibility:hidden;}}';
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

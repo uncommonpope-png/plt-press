@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soul Combat Arena - PLT Battle System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .arena-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .arena-header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .arena-title {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .arena-subtitle {
+            color: rgba(255,255,255,0.7);
+            font-size: 1.1em;
+        }
+
+        .battle-area {
+            display: grid;
+            grid-template-columns: 1fr 300px 1fr;
+            gap: 30px;
+            margin-top: 40px;
+            min-height: 500px;
+        }
+
+        .fighter-zone {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .fighter-zone.enemy {
+            border-color: rgba(255,107,107,0.3);
+        }
+
+        .fighter-zone.player {
+            border-color: rgba(78,205,196,0.3);
+        }
+
+        .fighter-info {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .fighter-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        }
+
+        .fighter-avatar.profit {
+            background: linear-gradient(135deg, #f39c12, #e74c3c);
+        }
+
+        .fighter-avatar.love {
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+        }
+
+        .fighter-avatar.tax {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+        }
+
+        .fighter-name {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .fighter-type {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .stats-bar {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .stat-label {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .stat-value {
+            font-weight: bold;
+        }
+
+        .health-bar-container {
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            height: 25px;
+            overflow: hidden;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .health-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4757, #ff6b81);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .health-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.85em;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0,0,0,0.8);
+        }
+
+        .energy-bar-container {
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            height: 15px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .energy-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #f1c40f, #f39c12);
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .battle-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .plt-triangle {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .triangle-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .triangle-node {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .triangle-node:hover {
+            transform: scale(1.2);
+        }
+
+        .triangle-node.profit {
+            fill: #f39c12;
+        }
+
+        .triangle-node.love {
+            fill: #ff69b4;
+        }
+
+        .triangle-node.tax {
+            fill: #3498db;
+        }
+
+        .triangle-line {
+            stroke: rgba(255,255,255,0.3);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .triangle-line.active {
+            stroke: rgba(255,255,255,0.8);
+            stroke-width: 4;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .action-panel {
+            background: rgba(0,0,0,0.4);
+            border-radius: 15px;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .action-title {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .action-btn.profit {
+            background: linear-gradient(135deg, #f39c12, #e74c3c);
+            color: #fff;
+        }
+
+        .action-btn.love {
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: #fff;
+        }
+
+        .action-btn.tax {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: #fff;
+        }
+
+        .action-btn.heal {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: #fff;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .battle-log {
+            background: rgba(0,0,0,0.4);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-title {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .log-entry {
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .log-entry.damage {
+            border-left: 3px solid #ff4757;
+        }
+
+        .log-entry.heal {
+            border-left: 3px solid #2ecc71;
+        }
+
+        .log-entry.critical {
+            border-left: 3px solid #f39c12;
+            background: rgba(243,156,18,0.1);
+        }
+
+        .turn-indicator {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.3em;
+            font-weight: bold;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.4);
+            z-index: 1000;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .damage-popup {
+            position: absolute;
+            font-size: 2em;
+            font-weight: bold;
+            color: #ff4757;
+            animation: floatUp 1s ease forwards;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .victory-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .victory-screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .victory-title {
+            font-size: 4em;
+            background: linear-gradient(45deg, #f39c12, #f1c40f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .victory-stats {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .victory-btn {
+            padding: 15px 50px;
+            font-size: 1.3em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .victory-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .setup-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .setup-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 50px;
+            border-radius: 30px;
+            max-width: 600px;
+            width: 90%;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .setup-title {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 30px;
+        }
+
+        .soul-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .soul-card {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .soul-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .soul-card.selected {
+            border-color: #4ecdc4;
+            background: rgba(78,205,196,0.1);
+        }
+
+        .soul-card-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .soul-card-name {
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .soul-card-stats {
+            font-size: 0.85em;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 30px rgba(102,126,234,0.4);
+        }
+
+        .plt-advantage {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(243,156,18,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            border: 1px solid #f39c12;
+        }
+    </style>
+</head>
+<body>
+    <!-- Setup Panel -->
+    <div class="setup-panel" id="setupPanel">
+        <div class="setup-content">
+            <h1 class="setup-title">⚔️ Select Your Soul</h1>
+            <div class="soul-selector">
+                <div class="soul-card" data-type="profit" onclick="selectSoul('profit')">
+                    <div class="soul-card-icon">💰</div>
+                    <div class="soul-card-name">Profit Prime</div>
+                    <div class="soul-card-stats">
+                        ATK: 95 | DEF: 60 | SPD: 85<br>
+                        Bonus vs Love
+                    </div>
+                </div>
+                <div class="soul-card" data-type="love" onclick="selectSoul('love')">
+                    <div class="soul-card-icon">❤️</div>
+                    <div class="soul-card-name">Love Weaver</div>
+                    <div class="soul-card-stats">
+                        ATK: 70 | DEF: 80 | SPD: 75<br>
+                        Bonus vs Tax
+                    </div>
+                </div>
+                <div class="soul-card" data-type="tax" onclick="selectSoul('tax')">
+                    <div class="soul-card-icon">📊</div>
+                    <div class="soul-card-name">Tax Collector</div>
+                    <div class="soul-card-stats">
+                        ATK: 65 | DEF: 95 | SPD: 50<br>
+                        Bonus vs Profit
+                    </div>
+                </div>
+            </div>
+            <button class="start-btn" onclick="startBattle()">Enter Arena</button>
+        </div>
+    </div>
+
+    <!-- Turn Indicator -->
+    <div class="turn-indicator" id="turnIndicator" style="display: none;">
+        Your Turn!
+    </div>
+
+    <!-- Victory Screen -->
+    <div class="victory-screen" id="victoryScreen">
+        <h1 class="victory-title" id="victoryTitle">VICTORY!</h1>
+        <div class="victory-stats">
+            <p id="victoryStats"></p>
+        </div>
+        <button class="victory-btn" onclick="resetBattle()">Battle Again</button>
+    </div>
+
+    <!-- Arena -->
+    <div class="arena-container">
+        <div class="arena-header">
+            <h1 class="arena-title">⚔️ Soul Combat Arena ⚔️</h1>
+            <p class="arena-subtitle">PLT Triangle: Profit > Love > Tax > Profit</p>
+        </div>
+
+        <div class="battle-area">
+            <!-- Player Zone -->
+            <div class="fighter-zone player">
+                <div class="fighter-info">
+                    <div class="fighter-avatar" id="playerAvatar">💰</div>
+                    <h2 class="fighter-name" id="playerName">Profit Prime</h2>
+                    <p class="fighter-type" id="playerType">PROFIT</p>
+                    <div class="plt-advantage" id="playerAdvantage" style="display: none;">
+                        ⚡ Advantage!
+                    </div>
+                </div>
+
+                <div class="stats-bar">
+                    <div class="stat-row">
+                        <span class="stat-label">⚔️ Attack</span>
+                        <span class="stat-value" id="playerAtk">95</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">🛡️ Defense</span>
+                        <span class="stat-value" id="playerDef">60</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">⚡ Speed</span>
+                        <span class="stat-value" id="playerSpd">85</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">🎯 Level</span>
+                        <span class="stat-value" id="playerLevel">1</span>
+                    </div>
+                </div>
+
+                <div class="health-bar-container">
+                    <div class="health-bar" id="playerHealth" style="width: 100%;"></div>
+                    <div class="health-text" id="playerHealthText">100/100</div>
+                </div>
+
+                <div class="energy-bar-container">
+                    <div class="energy-bar" id="playerEnergy" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <!-- Battle Center -->
+            <div class="battle-center">
+                <div class="plt-triangle">
+                    <svg class="triangle-svg" viewBox="0 0 200 200">
+                        <!-- Triangle lines -->
+                        <line class="triangle-line" id="line1" x1="100" y1="20" x2="30" y2="170"/>
+                        <line class="triangle-line" id="line2" x1="100" y1="20" x2="170" y2="170"/>
+                        <line class="triangle-line" id="line3" x1="30" y1="170" x2="170" y2="170"/>
+                        
+                        <!-- Nodes -->
+                        <circle class="triangle-node profit" cx="100" cy="20" r="20"/>
+                        <text x="100" y="27" text-anchor="middle" fill="white" font-size="12" font-weight="bold">P</text>
+                        
+                        <circle class="triangle-node love" cx="30" cy="170" r="20"/>
+                        <text x="30" y="177" text-anchor="middle" fill="white" font-size="12" font-weight="bold">L</text>
+                        
+                        <circle class="triangle-node tax" cx="170" cy="170" r="20"/>
+                        <text x="170" y="177" text-anchor="middle" fill="white" font-size="12" font-weight="bold">T</text>
+                    </svg>
+                </div>
+
+                <div class="action-panel">
+                    <h3 class="action-title">Battle Actions</h3>
+                    <div class="action-buttons">
+                        <button class="action-btn profit" onclick="playerAction('profit')" id="btnProfit">
+                            💰 Profit Strike
+                        </button>
+                        <button class="action-btn love" onclick="playerAction('love')" id="btnLove">
+                            ❤️ Love Wave
+                        </button>
+                        <button class="action-btn tax" onclick="playerAction('tax')" id="btnTax">
+                            📊 Tax Drain
+                        </button>
+                        <button class="action-btn heal" onclick="playerAction('heal')" id="btnHeal">
+                            💚 Heal (50 Energy)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enemy Zone -->
+            <div class="fighter-zone enemy">
+                <div class="fighter-info">
+                    <div class="fighter-avatar" id="enemyAvatar">❤️</div>
+                    <h2 class="fighter-name" id="enemyName">Love Weaver</h2>
+                    <p class="fighter-type" id="enemyType">LOVE</p>
+                    <div class="plt-advantage" id="enemyAdvantage" style="display: none;">
+                        ⚡ Advantage!
+                    </div>
+                </div>
+
+                <div class="stats-bar">
+                    <div class="stat-row">
+                        <span class="stat-label">⚔️ Attack</span>
+                        <span class="stat-value" id="enemyAtk">70</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">🛡️ Defense</span>
+                        <span class="stat-value" id="enemyDef">80</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">⚡ Speed</span>
+                        <span class="stat-value" id="enemySpd">75</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">🎯 Level</span>
+                        <span class="stat-value" id="enemyLevel">1</span>
+                    </div>
+                </div>
+
+                <div class="health-bar-container">
+                    <div class="health-bar" id="enemyHealth" style="width: 100%;"></div>
+                    <div class="health-text" id="enemyHealthText">100/100</div>
+                </div>
+
+                <div class="energy-bar-container">
+                    <div class="energy-bar" id="enemyEnergy" style="width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Battle Log -->
+        <div class="battle-log" id="battleLog">
+            <h3 class="log-title">📜 Battle Log</h3>
+            <div id="logEntries"></div>
+        </div>
+    </div>
+
+    <script>
+        // PLT Triangle: Profit > Love > Tax > Profit
+        const PLT_ADVANTAGE = {
+            'profit': 'love',    // Profit beats Love
+            'love': 'tax',       // Love beats Tax
+            'tax': 'profit'      // Tax beats Profit
+        };
+
+        const SOUL_STATS = {
+            'profit': { name: 'Profit Prime', atk: 95, def: 60, spd: 85, hp: 100, emoji: '💰' },
+            'love': { name: 'Love Weaver', atk: 70, def: 80, spd: 75, hp: 100, emoji: '❤️' },
+            'tax': { name: 'Tax Collector', atk: 65, def: 95, spd: 50, hp: 100, emoji: '📊' }
+        };
+
+        let selectedSoulType = null;
+        let player = null;
+        let enemy = null;
+        let playerTurn = true;
+        let battleActive = false;
+
+        function selectSoul(type) {
+            selectedSoulType = type;
+            document.querySelectorAll('.soul-card').forEach(card => {
+                card.classList.remove('selected');
+                if (card.dataset.type === type) {
+                    card.classList.add('selected');
+                }
+            });
+        }
+
+        function startBattle() {
+            if (!selectedSoulType) {
+                alert('Please select a soul first!');
+                return;
+            }
+
+            // Hide setup panel
+            document.getElementById('setupPanel').style.display = 'none';
+
+            // Initialize player
+            const playerStats = SOUL_STATS[selectedSoulType];
+            player = {
+                type: selectedSoulType,
+                name: playerStats.name,
+                atk: playerStats.atk,
+                def: playerStats.def,
+                spd: playerStats.spd,
+                hp: playerStats.hp,
+                maxHp: playerStats.hp,
+                energy: 100,
+                level: 1,
+                xp: 0
+            };
+
+            // Random enemy (different from player)
+            const types = ['profit', 'love', 'tax'].filter(t => t !== selectedSoulType);
+            const enemyType = types[Math.floor(Math.random() * types.length)];
+            const enemyStats = SOUL_STATS[enemyType];
+            enemy = {
+                type: enemyType,
+                name: enemyStats.name,
+                atk: enemyStats.atk,
+                def: enemyStats.def,
+                spd: enemyStats.spd,
+                hp: enemyStats.hp,
+                maxHp: enemyStats.hp,
+                energy: 100,
+                level: 1
+            };
+
+            // Update UI
+            updateFighterUI('player');
+            updateFighterUI('enemy');
+
+            // Determine turn order
+            playerTurn = player.spd >= enemy.spd;
+            battleActive = true;
+
+            // Show turn indicator
+            showTurnIndicator();
+
+            // Add log entry
+            addLogEntry(`Battle started! ${player.name} vs ${enemy.name}`, 'normal');
+
+            // Check advantage
+            updateAdvantage();
+        }
+
+        function updateFighterUI(side) {
+            const fighter = side === 'player' ? player : enemy;
+            const prefix = side === 'player' ? 'player' : 'enemy';
+
+            document.getElementById(`${prefix}Avatar`).textContent = SOUL_STATS[fighter.type].emoji;
+            document.getElementById(`${prefix}Name`).textContent = fighter.name;
+            document.getElementById(`${prefix}Type`).textContent = fighter.type.toUpperCase();
+            document.getElementById(`${prefix}Atk`).textContent = fighter.atk;
+            document.getElementById(`${prefix}Def`).textContent = fighter.def;
+            document.getElementById(`${prefix}Spd`).textContent = fighter.spd;
+            document.getElementById(`${prefix}Level`).textContent = fighter.level;
+
+            const hpPercent = (fighter.hp / fighter.maxHp) * 100;
+            document.getElementById(`${prefix}Health`).style.width = hpPercent + '%';
+            document.getElementById(`${prefix}HealthText`).textContent = `${fighter.hp}/${fighter.maxHp}`;
+
+            const energyPercent = fighter.energy;
+            document.getElementById(`${prefix}Energy`).style.width = energyPercent + '%';
+        }
+
+        function updateAdvantage() {
+            const playerAdv = document.getElementById('playerAdvantage');
+            const enemyAdv = document.getElementById('enemyAdvantage');
+
+            playerAdv.style.display = 'none';
+            enemyAdv.style.display = 'none';
+
+            if (PLT_ADVANTAGE[player.type] === enemy.type) {
+                playerAdv.style.display = 'block';
+            }
+            if (PLT_ADVANTAGE[enemy.type] === player.type) {
+                enemyAdv.style.display = 'block';
+            }
+        }
+
+        function showTurnIndicator() {
+            const indicator = document.getElementById('turnIndicator');
+            if (playerTurn) {
+                indicator.textContent = "⚔️ Your Turn!";
+                indicator.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+            } else {
+                indicator.textContent = "🤖 Enemy Turn...";
+                indicator.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+            }
+            indicator.style.display = 'block';
+        }
+
+        function playerAction(actionType) {
+            if (!battleActive || !playerTurn) return;
+
+            // Check energy
+            const energyCost = actionType === 'heal' ? 50 : 20;
+            if (player.energy < energyCost) {
+                addLogEntry('Not enough energy!', 'normal');
+                return;
+            }
+
+            player.energy -= energyCost;
+
+            if (actionType === 'heal') {
+                const healAmount = Math.floor(player.maxHp * 0.3);
+                player.hp = Math.min(player.maxHp, player.hp + healAmount);
+                addLogEntry(`${player.name} heals for ${healAmount} HP!`, 'heal');
+                showDamagePopup('player', `+${healAmount}`, 'heal');
+            } else {
+                // Attack
+                const damage = calculateDamage(player, enemy, actionType);
+                enemy.hp = Math.max(0, enemy.hp - damage);
+                
+                const isCrit = Math.random() < 0.2;
+                const finalDamage = isCrit ? Math.floor(damage * 1.5) : damage;
+                enemy.hp = Math.max(0, enemy.hp - (isCrit ? finalDamage - damage : 0));
+
+                addLogEntry(`${player.name} uses ${getActionName(actionType)}! Deals ${finalDamage} damage${isCrit ? ' (CRITICAL!)' : ''}`, isCrit ? 'critical' : 'damage');
+                showDamagePopup('enemy', `-${finalDamage}`, 'damage');
+            }
+
+            updateFighterUI('player');
+            updateFighterUI('enemy');
+
+            // Check victory
+            if (enemy.hp <= 0) {
+                endBattle(true);
+                return;
+            }
+
+            // Enemy turn
+            playerTurn = false;
+            showTurnIndicator();
+            setTimeout(enemyAI, 1500);
+        }
+
+        function enemyAI() {
+            if (!battleActive) return;
+
+            // Simple AI: attack with advantage type or heal if low
+            let actionType;
+            if (enemy.hp < enemy.maxHp * 0.3 && enemy.energy >= 50) {
+                actionType = 'heal';
+            } else if (PLT_ADVANTAGE[enemy.type] === player.type) {
+                actionType = enemy.type;
+            } else {
+                const actions = ['profit', 'love', 'tax'];
+                actionType = actions[Math.floor(Math.random() * actions.length)];
+            }
+
+            const energyCost = actionType === 'heal' ? 50 : 20;
+            enemy.energy -= energyCost;
+
+            if (actionType === 'heal') {
+                const healAmount = Math.floor(enemy.maxHp * 0.3);
+                enemy.hp = Math.min(enemy.maxHp, enemy.hp + healAmount);
+                addLogEntry(`${enemy.name} heals for ${healAmount} HP!`, 'heal');
+                showDamagePopup('enemy', `+${healAmount}`, 'heal');
+            } else {
+                const damage = calculateDamage(enemy, player, actionType);
+                player.hp = Math.max(0, player.hp - damage);
+                addLogEntry(`${enemy.name} uses ${getActionName(actionType)}! Deals ${damage} damage`, 'damage');
+                showDamagePopup('player', `-${damage}`, 'damage');
+            }
+
+            updateFighterUI('player');
+            updateFighterUI('enemy');
+
+            // Check defeat
+            if (player.hp <= 0) {
+                endBattle(false);
+                return;
+            }
+
+            // Player turn
+            playerTurn = true;
+            showTurnIndicator();
+        }
+
+        function calculateDamage(attacker, defender, actionType) {
+            let baseDamage = attacker.atk * 0.5;
+
+            // PLT advantage
+            if (PLT_ADVANTAGE[attacker.type] === defender.type) {
+                baseDamage *= 1.5;
+            }
+            if (PLT_ADVANTAGE[defender.type] === attacker.type) {
+                baseDamage *= 0.7;
+            }
+
+            // Action type bonus
+            if (actionType === attacker.type) {
+                baseDamage *= 1.2;
+            }
+
+            // Defense reduction
+            const defense = defender.def * 0.3;
+            const damage = Math.max(1, baseDamage - defense);
+
+            return Math.floor(damage);
+        }
+
+        function getActionName(type) {
+            const names = {
+                'profit': 'Profit Strike',
+                'love': 'Love Wave',
+                'tax': 'Tax Drain',
+                'heal': 'Heal'
+            };
+            return names[type];
+        }
+
+        function showDamagePopup(side, text, type) {
+            const zone = document.querySelector(`.fighter-zone.${side}`);
+            const popup = document.createElement('div');
+            popup.className = 'damage-popup';
+            popup.textContent = text;
+            popup.style.left = '50%';
+            popup.style.top = '30%';
+            popup.style.color = type === 'heal' ? '#2ecc71' : '#ff4757';
+            zone.appendChild(popup);
+
+            setTimeout(() => popup.remove(), 1000);
+        }
+
+        function addLogEntry(message, type) {
+            const logEntries = document.getElementById('logEntries');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[Turn ${battleActive ? Math.floor((player.energy + enemy.energy) / 2) : 0}] ${message}`;
+            logEntries.insertBefore(entry, logEntries.firstChild);
+        }
+
+        function endBattle(victory) {
+            battleActive = false;
+            document.getElementById('turnIndicator').style.display = 'none';
+
+            const victoryScreen = document.getElementById('victoryScreen');
+            const victoryTitle = document.getElementById('victoryTitle');
+            const victoryStats = document.getElementById('victoryStats');
+
+            if (victory) {
+                victoryTitle.textContent = '🏆 VICTORY!';
+                const xpGained = 50 + Math.floor(Math.random() * 30);
+                player.xp += xpGained;
+                
+                // Level up check
+                if (player.xp >= player.level * 100) {
+                    player.level++;
+                    player.xp = 0;
+                    player.atk += 5;
+                    player.def += 3;
+                    player.spd += 2;
+                    player.maxHp += 20;
+                    player.hp = player.maxHp;
+                    victoryStats.innerHTML = `
+                        <p style="font-size: 1.5em; margin-bottom: 10px;">Level Up! 🎉</p>
+                        <p>XP Gained: ${xpGained}</p>
+                        <p>New Level: ${player.level}</p>
+                        <p>ATK +5 | DEF +3 | SPD +2 | HP +20</p>
+                    `;
+                } else {
+                    victoryStats.innerHTML = `
+                        <p>XP Gained: ${xpGained}</p>
+                        <p>Total XP: ${player.xp}/${player.level * 100}</p>
+                    `;
+                }
+            } else {
+                victoryTitle.textContent = '💀 DEFEAT';
+                victoryTitle.style.background = 'linear-gradient(45deg, #7f8c8d, #95a5a6)';
+                victoryTitle.style.webkitBackgroundClip = 'text';
+                victoryStats.innerHTML = '<p>The battle is lost. Try again!</p>';
+            }
+
+            victoryScreen.classList.add('active');
+        }
+
+        function resetBattle() {
+            document.getElementById('victoryScreen').classList.remove('active');
+            document.getElementById('setupPanel').style.display = 'flex';
+            document.getElementById('battleLog').innerHTML = '<h3 class="log-title">📜 Battle Log</h3><div id="logEntries"></div>';
+            selectedSoulType = null;
+            document.querySelectorAll('.soul-card').forEach(card => card.classList.remove('selected'));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soul Forge - Universal Download</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0a0a0f;
+      color: #fff;
+      line-height: 1.6;
+      padding: 20px;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 2.5rem; margin-bottom: 20px; text-align: center; }
+    h2 { font-size: 1.8rem; margin: 30px 0 15px; color: #e94560; }
+    p { margin-bottom: 15px; color: #ccc; }
+    ul { margin: 15px 0 15px 30px; }
+    li { margin-bottom: 8px; }
+    .platform-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 30px 0; }
+    .platform-card {
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .platform-icon { font-size: 3rem; margin-bottom: 10px; }
+    .check { color: #4ade80; }
+    .download-box {
+      background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      margin: 40px 0;
+    }
+    .btn {
+      display: inline-block;
+      padding: 18px 40px;
+      background: #fff;
+      color: #e94560;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin: 10px;
+      transition: transform 0.3s;
+    }
+    .btn:hover { transform: translateY(-3px); }
+    .btn-outline {
+      background: transparent;
+      border: 2px solid #fff;
+      color: #fff;
+    }
+    code {
+      background: rgba(255,255,255,0.1);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+    }
+    .note {
+      background: rgba(74, 222, 128, 0.1);
+      border-left: 4px solid #4ade80;
+      padding: 15px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌍 Universal Download</h1>
+    <p style="text-align: center; color: #888;">Works on ANY device. Windows, Mac, Linux, Android, iPhone.</p>
+    
+    <div class="platform-grid">
+      <div class="platform-card">
+        <div class="platform-icon">🪟</div>
+        <h3>Windows</h3>
+        <p class="check">✓ Windows 10/11</p>
+        <p class="check">✓ No install needed</p>
+      </div>
+      <div class="platform-card">
+        <div class="platform-icon">🍎</div>
+        <h3>Mac</h3>
+        <p class="check">✓ Intel + M1/M2/M3</p>
+        <p class="check">✓ Safari/Chrome</p>
+      </div>
+      <div class="platform-card">
+        <div class="platform-icon">🐧</div>
+        <h3>Linux</h3>
+        <p class="check">✓ Ubuntu, Fedora</p>
+        <p class="check">✓ All distros</p>
+      </div>
+      <div class="platform-card">
+        <div class="platform-icon">📱</div>
+        <h3>Android</h3>
+        <p class="check">✓ Browser version</p>
+        <p class="check">✓ Termux option</p>
+      </div>
+      <div class="platform-card">
+        <div class="platform-icon">🍏</div>
+        <h3>iPhone/iPad</h3>
+        <p class="check">✓ iOS 13+</p>
+        <p class="check">✓ Files app</p>
+      </div>
+      <div class="platform-card">
+        <div class="platform-icon">💻</div>
+        <h3>Chromebook</h3>
+        <p class="check">✓ Chrome browser</p>
+        <p class="check">✓ Linux option</p>
+      </div>
+    </div>
+    
+    <div class="download-box">
+      <h2 style="color: #fff; margin-bottom: 20px;">📦 Download Your Product</h2>
+      <p style="color: #fff; margin-bottom: 30px;">Instant access. Works immediately. No credit card required for preview.</p>
+      <a href="soul-dashboard.html" class="btn">🚀 Open Dashboard (Browser)</a>
+      <br>
+      <a href="#" class="btn btn-outline" onclick="alert('After purchase, you will receive a download link via email.')">💳 Purchase Full Version</a>
+    </div>
+    
+    <h2>🚀 Quick Start (No Install)</h2>
+    <div class="note">
+      <strong>✅ EASIEST METHOD:</strong> Just download the ZIP, extract it, and double-click <code>soul-dashboard.html</code>. Opens in any browser. Works offline.
+    </div>
+    
+    <h3>Step-by-Step:</h3>
+    <ol style="margin-left: 20px; color: #ccc;">
+      <li>Download the ZIP file from your purchase email</li>
+      <li>Extract/unzip the file</li>
+      <li>Find <code>soul-dashboard.html</code></li>
+      <li>Double-click it</li>
+      <li>Opens in your browser - DONE! ✨</li>
+    </ol>
+    
+    <h2>💻 Full Installation (Optional)</h2>
+    <p>For advanced features (CLI, automation, etc.), install Node.js version:</p>
+    
+    <h3>Windows:</h3>
+    <pre style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; overflow-x: auto;">
+1. Install Node.js from nodejs.org
+2. Extract the ZIP
+3. Open Command Prompt in folder
+4. Run: <code>npm install</code>
+5. Run: <code>npm start</code>
+6. Open: http://localhost:3000</pre>
+    
+    <h3>Mac/Linux:</h3>
+    <pre style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; overflow-x: auto;">
+1. Install Node.js from nodejs.org
+2. Extract the ZIP
+3. Open Terminal in folder
+4. Run: <code>npm install</code>
+5. Run: <code>npm start</code>
+6. Open: http://localhost:3000</pre>
+    
+    <h3>Android (Termux):</h3>
+    <pre style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; overflow-x: auto;">
+pkg install nodejs
+unzip soul-forge-starter.zip
+cd soul-forge-starter
+npm install
+npm start</pre>
+    
+    <h2>📱 Mobile Instructions</h2>
+    
+    <h3>Android:</h3>
+    <ol style="margin-left: 20px; color: #ccc;">
+      <li>Download ZIP in Chrome or Files app</li>
+      <li>Tap to extract</li>
+      <li>Tap <code>soul-dashboard.html</code></li>
+      <li>Opens in Chrome</li>
+    </ol>
+    
+    <h3>iPhone/iPad:</h3>
+    <ol style="margin-left: 20px; color: #ccc;">
+      <li>Download ZIP in Files app</li>
+      <li>Tap to extract</li>
+      <li>Tap <code>soul-dashboard.html</code></li>
+      <li>Opens in Safari</li>
+    </ol>
+    
+    <h2>🌐 Browser Compatibility</h2>
+    <ul>
+      <li class="check">✓ Chrome 80+ (Recommended)</li>
+      <li class="check">✓ Firefox 75+</li>
+      <li class="check">✓ Safari 13+</li>
+      <li class="check">✓ Edge 80+</li>
+      <li class="check">✓ Brave</li>
+      <li class="check">✓ Opera</li>
+    </ul>
+    
+    <h2>💾 Your Data</h2>
+    <p>Soul data is saved in <code>my-soul.json</code> - works on ALL platforms. You can:</p>
+    <ul>
+      <li>Export anytime (JSON format)</li>
+      <li>Import to another device</li>
+      <li>Backup to cloud storage</li>
+      <li>Keep forever - no expiration</li>
+    </ul>
+    
+    <div class="note">
+      <strong>🔒 Privacy:</strong> Your data stays on YOUR device. No servers. No tracking. No cloud. 100% yours.
+    </div>
+    
+    <h2>🆘 Need Help?</h2>
+    <ul>
+      <li>📧 Email: support@soulforge.io</li>
+      <li>💬 Discord: discord.gg/soulforge</li>
+      <li>📖 Docs: docs.soulforge.io</li>
+    </ul>
+    
+    <div style="text-align: center; margin-top: 60px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1);">
+      <p style="color: #666;">Soul Forge v1.0 Universal • Works on any device • Lifetime updates</p>
+      <p style="color: #666; margin-top: 10px;">🌍 Built for everyone, everywhere</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soul Forge - Build Your Soul. Build Your Empire.</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0a0a0f;
+      color: #fff;
+      line-height: 1.6;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+    
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 100%);
+      padding: 40px 20px;
+    }
+    .hero h1 {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #e94560, #ff6b6b, #feca57);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p { font-size: 1.5rem; color: #888; margin-bottom: 40px; }
+    .cta-buttons { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+    .btn {
+      padding: 18px 40px;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, #e94560, #ff6b6b);
+      color: #fff;
+      box-shadow: 0 10px 40px rgba(233, 69, 96, 0.4);
+    }
+    .btn-primary:hover { transform: translateY(-5px); box-shadow: 0 20px 60px rgba(233, 69, 96, 0.6); }
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+    
+    /* Features */
+    .features { padding: 100px 20px; background: #0f0f1a; }
+    .features h2 { text-align: center; font-size: 2.5rem; margin-bottom: 60px; }
+    .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
+    .feature-card {
+      background: rgba(255,255,255,0.03);
+      padding: 40px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.3s;
+    }
+    .feature-card:hover { transform: translateY(-10px); }
+    .feature-icon { font-size: 3rem; margin-bottom: 20px; }
+    .feature-card h3 { font-size: 1.5rem; margin-bottom: 15px; }
+    .feature-card p { color: #888; }
+    
+    /* PLT */
+    .plt-section { padding: 100px 20px; }
+    .plt-section h2 { text-align: center; font-size: 2.5rem; margin-bottom: 60px; }
+    .plt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; }
+    .plt-card {
+      text-align: center;
+      padding: 40px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .plt-card.profit { border-top: 4px solid #4ade80; }
+    .plt-card.love { border-top: 4px solid #f472b6; }
+    .plt-card.tax { border-top: 4px solid #60a5fa; }
+    .plt-card.grace { border-top: 4px solid #a78bfa; }
+    .plt-card .icon { font-size: 4rem; margin-bottom: 20px; }
+    .plt-card h3 { font-size: 1.8rem; margin-bottom: 15px; }
+    
+    /* Pricing */
+    .pricing { padding: 100px 20px; background: #0f0f1a; }
+    .pricing h2 { text-align: center; font-size: 2.5rem; margin-bottom: 20px; }
+    .pricing-subtitle { text-align: center; color: #888; margin-bottom: 60px; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
+    .pricing-card {
+      background: rgba(255,255,255,0.03);
+      padding: 50px 40px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+      text-align: center;
+      position: relative;
+      transition: transform 0.3s;
+    }
+    .pricing-card:hover { transform: translateY(-10px); }
+    .pricing-card.featured {
+      border: 2px solid #e94560;
+      box-shadow: 0 0 60px rgba(233, 69, 96, 0.2);
+    }
+    .pricing-card.featured::before {
+      content: 'MOST POPULAR';
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, #e94560, #ff6b6b);
+      padding: 8px 25px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+    .pricing-card h3 { font-size: 1.8rem; margin-bottom: 15px; }
+    .price { font-size: 4rem; font-weight: bold; margin-bottom: 10px; }
+    .price span { font-size: 1.2rem; color: #888; }
+    .pricing-card ul { list-style: none; margin: 40px 0; text-align: left; }
+    .pricing-card li { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .pricing-card li:last-child { border: none; }
+    .pricing-card li::before { content: '✓'; color: #4ade80; margin-right: 10px; font-weight: bold; }
+    
+    /* Testimonials */
+    .testimonials { padding: 100px 20px; }
+    .testimonials h2 { text-align: center; font-size: 2.5rem; margin-bottom: 60px; }
+    .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
+    .testimonial-card {
+      background: rgba(255,255,255,0.03);
+      padding: 40px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .testimonial-card p { font-size: 1.1rem; font-style: italic; margin-bottom: 20px; color: #ccc; }
+    .testimonial-author { display: flex; align-items: center; gap: 15px; }
+    .author-avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(90deg, #e94560, #ff6b6b); }
+    .author-name { font-weight: bold; }
+    .author-title { color: #888; font-size: 0.9rem; }
+    
+    /* FAQ */
+    .faq { padding: 100px 20px; background: #0f0f1a; }
+    .faq h2 { text-align: center; font-size: 2.5rem; margin-bottom: 60px; }
+    .faq-item {
+      background: rgba(255,255,255,0.03);
+      margin-bottom: 20px;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+    .faq-question {
+      padding: 25px;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .faq-answer {
+      padding: 0 25px 25px;
+      color: #888;
+      display: none;
+    }
+    .faq-item.active .faq-answer { display: block; }
+    .faq-item.active .faq-question { color: #e94560; }
+    
+    /* Footer */
+    footer { padding: 60px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); }
+    footer p { color: #666; margin-bottom: 20px; }
+    .social-links { display: flex; justify-content: center; gap: 30px; margin-bottom: 30px; }
+    .social-links a { color: #888; text-decoration: none; font-size: 1.2rem; transition: color 0.3s; }
+    .social-links a:hover { color: #e94560; }
+    
+    /* Mobile */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.5rem; }
+      .hero p { font-size: 1.2rem; }
+      .cta-buttons { flex-direction: column; }
+      .btn { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Hero -->
+  <section class="hero">
+    <h1>🌌 Soul Forge</h1>
+    <p>Build Your Soul. Build Your Empire.</p>
+    <div class="cta-buttons">
+      <a href="#pricing" class="btn btn-primary">Get Started - $27</a>
+      <a href="#features" class="btn btn-secondary">Learn More</a>
+    </div>
+  </section>
+  
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="container">
+      <h2>Everything You Need to Grow Your Soul</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Soul Ledger</h3>
+          <p>Track every deed across Profit, Love, Tax, and Grace. Watch your reputation grow with cryptographic proof.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>Visual Dashboard</h3>
+          <p>Beautiful interface showing your soul's progress. Level up from Seed to Divine.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🧘</div>
+          <h3>Daily Check-ins</h3>
+          <p>Build unbreakable habits with morning intentions and evening reflections.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🦋</div>
+          <h3>Soul Evolution</h3>
+          <p>15 stages of growth. From Seed to Divine. Track your journey forever.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💾</div>
+          <h3>Full Ownership</h3>
+          <p>Your data is YOURS. Export anytime. No subscriptions. No tracking.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌈</div>
+          <h3>Soul Spectrum</h3>
+          <p>Discover your soul color and frequency. From Red (physical) to Ultraviolet (transcendent).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- PLT -->
+  <section class="plt-section">
+    <div class="container">
+      <h2>The PLT Framework</h2>
+      <div class="plt-grid">
+        <div class="plt-card profit">
+          <div class="icon">💰</div>
+          <h3>Profit</h3>
+          <p>Building wealth, resources, and abundance. Create value. Get paid.</p>
+        </div>
+        <div class="plt-card love">
+          <div class="icon">❤️</div>
+          <h3>Love</h3>
+          <p>Relationships, connection, and compassion. Love deeply. Connect fully.</p>
+        </div>
+        <div class="plt-card tax">
+          <div class="icon">📊</div>
+          <h3>Tax</h3>
+          <p>Giving back, responsibility, and contribution. Pay your debt to society.</p>
+        </div>
+        <div class="plt-card grace">
+          <div class="icon">✨</div>
+          <h3>Grace</h3>
+          <p>Spiritual growth, transcendence, and enlightenment. Rise above. Become infinite.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Pricing -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <h2>Choose Your Path</h2>
+      <p class="pricing-subtitle">One-time payment. Lifetime access. No subscriptions.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <h3>Starter</h3>
+          <div class="price">$27</div>
+          <p>Perfect for beginning your journey</p>
+          <ul>
+            <li>Soul Ledger System</li>
+            <li>PLT Dashboard</li>
+            <li>Daily Check-ins</li>
+            <li>Soul Evolution Tracking</li>
+            <li>Export Your Data</li>
+            <li>Email Support</li>
+          </ul>
+          <a href="#" class="btn btn-secondary" style="width:100%">Buy Now</a>
+        </div>
+        <div class="pricing-card featured">
+          <h3>Pro</h3>
+          <div class="price">$67</div>
+          <p>For serious soul builders</p>
+          <ul>
+            <li>Everything in Starter</li>
+            <li>Advanced Analytics</li>
+            <li>Soul Spectrum Analysis</li>
+            <li>Journal Templates</li>
+            <li>Community Access</li>
+            <li>Priority Support</li>
+            <li>Monthly Group Calls</li>
+          </ul>
+          <a href="#" class="btn btn-primary" style="width:100%">Buy Now</a>
+        </div>
+        <div class="pricing-card">
+          <h3>Enterprise</h3>
+          <div class="price">$197</div>
+          <p>For coaches and businesses</p>
+          <ul>
+            <li>Everything in Pro</li>
+            <li>Commercial License</li>
+            <li>API Access</li>
+            <li>White Label Rights</li>
+            <li>Client Dashboard</li>
+            <li>1-on-1 Onboarding</li>
+            <li>Lifetime Updates</li>
+          </ul>
+          <a href="#" class="btn btn-secondary" style="width:100%">Buy Now</a>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Testimonials -->
+  <section class="testimonials">
+    <div class="container">
+      <h2>What Soul Builders Say</h2>
+      <div class="testimonial-grid">
+        <div class="testimonial-card">
+          <p>"This changed how I see my life. The PLT framework is genius. I've gone from Seed to Weaver in 3 months."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar"></div>
+            <div>
+              <div class="author-name">Sarah K.</div>
+              <div class="author-title">Life Coach</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <p>"Finally, a system that tracks what actually matters. My business doubled since I started focusing on Grace."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar"></div>
+            <div>
+              <div class="author-name">Mike R.</div>
+              <div class="author-title">Developer</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <p>"I use this with all my coaching clients. The visual dashboard makes progress tangible. Worth every penny."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar"></div>
+            <div>
+              <div class="author-name">Jessica T.</div>
+              <div class="author-title">Entrepreneur</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- FAQ -->
+  <section class="faq">
+    <div class="container">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+          What exactly do I get?
+          <span>+</span>
+        </div>
+        <div class="faq-answer">
+          You get the complete Soul Forge system: Soul Ledger for tracking deeds, PLT Dashboard for visualization, Daily Check-in system, Soul Evolution tracking, and full data export. Plus bonuses based on your tier.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+          Is this a subscription?
+          <span>+</span>
+        </div>
+        <div class="faq-answer">
+          No! One-time payment, lifetime access. Your soul data is yours forever. No monthly fees, no tracking, no BS.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+          Can I use this commercially?
+          <span>+</span>
+        </div>
+        <div class="faq-answer">
+          With the Enterprise license ($197), yes! You get commercial rights, white label options, and can use it with your clients.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+          What's the refund policy?
+          <span>+</span>
+        </div>
+        <div class="faq-answer">
+          30-day money-back guarantee. If your soul doesn't feel more aligned, full refund. No questions asked.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+          How do I receive the product?
+          <span>+</span>
+        </div>
+        <div class="faq-answer">
+          Instant digital download. After payment, you'll get a download link immediately. Includes all files + setup instructions.
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="social-links">
+        <a href="#">Twitter</a>
+        <a href="#">Discord</a>
+        <a href="#">YouTube</a>
+        <a href="#">Email</a>
+      </div>
+      <p>&copy; 2026 Soul Forge. All rights reserved.</p>
+      <p style="font-size: 0.9rem;">
+        <a href="#" style="color: #666;">Terms</a> • 
+        <a href="#" style="color: #666;">Privacy</a> • 
+        <a href="#" style="color: #666;">Refund Policy</a>
+      </p>
+    </div>
+  </footer>
+  
+  <script>
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>

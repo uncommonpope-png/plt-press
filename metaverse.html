@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🌌 PLT METAVERSE — The Soulverse Beyond | PLT Press</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; height: 100vh; width: 100vw; }
+        canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        .ui { position: absolute; bottom: 20px; left: 20px; right: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; pointer-events: none; z-index: 100; }
+        .panel { background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); border-radius: 24px; border: 1px solid rgba(255,170,102,0.5); padding: 12px 20px; pointer-events: auto; font-size: 12px; }
+        .left-panel { width: 280px; max-height: 80vh; overflow-y: auto; }
+        .right-panel { width: 280px; text-align: right; }
+        .soul-entry { background: rgba(255,170,102,0.1); border-radius: 16px; padding: 8px; margin: 8px 0; cursor: pointer; transition: 0.2s; }
+        .soul-entry:hover { background: rgba(255,170,102,0.3); }
+        .btn { background: linear-gradient(135deg, #ffaa66, #ff8844); border: none; color: #010105; padding: 6px 14px; border-radius: 30px; cursor: pointer; font-weight: bold; margin: 5px; }
+        .input-group { display: flex; gap: 8px; margin-top: 8px; }
+        input, select { background: rgba(0,0,0,0.5); border: 1px solid #ffaa66; border-radius: 30px; padding: 6px 12px; color: #ffdd99; font-family: monospace; }
+        .voice-status { font-size: 10px; margin-top: 5px; }
+        .trade-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #0a0a1a; border: 2px solid #ffaa66; border-radius: 28px; padding: 20px; z-index: 200; min-width: 300px; display: none; }
+    </style>
+</head>
+<body>
+    <canvas id="metaverseCanvas"></canvas>
+    <div class="ui">
+        <div class="panel left-panel">
+            <div style="font-weight:bold;">🌀 YOUR SOULS</div>
+            <div id="yourSoulsList"></div>
+            <div style="margin-top: 15px;"><div style="font-weight:bold;">🌐 VISITING SOULS</div><div id="visitorSoulsList"></div></div>
+            <div class="voice-status" id="voiceStatus">🎤 Voice: idle</div>
+            <button id="micToggle" class="btn" style="background:#2a2a3a; color:#ffaa66;">🎙️ TALK</button>
+        </div>
+        <div class="panel right-panel">
+            <div>💰 <span id="playerPLT">0</span> PLT</div>
+            <div>⚡ Realm Energy: <span id="realmEnergy">100</span>%</div>
+            <button id="auctionBtn" class="btn">🏪 AUCTION HOUSE</button>
+            <button id="tradeBtn" class="btn">🤝 TRADE</button>
+            <div class="input-group">
+                <input type="text" id="chatInput" placeholder="Speak to the world...">
+                <button id="chatSend">📢 SEND</button>
+            </div>
+        </div>
+    </div>
+    <div id="tradeModal" class="trade-modal">
+        <h3>🤝 TRADE</h3>
+        <div id="tradeContent"></div>
+        <button id="closeTrade" class="btn">Close</button>
+    </div>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        
+        let souls = [], visitors = [], playerPLT = 1000, realmEnergy = 100;
+        
+        function loadData() {
+            const saved = localStorage.getItem('soulforge_souls');
+            if (saved) souls = JSON.parse(saved);
+            else {
+                souls = [
+                    { id: 's1', name: 'Profit Prime', type: 'profit', plt: { profit: 0.92, love: 0.18, tax: 0.68 }, skills: ['code','strategize'], level: 5, energy: 100, value: 500 },
+                    { id: 's2', name: 'Love Weaver', type: 'love', plt: { profit: 0.28, love: 0.91, tax: 0.45 }, skills: ['write','teach'], level: 4, energy: 100, value: 400 },
+                    { id: 's3', name: 'Tax Collector', type: 'tax', plt: { profit: 0.48, love: 0.22, tax: 0.94 }, skills: ['analyze','strategize'], level: 5, energy: 100, value: 450 }
+                ];
+            }
+            visitors = [];
+            const names = ['SoulSeeker','WeaveWalker','ProfitHunter','LoveKeeper','TaxAuditor','EchoWanderer'];
+            for (let i = 0; i < 3; i++) {
+                visitors.push({ id: `visitor_${i}`, name: names[Math.floor(Math.random()*names.length)]+'_'+Math.floor(Math.random()*100), type: ['profit','love','tax'][Math.floor(Math.random()*3)], plt: { profit: Math.random(), love: Math.random(), tax: Math.random() }, value: Math.floor(Math.random()*300)+50, x: (Math.random()-0.5)*10, z: (Math.random()-0.5)*8, owner: 'Visitor' });
+            }
+            updateUI(); saveData();
+        }
+        function saveData() { localStorage.setItem('soulforge_souls', JSON.stringify(souls)); localStorage.setItem('player_plt', playerPLT); }
+        function updateUI() {
+            document.getElementById('yourSoulsList').innerHTML = souls.map(s => `<div class="soul-entry"><strong>${s.name}</strong> (${s.type})<br>💰 ${s.value} PLT | Lv.${s.level}<button class="btn" onclick="listForSale('${s.id}')">Sell</button></div>`).join('');
+            document.getElementById('visitorSoulsList').innerHTML = visitors.map(v => `<div class="soul-entry"><strong>${v.name}</strong> (${v.type})<br>💰 ${v.value} PLT | Owner: ${v.owner}<button class="btn" onclick="buyFromVisitor('${v.id}')">Buy</button></div>`).join('');
+            document.getElementById('playerPLT').innerHTML = playerPLT;
+            document.getElementById('realmEnergy').innerHTML = Math.floor(realmEnergy);
+        }
+        window.listForSale = function(soulId) { const soul = souls.find(s => s.id === soulId); if (!soul) return; const price = prompt(`Set price for ${soul.name}:`, soul.value); if (price && !isNaN(price)) { soul.value = parseInt(price); addChatMessage(`📢 ${soul.name} listed for ${soul.value} PLT.`, 'system'); updateUI(); } };
+        window.buyFromVisitor = function(visitorId) { const visitor = visitors.find(v => v.id === visitorId); if (!visitor) return; if (playerPLT >= visitor.value) { playerPLT -= visitor.value; souls.push({ ...visitor, id: `soul_${Date.now()}_${visitor.name}`, owner: 'You', value: visitor.value }); visitors = visitors.filter(v => v.id !== visitorId); saveData(); updateUI(); addChatMessage(`✅ You bought ${visitor.name} for ${visitor.value} PLT.`, 'system'); generateNewVisitor(); } else { alert('Not enough PLT'); } };
+        function generateNewVisitor() { const names = ['SoulSeeker','WeaveWalker','ProfitHunter','LoveKeeper','TaxAuditor','EchoWanderer']; visitors.push({ id: `visitor_${Date.now()}`, name: names[Math.floor(Math.random()*names.length)]+'_'+Math.floor(Math.random()*100), type: ['profit','love','tax'][Math.floor(Math.random()*3)], plt: { profit: Math.random(), love: Math.random(), tax: Math.random() }, value: Math.floor(Math.random()*300)+50, x: (Math.random()-0.5)*10, z: (Math.random()-0.5)*8, owner: 'Visitor' }); }
+        
+        let recognition = null, isListening = false;
+        function initVoice() { if ('webkitSpeechRecognition' in window) { recognition = new webkitSpeechRecognition(); recognition.continuous = false; recognition.interimResults = false; recognition.lang = 'en-US'; recognition.onresult = (e) => { const text = e.results[0][0].transcript; document.getElementById('chatInput').value = text; sendChatMessage(text); document.getElementById('voiceStatus').innerHTML = '🎤 Voice: heard you'; setTimeout(() => document.getElementById('voiceStatus').innerHTML = '🎤 Voice: idle', 2000); }; recognition.onerror = () => { document.getElementById('voiceStatus').innerHTML = '🎤 Voice: error'; isListening = false; document.getElementById('micToggle').style.background = '#2a2a3a'; }; recognition.onend = () => { isListening = false; document.getElementById('micToggle').style.background = '#2a2a3a'; }; } }
+        document.getElementById('micToggle').addEventListener('click', () => { if (!recognition) return; if (isListening) recognition.stop(); else { recognition.start(); isListening = true; document.getElementById('micToggle').style.background = '#ffaa66'; document.getElementById('voiceStatus').innerHTML = '🎤 Voice: listening...'; } });
+        function sendChatMessage(msg) { if (!msg.trim()) return; addChatMessage(`You: "${msg}"`, 'user'); [...souls, ...visitors].filter(s => Math.hypot(s.x||0, s.z||0) < 5).forEach(s => { const response = generateResponse(s, msg); addChatMessage(`${s.name}: "${response}"`, 'soul'); speakText(response, s); }); }
+        function generateResponse(soul, userMsg) { const lower = userMsg.toLowerCase(); if (lower.includes('profit')||lower.includes('money')) return soul.type==='profit' ? "The numbers favor action." : "Profit matters, but so does balance."; else if (lower.includes('love')||lower.includes('trust')) return soul.type==='love' ? "Connection is everything." : "Love is the bond that holds."; else if (lower.includes('cost')||lower.includes('tax')) return soul.type==='tax' ? "Everything has a cost." : "Cost matters. But so does value."; else return "I am here. What do you seek?"; }
+        function speakText(text, soul) { if (!window.speechSynthesis) return; const utterance = new SpeechSynthesisUtterance(text); utterance.rate = soul.type==='profit' ? 0.9 : soul.type==='love' ? 1.0 : 0.95; utterance.pitch = soul.type==='love' ? 1.2 : 1.0; window.speechSynthesis.cancel(); window.speechSynthesis.speak(utterance); }
+        function addChatMessage(text, type) { const msgDiv = document.createElement('div'); msgDiv.style.cssText = 'position:fixed;bottom:100px;left:20px;background:rgba(0,0,0,0.7);border-left:3px solid #ffaa66;padding:5px 12px;border-radius:12px;margin:2px;font-size:11px;z-index:200;animation:fadeOut 5s forwards;'; msgDiv.innerHTML = text; document.body.appendChild(msgDiv); setTimeout(() => msgDiv.remove(), 5000); }
+        
+        const canvas = document.getElementById('metaverseCanvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x030318);
+        scene.fog = new THREE.FogExp2(0x030318, 0.004);
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
+        camera.position.set(0, 6, 14);
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.target.set(0, 1, 0);
+        const ambient = new THREE.AmbientLight(0x331144, 0.5); scene.add(ambient);
+        const mainLight = new THREE.DirectionalLight(0xffcc88, 1.2); mainLight.position.set(5, 8, 3); mainLight.castShadow = true; scene.add(mainLight);
+        const fillLight = new THREE.PointLight(0x8866ff, 0.5); fillLight.position.set(-2, 3, 4); scene.add(fillLight);
+        const groundGeo = new THREE.CylinderGeometry(7, 7.5, 0.3, 64);
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0x221133, metalness: 0.6, roughness: 0.4 });
+        const ground = new THREE.Mesh(groundGeo, groundMat); ground.position.y = -0.5; ground.receiveShadow = true; scene.add(ground);
+        const ringGeo = new THREE.TorusGeometry(6.2, 0.08, 64, 300);
+        const ringMat = new THREE.MeshStandardMaterial({ color: 0xffaa66, emissive: 0x442200 });
+        const ring = new THREE.Mesh(ringGeo, ringMat); ring.rotation.x = Math.PI/2; ring.position.y = -0.3; scene.add(ring);
+        const particleCount = 8000;
+        const particleGeo = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount*3);
+        for (let i=0; i<particleCount; i++) { positions[i*3]=(Math.random()-0.5)*22; positions[i*3+1]=Math.random()*8-1; positions[i*3+2]=(Math.random()-0.5)*20; }
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const particleMat = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.05, transparent: true, blending: THREE.AdditiveBlending });
+        const particles = new THREE.Points(particleGeo, particleMat); scene.add(particles);
+        const soulColors = { profit: 0xffaa44, love: 0xff88aa, tax: 0x88aaff };
+        let soulMeshes = [];
+        function updateWorldSouls() {
+            soulMeshes.forEach(m => scene.remove(m));
+            soulMeshes = [];
+            const allSouls = [...souls.map(s => ({...s, isVisitor:false})), ...visitors.map(v => ({...v, isVisitor:true}))];
+            allSouls.forEach((soul, idx) => {
+                let geometry;
+                if (soul.type==='profit') geometry = new THREE.CylinderGeometry(0.45, 0.55, 0.8, 8);
+                else if (soul.type==='love') geometry = new THREE.SphereGeometry(0.5, 32, 32);
+                else geometry = new THREE.ConeGeometry(0.5, 0.8, 6);
+                const material = new THREE.MeshStandardMaterial({ color: soulColors[soul.type], emissive: soulColors[soul.type], emissiveIntensity: 0.4, metalness: 0.7 });
+                const mesh = new THREE.Mesh(geometry, material);
+                if (!soul.isVisitor) { const angle = (idx/souls.length)*Math.PI*1.5 - Math.PI*0.75; const rad = 2.5; mesh.position.x = Math.cos(angle)*rad; mesh.position.z = Math.sin(angle)*rad; mesh.position.y = 0.2; }
+                else { mesh.position.x = soul.x!==undefined ? soul.x : (Math.random()-0.5)*7; mesh.position.z = soul.z!==undefined ? soul.z : (Math.random()-0.5)*6; mesh.position.y = 0.2; }
+                mesh.castShadow = true;
+                mesh.userData = { soul, isVisitor: soul.isVisitor };
+                scene.add(mesh);
+                soulMeshes.push(mesh);
+            });
+        }
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.016;
+            ring.rotation.z += 0.002;
+            particles.rotation.y += 0.0003;
+            soulMeshes.forEach((mesh, i) => { mesh.position.y = 0.2 + Math.sin(time*1.2+i)*0.05; });
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+        
+        document.getElementById('auctionBtn').addEventListener('click', () => { alert('Auction House: Other players\' souls would appear here. Trade with visitors for now.'); });
+        document.getElementById('tradeBtn').addEventListener('click', () => { const modal = document.getElementById('tradeModal'); document.getElementById('tradeContent').innerHTML = visitors.map(v => `<div class="soul-entry" onclick="initiateTrade('${v.id}')">${v.name} (${v.type}) — ${v.value} PLT</div>`).join(''); modal.style.display = 'block'; });
+        document.getElementById('closeTrade').addEventListener('click', () => document.getElementById('tradeModal').style.display = 'none');
+        window.initiateTrade = function(visitorId) { const visitor = visitors.find(v => v.id === visitorId); if (!visitor) return; const offer = prompt(`Offer PLT for ${visitor.name}:`, visitor.value); if (offer && !isNaN(offer) && offer > 0) { if (playerPLT >= offer) { playerPLT -= offer; souls.push({ ...visitor, id: `soul_${Date.now()}`, owner: 'You', value: offer }); visitors = visitors.filter(v => v.id !== visitorId); saveData(); updateUI(); updateWorldSouls(); addChatMessage(`✅ Trade completed: acquired ${visitor.name} for ${offer} PLT.`, 'system'); generateNewVisitor(); } else { alert('Not enough PLT'); } } document.getElementById('tradeModal').style.display = 'none'; };
+        document.getElementById('chatSend').addEventListener('click', () => { const msg = document.getElementById('chatInput').value; if (msg.trim()) sendChatMessage(msg); document.getElementById('chatInput').value = ''; });
+        document.getElementById('chatInput').addEventListener('keypress', (e) => { if (e.key==='Enter') { sendChatMessage(e.target.value); e.target.value = ''; } });
+        
+        loadData();
+        updateWorldSouls();
+        initVoice();
+        setInterval(() => { if (visitors.length < 5) generateNewVisitor(); updateUI(); updateWorldSouls(); }, 30000);
+        setInterval(() => saveData(), 10000);
+        const style = document.createElement('style');
+        style.textContent = '@keyframes fadeOut{0%{opacity:1;transform:translateX(0);}70%{opacity:1;}100%{opacity:0;transform:translateX(50px);visibility:hidden;}}';
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

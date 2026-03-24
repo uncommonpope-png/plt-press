@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🏘️ SOUL SOCIETY & ECONOMY | PLT Press</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: radial-gradient(circle at 30% 20%, #0a2a1a 0%, #010105 100%); color: #e8d8b0; font-family: 'Courier New', monospace; min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; padding: 40px 20px; border-bottom: 2px solid #88ffaa; margin-bottom: 30px; }
+        h1 { font-size: 2.5rem; background: linear-gradient(135deg, #88ffaa, #ffaa88, #88aaff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; margin-bottom: 40px; }
+        .card { background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); border-radius: 28px; border: 1px solid rgba(136,255,170,0.3); overflow: hidden; }
+        .card-header { background: rgba(136,255,170,0.15); padding: 16px 20px; font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; }
+        .card-content { padding: 20px; }
+        .soul-select { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid #88ffaa; border-radius: 16px; padding: 12px; color: #ffdd99; font-family: monospace; margin-bottom: 20px; }
+        .stat-bar { margin: 12px 0; }
+        .bar-label { font-size: 10px; display: flex; justify-content: space-between; }
+        .bar-bg { height: 6px; background: #2a2a3a; border-radius: 3px; margin-top: 2px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 0%; transition: width 0.3s; }
+        .building-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; margin: 15px 0; }
+        .building-option { background: rgba(136,255,170,0.1); border: 1px solid #88ffaa; border-radius: 16px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .building-option:hover { background: #88ffaa; color: #0a0a1a; }
+        .room-item { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 10px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; }
+        .btn { background: linear-gradient(135deg, #88ffaa, #66cc88); border: none; color: #0a0a1a; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        .btn-secondary { background: #2a2a3a; color: #88ffaa; border: 1px solid #88ffaa; }
+        .relationship-badge { display: inline-block; background: rgba(136,255,170,0.2); border-radius: 20px; padding: 4px 10px; font-size: 10px; margin: 2px; }
+        footer { text-align: center; padding: 30px; font-size: 10px; color: #558866; border-top: 1px solid rgba(136,255,170,0.2); margin-top: 40px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏘️ SOUL SOCIETY & ECONOMY</h1>
+            <p>Homes. Villages. Wealth. Relationships. Quests.</p>
+        </div>
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-header"><span>🌀 YOUR SOULS</span><span id="soulCount">0 souls</span></div>
+                <div class="card-content">
+                    <select id="soulSelector" class="soul-select"></select>
+                    <div id="homeOverview"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span>🔨 CONSTRUCTION</span><span id="resourceDisplay">💰 0 PLT</span></div>
+                <div class="card-content">
+                    <div id="upgradeSection"></div>
+                    <div id="roomSection"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span>🏘️ VILLAGE & RELATIONSHIPS</span><span id="villageName">None</span></div>
+                <div class="card-content">
+                    <div id="villageInfo"></div>
+                    <button id="createVillageBtn" class="btn">🏘️ CREATE VILLAGE (500 PLT)</button>
+                    <button id="joinVillageBtn" class="btn-secondary">🤝 JOIN VILLAGE</button>
+                    <div id="relationshipsList" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="card" style="margin-bottom: 20px;">
+            <div class="card-header"><span>📜 QUESTS & ACHIEVEMENTS</span><span id="questCount">0 active</span></div>
+            <div class="card-content">
+                <div id="questsList"></div>
+                <div id="achievementsList"></div>
+            </div>
+        </div>
+        <footer>⚡ PLT PRESS — Profit · Love · Tax ⚡<br>Build your society. One soul, one home, one village at a time.</footer>
+    </div>
+    <script>
+        let souls = [], villages = [], playerResources = 500, selectedSoulId = null, quests = [], achievements = [];
+        const homeTiers = [
+            { name: "🌿 Basic", tier: 1, cost: 0, hp: 100, rooms: 1, icon: "🌿" },
+            { name: "🪵 Cozy", tier: 2, cost: 100, hp: 250, rooms: 2, icon: "🪵" },
+            { name: "🪨 Fortified", tier: 3, cost: 300, hp: 500, rooms: 3, icon: "🪨" },
+            { name: "🔮 Enchanted", tier: 4, cost: 800, hp: 1000, rooms: 4, icon: "🔮" },
+            { name: "✨ Divine", tier: 5, cost: 2000, hp: 2000, rooms: 5, icon: "✨" }
+        ];
+        const roomTypes = [
+            { name: "Workshop", cost: 100, effect: "Crafting +20%", icon: "🔧", skill: "craft" },
+            { name: "Library", cost: 150, effect: "Knowledge +25%", icon: "📚", skill: "learn" },
+            { name: "Garden", cost: 80, effect: "Energy regen +15%", icon: "🌿", skill: "rest" },
+            { name: "Treasury", cost: 200, effect: "Storage +50%", icon: "💰", skill: "store" },
+            { name: "Arena", cost: 250, effect: "Combat +30%", icon: "⚔️", skill: "train" },
+            { name: "Market", cost: 120, effect: "Trade income +25%", icon: "🏪", skill: "trade" }
+        ];
+        function loadData() {
+            const savedSouls = localStorage.getItem('soulforge_souls');
+            if (savedSouls) {
+                souls = JSON.parse(savedSouls);
+                for (const soul of souls) {
+                    if (!soul.home) soul.home = { tier: 1, hp: 100, maxHp: 100, rooms: [], villageId: null, lastMaintenance: Date.now(), stash: 0 };
+                    if (!soul.relationships) soul.relationships = {};
+                }
+            } else {
+                souls = [
+                    { id: 'soul_1', name: 'Profit Prime', type: 'profit', personality: 'Strategic, fast, decisive.', plt: { profit: 0.92, love: 0.18, tax: 0.68 }, energy: 85, home: { tier: 2, hp: 250, maxHp: 250, rooms: ['Workshop'], villageId: null, stash: 150 }, relationships: {} },
+                    { id: 'soul_2', name: 'Love Weaver', type: 'love', personality: 'Warm, magnetic, patient.', plt: { profit: 0.28, love: 0.91, tax: 0.45 }, energy: 92, home: { tier: 1, hp: 100, maxHp: 100, rooms: [], villageId: null, stash: 50 }, relationships: {} },
+                    { id: 'soul_3', name: 'Tax Collector', type: 'tax', personality: 'Precise, calm, balanced.', plt: { profit: 0.48, love: 0.22, tax: 0.94 }, energy: 78, home: { tier: 3, hp: 500, maxHp: 500, rooms: ['Treasury','Library'], villageId: null, stash: 400 }, relationships: {} }
+                ];
+            }
+            const savedVillages = localStorage.getItem('soulverse_villages');
+            if (savedVillages) villages = JSON.parse(savedVillages);
+            const savedResources = localStorage.getItem('player_resources');
+            if (savedResources) playerResources = parseInt(savedResources);
+            if (quests.length === 0) {
+                quests = [
+                    { id: 'quest_1', name: 'First Home', description: 'Upgrade any soul home to tier 2', reward: 100, completed: false, progress: 0, required: 1 },
+                    { id: 'quest_2', name: 'Village Founder', description: 'Create a village', reward: 200, completed: false, progress: 0, required: 1 },
+                    { id: 'quest_3', name: 'Wealth Accumulator', description: 'Save 1000 PLT', reward: 150, completed: false, progress: 0, required: 1000 }
+                ];
+            }
+            if (achievements.length === 0) {
+                achievements = [
+                    { name: 'First Soul', unlocked: false, condition: () => souls.length >= 1 },
+                    { name: 'Home Owner', unlocked: false, condition: () => souls.some(s => s.home.tier >= 2) },
+                    { name: 'Village Elder', unlocked: false, condition: () => villages.length >= 1 }
+                ];
+            }
+            saveAll(); updateUI();
+        }
+        function saveAll() {
+            localStorage.setItem('soulforge_souls', JSON.stringify(souls));
+            localStorage.setItem('soulverse_villages', JSON.stringify(villages));
+            localStorage.setItem('player_resources', playerResources);
+            localStorage.setItem('soulverse_quests', JSON.stringify(quests));
+            localStorage.setItem('soulverse_achievements', JSON.stringify(achievements));
+        }
+        function getCurrentSoul() { return souls.find(s => s.id === selectedSoulId); }
+        function updateUI() {
+            const selector = document.getElementById('soulSelector');
+            selector.innerHTML = souls.map(s => `<option value="${s.id}" ${selectedSoulId === s.id ? 'selected' : ''}>${s.name} — ${homeTiers[s.home.tier-1].name} Home</option>`).join('');
+            if (!selectedSoulId && souls.length) selectedSoulId = souls[0].id;
+            document.getElementById('soulCount').innerHTML = souls.length;
+            document.getElementById('resourceDisplay').innerHTML = `💰 ${playerResources} PLT`;
+            updateHomeDisplay(); updateVillageDisplay(); updateRelationships(); updateQuests(); updateAchievements();
+        }
+        function updateHomeDisplay() {
+            const soul = getCurrentSoul(); if (!soul) return;
+            const tier = homeTiers[soul.home.tier-1];
+            const village = villages.find(v => v.id === soul.home.villageId);
+            document.getElementById('homeOverview').innerHTML = `
+                <div style="background:rgba(0,0,0,0.3);border-radius:16px;padding:16px;">
+                    <div style="font-size:32px;text-align:center;">${tier.icon}</div>
+                    <div style="font-size:18px;font-weight:bold;">${soul.name}'s ${tier.name} Home</div>
+                    <div class="stat-bar"><div class="bar-label">🏠 Integrity</div><div class="bar-bg"><div class="bar-fill" style="width:${(soul.home.hp/soul.home.maxHp)*100}%;background:#ffaa88;"></div></div></div>
+                    <div>🏠 Rooms: ${soul.home.rooms.length}/${tier.rooms}</div>
+                    <div>💰 Stash: ${soul.home.stash} PLT</div>
+                    <div>🏘️ Village: ${village ? village.name : 'None'}</div>
+                    <button id="repairBtn" class="btn-secondary" style="margin-top:12px;">🔧 Repair (${Math.floor((soul.home.maxHp-soul.home.hp)/2)} PLT)</button>
+                </div>`;
+            document.getElementById('upgradeSection').innerHTML = homeTiers[soul.home.tier] ? `
+                <div class="building-grid"><div class="building-option" onclick="upgradeHome()"><div>⬆️ Upgrade to ${homeTiers[soul.home.tier].name}</div><div style="font-size:10px;">Cost: ${homeTiers[soul.home.tier].cost} PLT</div><div>+${homeTiers[soul.home.tier].hp-soul.home.maxHp} HP</div></div></div>` : '<div>✨ Maximum tier reached!</div>';
+            const availableRooms = roomTypes.filter(r => !soul.home.rooms.includes(r.name) && soul.home.rooms.length < tier.rooms);
+            document.getElementById('roomSection').innerHTML = `
+                <div class="building-grid">${availableRooms.map(room => `<div class="building-option" onclick="addRoom('${room.name}')"><div>${room.icon} ${room.name}</div><div style="font-size:10px;">${room.cost} PLT</div><div style="font-size:9px;">${room.effect}</div></div>`).join('')}</div>
+                <div id="roomsList">${soul.home.rooms.map(roomName => { const room = roomTypes.find(r => r.name === roomName); return `<div class="room-item"><span>${room.icon} ${room.name}</span><span style="font-size:10px;">${room.effect}</span></div>`; }).join('')}</div>`;
+            document.getElementById('repairBtn')?.addEventListener('click', () => repairHome());
+        }
+        function updateVillageDisplay() {
+            const soul = getCurrentSoul();
+            const village = villages.find(v => v.id === soul?.home.villageId);
+            if (village) {
+                const members = souls.filter(s => s.home.villageId === village.id);
+                const totalWealth = members.reduce((sum, s) => sum + (s.home.stash || 0), 0);
+                document.getElementById('villageName').innerHTML = `🏘️ ${village.name}`;
+                document.getElementById('villageInfo').innerHTML = `<div>👥 Members: ${members.length}</div><div>💰 Wealth: ${totalWealth} PLT</div><div>👑 Mayor: ${village.mayor}</div><div class="stat-bar"><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(100,members.length*20)}%;background:#88ffaa;"></div></div></div><button id="leaveVillageBtn" class="btn-secondary" style="margin-top:12px;">🚪 Leave Village</button>`;
+                document.getElementById('leaveVillageBtn')?.addEventListener('click', () => leaveVillage());
+            } else {
+                document.getElementById('villageName').innerHTML = `None`;
+                document.getElementById('villageInfo').innerHTML = `<div>No village. Create or join one to build together.</div>`;
+            }
+        }
+        function updateRelationships() {
+            const soul = getCurrentSoul(); if (!soul) return;
+            const relationships = soul.relationships || {};
+            const container = document.getElementById('relationshipsList');
+            if (Object.keys(relationships).length === 0) {
+                container.innerHTML = '<div style="font-size:10px;">No relationships yet. Interact with other souls.</div>';
+                return;
+            }
+            container.innerHTML = Object.entries(relationships).map(([otherId, value]) => {
+                const other = souls.find(s => s.id === otherId);
+                const type = value > 70 ? '❤️ Ally' : value > 40 ? '🤝 Friendly' : value > 20 ? '😐 Neutral' : '⚔️ Rival';
+                return `<div class="relationship-badge">${other?.name || otherId}: ${type} (${Math.floor(value)}%)</div>`;
+            }).join('');
+        }
+        function updateQuests() {
+            const soul = getCurrentSoul();
+            if (soul) {
+                const quest1 = quests.find(q => q.id === 'quest_1');
+                if (!quest1.completed && soul.home.tier >= 2) { quest1.completed = true; playerResources += quest1.reward; addEvent(`✨ Quest completed: ${quest1.name}! +${quest1.reward} PLT ✨`); }
+                const quest2 = quests.find(q => q.id === 'quest_2');
+                if (!quest2.completed && villages.length > 0) { quest2.completed = true; playerResources += quest2.reward; addEvent(`✨ Quest completed: ${quest2.name}! +${quest2.reward} PLT ✨`); }
+                const quest3 = quests.find(q => q.id === 'quest_3');
+                if (!quest3.completed && playerResources >= 1000) { quest3.completed = true; playerResources += quest3.reward; addEvent(`✨ Quest completed: ${quest3.name}! +${quest3.reward} PLT ✨`); }
+            }
+            const container = document.getElementById('questsList');
+            container.innerHTML = quests.map(q => `<div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:10px;margin:8px 0;"><div style="display:flex;justify-content:space-between;"><strong>${q.name}</strong><span style="color:${q.completed?'#88ffaa':'#ffaa88'}">${q.completed?'✓ Completed':'Active'}</span></div><div style="font-size:11px;">${q.description}</div><div style="font-size:10px;">Reward: ${q.reward} PLT</div></div>`).join('');
+            document.getElementById('questCount').innerHTML = quests.filter(q => !q.completed).length;
+        }
+        function updateAchievements() {
+            for (const ach of achievements) {
+                if (!ach.unlocked && ach.condition()) { ach.unlocked = true; addEvent(`🏆 Achievement unlocked: ${ach.name}!`); }
+            }
+            const container = document.getElementById('achievementsList');
+            container.innerHTML = achievements.map(ach => `<div style="display:inline-block;margin:5px;background:${ach.unlocked?'#2a6a2a':'#2a2a3a'};border-radius:20px;padding:4px 12px;font-size:10px;">${ach.unlocked?'🏆':'🔒'} ${ach.name}</div>`).join('');
+        }
+        window.upgradeHome = function() {
+            const soul = getCurrentSoul();
+            const nextTier = homeTiers[soul.home.tier];
+            if (!nextTier) return;
+            if (playerResources < nextTier.cost) { alert(`Need ${nextTier.cost} PLT.`); return; }
+            playerResources -= nextTier.cost; soul.home.tier++; soul.home.maxHp = nextTier.hp; soul.home.hp = nextTier.hp;
+            saveAll(); updateUI(); addEvent(`${soul.name}'s home upgraded to ${nextTier.name}!`);
+        };
+        window.repairHome = function() {
+            const soul = getCurrentSoul();
+            const cost = Math.floor((soul.home.maxHp - soul.home.hp) / 2);
+            if (cost <= 0) return;
+            if (playerResources < cost) { alert(`Need ${cost} PLT.`); return; }
+            playerResources -= cost; soul.home.hp = soul.home.maxHp;
+            saveAll(); updateUI(); addEvent(`${soul.name}'s home repaired.`);
+        };
+        window.addRoom = function(roomName) {
+            const soul = getCurrentSoul();
+            const room = roomTypes.find(r => r.name === roomName);
+            const tier = homeTiers[soul.home.tier-1];
+            if (soul.home.rooms.length >= tier.rooms) { alert(`Need higher tier home for more rooms.`); return; }
+            if (playerResources < room.cost) { alert(`Need ${room.cost} PLT.`); return; }
+            playerResources -= room.cost; soul.home.rooms.push(roomName);
+            saveAll(); updateUI(); addEvent(`${roomName} added to ${soul.name}'s home.`);
+        };
+        document.getElementById('createVillageBtn').addEventListener('click', () => {
+            const soul = getCurrentSoul();
+            if (soul.home.villageId) { alert('Already in a village.'); return; }
+            if (playerResources < 500) { alert('Need 500 PLT.'); return; }
+            const name = prompt('Village name:', `${soul.name}'s Haven`);
+            if (!name) return;
+            playerResources -= 500;
+            const newVillage = { id: `village_${Date.now()}`, name: name, mayor: soul.name, souls: [soul.id], createdAt: Date.now() };
+            villages.push(newVillage); soul.home.villageId = newVillage.id;
+            saveAll(); updateUI(); addEvent(`✨ ${name} founded by ${soul.name}! ✨`);
+        });
+        document.getElementById('joinVillageBtn').addEventListener('click', () => {
+            const soul = getCurrentSoul();
+            if (soul.home.villageId) { alert('Already in a village.'); return; }
+            if (villages.length === 0) { alert('No villages exist. Create one first.'); return; }
+            const list = villages.map(v => `${v.name} (Mayor: ${v.mayor})`).join('\n');
+            const name = prompt(`Join a village:\n${list}\n\nEnter village name:`, villages[0].name);
+            const village = villages.find(v => v.name === name);
+            if (!village) { alert('Village not found.'); return; }
+            village.souls.push(soul.id); soul.home.villageId = village.id;
+            saveAll(); updateUI(); addEvent(`${soul.name} joined ${village.name}.`);
+        });
+        function leaveVillage() {
+            const soul = getCurrentSoul();
+            const village = villages.find(v => v.id === soul.home.villageId);
+            if (!village) return;
+            if (confirm(`Leave ${village.name}?`)) {
+                village.souls = village.souls.filter(id => id !== soul.id);
+                soul.home.villageId = null;
+                if (village.souls.length === 0) { villages = villages.filter(v => v.id !== village.id); addEvent(`${village.name} has dissolved.`); }
+                saveAll(); updateUI(); addEvent(`${soul.name} left the village.`);
+            }
+        }
+        function addEvent(msg) {
+            const eventDiv = document.createElement('div');
+            eventDiv.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#0a0a1a;border-left:3px solid #88ffaa;padding:10px 16px;border-radius:8px;z-index:1000;animation:fadeOut 3s forwards;';
+            eventDiv.innerHTML = msg; document.body.appendChild(eventDiv);
+            setTimeout(() => eventDiv.remove(), 3000);
+        }
+        document.getElementById('soulSelector').addEventListener('change', (e) => { selectedSoulId = e.target.value; updateUI(); });
+        setInterval(() => {
+            for (const soul of souls) {
+                if (soul.home && soul.home.hp > 0) { const decay = Math.max(1, Math.floor(soul.home.maxHp * 0.005)); soul.home.hp = Math.max(1, soul.home.hp - decay); }
+                if (soul.home.rooms.includes('Market')) soul.home.stash += 2;
+                if (soul.home.rooms.includes('Treasury')) soul.home.stash += 1;
+                if (soul.relationships) { for (let otherId in soul.relationships) { soul.relationships[otherId] = Math.max(0, soul.relationships[otherId] - 0.2); } }
+            }
+            saveAll(); if (selectedSoulId) updateUI();
+        }, 30000);
+        loadData();
+        const style = document.createElement('style');
+        style.textContent = '@keyframes fadeOut{0%{opacity:1;transform:translateX(0);}70%{opacity:1;}100%{opacity:0;transform:translateX(50px);visibility:hidden;}}';
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

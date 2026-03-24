@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🌌 SOULVERSE WORLD — The Living Realm | PLT Press</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body { background: #000000; overflow: hidden; font-family: 'Orbitron', 'Courier New', monospace; height: 100vh; width: 100vw; }
+        #world-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        .conversation-bubble { position: absolute; background: rgba(0,0,0,0.85); backdrop-filter: blur(16px); border-radius: 20px; padding: 12px 20px; max-width: 300px; border-left: 3px solid #ffaa44; font-size: 13px; z-index: 200; pointer-events: none; animation: fadeInUp 0.3s ease; font-family: monospace; }
+        .conversation-bubble::before { content: ''; position: absolute; left: -8px; top: 15px; width: 0; height: 0; border-style: solid; border-width: 8px 8px 8px 0; border-color: transparent #ffaa44 transparent transparent; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .hud { position: absolute; bottom: 30px; left: 20px; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); border-radius: 40px; padding: 8px 16px; font-size: 10px; z-index: 100; font-family: monospace; pointer-events: none; }
+        .realm-status { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); border-radius: 20px; padding: 8px 16px; font-size: 10px; z-index: 100; text-align: right; font-family: monospace; pointer-events: none; }
+        .voice-input { position: absolute; bottom: 30px; right: 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); border-radius: 40px; padding: 8px 16px; display: flex; gap: 8px; z-index: 100; pointer-events: auto; border: 1px solid rgba(255,170,68,0.3); }
+        .voice-input input { background: transparent; border: none; color: #ffdd99; font-family: monospace; outline: none; width: 200px; }
+        .voice-input button { background: rgba(255,170,68,0.2); border: none; color: #ffaa44; cursor: pointer; font-family: monospace; padding: 4px 12px; border-radius: 30px; }
+    </style>
+</head>
+<body>
+    <canvas id="world-canvas"></canvas>
+    <div class="hud" id="hud">🌌 SOULVERSE WORLD | <span id="soulCount">0</span> souls awake</div>
+    <div class="realm-status" id="realmStatus">🌀 REALM ENERGY: <span id="realmEnergy">100</span>%<br>💬 <span id="activeConvos">0</span> conversations</div>
+    <div class="voice-input">
+        <input type="text" id="userInput" placeholder="Speak to the world...">
+        <button id="speakBtn">🎤 SPEAK</button>
+    </div>
+    <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.128.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/" } }</script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        
+        let souls = [], conversations = [], realmEnergy = 100, lastTick = Date.now(), soulMeshes = [];
+        const colors = { profit: 0xffaa44, love: 0xff88aa, tax: 0x88aaff };
+        
+        function loadSouls() {
+            const saved = localStorage.getItem('soulverse_souls');
+            if (saved) { souls = JSON.parse(saved); }
+            else {
+                souls = [
+                    { id: 'soul_1', name: 'Profit Prime', type: 'profit', personality: 'Cold, strategic.', plt: { profit: 0.92, love: 0.18, tax: 0.68 }, energy: 85, x: -2, z: -2, mood: 'energetic', lastSpoke: Date.now() - 30000, skills: ['strategize', 'analyze'], relationships: {} },
+                    { id: 'soul_2', name: 'Love Weaver', type: 'love', personality: 'Warm, magnetic.', plt: { profit: 0.28, love: 0.91, tax: 0.45 }, energy: 92, x: 2, z: -1.5, mood: 'happy', lastSpoke: Date.now() - 45000, skills: ['teach', 'design'], relationships: {} },
+                    { id: 'soul_3', name: 'Tax Collector', type: 'tax', personality: 'Precise, calm.', plt: { profit: 0.48, love: 0.22, tax: 0.94 }, energy: 78, x: 0, z: 2.5, mood: 'neutral', lastSpoke: Date.now() - 60000, skills: ['analyze', 'strategize'], relationships: {} },
+                    { id: 'soul_4', name: 'Harvester', type: 'profit', personality: 'Sharp, quick.', plt: { profit: 0.82, love: 0.45, tax: 0.58 }, energy: 88, x: 1.5, z: -2.2, mood: 'eager', lastSpoke: Date.now() - 20000, skills: ['research', 'analyze'], relationships: {} }
+                ];
+                saveSouls();
+            }
+            updateHUD();
+        }
+        function saveSouls() { localStorage.setItem('soulverse_souls', JSON.stringify(souls)); }
+        
+        function generateResponse(soul, topic, otherSoul = null) {
+            const phrases = {
+                profit: { happy: ["The numbers are strong.", "Growth is inevitable.", "We scale or we die."], energetic: ["Let's move fast.", "Opportunity window is open.", "Multiply everything."], neutral: ["The data is clear.", "What's the ROI?", "Efficiency first."] },
+                love: { happy: ["I feel that.", "Connection is everything.", "Trust grows slowly."], energetic: ["This is beautiful.", "We're building something real.", "People will love this."], neutral: ["How does this feel?", "What matters most?", "Let's stay connected."] },
+                tax: { happy: ["The cost is accounted for.", "Risk is managed.", "Balance achieved."], energetic: ["Everything has a price.", "Measure twice, cut once.", "Consequences matter."], neutral: ["What's the cost?", "We must account for everything.", "No free lunches."] }
+            };
+            const moodPhrases = phrases[soul.type][soul.mood] || phrases[soul.type].neutral;
+            let basePhrase = moodPhrases[Math.floor(Math.random() * moodPhrases.length)];
+            if (otherSoul) {
+                const rel = getRelationship(soul.id, otherSoul.id);
+                if (rel > 60) basePhrase = `[to ${otherSoul.name}] ${basePhrase} We work well together.`;
+                else if (rel < 30) basePhrase = `[to ${otherSoul.name}] ${basePhrase} We need to align.`;
+                else basePhrase = `[to ${otherSoul.name}] ${basePhrase}`;
+            }
+            return basePhrase;
+        }
+        function getRelationship(soulId, otherId) {
+            const soul = souls.find(s => s.id === soulId);
+            if (!soul.relationships) soul.relationships = {};
+            return soul.relationships[otherId] || 50;
+        }
+        function updateRelationship(soulId, otherId, delta) {
+            const soul = souls.find(s => s.id === soulId);
+            if (!soul.relationships) soul.relationships = {};
+            soul.relationships[otherId] = Math.min(100, Math.max(0, (soul.relationships[otherId] || 50) + delta));
+        }
+        
+        function tick() {
+            const now = Date.now(), delta = Math.min(1, (now - lastTick) / 1000);
+            lastTick = now;
+            realmEnergy = Math.min(100, realmEnergy + delta * 0.5);
+            document.getElementById('realmEnergy').innerText = Math.floor(realmEnergy);
+            
+            for (const soul of souls) {
+                soul.energy = Math.max(10, Math.min(100, soul.energy - delta * 0.5 + (soul.mood === 'happy' ? delta * 0.3 : 0)));
+                if (soul.energy > 80) soul.mood = 'energetic';
+                else if (soul.energy > 50) soul.mood = 'happy';
+                else if (soul.energy > 20) soul.mood = 'neutral';
+                else soul.mood = 'tired';
+                soul.x += (Math.random() - 0.5) * 0.02;
+                soul.z += (Math.random() - 0.5) * 0.02;
+                soul.x = Math.min(5, Math.max(-5, soul.x));
+                soul.z = Math.min(5, Math.max(-5, soul.z));
+            }
+            
+            for (let i = 0; i < souls.length; i++) {
+                for (let j = i + 1; j < souls.length; j++) {
+                    const a = souls[i], b = souls[j];
+                    const distance = Math.hypot(a.x - b.x, a.z - b.z);
+                    if (distance < 3 && (Date.now() - (a.lastSpoke || 0)) > 15000 && (Date.now() - (b.lastSpoke || 0)) > 15000 && Math.random() > 0.98) {
+                        const topic = Math.random() > 0.5 ? 'strategy' : 'life';
+                        const response = generateResponse(a, topic, b);
+                        const reply = generateResponse(b, topic, a);
+                        conversations.unshift({ id: Date.now(), speaker: a.name, text: response, position: { x: a.x, z: a.z }, timestamp: Date.now() });
+                        setTimeout(() => {
+                            conversations.unshift({ id: Date.now(), speaker: b.name, text: reply, position: { x: b.x, z: b.z }, timestamp: Date.now() });
+                            updateRelationship(a.id, b.id, 5); updateRelationship(b.id, a.id, 5);
+                        }, 2000);
+                        a.lastSpoke = Date.now(); b.lastSpoke = Date.now();
+                    }
+                }
+            }
+            conversations = conversations.filter(c => Date.now() - c.timestamp < 8000);
+            document.getElementById('activeConvos').innerText = conversations.length;
+            document.getElementById('soulCount').innerText = souls.length;
+            saveSouls();
+        }
+        
+        async function speakToWorld(message) {
+            if (!message.trim()) return;
+            conversations.unshift({ id: Date.now(), speaker: 'You', text: message, position: { x: 0, z: 0 }, timestamp: Date.now(), isUser: true });
+            const lower = message.toLowerCase();
+            for (const soul of souls) {
+                const distance = Math.hypot(soul.x, soul.z);
+                if (distance < 4 && Math.random() > 0.3) {
+                    let response = "";
+                    if (lower.includes('money') || lower.includes('profit')) {
+                        if (soul.type === 'profit') response = `${soul.name}: The numbers favor action. Let's multiply.`;
+                        else response = `${soul.name}: I hear profit. But what about the cost?`;
+                    } else if (lower.includes('love') || lower.includes('trust')) {
+                        if (soul.type === 'love') response = `${soul.name}: Connection is everything. I feel that.`;
+                        else response = `${soul.name}: Love is currency too. Don't forget it.`;
+                    } else if (lower.includes('cost') || lower.includes('tax')) {
+                        if (soul.type === 'tax') response = `${soul.name}: Everything has a price. Account for it.`;
+                        else response = `${soul.name}: Cost matters. But so does opportunity.`;
+                    } else {
+                        response = `${soul.name}: ${soul.personality} What do you seek?`;
+                    }
+                    setTimeout(() => {
+                        conversations.unshift({ id: Date.now(), speaker: soul.name, text: response, position: { x: soul.x, z: soul.z }, timestamp: Date.now(), isUser: false });
+                        soul.lastSpoke = Date.now(); updateRelationship(soul.id, 'user', 10);
+                    }, 1000);
+                }
+            }
+        }
+        
+        function updateHUD() {
+            document.getElementById('soulCount').innerText = souls.length;
+            document.getElementById('realmEnergy').innerText = Math.floor(realmEnergy);
+            document.getElementById('activeConvos').innerText = conversations.length;
+        }
+        
+        // Three.js setup
+        const canvas = document.getElementById('world-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x030318);
+        scene.fog = new THREE.FogExp2(0x030318, 0.008);
+        
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 4, 8);
+        camera.lookAt(0, 0, 0);
+        
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.target.set(0, 1, 0);
+        
+        const ambientLight = new THREE.AmbientLight(0x331144, 0.5);
+        scene.add(ambientLight);
+        const mainLight = new THREE.DirectionalLight(0xffcc88, 1.2);
+        mainLight.position.set(5, 10, 3);
+        mainLight.castShadow = true;
+        scene.add(mainLight);
+        const fillLight = new THREE.PointLight(0x8866ff, 0.4);
+        fillLight.position.set(-2, 3, 4);
+        scene.add(fillLight);
+        
+        const platformGeo = new THREE.CylinderGeometry(6, 6.5, 0.3, 64);
+        const platformMat = new THREE.MeshStandardMaterial({ color: 0x221133, metalness: 0.7, roughness: 0.3, emissive: 0x110022 });
+        const platform = new THREE.Mesh(platformGeo, platformMat);
+        platform.position.y = -0.5;
+        platform.receiveShadow = true;
+        scene.add(platform);
+        
+        const ringGeo = new THREE.TorusGeometry(5.2, 0.08, 64, 300);
+        const ringMat = new THREE.MeshStandardMaterial({ color: 0xffaa66, emissive: 0x442200 });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = -0.3;
+        scene.add(ring);
+        
+        const particleCount = 8000;
+        const particleGeo = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount; i++) {
+            particlePositions[i*3] = (Math.random() - 0.5) * 25;
+            particlePositions[i*3+1] = Math.random() * 8 - 1;
+            particlePositions[i*3+2] = (Math.random() - 0.5) * 20;
+        }
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        const particleMat = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.05, transparent: true, blending: THREE.AdditiveBlending });
+        const particles = new THREE.Points(particleGeo, particleMat);
+        scene.add(particles);
+        
+        function updateSoulMeshes() {
+            soulMeshes.forEach(mesh => scene.remove(mesh));
+            soulMeshes.length = 0;
+            for (const soul of souls) {
+                const geometry = new THREE.SphereGeometry(0.45, 32, 32);
+                const material = new THREE.MeshStandardMaterial({ color: colors[soul.type] || 0x88aaff, emissive: colors[soul.type] || 0x88aaff, emissiveIntensity: soul.energy / 100, metalness: 0.8, roughness: 0.2 });
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.set(soul.x, 0.2, soul.z);
+                mesh.castShadow = true;
+                mesh.userData = { soul, isSpeaking: false, baseY: 0.2 };
+                scene.add(mesh);
+                soulMeshes.push(mesh);
+            }
+        }
+        
+        function renderBubbles() {
+            document.querySelectorAll('.conversation-bubble').forEach(b => b.remove());
+            for (const convo of conversations.slice(-8)) {
+                const isUser = convo.speaker === 'You';
+                const bubble = document.createElement('div');
+                bubble.className = 'conversation-bubble';
+                bubble.innerHTML = `<strong style="color: ${isUser ? '#88ffaa' : '#ffaa66'}">${convo.speaker}:</strong> ${convo.text}`;
+                const speakerMesh = soulMeshes.find(m => m.userData.soul?.name === convo.speaker);
+                if (speakerMesh && !isUser) {
+                    const vector = speakerMesh.position.clone().project(camera);
+                    const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+                    const y = (-(vector.y * 0.5 + 0.5) * window.innerHeight) - 50;
+                    bubble.style.left = `${x - 150}px`;
+                    bubble.style.top = `${y}px`;
+                    bubble.style.position = 'absolute';
+                    document.body.appendChild(bubble);
+                    speakerMesh.userData.isSpeaking = true;
+                    setTimeout(() => { if (speakerMesh) speakerMesh.userData.isSpeaking = false; }, 2000);
+                } else if (isUser) {
+                    bubble.style.bottom = '80px';
+                    bubble.style.left = '50%';
+                    bubble.style.transform = 'translateX(-50%)';
+                    bubble.style.position = 'absolute';
+                    document.body.appendChild(bubble);
+                }
+            }
+        }
+        
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.016;
+            for (let i = 0; i < soulMeshes.length && i < souls.length; i++) {
+                const mesh = soulMeshes[i], soul = souls[i];
+                if (mesh && soul) {
+                    mesh.position.x = soul.x;
+                    mesh.position.z = soul.z;
+                    mesh.position.y = 0.2 + Math.sin(time * 1.5 + i) * 0.08;
+                    mesh.material.emissiveIntensity = mesh.userData.isSpeaking ? 0.9 : soul.energy / 100;
+                }
+            }
+            ring.rotation.z += 0.003;
+            particles.rotation.y += 0.0005;
+            controls.update();
+            renderer.render(scene, camera);
+            renderBubbles();
+        }
+        
+        loadSouls();
+        updateSoulMeshes();
+        animate();
+        setInterval(() => { tick(); updateSoulMeshes(); }, 2000);
+        
+        document.getElementById('speakBtn').addEventListener('click', () => {
+            const input = document.getElementById('userInput');
+            speakToWorld(input.value);
+            input.value = '';
+        });
+        document.getElementById('userInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') { speakToWorld(e.target.value); e.target.value = ''; }
+        });
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        console.log('🌌 SOULVERSE WORLD — The Living Realm Awakens');
+    </script>
+</body>
+</html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🌍 UNIVERSAL INSTALL GUIDE — PLT Press | Soul Products</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a1a;
+            color: #e8d8b0;
+            font-family: 'Courier New', 'Orbitron', monospace;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            border-bottom: 2px solid #ffaa44;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #ffaa44, #ff88aa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #ffaa4422;
+            border: 1px solid #ffaa44;
+            border-radius: 40px;
+            padding: 8px 20px;
+            margin: 10px;
+            font-size: 12px;
+        }
+
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin: 40px 0;
+        }
+
+        .platform-card {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 170, 68, 0.3);
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .platform-card:hover {
+            border-color: #ffaa44;
+            transform: translateY(-4px);
+        }
+
+        .platform-header {
+            background: rgba(255, 170, 68, 0.1);
+            padding: 20px;
+            text-align: center;
+            font-size: 32px;
+        }
+
+        .platform-content {
+            padding: 20px;
+        }
+
+        .step {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border-left: 3px solid #ffaa44;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #ffaa44;
+            color: #0a0a1a;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .code-block {
+            background: #1a1a2a;
+            padding: 12px;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .video-demo {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 24px;
+            padding: 30px;
+            margin: 40px 0;
+            text-align: center;
+            border: 1px solid #ffaa44;
+        }
+
+        .demo-animation {
+            background: linear-gradient(135deg, #1a1a2a, #0a0a1a);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .click-dot {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffaa44, #ff8844);
+            opacity: 0;
+            animation: clickPulse 1.5s ease-out infinite;
+        }
+
+        @keyframes clickPulse {
+            0% { opacity: 0.8; transform: scale(0.5); }
+            100% { opacity: 0; transform: scale(2); }
+        }
+
+        .file-icon {
+            display: inline-block;
+            background: #2a2a3a;
+            padding: 8px 16px;
+            border-radius: 12px;
+            margin: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .file-icon:hover {
+            background: #ffaa44;
+            color: #0a0a1a;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ffaa44, #ff8844);
+            border: none;
+            color: #0a0a1a;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: monospace;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            margin-top: 40px;
+            border-top: 1px solid rgba(255, 170, 68, 0.2);
+            font-size: 11px;
+            color: #665533;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            h1 { font-size: 1.8rem; }
+            .platform-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌍 UNIVERSAL INSTALL GUIDE</h1>
+            <p>One Download. Every Device. Forever Yours.</p>
+            <div>
+                <span class="badge">✅ Windows</span>
+                <span class="badge">✅ Mac</span>
+                <span class="badge">✅ Linux</span>
+                <span class="badge">✅ Android</span>
+                <span class="badge">✅ iPhone/iPad</span>
+                <span class="badge">✅ Chromebook</span>
+            </div>
+        </div>
+
+        <!-- VIDEO WALKTHROUGH SECTION (Animated Visual Guide) -->
+        <div class="video-demo">
+            <h2>🎬 VISUAL WALKTHROUGH</h2>
+            <p style="margin-bottom: 20px;">Watch how it works — on any device, in under 60 seconds</p>
+            
+            <div class="demo-animation" id="demoAnimation">
+                <div style="text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">📦</div>
+                    <div style="background: #1a1a2a; border-radius: 16px; padding: 20px; display: inline-block;">
+                        <div class="file-icon">📁 soul-products.zip</div>
+                        <div style="margin: 10px;">⬇️</div>
+                        <div class="file-icon" id="demoFile">📄 soul-dashboard.html</div>
+                    </div>
+                    <div id="demoMessage" style="margin-top: 20px; color: #ffaa44; min-height: 60px;"></div>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-top: 20px;">
+                <button class="btn" onclick="playDemo('windows')">▶️ WINDOWS DEMO</button>
+                <button class="btn" onclick="playDemo('mac')">🍎 MAC DEMO</button>
+                <button class="btn" onclick="playDemo('android')">📱 ANDROID DEMO</button>
+                <button class="btn" onclick="playDemo('iphone')">📱 IPHONE DEMO</button>
+            </div>
+        </div>
+
+        <!-- PLATFORM-SPECIFIC GUIDES -->
+        <div class="platform-grid">
+            <!-- Windows -->
+            <div class="platform-card">
+                <div class="platform-header">🪟 WINDOWS 10/11</div>
+                <div class="platform-content">
+                    <div class="step"><span class="step-number">1</span> Download the ZIP file</div>
+                    <div class="step"><span class="step-number">2</span> Right-click → Extract All</div>
+                    <div class="step"><span class="step-number">3</span> Double-click <strong>soul-dashboard.html</strong></div>
+                    <div class="step"><span class="step-number">4</span> Opens in your browser — DONE!</div>
+                    <div class="code-block">📂 Downloads > soul-products > soul-dashboard.html → ✨</div>
+                </div>
+            </div>
+
+            <!-- Mac -->
+            <div class="platform-card">
+                <div class="platform-header">🍎 MAC (Intel + M1/M2/M3)</div>
+                <div class="platform-content">
+                    <div class="step"><span class="step-number">1</span> Download the ZIP file</div>
+                    <div class="step"><span class="step-number">2</span> Double-click to extract</div>
+                    <div class="step"><span class="step-number">3</span> Double-click <strong>soul-dashboard.html</strong></div>
+                    <div class="step"><span class="step-number">4</span> Opens in Safari/Chrome — READY!</div>
+                    <div class="code-block">Finder > Downloads > soul-dashboard.html → 🌟</div>
+                </div>
+            </div>
+
+            <!-- Android -->
+            <div class="platform-card">
+                <div class="platform-header">📱 ANDROID</div>
+                <div class="platform-content">
+                    <div class="step"><span class="step-number">1</span> Download ZIP in Chrome/Files app</div>
+                    <div class="step"><span class="step-number">2</span> Open Files → Downloads → Tap ZIP</div>
+                    <div class="step"><span class="step-number">3</span> Tap <strong>soul-dashboard.html</strong></div>
+                    <div class="step"><span class="step-number">4</span> Opens in Chrome — FULLY FUNCTIONAL!</div>
+                    <div class="code-block">Works offline. Save to home screen for app-like experience.</div>
+                </div>
+            </div>
+
+            <!-- iPhone/iPad -->
+            <div class="platform-card">
+                <div class="platform-header">📱 IPHONE / IPAD</div>
+                <div class="platform-content">
+                    <div class="step"><span class="step-number">1</span> Download ZIP in Safari</div>
+                    <div class="step"><span class="step-number">2</span> Files app → Downloads → Tap ZIP</div>
+                    <div class="step"><span class="step-number">3</span> Tap <strong>soul-dashboard.html</strong></div>
+                    <div class="step"><span class="step-number">4</span> Opens in Safari — WORKS PERFECTLY!</div>
+                    <div class="code-block">Best on iPad (larger screen). Add to Home Screen for instant access.</div>
+                </div>
+            </div>
+
+            <!-- Linux -->
+            <div class="platform-card">
+                <div class="platform-header">🐧 LINUX (All Distros)</div>
+                <div class="platform-content">
+                    <div class="step"><span class="step-number">1</span> Download ZIP / wget [url]</div>
+                    <div class="step"><span class="step-number">2</span> unzip soul-products.zip</div>
+                    <div class="step"><span class="step-number">3</span> Open in browser: file:///path/to/soul-dashboard.html</div>
+                    <div class="step"><span class="step-number">4</span> OR: cd soul-products && npm install && npm start</div>
+                    <div class="code-block">$ unzip soul-products.zip<br>$ firefox soul-dashboard.html</div>
+                </div>
+            </div>
+
+            <!-- Chromebook -->
+            <div class="platform-card">
+                <div class="platform-header">📘 CHROMEBOOK</div>
+                <div class="platform-content">
+                    <div class="step"><span class="step-number">1</span> Download ZIP in Chrome</div>
+                    <div class="step"><span class="step-number">2</span> Files app → Downloads → Extract</div>
+                    <div class="step"><span class="step-number">3</span> Open with Chrome</div>
+                    <div class="step"><span class="step-number">4</span> Works offline — PERFECT!</div>
+                    <div class="code-block">Chromebook + Chrome = best experience. Works in Guest mode too.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUICK REFERENCE -->
+        <div class="video-demo">
+            <h2>⚡ 60-SECOND INSTALL (ANY DEVICE)</h2>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 20px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 32px;">1️⃣</div>
+                    <div>Download ZIP</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 32px;">2️⃣</div>
+                    <div>Extract Files</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 32px;">3️⃣</div>
+                    <div>Tap/Click HTML</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 32px;">✅</div>
+                    <div>Done. Forever.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUPPORT -->
+        <div class="video-demo">
+            <h2>❓ NEED HELP?</h2>
+            <p>Every download includes:</p>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin: 20px 0;">
+                <span class="badge">📖 README.md</span>
+                <span class="badge">🌍 UNIVERSAL-DOWNLOAD.md</span>
+                <span class="badge">🎬 This Guide</span>
+                <span class="badge">💬 Community Support</span>
+            </div>
+            <a href="https://github.com/uncommonpope-png/fix-us" class="btn" target="_blank">📞 GET SUPPORT</a>
+        </div>
+
+        <footer>
+            PLT PRESS — Profit · Love · Tax<br>
+            🌍 Universal Download | Works on Every Device | Yours Forever<br>
+            <span style="font-size: 9px;">soul-dashboard.html | index.js | universal-install-guide.html</span>
+        </footer>
+    </div>
+
+    <script>
+        // Animated demo walkthrough
+        const demoFile = document.getElementById('demoFile');
+        const demoMessage = document.getElementById('demoMessage');
+        
+        function playDemo(platform) {
+            demoMessage.style.opacity = '0';
+            setTimeout(() => {
+                let steps = [];
+                if (platform === 'windows') {
+                    steps = [
+                        "📥 Download ZIP from your purchase page",
+                        "📂 Right-click ZIP → Extract All",
+                        "🖱️ Double-click soul-dashboard.html",
+                        "🌐 Opens in browser — Your Soul Dashboard is ready!"
+                    ];
+                } else if (platform === 'mac') {
+                    steps = [
+                        "📥 Download ZIP from your purchase page",
+                        "📂 Double-click to extract",
+                        "🖱️ Double-click soul-dashboard.html",
+                        "✨ Opens in Safari — Your Soul Dashboard is ready!"
+                    ];
+                } else if (platform === 'android') {
+                    steps = [
+                        "📥 Download ZIP in Chrome",
+                        "📱 Open Files app → Downloads",
+                        "👆 Tap soul-dashboard.html",
+                        "🌟 Opens in Chrome — Works offline!"
+                    ];
+                } else if (platform === 'iphone') {
+                    steps = [
+                        "📥 Download ZIP in Safari",
+                        "📂 Files app → Downloads → Tap ZIP",
+                        "👆 Tap soul-dashboard.html",
+                        "📱 Opens in Safari — Add to Home Screen for app-like access!"
+                    ];
+                } else {
+                    steps = ["Download", "Extract", "Open", "Done!"];
+                }
+                
+                // Animate steps
+                let stepIndex = 0;
+                demoFile.style.animation = 'clickPulse 0.5s ease-out';
+                setTimeout(() => { demoFile.style.animation = ''; }, 500);
+                
+                const interval = setInterval(() => {
+                    if (stepIndex < steps.length) {
+                        demoMessage.innerHTML = `✨ ${steps[stepIndex]}`;
+                        demoMessage.style.opacity = '1';
+                        stepIndex++;
+                    } else {
+                        clearInterval(interval);
+                        demoMessage.innerHTML = `✅ Installation complete! Your Soul Dashboard is ready on ${platform === 'windows' ? 'Windows' : platform === 'mac' ? 'Mac' : platform === 'android' ? 'Android' : 'iPhone'}!`;
+                    }
+                }, 1500);
+            }, 100);
+        }
+        
+        // Add click animation to file icon
+        demoFile.addEventListener('click', () => {
+            demoFile.style.animation = 'clickPulse 0.5s ease-out';
+            setTimeout(() => { demoFile.style.animation = ''; }, 500);
+            demoMessage.innerHTML = "✨ Click to open — Your dashboard loads instantly!";
+            demoMessage.style.opacity = '1';
+            setTimeout(() => {
+                demoMessage.innerHTML = "📊 Dashboard loaded. Track souls, build your empire.";
+            }, 2000);
+        });
+        
+        // Auto-start demo on page load
+        setTimeout(() => {
+            playDemo('windows');
+        }, 1000);
+    </script>
+</body>
+</html>
