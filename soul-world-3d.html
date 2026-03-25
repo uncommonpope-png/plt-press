@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🌍 SOUL WORLD 3D — Catch Souls in a Living Universe</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            overflow: hidden; 
+            background: #000; 
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            touch-action: none;
+        }
+        #gameCanvas { 
+            display: block; 
+            width: 100vw; 
+            height: 100vh;
+        }
+        
+        /* UI Overlay */
+        #uiOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            pointer-events: auto;
+        }
+        .hud-panel {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .hud-title {
+            font-size: 12px;
+            color: #88aaff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+        .stat-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 5px 0;
+        }
+        .stat-icon { font-size: 18px; }
+        .stat-value { font-size: 18px; font-weight: bold; }
+        .stat-label { font-size: 12px; color: #aaa; }
+        
+        /* Soul Radar */
+        #soulRadar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 150px;
+            height: 150px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            border: 2px solid rgba(136,170,255,0.5);
+            pointer-events: auto;
+        }
+        #radarCanvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Action Bar */
+        #actionBar {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            pointer-events: auto;
+        }
+        .action-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-btn:hover {
+            transform: scale(1.1);
+            border-color: #88aaff;
+            background: rgba(136,170,255,0.3);
+        }
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+        .action-btn.active {
+            border-color: #ffaa44;
+            background: rgba(255,170,68,0.3);
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,170,68,0.5); }
+            50% { box-shadow: 0 0 0 15px rgba(255,170,68,0); }
+        }
+        
+        /* Catch Mode UI */
+        #catchMode {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px 40px;
+            text-align: center;
+            display: none;
+            pointer-events: auto;
+        }
+        #catchMode.active { display: block; }
+        .catch-power-bar {
+            width: 200px;
+            height: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px auto;
+        }
+        .catch-power-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4ade80, #fbbf24, #ef4444);
+            transition: width 0.1s;
+        }
+        .catch-instruction {
+            color: #fff;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        /* Soul Dex Panel */
+        #soulDex {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            background: rgba(10,30,50,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 2px solid rgba(136,170,255,0.5);
+            padding: 30px;
+            display: none;
+            pointer-events: auto;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        #soulDex.active { display: block; animation: slideIn 0.3s ease; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        .dex-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .dex-title {
+            font-size: 28px;
+            color: #88aaff;
+            margin-bottom: 5px;
+        }
+        .dex-count {
+            color: #aaa;
+            font-size: 14px;
+        }
+        .dex-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+        }
+        .dex-entry {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .dex-entry:hover {
+            background: rgba(136,170,255,0.1);
+            border-color: #88aaff;
+            transform: translateY(-3px);
+        }
+        .dex-entry.caught {
+            border-color: #4ade80;
+            background: rgba(74,222,128,0.1);
+        }
+        .dex-soul-icon {
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+        .dex-soul-name {
+            font-size: 12px;
+            color: #fff;
+            font-weight: bold;
+        }
+        .dex-soul-type {
+            font-size: 10px;
+            color: #88aaff;
+            margin-top: 4px;
+        }
+        .dex-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 28px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .dex-close:hover { opacity: 1; }
+        
+        /* Loading Screen */
+        #loadingScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a1a2a 0%, #000 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            pointer-events: auto;
+        }
+        .loading-title {
+            font-size: 32px;
+            color: #88aaff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .loading-bar {
+            width: 300px;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .loading-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #88aaff, #ffaa44);
+            transition: width 0.3s;
+        }
+        .loading-text {
+            color: #aaa;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        /* Mobile Controls */
+        #mobileControls {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            display: none;
+            pointer-events: auto;
+        }
+        @media (max-width: 768px) {
+            #mobileControls { display: block; }
+            #actionBar { bottom: 100px; }
+        }
+        .dpad {
+            width: 150px;
+            height: 150px;
+            position: relative;
+        }
+        .dpad-btn {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .dpad-btn:active { background: rgba(136,170,255,0.3); }
+        .dpad-up { top: 0; left: 50px; }
+        .dpad-down { bottom: 0; left: 50px; }
+        .dpad-left { top: 50px; left: 0; }
+        .dpad-right { top: 50px; right: 0; }
+        
+        /* Notification */
+        #notification {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px 60px;
+            text-align: center;
+            display: none;
+            z-index: 2000;
+            pointer-events: auto;
+            border: 2px solid rgba(136,170,255,0.5);
+        }
+        #notification.active { 
+            display: block; 
+            animation: notifyPop 0.5s ease;
+        }
+        @keyframes notifyPop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            70% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        .notify-icon { font-size: 64px; margin-bottom: 20px; }
+        .notify-title { font-size: 28px; color: #88aaff; margin-bottom: 10px; }
+        .notify-message { color: #fff; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <!-- 3D Canvas -->
+    <canvas id="gameCanvas"></canvas>
+    
+    <!-- UI Overlay -->
+    <div id="uiOverlay">
+        <!-- HUD -->
+        <div id="hud">
+            <div class="hud-panel">
+                <div class="hud-title">🎮 Player Stats</div>
+                <div class="stat-row">
+                    <span class="stat-icon">🎯</span>
+                    <div>
+                        <div class="stat-value" id="soulsCaught">0</div>
+                        <div class="stat-label">Souls Caught</div>
+                    </div>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-icon">⭐</span>
+                    <div>
+                        <div class="stat-value" id="playerLevel">1</div>
+                        <div class="stat-label">Level</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hud-panel">
+                <div class="hud-title">🎒 Catch Items</div>
+                <div class="stat-row">
+                    <span class="stat-icon">🔮</span>
+                    <div>
+                        <div class="stat-value" id="soulOrbs">10</div>
+                        <div class="stat-label">Soul Orbs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Soul Radar -->
+        <div id="soulRadar">
+            <canvas id="radarCanvas"></canvas>
+        </div>
+        
+        <!-- Action Bar -->
+        <div id="actionBar">
+            <button class="action-btn" id="catchBtn" title="Catch Mode">🎯</button>
+            <button class="action-btn" id="dexBtn" title="Soul Dex">📖</button>
+            <button class="action-btn" id="scanBtn" title="Scan Souls">🔍</button>
+            <button class="action-btn" id="summonBtn" title="Summon Soul">✨</button>
+        </div>
+        
+        <!-- Catch Mode UI -->
+        <div id="catchMode">
+            <div class="catch-power-bar">
+                <div class="catch-power-fill" id="powerFill"></div>
+            </div>
+            <div class="catch-instruction">Hold to charge power, release to throw!</div>
+        </div>
+        
+        <!-- Soul Dex Panel -->
+        <div id="soulDex">
+            <button class="dex-close" id="dexClose">×</button>
+            <div class="dex-header">
+                <div class="dex-title">📖 SOUL DEX</div>
+                <div class="dex-count" id="dexCount">0 / 16 souls collected</div>
+            </div>
+            <div class="dex-grid" id="dexGrid"></div>
+        </div>
+        
+        <!-- Mobile Controls -->
+        <div id="mobileControls">
+            <div class="dpad">
+                <div class="dpad-btn dpad-up" data-dir="up">↑</div>
+                <div class="dpad-btn dpad-down" data-dir="down">↓</div>
+                <div class="dpad-btn dpad-left" data-dir="left">←</div>
+                <div class="dpad-btn dpad-right" data-dir="right">→</div>
+            </div>
+        </div>
+        
+        <!-- Notification -->
+        <div id="notification">
+            <div class="notify-icon" id="notifyIcon">🎉</div>
+            <div class="notify-title" id="notifyTitle">Soul Caught!</div>
+            <div class="notify-message" id="notifyMessage">You caught a Profit Seed!</div>
+        </div>
+        
+        <!-- Loading Screen -->
+        <div id="loadingScreen">
+            <div class="loading-title">🌍 Loading Soul World...</div>
+            <div class="loading-bar">
+                <div class="loading-fill" id="loadingFill"></div>
+            </div>
+            <div class="loading-text" id="loadingText">Initializing 3D engine...</div>
+        </div>
+    </div>
+    
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script>
+        // ============================================
+        // SOUL WORLD 3D - Game Engine
+        // ============================================
+        
+        class SoulWorld3D {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.clock = new THREE.Clock();
+                
+                // Player
+                this.player = {
+                    x: 0, y: 1.7, z: 0,
+                    speed: 5,
+                    level: 1,
+                    soulsCaught: 0
+                };
+                
+                // Input
+                this.keys = {};
+                this.mouseX = 0;
+                this.mouseY = 0;
+                this.isPointerLocked = false;
+                
+                // Game State
+                this.souls = [];
+                this.soulCollection = [];
+                this.soulOrbs = 10;
+                this.inCatchMode = false;
+                this.catchPower = 0;
+                this.isCharging = false;
+                
+                // Soul Types with 3D properties
+                this.soulTypes = {
+                    profit: { 
+                        color: 0xffaa44, 
+                        icon: '💰', 
+                        name: 'Profit',
+                        shape: 'icosahedron',
+                        emissive: 0xff6600
+                    },
+                    love: { 
+                        color: 0xff88aa, 
+                        icon: '❤️', 
+                        name: 'Love',
+                        shape: 'heart',
+                        emissive: 0xff4488
+                    },
+                    tax: { 
+                        color: 0x88aaff, 
+                        icon: '⚖️', 
+                        name: 'Tax',
+                        shape: 'octahedron',
+                        emissive: 0x4488ff
+                    },
+                    hybrid: { 
+                        color: 0xaaff88, 
+                        icon: '🌀', 
+                        name: 'Hybrid',
+                        shape: 'dodecahedron',
+                        emissive: 0x88ff44
+                    }
+                };
+                
+                // Soul Dex entries
+                this.soulDex = [
+                    { id: 1, name: 'Profit Seed', type: 'profit', icon: '🌱', caught: false },
+                    { id: 2, name: 'Profit Sprout', type: 'profit', icon: '🌿', caught: false },
+                    { id: 3, name: 'Profit Tree', type: 'profit', icon: '🌳', caught: false },
+                    { id: 4, name: 'Profit Master', type: 'profit', icon: '💼', caught: false },
+                    { id: 5, name: 'Love Bud', type: 'love', icon: '🌸', caught: false },
+                    { id: 6, name: 'Love Flower', type: 'love', icon: '🌺', caught: false },
+                    { id: 7, name: 'Love Heart', type: 'love', icon: '💖', caught: false },
+                    { id: 8, name: 'Love Angel', type: 'love', icon: '👼', caught: false },
+                    { id: 9, name: 'Tax Stone', type: 'tax', icon: '🪨', caught: false },
+                    { id: 10, name: 'Tax Crystal', type: 'tax', icon: '💎', caught: false },
+                    { id: 11, name: 'Tax Scale', type: 'tax', icon: '⚖️', caught: false },
+                    { id: 12, name: 'Tax Judge', type: 'tax', icon: '👨‍⚖️', caught: false },
+                    { id: 13, name: 'Weave Sprout', type: 'hybrid', icon: '🌱', caught: false },
+                    { id: 14, name: 'Weave Weaver', type: 'hybrid', icon: '🕸️', caught: false },
+                    { id: 15, name: 'Weave Master', type: 'hybrid', icon: '🌀', caught: false },
+                    { id: 16, name: 'The First Thread', type: 'hybrid', icon: '✨', caught: false }
+                ];
+                
+                // World
+                this.terrain = null;
+                this.trees = [];
+                this.particles = [];
+            }
+            
+            async init() {
+                this.updateLoading(20, 'Creating scene...');
+                await this.sleep(300);
+                
+                // Scene
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x0a1a2a);
+                this.scene.fog = new THREE.FogExp2(0x0a1a2a, 0.02);
+                
+                this.updateLoading(40, 'Setting up camera...');
+                await this.sleep(300);
+                
+                // Camera
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.camera.position.set(0, 1.7, 0);
+                
+                this.updateLoading(60, 'Initializing renderer...');
+                await this.sleep(300);
+                
+                // Renderer
+                this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.shadowMap.enabled = true;
+                
+                this.updateLoading(70, 'Building world...');
+                await this.sleep(300);
+                
+                // Lights
+                this.createLights();
+                
+                // Terrain
+                this.createTerrain();
+                
+                // Vegetation
+                this.createVegetation();
+                
+                // Spawn souls
+                this.spawnSouls(20);
+                
+                this.updateLoading(90, 'Loading complete...');
+                await this.sleep(300);
+                
+                // Setup controls
+                this.setupControls();
+                
+                // Setup UI
+                this.setupUI();
+                
+                // Hide loading screen
+                document.getElementById('loadingScreen').style.display = 'none';
+                
+                // Start game loop
+                this.animate();
+                
+                // Load collection
+                this.loadCollection();
+                
+                console.log('🌍 Soul World 3D initialized!');
+            }
+            
+            updateLoading(percent, text) {
+                document.getElementById('loadingFill').style.width = percent + '%';
+                document.getElementById('loadingText').textContent = text;
+            }
+            
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+            
+            createLights() {
+                // Ambient
+                const ambient = new THREE.AmbientLight(0x404080, 0.5);
+                this.scene.add(ambient);
+                
+                // Moon
+                const moon = new THREE.DirectionalLight(0xaaccff, 0.8);
+                moon.position.set(50, 100, 50);
+                moon.castShadow = true;
+                moon.shadow.camera.left = -50;
+                moon.shadow.camera.right = 50;
+                moon.shadow.camera.top = 50;
+                moon.shadow.camera.bottom = -50;
+                this.scene.add(moon);
+                
+                // Point lights for atmosphere
+                const light1 = new THREE.PointLight(0x88aaff, 0.5, 50);
+                light1.position.set(10, 5, 10);
+                this.scene.add(light1);
+                
+                const light2 = new THREE.PointLight(0xffaa44, 0.3, 30);
+                light2.position.set(-15, 3, -10);
+                this.scene.add(light2);
+            }
+            
+            createTerrain() {
+                // Ground
+                const geometry = new THREE.PlaneGeometry(200, 200, 64, 64);
+                
+                // Add height variation
+                const vertices = geometry.attributes.position.array;
+                for (let i = 0; i < vertices.length; i += 3) {
+                    const x = vertices[i];
+                    const y = vertices[i + 1];
+                    vertices[i + 2] = Math.sin(x * 0.1) * Math.cos(y * 0.1) * 2 + 
+                                     Math.sin(x * 0.3 + y * 0.2) * 1;
+                }
+                geometry.computeVertexNormals();
+                
+                const material = new THREE.MeshStandardMaterial({ 
+                    color: 0x1a3a2a,
+                    roughness: 0.8,
+                    metalness: 0.2
+                });
+                
+                this.terrain = new THREE.Mesh(geometry, material);
+                this.terrain.rotation.x = -Math.PI / 2;
+                this.terrain.receiveShadow = true;
+                this.scene.add(this.terrain);
+                
+                // Water
+                const waterGeo = new THREE.PlaneGeometry(200, 200);
+                const waterMat = new THREE.MeshStandardMaterial({
+                    color: 0x0a2a4a,
+                    transparent: true,
+                    opacity: 0.6,
+                    roughness: 0.1,
+                    metalness: 0.8
+                });
+                const water = new THREE.Mesh(waterGeo, waterMat);
+                water.rotation.x = -Math.PI / 2;
+                water.position.y = -0.5;
+                this.scene.add(water);
+            }
+            
+            createVegetation() {
+                // Simple tree geometry
+                const trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, 3, 6);
+                const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3a2a });
+                
+                const leavesGeo = new THREE.ConeGeometry(2, 5, 8);
+                const leavesMat = new THREE.MeshStandardMaterial({ color: 0x2a5a3a });
+                
+                // Create trees
+                for (let i = 0; i < 50; i++) {
+                    const x = (Math.random() - 0.5) * 150;
+                    const z = (Math.random() - 0.5) * 150;
+                    
+                    // Skip center area
+                    if (Math.abs(x) < 10 && Math.abs(z) < 10) continue;
+                    
+                    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+                    trunk.position.set(x, 1.5, z);
+                    trunk.castShadow = true;
+                    
+                    const leaves = new THREE.Mesh(leavesGeo, leavesMat);
+                    leaves.position.set(0, 4, 0);
+                    leaves.castShadow = true;
+                    trunk.add(leaves);
+                    
+                    this.scene.add(trunk);
+                    this.trees.push(trunk);
+                }
+            }
+            
+            spawnSouls(count) {
+                for (let i = 0; i < count; i++) {
+                    const types = Object.keys(this.soulTypes);
+                    const type = types[Math.floor(Math.random() * types.length)];
+                    const soulData = this.soulTypes[type];
+                    
+                    // Create soul geometry
+                    let geometry;
+                    switch(soulData.shape) {
+                        case 'icosahedron':
+                            geometry = new THREE.IcosahedronGeometry(0.5, 0);
+                            break;
+                        case 'octahedron':
+                            geometry = new THREE.OctahedronGeometry(0.5, 0);
+                            break;
+                        case 'dodecahedron':
+                            geometry = new THREE.DodecahedronGeometry(0.5, 0);
+                            break;
+                        default:
+                            geometry = new THREE.SphereGeometry(0.5, 16, 16);
+                    }
+                    
+                    const material = new THREE.MeshStandardMaterial({
+                        color: soulData.color,
+                        emissive: soulData.emissive,
+                        emissiveIntensity: 0.5,
+                        roughness: 0.2,
+                        metalness: 0.8,
+                        transparent: true,
+                        opacity: 0.9
+                    });
+                    
+                    const soul = new THREE.Mesh(geometry, material);
+                    
+                    // Random position
+                    const x = (Math.random() - 0.5) * 100;
+                    const z = (Math.random() - 0.5) * 100;
+                    const y = 1;
+                    
+                    soul.position.set(x, y, z);
+                    soul.castShadow = true;
+                    
+                    // Soul properties
+                    soul.userData = {
+                        type: type,
+                        name: this.generateSoulName(type),
+                        level: Math.floor(Math.random() * 5) + 1,
+                        health: 100,
+                        maxHealth: 100,
+                        rotationSpeed: Math.random() * 0.02 + 0.01,
+                        floatSpeed: Math.random() * 0.5 + 0.5,
+                        floatOffset: Math.random() * Math.PI * 2
+                    };
+                    
+                    this.scene.add(soul);
+                    this.souls.push(soul);
+                }
+            }
+            
+            generateSoulName(type) {
+                const names = {
+                    profit: ['Profit Seed', 'Profit Sprout', 'Profit Tree', 'Profit Master'],
+                    love: ['Love Bud', 'Love Flower', 'Love Heart', 'Love Angel'],
+                    tax: ['Tax Stone', 'Tax Crystal', 'Tax Scale', 'Tax Judge'],
+                    hybrid: ['Weave Sprout', 'Weave Weaver', 'Weave Master', 'The First Thread']
+                };
+                const typeNames = names[type] || names.hybrid;
+                return typeNames[Math.floor(Math.random() * typeNames.length)];
+            }
+            
+            setupControls() {
+                // Keyboard
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.code] = true;
+                    
+                    // Number keys for action bar
+                    if (e.code === 'Digit1') this.toggleCatchMode();
+                    if (e.code === 'Digit2') this.toggleSoulDex();
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.code] = false;
+                });
+                
+                // Mouse look (pointer lock)
+                this.canvas.addEventListener('click', () => {
+                    if (!this.inCatchMode) {
+                        this.canvas.requestPointerLock();
+                    }
+                });
+                
+                document.addEventListener('pointerlockchange', () => {
+                    this.isPointerLocked = document.pointerLockElement === this.canvas;
+                });
+                
+                document.addEventListener('mousemove', (e) => {
+                    if (this.isPointerLocked && !this.inCatchMode) {
+                        this.mouseX += e.movementX * 0.002;
+                        this.mouseY += e.movementY * 0.002;
+                        this.mouseY = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.mouseY));
+                    }
+                });
+                
+                // Catch mode charge
+                document.addEventListener('mousedown', (e) => {
+                    if (this.inCatchMode && e.button === 0) {
+                        this.isCharging = true;
+                    }
+                });
+                
+                document.addEventListener('mouseup', (e) => {
+                    if (this.isCharging && e.button === 0) {
+                        this.throwSoulOrb();
+                    }
+                });
+                
+                // Mobile D-pad
+                document.querySelectorAll('.dpad-btn').forEach(btn => {
+                    btn.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        const dir = btn.dataset.dir;
+                        if (dir === 'up') this.keys['KeyW'] = true;
+                        if (dir === 'down') this.keys['KeyS'] = true;
+                        if (dir === 'left') this.keys['KeyA'] = true;
+                        if (dir === 'right') this.keys['KeyD'] = true;
+                    });
+                    
+                    btn.addEventListener('touchend', (e) => {
+                        e.preventDefault();
+                        const dir = btn.dataset.dir;
+                        if (dir === 'up') this.keys['KeyW'] = false;
+                        if (dir === 'down') this.keys['KeyS'] = false;
+                        if (dir === 'left') this.keys['KeyA'] = false;
+                        if (dir === 'right') this.keys['KeyD'] = false;
+                    });
+                });
+                
+                // Window resize
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            }
+            
+            setupUI() {
+                // Action buttons
+                document.getElementById('catchBtn').addEventListener('click', () => this.toggleCatchMode());
+                document.getElementById('dexBtn').addEventListener('click', () => this.toggleSoulDex());
+                document.getElementById('scanBtn').addEventListener('click', () => this.scanSouls());
+                document.getElementById('summonBtn').addEventListener('click', () => this.summonSoul());
+                
+                // Dex close
+                document.getElementById('dexClose').addEventListener('click', () => this.toggleSoulDex());
+            }
+            
+            toggleCatchMode() {
+                this.inCatchMode = !this.inCatchMode;
+                document.getElementById('catchMode').classList.toggle('active', this.inCatchMode);
+                document.getElementById('catchBtn').classList.toggle('active', this.inCatchMode);
+                
+                if (this.inCatchMode) {
+                    document.exitPointerLock();
+                } else {
+                    this.isCharging = false;
+                    this.catchPower = 0;
+                }
+            }
+            
+            toggleSoulDex() {
+                const dex = document.getElementById('soulDex');
+                const isActive = dex.classList.contains('active');
+                
+                if (isActive) {
+                    dex.classList.remove('active');
+                } else {
+                    this.renderSoulDex();
+                    dex.classList.add('active');
+                }
+            }
+            
+            renderSoulDex() {
+                const grid = document.getElementById('dexGrid');
+                const caughtCount = this.soulDex.filter(s => s.caught).length;
+                
+                document.getElementById('dexCount').textContent = `${caughtCount} / ${this.soulDex.length} souls collected`;
+                
+                grid.innerHTML = this.soulDex.map(soul => `
+                    <div class="dex-entry ${soul.caught ? 'caught' : ''}" onclick="game.viewSoulInfo(${soul.id})">
+                        <div class="dex-soul-icon">${soul.icon}</div>
+                        <div class="dex-soul-name">${soul.name}</div>
+                        <div class="dex-soul-type">${soul.type.toUpperCase()}</div>
+                    </div>
+                `).join('');
+            }
+            
+            viewSoulInfo(id) {
+                const soul = this.soulDex.find(s => s.id === id);
+                if (soul) {
+                    const status = soul.caught ? '✅ Caught!' : '❌ Not caught yet';
+                    alert(`${soul.icon} ${soul.name}\nType: ${soul.type.toUpperCase()}\n${status}`);
+                }
+            }
+            
+            scanSouls() {
+                // Highlight nearby souls
+                const nearby = this.souls.filter(s => {
+                    const dist = s.position.distanceTo(this.camera.position);
+                    return dist < 30;
+                });
+                
+                nearby.forEach(soul => {
+                    soul.userData.scanned = true;
+                    setTimeout(() => { soul.userData.scanned = false; }, 3000);
+                });
+                
+                this.showNotification('🔍', 'Scan Complete', `Found ${nearby.length} nearby souls!`);
+            }
+            
+            summonSoul() {
+                if (this.soulOrbs > 0) {
+                    this.soulOrbs--;
+                    this.updateHUD();
+                    
+                    // Spawn a soul near player
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 5 + Math.random() * 5;
+                    const x = this.player.x + Math.cos(angle) * dist;
+                    const z = this.player.z + Math.sin(angle) * dist;
+                    
+                    const types = Object.keys(this.soulTypes);
+                    const type = types[Math.floor(Math.random() * types.length)];
+                    const soulData = this.soulTypes[type];
+                    
+                    let geometry = new THREE.SphereGeometry(0.5, 16, 16);
+                    const material = new THREE.MeshStandardMaterial({
+                        color: soulData.color,
+                        emissive: soulData.emissive,
+                        emissiveIntensity: 0.8
+                    });
+                    
+                    const soul = new THREE.Mesh(geometry, material);
+                    soul.position.set(x, 1, z);
+                    soul.userData = {
+                        type: type,
+                        name: this.generateSoulName(type),
+                        level: Math.floor(Math.random() * 5) + 1,
+                        rotationSpeed: 0.02,
+                        floatSpeed: 1,
+                        floatOffset: 0
+                    };
+                    
+                    this.scene.add(soul);
+                    this.souls.push(soul);
+                    
+                    this.showNotification('✨', 'Soul Summoned!', `A wild ${soul.userData.name} appeared!`);
+                } else {
+                    this.showNotification('⚠️', 'No Soul Orbs!', 'Catch more souls to get orbs!');
+                }
+            }
+            
+            throwSoulOrb() {
+                if (this.soulOrbs <= 0) {
+                    this.showNotification('⚠️', 'No Soul Orbs!', 'You need orbs to catch souls!');
+                    this.isCharging = false;
+                    this.catchPower = 0;
+                    return;
+                }
+                
+                this.soulOrbs--;
+                this.updateHUD();
+                
+                // Create orb projectile
+                const orbGeo = new THREE.SphereGeometry(0.2, 8, 8);
+                const orbMat = new THREE.MeshStandardMaterial({
+                    color: 0x88aaff,
+                    emissive: 0x4488ff,
+                    emissiveIntensity: 1
+                });
+                
+                const orb = new THREE.Mesh(orbGeo, orbMat);
+                orb.position.copy(this.camera.position);
+                
+                // Calculate throw direction
+                const direction = new THREE.Vector3(0, 0, -1);
+                direction.applyQuaternion(this.camera.quaternion);
+                direction.y += 0.1;
+                direction.normalize();
+                
+                orb.userData = {
+                    velocity: direction.multiplyScalar(0.5 + this.catchPower * 0.3),
+                    lifetime: 100
+                };
+                
+                this.scene.add(orb);
+                this.particles.push(orb);
+                
+                this.isCharging = false;
+                this.catchPower = 0;
+                
+                // Check collision after delay
+                setTimeout(() => {
+                    this.checkCatchCollision();
+                }, 500);
+            }
+            
+            checkCatchCollision() {
+                // Find closest soul
+                let closest = null;
+                let closestDist = Infinity;
+                
+                this.souls.forEach(soul => {
+                    const dist = soul.position.distanceTo(this.camera.position);
+                    if (dist < closestDist && dist < 30) {
+                        closestDist = dist;
+                        closest = soul;
+                    }
+                });
+                
+                if (closest) {
+                    // Catch chance based on power and soul health
+                    const catchChance = (this.catchPower / 100) * (closest.userData.health / 100);
+                    const success = Math.random() < catchChance;
+                    
+                    if (success) {
+                        // Caught!
+                        this.player.soulsCaught++;
+                        this.player.level = Math.floor(this.player.soulsCaught / 5) + 1;
+                        
+                        // Add to collection
+                        const dexEntry = this.soulDex.find(s => s.name === closest.userData.name);
+                        if (dexEntry) dexEntry.caught = true;
+                        
+                        this.soulCollection.push({
+                            name: closest.userData.name,
+                            type: closest.userData.type,
+                            level: closest.userData.level,
+                            caughtAt: Date.now()
+                        });
+                        
+                        this.saveCollection();
+                        this.updateHUD();
+                        this.renderSoulDex();
+                        
+                        // Remove soul from world
+                        this.scene.remove(closest);
+                        this.souls = this.souls.filter(s => s !== closest);
+                        
+                        this.showNotification('🎉', 'Soul Caught!', `You caught ${closest.userData.name}!`);
+                    } else {
+                        this.showNotification('😢', 'Soul Escaped!', 'Try again with more power!');
+                    }
+                }
+            }
+            
+            showNotification(icon, title, message) {
+                document.getElementById('notifyIcon').textContent = icon;
+                document.getElementById('notifyTitle').textContent = title;
+                document.getElementById('notifyMessage').textContent = message;
+                
+                const notif = document.getElementById('notification');
+                notif.classList.add('active');
+                
+                setTimeout(() => {
+                    notif.classList.remove('active');
+                }, 3000);
+            }
+            
+            updateHUD() {
+                document.getElementById('soulsCaught').textContent = this.player.soulsCaught;
+                document.getElementById('playerLevel').textContent = this.player.level;
+                document.getElementById('soulOrbs').textContent = this.soulOrbs;
+            }
+            
+            updateRadar() {
+                const canvas = document.getElementById('radarCanvas');
+                const ctx = canvas.getContext('2d');
+                const size = 150;
+                canvas.width = size;
+                canvas.height = size;
+                
+                const centerX = size / 2;
+                const centerY = size / 2;
+                const radius = size / 2 - 5;
+                
+                // Clear
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(0, 0, size, size);
+                
+                // Draw circle
+                ctx.strokeStyle = 'rgba(136, 170, 255, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Draw player (center)
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw souls
+                this.souls.forEach(soul => {
+                    const dx = soul.position.x - this.player.x;
+                    const dz = soul.position.z - this.player.z;
+                    const dist = Math.sqrt(dx * dx + dz * dz);
+                    
+                    if (dist < 50) {
+                        const angle = Math.atan2(dz, dx) - this.mouseX;
+                        const radarDist = (dist / 50) * radius;
+                        
+                        const sx = centerX + Math.cos(angle) * radarDist;
+                        const sy = centerY + Math.sin(angle) * radarDist;
+                        
+                        const soulType = this.soulTypes[soul.userData.type];
+                        ctx.fillStyle = '#' + soulType.color.toString(16).padStart(6, '0');
+                        ctx.beginPath();
+                        ctx.arc(sx, sy, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+            }
+            
+            updateCatchPower() {
+                if (this.isCharging) {
+                    this.catchPower += 2;
+                    if (this.catchPower >= 100) this.catchPower = 100;
+                    
+                    document.getElementById('powerFill').style.width = this.catchPower + '%';
+                }
+            }
+            
+            updatePlayer(delta) {
+                const moveSpeed = this.player.speed * delta;
+                const direction = new THREE.Vector3();
+                
+                if (this.keys['KeyW'] || this.keys['ArrowUp']) direction.z -= 1;
+                if (this.keys['KeyS'] || this.keys['ArrowDown']) direction.z += 1;
+                if (this.keys['KeyA'] || this.keys['ArrowLeft']) direction.x -= 1;
+                if (this.keys['KeyD'] || this.keys['ArrowRight']) direction.x += 1;
+                
+                direction.normalize();
+                
+                // Rotate direction by camera yaw
+                const rotated = direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.mouseX);
+                
+                this.player.x += rotated.x * moveSpeed;
+                this.player.z += rotated.z * moveSpeed;
+                
+                // Update camera
+                this.camera.position.set(
+                    this.player.x,
+                    this.player.y,
+                    this.player.z
+                );
+                
+                // Camera rotation
+                this.camera.rotation.order = 'YXZ';
+                this.camera.rotation.y = this.mouseX;
+                this.camera.rotation.x = this.mouseY;
+            }
+            
+            updateSouls(time) {
+                this.souls.forEach(soul => {
+                    // Rotation
+                    soul.rotation.y += soul.userData.rotationSpeed;
+                    soul.rotation.x += soul.userData.rotationSpeed * 0.5;
+                    
+                    // Floating
+                    soul.position.y = 1 + Math.sin(time * soul.userData.floatSpeed + soul.userData.floatOffset) * 0.3;
+                    
+                    // Pulsing
+                    if (soul.userData.scanned) {
+                        soul.scale.setScalar(1.2 + Math.sin(time * 5) * 0.1);
+                    } else {
+                        soul.scale.setScalar(1);
+                    }
+                });
+            }
+            
+            updateParticles() {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    p.position.add(p.userData.velocity);
+                    p.userData.lifetime--;
+                    
+                    if (p.userData.lifetime <= 0) {
+                        this.scene.remove(p);
+                        this.particles.splice(i, 1);
+                    }
+                }
+            }
+            
+            loadCollection() {
+                const saved = localStorage.getItem('soulworld_collection');
+                if (saved) {
+                    this.soulCollection = JSON.parse(saved);
+                    this.player.soulsCaught = this.soulCollection.length;
+                    this.player.level = Math.floor(this.player.soulsCaught / 5) + 1;
+                    
+                    // Update dex
+                    this.soulCollection.forEach(caught => {
+                        const dexEntry = this.soulDex.find(s => s.name === caught.name);
+                        if (dexEntry) dexEntry.caught = true;
+                    });
+                    
+                    this.updateHUD();
+                    this.renderSoulDex();
+                }
+            }
+            
+            saveCollection() {
+                localStorage.setItem('soulworld_collection', JSON.stringify(this.soulCollection));
+            }
+            
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                
+                const delta = this.clock.getDelta();
+                const time = this.clock.getElapsedTime();
+                
+                if (!this.inCatchMode) {
+                    this.updatePlayer(delta);
+                }
+                
+                this.updateSouls(time);
+                this.updateParticles();
+                this.updateCatchPower();
+                this.updateRadar();
+                
+                this.renderer.render(this.scene, this.camera);
+            }
+        }
+        
+        // Start game
+        const game = new SoulWorld3D();
+        game.init();
+        
+        // Make game global for UI callbacks
+        window.game = game;
+    </script>
+</body>
+</html>
