@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🌍 SOULVERSE REAL — Fixed Timestep, ECS, State Machine | PLT Press</title>
+    <style>
+        body { margin:0; overflow:hidden; font-family:'Courier New', monospace; background:#000; }
+        canvas { display:block; width:100%; height:100%; }
+        
+        /* Loading Screen */
+        #loading-screen {
+            position:absolute; top:0; left:0; right:0; bottom:0;
+            background:linear-gradient(135deg, #0a0a1a, #1a1a2e);
+            display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            z-index:9999;
+        }
+        #loading-bar-container {
+            width:300px; height:20px;
+            background:rgba(255,255,255,0.1);
+            border-radius:10px; overflow:hidden;
+            margin:20px 0;
+        }
+        #loading-bar {
+            width:0%; height:100%;
+            background:linear-gradient(90deg, #ffaa66, #ff8844);
+            transition:width 0.3s;
+        }
+        #loading-text {
+            color:#ffaa66; font-size:18px; font-weight:bold;
+        }
+        
+        /* HUD */
+        #hud {
+            position:absolute; top:0; left:0; right:0;
+            padding:15px; display:flex; justify-content:space-between;
+            pointer-events:none; z-index:100;
+        }
+        .stat-box {
+            background:rgba(0,0,0,0.7); backdrop-filter:blur(8px);
+            border-radius:12px; padding:10px 15px;
+            color:#ffaa66; font-size:12px;
+            border:2px solid rgba(255,170,68,0.5);
+        }
+        .stat-row { margin:5px 0; }
+        .stat-label { color:#888; margin-right:8px; }
+        .stat-value { color:#fff; font-weight:bold; }
+        
+        /* Action Bar */
+        #action-bar {
+            position:absolute; bottom:20px; left:50%;
+            transform:translateX(-50%);
+            display:flex; gap:10px; z-index:100;
+        }
+        .action-btn {
+            width:60px; height:60px; border-radius:30px;
+            background:linear-gradient(135deg, #ffaa66, #ff8844);
+            border:2px solid #fff; color:#000;
+            font-weight:bold; font-size:24px;
+            cursor:pointer; pointer-events:auto;
+            box-shadow:0 0 20px rgba(255,170,68,0.5);
+        }
+        .action-btn:active { transform:scale(0.9); }
+        
+        /* State Display */
+        #state-display {
+            position:absolute; top:80px; right:20px;
+            background:rgba(0,0,0,0.7); border-radius:12px;
+            padding:10px; color:#ffaa66; font-size:12px;
+            z-index:90;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div id="loading-text">Loading Soulverse...</div>
+        <div id="loading-bar-container">
+            <div id="loading-bar"></div>
+        </div>
+    </div>
+    
+    <!-- HUD -->
+    <div id="hud">
+        <div class="stat-box">
+            <div class="stat-row"><span class="stat-label">💰</span><span class="stat-value" id="money">$1000</span></div>
+            <div class="stat-row"><span class="stat-label">❤️</span><span class="stat-value" id="health">100</span></div>
+            <div class="stat-row"><span class="stat-label">⚡</span><span class="stat-value" id="stamina">100</span></div>
+        </div>
+        <div class="stat-box" style="text-align:right;">
+            <div class="stat-row"><span class="stat-label">🕐</span><span class="stat-value" id="time">12:00</span></div>
+            <div class="stat-row"><span class="stat-label">🌤️</span><span class="stat-value" id="weather">SUNNY</span></div>
+            <div class="stat-row"><span class="stat-label">📍</span><span class="stat-value" id="state">EXPLORE</span></div>
+        </div>
+    </div>
+    
+    <!-- Action Bar -->
+    <div id="action-bar">
+        <button class="action-btn" id="btn-fight" title="Fight">👊</button>
+        <button class="action-btn" id="btn-interact" title="Interact">💬</button>
+        <button class="action-btn" id="btn-collect" title="Collect">🔮</button>
+        <button class="action-btn" id="btn-save" title="Save">💾</button>
+    </div>
+
+    <script>
+        // ============================================================
+        // SOULVERSE REAL — Professional Game Architecture
+        // Fixed Timestep | ECS | State Machine | Asset Loader
+        // ============================================================
+        
+        // --- CONFIGURATION ---
+        const GAME_CONFIG = {
+            TARGET_FPS: 60,
+            STEP_SIZE: 1/60,
+            MAX_STEPS: 5,
+            GRAVITY: 9.8
+        };
+        
+        // --- ASSET LOADER ---
+        class AssetLoader {
+            constructor() {
+                this.assets = {};
+                this.onProgress = null;
+                this.onComplete = null;
+            }
+            
+            async loadAll(assetList) {
+                const total = assetList.length;
+                let loaded = 0;
+                
+                for (const asset of assetList) {
+                    try {
+                        const loadedAsset = await this.loadAsset(asset);
+                        this.assets[asset.name] = loadedAsset;
+                        loaded++;
+                        
+                        if (this.onProgress) {
+                            this.onProgress(loaded / total);
+                        }
+                    } catch (error) {
+                        console.error(`Failed to load ${asset.name}:`, error);
+                    }
+                }
+                
+                if (this.onComplete) {
+                    this.onComplete(this.assets);
+                }
+            }
+            
+            async loadAsset(asset) {
+                return new Promise((resolve) => {
+                    // Simulate loading (in real version, would load actual files)
+                    setTimeout(() => {
+                        resolve({ name: asset.name, type: asset.type });
+                    }, 100);
+                });
+            }
+            
+            get(name) {
+                return this.assets[name];
+            }
+        }
+        
+        // --- ENTITY COMPONENT SYSTEM ---
+        class Entity {
+            constructor(id) {
+                this.id = id;
+                this.components = new Map();
+            }
+            
+            addComponent(type, data) {
+                this.components.set(type, new type(data));
+                return this;
+            }
+            
+            getComponent(type) {
+                return this.components.get(type);
+            }
+            
+            hasComponent(type) {
+                return this.components.has(type);
+            }
+        }
+        
+        // Components
+        class PositionComponent {
+            constructor({ x = 0, y = 0, z = 0 } = {}) {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+        }
+        
+        class VelocityComponent {
+            constructor({ vx = 0, vy = 0, vz = 0 } = {}) {
+                this.vx = vx;
+                this.vy = vy;
+                this.vz = vz;
+            }
+        }
+        
+        class HealthComponent {
+            constructor({ max = 100, current = 100 } = {}) {
+                this.max = max;
+                this.current = current;
+            }
+            
+            takeDamage(amount) {
+                this.current = Math.max(0, this.current - amount);
+            }
+        }
+        
+        class PlayerComponent {
+            constructor({ speed = 5, stamina = 100 } = {}) {
+                this.speed = speed;
+                this.stamina = stamina;
+            }
+        }
+        
+        class NPCComponent {
+            constructor({ type = 'profit', rarity = 'common', behavior = 'wander' } = {}) {
+                this.type = type;
+                this.rarity = rarity;
+                this.behavior = behavior;
+            }
+        }
+        
+        // Systems
+        class MovementSystem {
+            update(entities, dt) {
+                entities.forEach(entity => {
+                    if (entity.hasComponent(PositionComponent) && 
+                        entity.hasComponent(VelocityComponent)) {
+                        
+                        const pos = entity.getComponent(PositionComponent);
+                        const vel = entity.getComponent(VelocityComponent);
+                        
+                        pos.x += vel.vx * dt;
+                        pos.y += vel.vy * dt;
+                        pos.z += vel.vz * dt;
+                        
+                        // Gravity
+                        if (!entity.hasComponent(PlayerComponent)) {
+                            vel.vy -= GAME_CONFIG.GRAVITY * dt;
+                        }
+                    }
+                });
+            }
+        }
+        
+        class PlayerSystem {
+            update(entities, dt, input) {
+                entities.forEach(entity => {
+                    if (entity.hasComponent(PlayerComponent) && 
+                        entity.hasComponent(PositionComponent) && 
+                        entity.hasComponent(VelocityComponent)) {
+                        
+                        const vel = entity.getComponent(VelocityComponent);
+                        const player = entity.getComponent(PlayerComponent);
+                        
+                        // Movement input
+                        vel.vx = 0;
+                        vel.vz = 0;
+                        
+                        if (input.isDown('KeyW') || input.isDown('ArrowUp')) vel.vz = -player.speed;
+                        if (input.isDown('KeyS') || input.isDown('ArrowDown')) vel.vz = player.speed;
+                        if (input.isDown('KeyA') || input.isDown('ArrowLeft')) vel.vx = -player.speed;
+                        if (input.isDown('KeyD') || input.isDown('ArrowRight')) vel.vx = player.speed;
+                        
+                        // Sprint
+                        if (input.isDown('ShiftLeft')) {
+                            vel.vx *= 1.5;
+                            vel.vz *= 1.5;
+                        }
+                    }
+                });
+            }
+        }
+        
+        class NPCSystem {
+            update(entities, dt) {
+                entities.forEach(entity => {
+                    if (entity.hasComponent(NPCComponent) && 
+                        entity.hasComponent(PositionComponent) && 
+                        entity.hasComponent(VelocityComponent)) {
+                        
+                        const npc = entity.getComponent(NPCComponent);
+                        const vel = entity.getComponent(VelocityComponent);
+                        
+                        // Simple wander behavior
+                        if (npc.behavior === 'wander') {
+                            if (Math.random() < 0.02) {
+                                vel.vx = (Math.random() - 0.5) * 2;
+                                vel.vz = (Math.random() - 0.5) * 2;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // World
+        class World {
+            constructor() {
+                this.entities = [];
+                this.systems = [
+                    new MovementSystem(),
+                    new PlayerSystem(),
+                    new NPCSystem()
+                ];
+            }
+            
+            createEntity() {
+                const entity = new Entity(this.entities.length);
+                this.entities.push(entity);
+                return entity;
+            }
+            
+            update(dt, input) {
+                this.systems.forEach(system => system.update(this.entities, dt, input));
+            }
+        }
+        
+        // --- STATE MACHINE ---
+        class GameState {
+            constructor() {
+                this.currentState = null;
+                this.states = {};
+            }
+            
+            registerState(name, state) {
+                this.states[name] = state;
+            }
+            
+            changeState(name, data = {}) {
+                if (this.currentState && this.currentState.exit) {
+                    this.currentState.exit();
+                }
+                
+                this.currentState = this.states[name];
+                
+                if (this.currentState && this.currentState.enter) {
+                    this.currentState.enter(data);
+                }
+                
+                // Update UI
+                document.getElementById('state').innerText = name.toUpperCase();
+            }
+            
+            update(dt, input) {
+                if (this.currentState && this.currentState.update) {
+                    this.currentState.update(dt, input);
+                }
+            }
+        }
+        
+        // --- INPUT HANDLER ---
+        class InputHandler {
+            constructor() {
+                this.keys = {};
+                this.touchPoints = [];
+                this.bindKeys();
+                this.bindTouch();
+            }
+            
+            bindKeys() {
+                window.addEventListener('keydown', (e) => {
+                    this.keys[e.code] = true;
+                });
+                
+                window.addEventListener('keyup', (e) => {
+                    this.keys[e.code] = false;
+                });
+            }
+            
+            bindTouch() {
+                const canvas = document.querySelector('canvas');
+                if (!canvas) return;
+                
+                canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.touchPoints = Array.from(e.touches).map(t => ({
+                        id: t.identifier,
+                        x: t.clientX,
+                        y: t.clientY
+                    }));
+                });
+            }
+            
+            isDown(code) {
+                return this.keys[code] === true;
+            }
+        }
+        
+        // --- GAME ENGINE ---
+        class SoulverseGame {
+            constructor() {
+                this.lastTime = performance.now();
+                this.accumulatedTime = 0;
+                this.isRunning = false;
+                this.world = new World();
+                this.gameState = new GameState();
+                this.input = new InputHandler();
+                this.assetLoader = new AssetLoader();
+                
+                this.playerEntity = null;
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+            }
+            
+            async init() {
+                // Load assets
+                const loadingBar = document.getElementById('loading-bar');
+                const loadingText = document.getElementById('loading-text');
+                
+                this.assetLoader.onProgress = (progress) => {
+                    if (loadingBar) loadingBar.style.width = (progress * 100) + '%';
+                    if (loadingText) loadingText.innerText = `Loading... ${Math.round(progress * 100)}%`;
+                };
+                
+                this.assetLoader.onComplete = (assets) => {
+                    console.log('Assets loaded:', assets);
+                };
+                
+                await this.assetLoader.loadAll([
+                    { name: 'player', type: 'model' },
+                    { name: 'npc', type: 'model' },
+                    { name: 'collect', type: 'audio' },
+                    { name: 'fight', type: 'audio' }
+                ]);
+                
+                // Setup Three.js
+                this.setupThreeJS();
+                
+                // Create entities
+                this.createEntities();
+                
+                // Setup states
+                this.setupStates();
+                
+                // Setup UI
+                this.setupUI();
+                
+                // Hide loading screen
+                setTimeout(() => {
+                    document.getElementById('loading-screen').style.display = 'none';
+                    this.start();
+                }, 500);
+            }
+            
+            setupThreeJS() {
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x87CEEB);
+                this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.01);
+                
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+                this.camera.position.set(0, 5, 10);
+                this.camera.lookAt(0, 0, 0);
+                
+                this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.shadowMap.enabled = true;
+                document.body.appendChild(this.renderer.domElement);
+                
+                // Lighting
+                const ambient = new THREE.AmbientLight(0x404040, 0.6);
+                this.scene.add(ambient);
+                
+                const sun = new THREE.DirectionalLight(0xffdd99, 0.8);
+                sun.position.set(10, 15, 5);
+                sun.castShadow = true;
+                this.scene.add(sun);
+                
+                // Ground
+                const ground = new THREE.Mesh(
+                    new THREE.PlaneGeometry(100, 100),
+                    new THREE.MeshStandardMaterial({ color: 0x7c9c5e })
+                );
+                ground.rotation.x = -Math.PI/2;
+                ground.receiveShadow = true;
+                this.scene.add(ground);
+            }
+            
+            createEntities() {
+                // Player entity
+                this.playerEntity = this.world.createEntity()
+                    .addComponent(PositionComponent, { x: 0, y: 1.6, z: 0 })
+                    .addComponent(VelocityComponent, { vx: 0, vy: 0, vz: 0 })
+                    .addComponent(HealthComponent, { max: 100, current: 100 })
+                    .addComponent(PlayerComponent, { speed: 5, stamina: 100 });
+                
+                // Create player mesh
+                const playerMesh = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.8, 1.6, 0.8),
+                    new THREE.MeshStandardMaterial({ color: 0xffaa44 })
+                );
+                playerMesh.position.set(0, 0.8, 0);
+                playerMesh.castShadow = true;
+                this.scene.add(playerMesh);
+                this.playerEntity.mesh = playerMesh;
+                
+                // NPC entities
+                for (let i = 0; i < 5; i++) {
+                    const x = (Math.random() - 0.5) * 50;
+                    const z = (Math.random() - 0.5) * 50;
+                    
+                    const npc = this.world.createEntity()
+                        .addComponent(PositionComponent, { x, y: 1, z })
+                        .addComponent(VelocityComponent, { vx: 0, vy: 0, vz: 0 })
+                        .addComponent(HealthComponent, { max: 100, current: 100 })
+                        .addComponent(NPCComponent, { 
+                            type: ['profit', 'love', 'tax'][i % 3],
+                            rarity: ['common', 'rare', 'legendary'][Math.floor(Math.random() * 3)],
+                            behavior: 'wander'
+                        });
+                    
+                    const npcMesh = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.5, 16, 16),
+                        new THREE.MeshStandardMaterial({ 
+                            color: [0xffaa44, 0xff88aa, 0x88aaff][i % 3]
+                        })
+                    );
+                    npcMesh.position.set(x, 0.5, z);
+                    npcMesh.castShadow = true;
+                    this.scene.add(npcMesh);
+                    npc.mesh = npcMesh;
+                }
+            }
+            
+            setupStates() {
+                // EXPLORE state
+                this.gameState.registerState('explore', {
+                    enter: () => {
+                        console.log('Entered EXPLORE state');
+                    },
+                    update: (dt, input) => {
+                        // Update world
+                        this.world.update(dt, input);
+                        
+                        // Sync player mesh
+                        if (this.playerEntity) {
+                            const pos = this.playerEntity.getComponent(PositionComponent);
+                            this.playerEntity.mesh.position.set(pos.x, pos.y, pos.z);
+                        }
+                        
+                        // Sync NPC meshes
+                        this.world.entities.forEach(entity => {
+                            if (entity.hasComponent(NPCComponent) && entity.mesh) {
+                                const pos = entity.getComponent(PositionComponent);
+                                entity.mesh.position.set(pos.x, pos.y, pos.z);
+                            }
+                        });
+                        
+                        // Camera follow player
+                        if (this.playerEntity) {
+                            const pos = this.playerEntity.getComponent(PositionComponent);
+                            this.camera.position.x = pos.x;
+                            this.camera.position.z = pos.z + 10;
+                            this.camera.lookAt(pos.x, pos.y, pos.z);
+                        }
+                    },
+                    exit: () => {
+                        console.log('Exited EXPLORE state');
+                    }
+                });
+                
+                // COMBAT state
+                this.gameState.registerState('combat', {
+                    enter: (data) => {
+                        console.log('Entered COMBAT state vs', data.opponent);
+                    },
+                    update: (dt, input) => {
+                        // Combat logic would go here
+                        if (input.isDown('KeyF')) {
+                            console.log('Attack!');
+                        }
+                    },
+                    exit: () => {
+                        console.log('Exited COMBAT state');
+                    }
+                });
+                
+                // Start in EXPLORE state
+                this.gameState.changeState('explore');
+            }
+            
+            setupUI() {
+                // Action buttons
+                document.getElementById('btn-fight').addEventListener('click', () => {
+                    // Find nearest NPC
+                    let nearest = null, minDist = 10;
+                    this.world.entities.forEach(entity => {
+                        if (entity.hasComponent(NPCComponent)) {
+                            const pos = entity.getComponent(PositionComponent);
+                            const playerPos = this.playerEntity.getComponent(PositionComponent);
+                            const dist = Math.hypot(pos.x - playerPos.x, pos.z - playerPos.z);
+                            if (dist < minDist) { nearest = entity; minDist = dist; }
+                        }
+                    });
+                    
+                    if (nearest) {
+                        this.gameState.changeState('combat', { opponent: nearest });
+                    }
+                });
+                
+                document.getElementById('btn-save').addEventListener('click', () => {
+                    this.saveGame();
+                });
+            }
+            
+            saveGame() {
+                const saveData = {
+                    player: {
+                        position: this.playerEntity.getComponent(PositionComponent),
+                        health: this.playerEntity.getComponent(HealthComponent)
+                    },
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('soulverse_real_save', JSON.stringify(saveData));
+                alert('Game Saved!');
+            }
+            
+            start() {
+                this.isRunning = true;
+                this.lastTime = performance.now();
+                requestAnimationFrame((t) => this.gameLoop(t));
+            }
+            
+            gameLoop(currentTime) {
+                if (!this.isRunning) return;
+                
+                const deltaTime = (currentTime - this.lastTime) / 1000;
+                this.lastTime = currentTime;
+                this.accumulatedTime += Math.min(deltaTime, 0.1);
+                
+                let steps = 0;
+                while (this.accumulatedTime >= GAME_CONFIG.STEP_SIZE && steps < GAME_CONFIG.MAX_STEPS) {
+                    this.fixedUpdate(GAME_CONFIG.STEP_SIZE);
+                    this.accumulatedTime -= GAME_CONFIG.STEP_SIZE;
+                    steps++;
+                }
+                
+                this.render();
+                requestAnimationFrame((t) => this.gameLoop(t));
+            }
+            
+            fixedUpdate(dt) {
+                // Update game state
+                this.gameState.update(dt, this.input);
+                
+                // Update UI
+                this.updateUI();
+            }
+            
+            render() {
+                this.renderer.render(this.scene, this.camera);
+            }
+            
+            updateUI() {
+                if (this.playerEntity) {
+                    const health = this.playerEntity.getComponent(HealthComponent);
+                    const player = this.playerEntity.getComponent(PlayerComponent);
+                    document.getElementById('health').innerText = Math.round(health.current);
+                    document.getElementById('stamina').innerText = Math.round(player.stamina);
+                }
+            }
+        }
+        
+        // --- START GAME ---
+        const game = new SoulverseGame();
+        
+        // Wait for Three.js
+        if (typeof THREE === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+            script.onload = () => game.init();
+            document.head.appendChild(script);
+        } else {
+            game.init();
+        }
+        
+        // Handle resize
+        window.addEventListener('resize', () => {
+            if (game.camera && game.renderer) {
+                game.camera.aspect = window.innerWidth / window.innerHeight;
+                game.camera.updateProjectionMatrix();
+                game.renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+    </script>
+</body>
+</html>

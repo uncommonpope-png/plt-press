@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🏠 SOUL HABITAT — Souls Living Like Humans</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        body { 
+            background: #0a0a1a; 
+            overflow: hidden; 
+            font-family: 'Georgia', serif;
+            touch-action: none;
+        }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            z-index: 100;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+        }
+        
+        .location-title {
+            color: #ffaa44;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        
+        .souls-count {
+            color: #888;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 5px;
+        }
+        
+        /* Location Selector */
+        #location-select {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .location-btn {
+            background: rgba(255,170,68,0.2);
+            border: 2px solid rgba(255,170,68,0.5);
+            color: #ffaa44;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .location-btn.active {
+            background: rgba(255,170,68,0.5);
+            border-color: #ffaa44;
+            box-shadow: 0 0 20px rgba(255,170,68,0.5);
+        }
+        
+        /* Speech Bubbles */
+        .speech-bubble {
+            position: absolute;
+            background: #fff;
+            color: #000;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            max-width: 200px;
+            pointer-events: none;
+            z-index: 50;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #fff transparent transparent transparent;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Interaction Log */
+        #interaction-log {
+            position: absolute;
+            bottom: 100px;
+            left: 20px;
+            right: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        .log-entry {
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin-bottom: 5px;
+            font-size: 11px;
+            border-left: 3px solid #ffaa44;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* Soul Info Panel */
+        #soul-info {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid rgba(255,170,68,0.5);
+            border-radius: 15px;
+            padding: 15px;
+            min-width: 200px;
+            z-index: 100;
+            display: none;
+        }
+        
+        #soul-info h3 {
+            color: #ffaa44;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .soul-stat {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 12px;
+            color: #aaa;
+        }
+        
+        .soul-stat span:last-child {
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        /* Start Screen */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        
+        #start-screen h1 {
+            color: #ffaa44;
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        
+        #start-screen p {
+            color: #888;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        #enter-btn {
+            background: linear-gradient(135deg, #ffaa44, #ff8844);
+            border: none;
+            color: #000;
+            padding: 15px 50px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 0 30px #ffaa44;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="canvas"></canvas>
+        
+        <!-- HUD -->
+        <div id="hud">
+            <div class="location-title" id="location-title">🏛️ MAIN HALL</div>
+            <div class="souls-count" id="souls-count">8 souls present</div>
+        </div>
+        
+        <!-- Location Selector -->
+        <div id="location-select">
+            <div class="location-btn active" data-location="main-hall">🏛️ Main Hall</div>
+            <div class="location-btn" data-location="library">📚 Library</div>
+            <div class="location-btn" data-location="workshop">🔨 Workshop</div>
+            <div class="location-btn" data-location="garden">🌸 Garden</div>
+            <div class="location-btn" data-location="arena">⚔️ Arena</div>
+        </div>
+        
+        <!-- Interaction Log -->
+        <div id="interaction-log"></div>
+        
+        <!-- Soul Info Panel -->
+        <div id="soul-info">
+            <h3 id="soul-name">Soul Name</h3>
+            <div class="soul-stat"><span>Mood:</span><span id="soul-mood">Happy</span></div>
+            <div class="soul-stat"><span>Energy:</span><span id="soul-energy">100%</span></div>
+            <div class="soul-stat"><span>PLT:</span><span id="soul-plt">💰 8/10</span></div>
+            <div class="soul-stat"><span>Activity:</span><span id="soul-activity">Talking</span></div>
+        </div>
+        
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1>🏠 SOUL HABITAT</h1>
+            <p>Watch souls live like humans</p>
+            <p>Walking • Talking • Arguing • Challenging</p>
+            <button id="enter-btn">▶️ ENTER HABITAT</button>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+// SOUL HABITAT — Souls Living Like Humans
+// Real human behavior: walking, talking, arguing, challenging
+
+let scene, camera, renderer;
+let souls = [];
+let currentLocation = 'main-hall';
+let selectedSoul = null;
+
+// Human-like behaviors
+const BEHAVIORS = {
+    IDLE: 'idle',
+    WALKING: 'walking',
+    TALKING: 'talking',
+    ARGUING: 'arguing',
+    CHALLENGING: 'challenging',
+    FRIENDLY: 'friendly',
+    THINKING: 'thinking',
+    RESTING: 'resting'
+};
+
+// Human conversations (real dialogue)
+const DIALOGUES = {
+    friendly: [
+        "Hey! How's it going?",
+        "I've been working on something new.",
+        "Want to collaborate on a project?",
+        "The energy here is amazing today.",
+        "I had the best idea last night!",
+        "Have you seen the new expansion?",
+        "Let's grab some energy drinks.",
+        "I'm so inspired right now!"
+    ],
+    arguing: [
+        "That's not how PLT works at all!",
+        "You're focusing too much on profit.",
+        "Love should come first, always.",
+        "You don't understand the tax implications.",
+        "I disagree. Completely.",
+        "That's a terrible idea.",
+        "We did this my way last time.",
+        "You never listen to me!"
+    ],
+    challenging: [
+        "I bet I can build it faster than you.",
+        "Let's settle this in the arena.",
+        "Your PLT score is lower than mine.",
+        "Prove it. Right now.",
+        "I dare you.",
+        "You think you're better? Show me.",
+        "Let's make this interesting.",
+        "Winner takes all."
+    ],
+    thinking: [
+        "Hmm... what if we tried...",
+        "I need to think about this.",
+        "The numbers don't add up.",
+        "There has to be a better way.",
+        "What would Craig do?",
+        "I'm onto something big...",
+        "This could change everything."
+    ]
+};
+
+// Soul personalities (human-like)
+const PERSONALITIES = [
+    { name: "Marcus", type: "profit", trait: "ambitious", color: 0xffaa44 },
+    { name: "Sophia", type: "love", trait: "caring", color: 0xff44aa },
+    { name: "David", type: "tax", trait: "cautious", color: 0x4488ff },
+    { name: "Elena", type: "profit", trait: "competitive", color: 0xff8800 },
+    { name: "Maya", type: "love", trait: "empathetic", color: 0xff66aa },
+    { name: "James", type: "tax", trait: "analytical", color: 0x6699ff },
+    { name: "Zoe", type: "hybrid", trait: "creative", color: 0xaa44ff },
+    { name: "Alex", type: "profit", trait: "driven", color: 0xffcc00 }
+];
+
+// Locations with real layouts
+const LOCATIONS = {
+    'main-hall': {
+        name: '🏛️ Main Hall',
+        color: 0x2a1a4e,
+        size: { width: 20, height: 15 },
+        objects: ['chairs', 'tables', 'decorations']
+    },
+    'library': {
+        name: '📚 Library',
+        color: 0x1a2a3e,
+        size: { width: 18, height: 12 },
+        objects: ['bookshelves', 'reading_nooks', 'desks']
+    },
+    'workshop': {
+        name: '🔨 Workshop',
+        color: 0x3a2a1e,
+        size: { width: 16, height: 14 },
+        objects: ['workbenches', 'tools', 'blueprints']
+    },
+    'garden': {
+        name: '🌸 Garden',
+        color: 0x1a3a2e,
+        size: { width: 20, height: 16 },
+        objects: ['trees', 'benches', 'flowers']
+    },
+    'arena': {
+        name: '⚔️ Arena',
+        color: 0x3a1a1e,
+        size: { width: 15, height: 15 },
+        objects: ['fighting_ring', 'bleachers', 'trophies']
+    }
+};
+
+function init() {
+    // Scene
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0a1a);
+    scene.fog = new THREE.Fog(0x0a0a1a, 15, 40);
+    
+    // Camera (top-down isometric view)
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 15, 10);
+    camera.lookAt(0, 0, 0);
+    
+    // Renderer
+    renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    
+    // Lighting
+    const ambient = new THREE.AmbientLight(0x404040, 0.6);
+    scene.add(ambient);
+    
+    const spotlight = new THREE.SpotLight(0xffaa44, 0.8);
+    spotlight.position.set(10, 15, 10);
+    spotlight.castShadow = true;
+    scene.add(spotlight);
+    
+    // Create souls
+    createSouls();
+    
+    // Load initial location
+    loadLocation('main-hall');
+    
+    // Start animation
+    animate();
+    
+    // Start human behavior simulation
+    setInterval(simulateHumanBehavior, 2000);
+}
+
+function createSouls() {
+    PERSONALITIES.forEach((personality, index) => {
+        const soul = createHumanoidSoul(personality);
+        soul.userData.personality = personality;
+        soul.userData.behavior = BEHAVIORS.IDLE;
+        soul.userData.target = null;
+        soul.userData.conversation = null;
+        soul.userData.mood = 'neutral';
+        soul.userData.energy = 100;
+        souls.push(soul);
+    });
+}
+
+function createHumanoidSoul(personality) {
+    const group = new THREE.Group();
+    
+    // Body (more human proportions)
+    const bodyGeo = new THREE.CylinderGeometry(0.2, 0.3, 0.8, 8);
+    const bodyMat = new THREE.MeshStandardMaterial({ color: personality.color });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.y = 0.9;
+    body.castShadow = true;
+    group.add(body);
+    
+    // Head (sphere, more human)
+    const headGeo = new THREE.SphereGeometry(0.25, 16, 16);
+    const headMat = new THREE.MeshStandardMaterial({ color: 0xffdbac }); // Skin tone
+    const head = new THREE.Mesh(headGeo, headMat);
+    head.position.y = 1.5;
+    head.castShadow = true;
+    group.add(head);
+    
+    // Arms (articulated)
+    const armGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.5, 8);
+    const leftArm = new THREE.Mesh(armGeo, bodyMat);
+    leftArm.position.set(-0.35, 1, 0);
+    leftArm.rotation.z = 0.2;
+    leftArm.castShadow = true;
+    group.add(leftArm);
+    
+    const rightArm = new THREE.Mesh(armGeo, bodyMat);
+    rightArm.position.set(0.35, 1, 0);
+    rightArm.rotation.z = -0.2;
+    rightArm.castShadow = true;
+    group.add(rightArm);
+    
+    // Legs (articulated)
+    const legGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.6, 8);
+    const legMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+    const leftLeg = new THREE.Mesh(legGeo, legMat);
+    leftLeg.position.set(-0.15, 0.4, 0);
+    leftLeg.castShadow = true;
+    group.add(leftLeg);
+    
+    const rightLeg = new THREE.Mesh(legGeo, legMat);
+    rightLeg.position.set(0.15, 0.4, 0);
+    rightLeg.castShadow = true;
+    group.add(rightLeg);
+    
+    // Random position
+    group.position.set(
+        (Math.random() - 0.5) * 15,
+        0,
+        (Math.random() - 0.5) * 10
+    );
+    
+    // Random rotation
+    group.rotation.y = Math.random() * Math.PI * 2;
+    
+    // Store references
+    group.userData = {
+        body: body,
+        head: head,
+        leftArm: leftArm,
+        rightArm: rightArm,
+        leftLeg: leftLeg,
+        rightLeg: rightLeg,
+        walkCycle: Math.random() * Math.PI * 2,
+        ...group.userData
+    };
+    
+    scene.add(group);
+    return group;
+}
+
+function loadLocation(locationName) {
+    currentLocation = locationName;
+    const location = LOCATIONS[locationName];
+    
+    // Update title
+    document.getElementById('location-title').innerText = location.name;
+    document.getElementById('souls-count').innerText = `${souls.length} souls present`;
+    
+    // Change scene color
+    scene.background = new THREE.Color(location.color);
+    scene.fog.color.setHex(location.color);
+    
+    // Clear and rebuild location
+    // (In full version, would add furniture, decorations, etc.)
+}
+
+function simulateHumanBehavior() {
+    // Each soul picks a human behavior
+    souls.forEach(soul => {
+        if (soul.userData.behavior !== BEHAVIORS.ARGUING && 
+            soul.userData.behavior !== BEHAVIORS.CHALLENGING &&
+            soul.userData.behavior !== BEHAVIORS.TALKING) {
+            
+            // Pick random human behavior
+            const behaviors = [
+                BEHAVIORS.WALKING,
+                BEHAVIORS.IDLE,
+                BEHAVIORS.THINKING,
+                BEHAVIORS.FRIENDLY,
+                BEHAVIORS.RESTING
+            ];
+            
+            // Weighted towards social behaviors
+            if (Math.random() < 0.4) {
+                soul.userData.behavior = BEHAVIORS.WALKING;
+                setRandomTarget(soul);
+            } else if (Math.random() < 0.3) {
+                // Find someone to interact with
+                const other = findNearbySoul(soul);
+                if (other) {
+                    startInteraction(soul, other);
+                } else {
+                    soul.userData.behavior = BEHAVIORS.IDLE;
+                }
+            } else {
+                soul.userData.behavior = BEHAVIORS.IDLE;
+            }
+        }
+    });
+}
+
+function findNearbySoul(soul, maxDistance = 5) {
+    for (let other of souls) {
+        if (other === soul) continue;
+        const distance = soul.position.distanceTo(other.position);
+        if (distance < maxDistance) {
+            return other;
+        }
+    }
+    return null;
+}
+
+function setRandomTarget(soul) {
+    const location = LOCATIONS[currentLocation];
+    soul.userData.target = new THREE.Vector3(
+        (Math.random() - 0.5) * location.size.width * 0.8,
+        0,
+        (Math.random() - 0.5) * location.size.height * 0.8
+    );
+}
+
+function startInteraction(soul1, soul2) {
+    // Determine interaction type based on personalities
+    const roll = Math.random();
+    let interactionType;
+    
+    if (roll < 0.5) {
+        interactionType = 'friendly';
+        soul1.userData.behavior = BEHAVIORS.TALKING;
+        soul2.userData.behavior = BEHAVIORS.TALKING;
+    } else if (roll < 0.75) {
+        interactionType = 'arguing';
+        soul1.userData.behavior = BEHAVIORS.ARGUING;
+        soul2.userData.behavior = BEHAVIORS.ARGUING;
+    } else {
+        interactionType = 'challenging';
+        soul1.userData.behavior = BEHAVIORS.CHALLENGING;
+        soul2.userData.behavior = BEHAVIORS.CHALLENGING;
+    }
+    
+    // Face each other
+    soul1.lookAt(soul2.position);
+    soul2.lookAt(soul1.position);
+    
+    // Show dialogue
+    showDialogue(soul1, getRandomDialogue(interactionType));
+    setTimeout(() => {
+        showDialogue(soul2, getRandomDialogue(interactionType));
+    }, 1500);
+    
+    // Log interaction
+    logInteraction(soul1.userData.personality.name, 
+                   soul2.userData.personality.name, 
+                   interactionType);
+    
+    // End interaction after a while
+    setTimeout(() => {
+        soul1.userData.behavior = BEHAVIORS.IDLE;
+        soul2.userData.behavior = BEHAVIORS.IDLE;
+    }, 5000);
+}
+
+function getRandomDialogue(type) {
+    const dialogues = DIALOGUES[type];
+    return dialogues[Math.floor(Math.random() * dialogues.length)];
+}
+
+function showDialogue(soul, text) {
+    const bubble = document.createElement('div');
+    bubble.className = 'speech-bubble';
+    bubble.innerText = text;
+    
+    // Position above soul
+    const pos = soul.position.clone();
+    pos.y += 2.5;
+    
+    // Project to screen space
+    pos.project(camera);
+    
+    const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-(pos.y * 0.5) + 0.5) * window.innerHeight;
+    
+    bubble.style.left = (x - 100) + 'px';
+    bubble.style.top = (y - 50) + 'px';
+    
+    document.getElementById('game-container').appendChild(bubble);
+    
+    // Remove after 3 seconds
+    setTimeout(() => bubble.remove(), 3000);
+}
+
+function logInteraction(name1, name2, type) {
+    const log = document.getElementById('interaction-log');
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    
+    const icons = {
+        friendly: '💬',
+        arguing: '😠',
+        challenging: '⚔️'
+    };
+    
+    entry.innerText = `${icons[type]} ${name1} ${type === 'friendly' ? 'chats with' : type === 'arguing' ? 'argues with' : 'challenges'} ${name2}`;
+    
+    log.insertBefore(entry, log.firstChild);
+    
+    // Keep only last 10 entries
+    while (log.children.length > 10) {
+        log.removeChild(log.lastChild);
+    }
+}
+
+function animateHumanoid(soul, delta) {
+    const data = soul.userData;
+    data.walkCycle += delta * 5;
+    
+    switch(data.behavior) {
+        case BEHAVIORS.WALKING:
+            // Walk animation
+            if (data.target) {
+                const direction = new THREE.Vector3().subVectors(data.target, soul.position);
+                const distance = direction.length();
+                
+                if (distance > 0.5) {
+                    direction.normalize();
+                    soul.position.add(direction.multiplyScalar(0.05));
+                    soul.lookAt(data.target);
+                    
+                    // Walking animation (legs/arms swing)
+                    data.leftLeg.rotation.x = Math.sin(data.walkCycle) * 0.5;
+                    data.rightLeg.rotation.x = -Math.sin(data.walkCycle) * 0.5;
+                    data.leftArm.rotation.x = -Math.sin(data.walkCycle) * 0.5;
+                    data.rightArm.rotation.x = Math.sin(data.walkCycle) * 0.5;
+                } else {
+                    data.target = null;
+                    data.behavior = BEHAVIORS.IDLE;
+                }
+            }
+            break;
+            
+        case BEHAVIORS.TALKING:
+            // Gesturing while talking
+            data.rightArm.rotation.x = -Math.sin(data.walkCycle * 2) * 0.5 - 1;
+            data.rightArm.rotation.z = -0.5;
+            break;
+            
+        case BEHAVIORS.ARGUING:
+            // Aggressive gesturing
+            data.rightArm.rotation.x = -Math.sin(data.walkCycle * 3) * 0.8 - 1.5;
+            data.body.rotation.z = Math.sin(data.walkCycle * 2) * 0.1;
+            break;
+            
+        case BEHAVIORS.CHALLENGING:
+            // Challenge stance
+            data.leftArm.rotation.x = -Math.PI / 2;
+            data.rightArm.rotation.x = -Math.PI / 2;
+            data.body.rotation.y += 0.02;
+            break;
+            
+        case BEHAVIORS.THINKING:
+            // Hand on chin
+            data.rightArm.rotation.x = -Math.PI / 3;
+            data.rightArm.rotation.z = 0.3;
+            data.head.rotation.x = 0.2;
+            break;
+            
+        default:
+            // Idle breathing
+            data.body.position.y = 0.9 + Math.sin(data.walkCycle) * 0.03;
+            data.head.position.y = 1.5 + Math.sin(data.walkCycle) * 0.03;
+            data.leftArm.rotation.z = 0.2 + Math.sin(data.walkCycle) * 0.05;
+            data.rightArm.rotation.z = -0.2 - Math.sin(data.walkCycle) * 0.05;
+    }
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    
+    const delta = 0.016; // ~60fps
+    
+    // Animate all souls
+    souls.forEach(soul => {
+        animateHumanoid(soul, delta);
+    });
+    
+    renderer.render(scene, camera);
+}
+
+// Event listeners
+document.getElementById('enter-btn').addEventListener('click', () => {
+    document.getElementById('start-screen').style.display = 'none';
+});
+
+document.querySelectorAll('.location-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.location-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadLocation(btn.dataset.location);
+    });
+});
+
+// Click on soul to see info
+window.addEventListener('click', (e) => {
+    if (e.target.tagName === 'CANVAS') {
+        // Raycast to find clicked soul
+        const mouse = new THREE.Vector2(
+            (e.clientX / window.innerWidth) * 2 - 1,
+            -(e.clientY / window.innerHeight) * 2 + 1
+        );
+        
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, camera);
+        
+        const intersects = raycaster.intersectObjects(souls, true);
+        
+        if (intersects.length > 0) {
+            // Find the soul group
+            let clickedSoul = intersects[0].object;
+            while (clickedSoul.parent && !clickedSoul.userData.personality) {
+                clickedSoul = clickedSoul.parent;
+            }
+            
+            if (clickedSoul.userData.personality) {
+                showSoulInfo(clickedSoul);
+            }
+        } else {
+            document.getElementById('soul-info').style.display = 'none';
+        }
+    }
+});
+
+function showSoulInfo(soul) {
+    const panel = document.getElementById('soul-info');
+    const personality = soul.userData.personality;
+    
+    document.getElementById('soul-name').innerText = personality.name;
+    document.getElementById('soul-mood').innerText = soul.userData.mood;
+    document.getElementById('soul-energy').innerText = soul.userData.energy + '%';
+    document.getElementById('soul-plt').innerText = personality.type.toUpperCase();
+    document.getElementById('soul-activity').innerText = soul.userData.behavior;
+    
+    panel.style.display = 'block';
+}
+
+// Handle resize
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Initialize
+init();
+
+console.log('🏠 SOUL HABITAT loaded — Souls living like humans');
+console.log('💬 Real conversations, arguments, challenges');
+console.log('🙏 Built on THE WEAVE foundation');
+    </script>
+</body>
+</html>

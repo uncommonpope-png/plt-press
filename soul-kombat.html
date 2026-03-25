@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🥊 SOUL KOMBAT — Mortal Kombat Style</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        body { 
+            background: linear-gradient(135deg, #1a0a2e 0%, #0a0a1a 100%); 
+            overflow: hidden; 
+            font-family: 'Arial Black', sans-serif;
+            touch-action: none;
+        }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+        }
+        
+        .health-bar-container {
+            width: 40%;
+            height: 30px;
+            background: rgba(0,0,0,0.5);
+            border: 3px solid #ffaa44;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .health-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4444, #ff8844);
+            transition: width 0.3s;
+            box-shadow: 0 0 20px #ff4444;
+        }
+        
+        #player-health { width: 100%; }
+        #enemy-health { width: 100%; float: right; }
+        
+        .fighter-name {
+            color: #ffaa44;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        #timer {
+            background: #ffaa44;
+            color: #000;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            border: 4px solid #fff;
+            box-shadow: 0 0 30px #ffaa44;
+        }
+        
+        /* Mobile Controls */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+        
+        #dpad {
+            width: 150px;
+            height: 150px;
+            position: relative;
+        }
+        
+        .dpad-btn {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(255,170,68,0.3);
+            border: 3px solid #ffaa44;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #ffaa44;
+            touch-action: none;
+        }
+        
+        .dpad-btn:active {
+            background: rgba(255,170,68,0.8);
+            box-shadow: 0 0 20px #ffaa44;
+        }
+        
+        #up { top: 0; left: 50px; }
+        #down { bottom: 0; left: 50px; }
+        #left { top: 50px; left: 0; }
+        #right { top: 50px; right: 0; }
+        
+        #actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .action-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(255,68,68,0.3);
+            border: 3px solid #ff4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #ff4444;
+            touch-action: none;
+        }
+        
+        .action-btn:active {
+            background: rgba(255,68,68,0.8);
+            box-shadow: 0 0 30px #ff4444;
+        }
+        
+        #punch-btn { background: rgba(255,68,68,0.3); border-color: #ff4444; color: #ff4444; }
+        #kick-btn { background: rgba(68,255,68,0.3); border-color: #44ff44; color: #44ff44; }
+        #special-btn { background: rgba(68,68,255,0.3); border-color: #4488ff; color: #4488ff; }
+        
+        /* Combo Display */
+        #combo-display {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        #combo-text {
+            font-size: 32px;
+            color: #ffaa44;
+            text-shadow: 0 0 20px #ffaa44;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        #combo-count {
+            font-size: 48px;
+            color: #fff;
+            text-shadow: 0 0 30px #ffaa44;
+        }
+        
+        /* Start Screen */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        
+        #start-screen h1 {
+            font-size: 48px;
+            color: #ffaa44;
+            text-shadow: 0 0 30px #ffaa44;
+            margin-bottom: 10px;
+        }
+        
+        #start-screen p {
+            color: #aaa;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        #start-btn {
+            background: linear-gradient(135deg, #ffaa44, #ff4444);
+            border: none;
+            color: #000;
+            padding: 20px 60px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 40px;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 0 30px #ffaa44;
+        }
+        
+        #start-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* Character Select */
+        #char-select {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 200;
+            padding: 20px;
+        }
+        
+        .char-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .char-card {
+            background: rgba(255,170,68,0.1);
+            border: 2px solid rgba(255,170,68,0.3);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .char-card:active {
+            background: rgba(255,170,68,0.3);
+            border-color: #ffaa44;
+            transform: scale(1.05);
+        }
+        
+        .char-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .char-name {
+            color: #ffaa44;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .char-stats {
+            font-size: 10px;
+            color: #888;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="canvas"></canvas>
+        
+        <!-- HUD -->
+        <div id="hud">
+            <div style="width: 40%">
+                <div class="health-bar-container">
+                    <div id="player-health" class="health-bar"></div>
+                </div>
+                <div class="fighter-name">🥷 PLAYER</div>
+            </div>
+            
+            <div id="timer">60</div>
+            
+            <div style="width: 40%">
+                <div class="health-bar-container">
+                    <div id="enemy-health" class="health-bar"></div>
+                </div>
+                <div class="fighter-name">👹 ENEMY</div>
+            </div>
+        </div>
+        
+        <!-- Combo Display -->
+        <div id="combo-display">
+            <div id="combo-text">COMBO!</div>
+            <div id="combo-count">x0</div>
+        </div>
+        
+        <!-- Mobile Controls -->
+        <div id="controls">
+            <div id="dpad">
+                <div class="dpad-btn" id="up">⬆️</div>
+                <div class="dpad-btn" id="down">⬇️</div>
+                <div class="dpad-btn" id="left">⬅️</div>
+                <div class="dpad-btn" id="right">➡️</div>
+            </div>
+            
+            <div id="actions">
+                <div class="action-btn" id="punch-btn">👊</div>
+                <div class="action-btn" id="kick-btn">🦵</div>
+                <div class="action-btn" id="special-btn">⚡</div>
+            </div>
+        </div>
+        
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1>🥊 SOUL KOMBAT</h1>
+            <p>Mortal Kombat Style Fighting</p>
+            <p>💰 PLT Combat System</p>
+            <button id="start-btn">▶️ FIGHT</button>
+        </div>
+        
+        <!-- Character Select -->
+        <div id="char-select">
+            <h2 style="color: #ffaa44; text-align: center; font-size: 28px;">SELECT YOUR FIGHTER</h2>
+            <div class="char-grid">
+                <div class="char-card" onclick="selectChar('profit')">
+                    <div class="char-icon">💰</div>
+                    <div class="char-name">PROFIT</div>
+                    <div class="char-stats">High DMG • Fast</div>
+                </div>
+                <div class="char-card" onclick="selectChar('love')">
+                    <div class="char-icon">❤️</div>
+                    <div class="char-name">LOVE</div>
+                    <div class="char-stats">High HP • Tank</div>
+                </div>
+                <div class="char-card" onclick="selectChar('tax')">
+                    <div class="char-icon">⚖️</div>
+                    <div class="char-name">TAX</div>
+                    <div class="char-stats">Balanced • Tech</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+// SOUL KOMBAT — Mortal Kombat Style Fighter
+// Built on THE WEAVE foundation
+
+let scene, camera, renderer;
+let player, enemy;
+let playerHealth = 100, enemyHealth = 100;
+let combo = 0, comboTimer = null;
+let gameActive = false;
+let timer = 60, timerInterval = null;
+
+// Fighter data
+const FIGHTERS = {
+    profit: { color: 0xffaa44, speed: 0.15, damage: 15, health: 100, emoji: '💰' },
+    love: { color: 0xff44aa, speed: 0.1, damage: 10, health: 150, emoji: '❤️' },
+    tax: { color: 0x4488ff, speed: 0.12, damage: 12, health: 120, emoji: '⚖️' }
+};
+
+let selectedChar = null;
+
+// Animation states
+const ANIMATIONS = {
+    IDLE: 'idle',
+    WALK: 'walk',
+    PUNCH: 'punch',
+    KICK: 'kick',
+    SPECIAL: 'special',
+    HIT: 'hit',
+    DEAD: 'dead'
+};
+
+let currentAnim = ANIMATIONS.IDLE;
+let animFrame = 0;
+
+function init() {
+    // Scene
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a0a2e);
+    scene.fog = new THREE.Fog(0x1a0a2e, 10, 50);
+    
+    // Camera
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 2, 5);
+    camera.lookAt(0, 1, 0);
+    
+    // Renderer
+    renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    
+    // Lighting
+    const ambient = new THREE.AmbientLight(0x404040, 0.5);
+    scene.add(ambient);
+    
+    const spotlight = new THREE.SpotLight(0xffaa44, 1);
+    spotlight.position.set(5, 10, 5);
+    spotlight.castShadow = true;
+    scene.add(spotlight);
+    
+    const spotlight2 = new THREE.SpotLight(0x4488ff, 0.5);
+    spotlight2.position.set(-5, 10, 5);
+    scene.add(spotlight2);
+    
+    // Arena floor
+    const floorGeo = new THREE.PlaneGeometry(20, 10);
+    const floorMat = new THREE.MeshStandardMaterial({ 
+        color: 0x2a1a4e,
+        roughness: 0.8,
+        metalness: 0.2
+    });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    scene.add(floor);
+    
+    // Create fighters
+    createFighter('player', 0xffaa44, -2);
+    createFighter('enemy', 0xff4444, 2);
+    
+    // Start animation loop
+    animate();
+}
+
+function createFighter(type, color, x) {
+    const group = new THREE.Group();
+    
+    // Body
+    const bodyGeo = new THREE.BoxGeometry(0.5, 1, 0.3);
+    const bodyMat = new THREE.MeshStandardMaterial({ color: color });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.y = 1;
+    body.castShadow = true;
+    group.add(body);
+    
+    // Head
+    const headGeo = new THREE.BoxGeometry(0.4, 0.4, 0.4);
+    const headMat = new THREE.MeshStandardMaterial({ color: 0xffdbac });
+    const head = new THREE.Mesh(headGeo, headMat);
+    head.position.y = 1.7;
+    head.castShadow = true;
+    group.add(head);
+    
+    // Arms
+    const armGeo = new THREE.BoxGeometry(0.15, 0.6, 0.15);
+    const leftArm = new THREE.Mesh(armGeo, bodyMat);
+    leftArm.position.set(-0.35, 1, 0);
+    leftArm.castShadow = true;
+    group.add(leftArm);
+    
+    const rightArm = new THREE.Mesh(armGeo, bodyMat);
+    rightArm.position.set(0.35, 1, 0);
+    rightArm.castShadow = true;
+    group.add(rightArm);
+    
+    // Legs
+    const legGeo = new THREE.BoxGeometry(0.2, 0.8, 0.2);
+    const leftLeg = new THREE.Mesh(legGeo, new THREE.MeshStandardMaterial({ color: 0x333333 }));
+    leftLeg.position.set(-0.15, 0.4, 0);
+    leftLeg.castShadow = true;
+    group.add(leftLeg);
+    
+    const rightLeg = new THREE.Mesh(legGeo, new THREE.MeshStandardMaterial({ color: 0x333333 }));
+    rightLeg.position.set(0.15, 0.4, 0);
+    rightLeg.castShadow = true;
+    group.add(rightLeg);
+    
+    group.position.x = x;
+    group.name = type;
+    
+    // Store references for animation
+    group.userData = {
+        body: body,
+        head: head,
+        leftArm: leftArm,
+        rightArm: rightArm,
+        leftLeg: leftLeg,
+        rightLeg: rightLeg,
+        health: type === 'player' ? 100 : 100,
+        maxHealth: type === 'player' ? 100 : 100,
+        state: 'idle'
+    };
+    
+    scene.add(group);
+    
+    if (type === 'player') player = group;
+    else enemy = group;
+}
+
+function animateFighter(fighter, anim, direction = 1) {
+    if (!fighter) return;
+    
+    const data = fighter.userData;
+    animFrame += 0.2;
+    
+    switch(anim) {
+        case ANIMATIONS.IDLE:
+            // Breathing animation
+            data.body.position.y = 1 + Math.sin(animFrame) * 0.05;
+            data.head.position.y = 1.7 + Math.sin(animFrame) * 0.05;
+            data.leftArm.rotation.z = Math.sin(animFrame) * 0.1;
+            data.rightArm.rotation.z = -Math.sin(animFrame) * 0.1;
+            break;
+            
+        case ANIMATIONS.WALK:
+            // Walking animation
+            data.leftLeg.rotation.x = Math.sin(animFrame) * 0.5;
+            data.rightLeg.rotation.x = -Math.sin(animFrame) * 0.5;
+            data.leftArm.rotation.x = -Math.sin(animFrame) * 0.5;
+            data.rightArm.rotation.x = Math.sin(animFrame) * 0.5;
+            break;
+            
+        case ANIMATIONS.PUNCH:
+            // Punch animation
+            data.rightArm.rotation.x = -Math.PI / 2 * direction;
+            data.rightArm.rotation.z = -Math.PI / 4 * direction;
+            break;
+            
+        case ANIMATIONS.KICK:
+            // Kick animation
+            data.rightLeg.rotation.x = -Math.PI / 3 * direction;
+            break;
+            
+        case ANIMATIONS.HIT:
+            // Hit reaction
+            fighter.position.x += Math.sin(animFrame) * 0.1 * direction;
+            data.body.rotation.z = Math.sin(animFrame) * 0.2;
+            break;
+            
+        case ANIMATIONS.SPECIAL:
+            // Special attack glow
+            data.body.material.emissive.setHex(0xffaa44);
+            data.body.material.emissiveIntensity = Math.sin(animFrame * 2) * 0.5 + 0.5;
+            break;
+    }
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    
+    // Animate fighters
+    if (player) {
+        if (player.userData.state === 'idle') {
+            animateFighter(player, ANIMATIONS.IDLE);
+        } else {
+            animateFighter(player, player.userData.state);
+        }
+    }
+    
+    if (enemy) {
+        if (enemy.userData.state === 'idle') {
+            animateFighter(enemy, ANIMATIONS.IDLE, -1);
+        } else {
+            animateFighter(enemy, enemy.userData.state, -1);
+        }
+    }
+    
+    renderer.render(scene, camera);
+}
+
+function attack(type) {
+    if (!gameActive || !player) return;
+    
+    const data = player.userData;
+    const enemyData = enemy.userData;
+    
+    // Check if in range
+    const distance = Math.abs(player.position.x - enemy.position.x);
+    
+    if (distance < 2) {
+        // Hit!
+        let damage = 0;
+        
+        if (type === 'punch') {
+            damage = FIGHTERS[selectedChar].damage;
+            data.state = 'punch';
+            setTimeout(() => { data.state = 'idle'; }, 300);
+        } else if (type === 'kick') {
+            damage = FIGHTERS[selectedChar].damage * 1.3;
+            data.state = 'kick';
+            setTimeout(() => { data.state = 'idle'; }, 400);
+        } else if (type === 'special') {
+            damage = FIGHTERS[selectedChar].damage * 2;
+            data.state = 'special';
+            setTimeout(() => { 
+                data.state = 'idle';
+                data.body.material.emissive.setHex(0x000000);
+                data.body.material.emissiveIntensity = 0;
+            }, 500);
+        }
+        
+        // Apply damage
+        enemyData.health = Math.max(0, enemyData.health - damage);
+        enemyHealth = (enemyData.health / enemyData.maxHealth) * 100;
+        document.getElementById('enemy-health').style.width = enemyHealth + '%';
+        
+        // Enemy hit reaction
+        enemyData.state = 'hit';
+        setTimeout(() => { enemyData.state = 'idle'; }, 300);
+        
+        // Combo system
+        combo++;
+        clearTimeout(comboTimer);
+        comboTimer = setTimeout(() => { combo = 0; }, 2000);
+        
+        if (combo >= 3) {
+            document.getElementById('combo-text').style.opacity = 1;
+            document.getElementById('combo-count').innerText = 'x' + combo;
+        }
+        
+        // Check win
+        if (enemyData.health <= 0) {
+            endGame('win');
+        }
+    }
+}
+
+function move(direction) {
+    if (!gameActive || !player) return;
+    
+    player.userData.state = 'walk';
+    
+    if (direction === 'left' && player.position.x > -4) {
+        player.position.x -= FIGHTERS[selectedChar].speed;
+        player.rotation.y = Math.PI / 2;
+    } else if (direction === 'right' && player.position.x < 0) {
+        player.position.x += FIGHTERS[selectedChar].speed;
+        player.rotation.y = -Math.PI / 2;
+    }
+    
+    setTimeout(() => { 
+        if (gameActive) player.userData.state = 'idle'; 
+    }, 200);
+}
+
+function selectChar(char) {
+    selectedChar = char;
+    document.getElementById('char-select').style.display = 'none';
+    document.getElementById('start-screen').style.display = 'none';
+    
+    // Update player fighter color
+    scene.remove(player);
+    createFighter('player', FIGHTERS[char].color, -2);
+    
+    // Start game
+    startGame();
+}
+
+function startGame() {
+    gameActive = true;
+    timer = 60;
+    
+    timerInterval = setInterval(() => {
+        timer--;
+        document.getElementById('timer').innerText = timer;
+        
+        if (timer <= 0) {
+            endGame(playerHealth > enemyHealth ? 'win' : 'lose');
+        }
+    }, 1000);
+    
+    // Enemy AI
+    setInterval(enemyAI, 1000);
+}
+
+function enemyAI() {
+    if (!gameActive || !enemy) return;
+    
+    const data = enemy.userData;
+    const playerData = player.userData;
+    
+    // Move towards player
+    if (enemy.position.x > player.position.x + 1) {
+        enemy.position.x -= 0.05;
+        enemy.rotation.y = -Math.PI / 2;
+        data.state = 'walk';
+    } else if (enemy.position.x < player.position.x - 1) {
+        enemy.position.x += 0.05;
+        enemy.rotation.y = Math.PI / 2;
+        data.state = 'walk';
+    } else {
+        data.state = 'idle';
+        
+        // Attack
+        if (Math.random() < 0.5) {
+            const damage = 10;
+            playerData.health = Math.max(0, playerData.health - damage);
+            playerHealth = (playerData.health / playerData.maxHealth) * 100;
+            document.getElementById('player-health').style.width = playerHealth + '%';
+            
+            playerData.state = 'hit';
+            setTimeout(() => { playerData.state = 'idle'; }, 300);
+            
+            if (playerData.health <= 0) {
+                endGame('lose');
+            }
+        }
+    }
+    
+    setTimeout(() => { if (gameActive) data.state = 'idle'; }, 500);
+}
+
+function endGame(result) {
+    gameActive = false;
+    clearInterval(timerInterval);
+    
+    const startScreen = document.getElementById('start-screen');
+    startScreen.style.display = 'flex';
+    
+    const h1 = startScreen.querySelector('h1');
+    const btn = document.getElementById('start-btn');
+    
+    if (result === 'win') {
+        h1.innerText = '🏆 VICTORY!';
+        h1.style.color = '#44ff44';
+    } else {
+        h1.innerText = '💀 DEFEAT';
+        h1.style.color = '#ff4444';
+    }
+    
+    btn.innerText = '🔄 REMATCH';
+    btn.onclick = () => location.reload();
+}
+
+// Event listeners
+document.getElementById('start-btn').addEventListener('click', () => {
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('char-select').style.display = 'block';
+});
+
+// Touch controls
+document.getElementById('punch-btn').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    attack('punch');
+});
+
+document.getElementById('kick-btn').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    attack('kick');
+});
+
+document.getElementById('special-btn').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    attack('special');
+});
+
+document.getElementById('left').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    move('left');
+});
+
+document.getElementById('right').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    move('right');
+});
+
+// Keyboard controls (for desktop testing)
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') move('left');
+    if (e.key === 'ArrowRight') move('right');
+    if (e.key === 'z') attack('punch');
+    if (e.key === 'x') attack('kick');
+    if (e.key === 'c') attack('special');
+});
+
+// Initialize
+init();
+
+console.log('🥊 SOUL KOMBAT loaded — Mortal Kombat style fighter');
+console.log('💰 Built on THE WEAVE foundation');
+console.log('🙏 Thanks to TEC for writing the code');
+    </script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🌌 SOULVERSE MOBILE</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background: linear-gradient(135deg, #0a0a2a 0%, #1a1a3a 100%); 
+            color: #fff; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .header { 
+            text-align: center; 
+            padding: 30px 20px; 
+            background: rgba(255,170,68,0.1);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 2px solid #ffaa44;
+        }
+        h1 { 
+            font-size: 2.5rem; 
+            background: linear-gradient(135deg, #ffaa44, #ff88aa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        .tagline { color: #aaa; font-size: 1rem; }
+        .game-grid { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 15px; 
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .game-card { 
+            background: rgba(0,0,0,0.6);
+            border: 2px solid rgba(255,170,68,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-decoration: none;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+        .game-card:active { 
+            transform: scale(0.98); 
+            border-color: #ffaa44;
+            background: rgba(255,170,68,0.1);
+        }
+        .game-icon { 
+            font-size: 2.5rem; 
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,170,68,0.1);
+            border-radius: 12px;
+        }
+        .game-info { flex: 1; }
+        .game-title { 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            color: #ffaa66;
+            margin-bottom: 5px;
+        }
+        .game-desc { 
+            font-size: 0.85rem; 
+            color: #888;
+        }
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.9);
+            padding: 15px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #888;
+            border-top: 1px solid rgba(255,170,68,0.3);
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(255,170,68,0.2);
+            color: #ffaa44;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            margin: 5px 5px 0 0;
+        }
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .action-btn {
+            background: linear-gradient(135deg, #ffaa44, #ff8844);
+            border: none;
+            color: #000;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+        }
+        .action-btn:active { transform: scale(0.95); }
+        .action-btn.secondary {
+            background: rgba(255,255,255,0.1);
+            color: #ffaa44;
+            border: 2px solid #ffaa44;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌌 SOULVERSE</h1>
+        <div class="tagline">Mobile Edition — Play Anywhere</div>
+        <div style="margin-top: 15px;">
+            <span class="badge">📱 Mobile Optimized</span>
+            <span class="badge">⚡ Instant Play</span>
+            <span class="badge">💰 PLT Powered</span>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <a href="soul-kombat.html" class="action-btn">🥊 SOUL KOMBAT</a>
+        <a href="THE-SOULVERSE-MASTER.html" class="action-btn secondary">🎮 MASTER GAME</a>
+    </div>
+
+    <div class="game-grid">
+        <a href="soul-habitat-human.html" class="game-card">
+            <div class="game-icon">🏠</div>
+            <div class="game-info">
+                <div class="game-title">Soul Habitat (LIVE)</div>
+                <div class="game-desc">Souls living like real humans</div>
+            </div>
+        </a>
+
+        <a href="soul-kombat.html" class="game-card">
+            <div class="game-icon">🥊</div>
+            <div class="game-info">
+                <div class="game-title">SOUL KOMBAT</div>
+                <div class="game-desc">Mortal Kombat style fighting</div>
+            </div>
+        </a>
+
+        <a href="THE-SOULVERSE-MASTER.html" class="game-card">
+            <div class="game-icon">🎮</div>
+            <div class="game-info">
+                <div class="game-title">Master Game</div>
+                <div class="game-desc">All-in-one Soulverse experience</div>
+            </div>
+        </a>
+
+        <a href="soul-forge.html" class="game-card">
+            <div class="game-icon">⚔️</div>
+            <div class="game-info">
+                <div class="game-title">Soul Forge</div>
+                <div class="game-desc">Create souls with PLT alignment</div>
+            </div>
+        </a>
+
+        <a href="soul-habitat.html" class="game-card">
+            <div class="game-icon">🏠</div>
+            <div class="game-info">
+                <div class="game-title">Soul Habitat</div>
+                <div class="game-desc">Watch souls live and bond</div>
+            </div>
+        </a>
+
+        <a href="soul-arena.html" class="game-card">
+            <div class="game-icon">⚔️</div>
+            <div class="game-info">
+                <div class="game-title">Soul Arena</div>
+                <div class="game-desc">Automated PLT combat</div>
+            </div>
+        </a>
+
+        <a href="soul-combat-arena.html" class="game-card">
+            <div class="game-icon">🎮</div>
+            <div class="game-info">
+                <div class="game-title">Combat Arena</div>
+                <div class="game-desc">Turn-based PLT battles</div>
+            </div>
+        </a>
+
+        <a href="soul-collector.html" class="game-card">
+            <div class="game-icon">🧬</div>
+            <div class="game-info">
+                <div class="game-title">Soul Collector</div>
+                <div class="game-desc">Catch and evolve souls</div>
+            </div>
+        </a>
+
+        <a href="MOBILE-GAME.html" class="game-card">
+            <div class="game-icon">📱</div>
+            <div class="game-info">
+                <div class="game-title">Voxel Mobile</div>
+                <div class="game-desc">3D mobile game with touch controls</div>
+            </div>
+        </a>
+
+        <a href="world-persistent.html" class="game-card">
+            <div class="game-icon">🌌</div>
+            <div class="game-info">
+                <div class="game-title">Persistent Realm</div>
+                <div class="game-desc">Souls never sleep</div>
+            </div>
+        </a>
+
+        <a href="executor-integration.html" class="game-card">
+            <div class="game-icon">⚡</div>
+            <div class="game-info">
+                <div class="game-title">Soul Executor</div>
+                <div class="game-desc">Souls execute real tasks</div>
+            </div>
+        </a>
+    </div>
+
+    <div class="status-bar">
+        <div>🌐 Running locally on your device</div>
+        <div style="margin-top: 5px;">⚡ PLT Press — Profit · Love · Tax</div>
+    </div>
+
+    <script>
+        // Track which game is played
+        document.querySelectorAll('.game-card, .action-btn').forEach(link => {
+            link.addEventListener('click', () => {
+                const game = link.querySelector('.game-title')?.innerText || link.innerText;
+                console.log('🎮 Playing:', game);
+                localStorage.setItem('last_played', game);
+                localStorage.setItem('play_count', (parseInt(localStorage.getItem('play_count') || '0') + 1).toString());
+            });
+        });
+    </script>
+</body>
+</html>

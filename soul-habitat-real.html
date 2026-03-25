@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🏠 SOUL HABITAT — Real Living World</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        body { 
+            background: #0a0a1a; 
+            overflow: hidden; 
+            font-family: 'Georgia', serif;
+            touch-action: none;
+        }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            z-index: 100;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            pointer-events: none;
+        }
+        
+        .location-title {
+            color: #ffaa44;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #ffaa44;
+        }
+        
+        /* Location Selector */
+        #location-select {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            z-index: 100;
+            max-width: 90%;
+            justify-content: center;
+        }
+        
+        .location-btn {
+            background: rgba(255,170,68,0.2);
+            border: 2px solid rgba(255,170,68,0.5);
+            color: #ffaa44;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+        
+        .location-btn.active {
+            background: rgba(255,170,68,0.5);
+            border-color: #ffaa44;
+            box-shadow: 0 0 20px rgba(255,170,68,0.5);
+        }
+        
+        /* Speech Bubbles */
+        .speech-bubble {
+            position: absolute;
+            background: linear-gradient(135deg, #fff, #f0f0f0);
+            color: #000;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            max-width: 220px;
+            pointer-events: none;
+            z-index: 50;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+            border: 2px solid rgba(255,170,68,0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #fff transparent transparent transparent;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        /* Thought Bubbles */
+        .thought-bubble {
+            position: absolute;
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 10px 14px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-style: italic;
+            max-width: 180px;
+            pointer-events: none;
+            z-index: 49;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.4);
+            border: 1px dashed rgba(255,170,68,0.5);
+        }
+        
+        .thought-bubble::before {
+            content: '💭';
+            position: absolute;
+            top: -8px;
+            left: 10px;
+            font-size: 12px;
+        }
+        
+        /* Interaction Log */
+        #interaction-log {
+            position: absolute;
+            bottom: 100px;
+            left: 20px;
+            max-width: 300px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        .log-entry {
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin-bottom: 5px;
+            font-size: 11px;
+            border-left: 3px solid #ffaa44;
+            animation: slideIn 0.3s ease-out;
+            backdrop-filter: blur(5px);
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* Soul Info Panel */
+        #soul-info {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            background: rgba(0,0,0,0.85);
+            border: 2px solid rgba(255,170,68,0.5);
+            border-radius: 15px;
+            padding: 15px;
+            min-width: 220px;
+            z-index: 100;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+        
+        #soul-info h3 {
+            color: #ffaa44;
+            font-size: 18px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .soul-stat {
+            display: flex;
+            justify-content: space-between;
+            margin: 6px 0;
+            font-size: 12px;
+            color: #aaa;
+        }
+        
+        .soul-stat span:last-child {
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .mood-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        /* Start Screen */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        
+        #start-screen h1 {
+            color: #ffaa44;
+            font-size: 42px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px #ffaa44;
+        }
+        
+        #start-screen p {
+            color: #888;
+            margin: 10px 0;
+            font-size: 14px;
+            text-align: center;
+            max-width: 400px;
+        }
+        
+        #enter-btn {
+            background: linear-gradient(135deg, #ffaa44, #ff8844);
+            border: none;
+            color: #000;
+            padding: 18px 60px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 0 30px #ffaa44;
+            transition: transform 0.2s;
+        }
+        
+        #enter-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* Loading */
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffaa44;
+            font-size: 24px;
+            z-index: 300;
+            display: none;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,170,68,0.3);
+            border-top-color: #ffaa44;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="canvas"></canvas>
+        
+        <!-- HUD -->
+        <div id="hud">
+            <div class="location-title" id="location-title">🏛️ MAIN HALL</div>
+        </div>
+        
+        <!-- Location Selector -->
+        <div id="location-select">
+            <div class="location-btn active" data-location="main-hall">🏛️ Main Hall</div>
+            <div class="location-btn" data-location="kitchen">🍳 Kitchen</div>
+            <div class="location-btn" data-location="bedroom">🛏️ Bedroom</div>
+            <div class="location-btn" data-location="office">💼 Office</div>
+            <div class="location-btn" data-location="gym">💪 Gym</div>
+            <div class="location-btn" data-location="garden">🌸 Garden</div>
+        </div>
+        
+        <!-- Interaction Log -->
+        <div id="interaction-log"></div>
+        
+        <!-- Soul Info Panel -->
+        <div id="soul-info">
+            <h3 id="soul-name">Soul Name</h3>
+            <div class="soul-stat"><span>Mood:</span><span id="soul-mood">😊 Happy</span></div>
+            <div class="soul-stat"><span>Energy:</span><span id="soul-energy">100%</span></div>
+            <div class="soul-stat"><span>Hunger:</span><span id="soul-hunger">50%</span></div>
+            <div class="soul-stat"><span>Job:</span><span id="soul-job">Builder</span></div>
+            <div class="soul-stat"><span>PLT:</span><span id="soul-plt">💰 8/10</span></div>
+            <div class="soul-stat"><span>Goal:</span><span id="soul-goal">Building</span></div>
+        </div>
+        
+        <!-- Loading -->
+        <div id="loading">
+            <div class="spinner"></div>
+            <div>Loading world...</div>
+        </div>
+        
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1>🏠 SOUL HABITAT</h1>
+            <p>Real souls living real lives</p>
+            <p>Working • Talking • Thinking • Loving • Fighting</p>
+            <button id="enter-btn">▶️ ENTER WORLD</button>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+// SOUL HABITAT — Real Living World
+// Better graphics, furnished rooms, real conversations, jobs, goals
+
+let scene, camera, renderer;
+let souls = [];
+let furniture = [];
+let currentLocation = 'main-hall';
+let selectedSoul = null;
+let clock = new THREE.Clock();
+
+// Human behaviors with depth
+const BEHAVIORS = {
+    IDLE: 'idle',
+    WALKING: 'walking',
+    WORKING: 'working',
+    TALKING: 'talking',
+    ARGUING: 'arguing',
+    CHALLENGING: 'challenging',
+    FRIENDLY: 'friendly',
+    THINKING: 'thinking',
+    RESTING: 'resting',
+    EATING: 'eating',
+    SLEEPING: 'sleeping',
+    EXERCISING: 'exercising'
+};
+
+// Real conversations with context and memory
+const CONVERSATIONS = {
+    friendly: [
+        { text: "Hey! How's your project going?", response: "Pretty good! Making progress." },
+        { text: "Did you see what Craig built yesterday?", response: "Yeah! It's amazing!" },
+        { text: "Want to collaborate on something?", response: "Absolutely! What do you have in mind?" },
+        { text: "I've been thinking about expanding...", response: "Tell me more!" },
+        { text: "The energy here is incredible today.", response: "I feel it too!" }
+    ],
+    arguing: [
+        { text: "That's not how PLT works!", response: "Actually, I think you're wrong." },
+        { text: "You're focusing too much on profit.", response: "And you're not focusing enough!" },
+        { text: "We should do it my way.", response: "We tried your way last time!" },
+        { text: "You never listen to me!", response: "Because you're usually wrong!" }
+    ],
+    challenging: [
+        { text: "I bet I can build it faster.", response: "You're on! Loser cleans the workshop." },
+        { text: "Your PLT score is lower than mine.", response: "Prove it. Arena. Now." },
+        { text: "Let's settle this.", response: "Finally! I've been waiting." }
+    ],
+    thinking: [
+        { text: "Hmm... what if we tried...", response: null },
+        { text: "The numbers don't add up...", response: null },
+        { text: "What would Craig do?", response: null },
+        { text: "I'm onto something big...", response: null }
+    ],
+    working: [
+        { text: "I need to finish this by tonight.", response: null },
+        { text: "This code is coming together nicely.", response: null },
+        { text: "Almost done with the new feature!", response: null }
+    ]
+};
+
+// Souls with jobs, goals, personalities
+const SOUL_PROFILES = [
+    { name: "Marcus", type: "profit", job: "Developer", trait: "ambitious", goal: "Launch product", color: 0xffaa44 },
+    { name: "Sophia", type: "love", job: "Community Manager", trait: "caring", goal: "Grow community", color: 0xff44aa },
+    { name: "David", type: "tax", job: "Accountant", trait: "cautious", goal: "Balance budget", color: 0x4488ff },
+    { name: "Elena", type: "profit", job: "Designer", trait: "competitive", goal: "Win design award", color: 0xff8800 },
+    { name: "Maya", type: "love", job: "Teacher", trait: "empathetic", goal: "Help students", color: 0xff66aa },
+    { name: "James", type: "tax", job: "Analyst", trait: "analytical", goal: "Optimize systems", color: 0x6699ff },
+    { name: "Zoe", type: "hybrid", job: "Artist", trait: "creative", goal: "Create masterpiece", color: 0xaa44ff },
+    { name: "Alex", type: "profit", job: "Entrepreneur", trait: "driven", goal: "Scale business", color: 0xffcc00 }
+];
+
+// Furnished rooms with real objects
+const LOCATIONS = {
+    'main-hall': {
+        name: '🏛️ Main Hall',
+        color: 0x2a1a4e,
+        furniture: ['sofa', 'coffee_table', 'tv', 'bookshelf', 'plant', 'lamp'],
+        size: { width: 25, height: 18 }
+    },
+    'kitchen': {
+        name: '🍳 Kitchen',
+        color: 0x3a2a1e,
+        furniture: ['fridge', 'stove', 'counter', 'table', 'chairs', 'cabinet'],
+        size: { width: 20, height: 15 }
+    },
+    'bedroom': {
+        name: '🛏️ Bedroom',
+        color: 0x1a2a3e,
+        furniture: ['bed', 'nightstand', 'dresser', 'desk', 'chair', 'closet'],
+        size: { width: 18, height: 14 }
+    },
+    'office': {
+        name: '💼 Office',
+        color: 0x2a3a4e,
+        furniture: ['desk', 'computer', 'chair', 'bookshelf', 'filing_cabinet', 'whiteboard'],
+        size: { width: 20, height: 16 }
+    },
+    'gym': {
+        name: '💪 Gym',
+        color: 0x3a1a2e,
+        furniture: ['treadmill', 'weights', 'bench', 'mirror', 'mat', 'rack'],
+        size: { width: 22, height: 16 }
+    },
+    'garden': {
+        name: '🌸 Garden',
+        color: 0x1a3a2e,
+        furniture: ['tree', 'bench', 'fountain', 'flowers', 'path', 'gazebo'],
+        size: { width: 25, height: 20 }
+    }
+};
+
+function init() {
+    // Scene
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0a1a);
+    scene.fog = new THREE.Fog(0x0a0a1a, 20, 50);
+    
+    // Camera (isometric view)
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 20, 15);
+    camera.lookAt(0, 0, 0);
+    
+    // Renderer
+    renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    
+    // Better lighting
+    const ambient = new THREE.AmbientLight(0x404040, 0.6);
+    scene.add(ambient);
+    
+    const mainLight = new THREE.DirectionalLight(0xffaa44, 0.8);
+    mainLight.position.set(10, 15, 10);
+    mainLight.castShadow = true;
+    mainLight.shadow.mapSize.width = 2048;
+    mainLight.shadow.mapSize.height = 2048;
+    scene.add(mainLight);
+    
+    const fillLight = new THREE.PointLight(0x4488ff, 0.4);
+    fillLight.position.set(-10, 10, -10);
+    scene.add(fillLight);
+    
+    // Create souls with depth
+    createSouls();
+    
+    // Load initial location with furniture
+    loadLocation('main-hall');
+    
+    // Start animation
+    animate();
+    
+    // Simulate real life
+    setInterval(simulateLife, 3000);
+}
+
+function createSouls() {
+    SOUL_PROFILES.forEach((profile, index) => {
+        const soul = createDetailedHumanoid(profile);
+        soul.userData.profile = profile;
+        soul.userData.behavior = BEHAVIORS.IDLE;
+        soul.userData.target = null;
+        soul.userData.conversation = null;
+        soul.userData.mood = 'neutral';
+        soul.userData.energy = 100;
+        soul.userData.hunger = 50;
+        soul.userData.currentGoal = profile.goal;
+        souls.push(soul);
+    });
+}
+
+function createDetailedHumanoid(profile) {
+    const group = new THREE.Group();
+    
+    // More detailed body with better proportions
+    const bodyMat = new THREE.MeshStandardMaterial({ 
+        color: profile.color,
+        roughness: 0.5,
+        metalness: 0.1
+    });
+    
+    // Torso
+    const torsoGeo = new THREE.BoxGeometry(0.5, 0.7, 0.3);
+    const torso = new THREE.Mesh(torsoGeo, bodyMat);
+    torso.position.y = 1.1;
+    torso.castShadow = true;
+    group.add(torso);
+    
+    // Head (more detailed)
+    const headGeo = new THREE.SphereGeometry(0.25, 16, 16);
+    const headMat = new THREE.MeshStandardMaterial({ 
+        color: 0xffdbac,
+        roughness: 0.8
+    });
+    const head = new THREE.Mesh(headGeo, headMat);
+    head.position.y = 1.65;
+    head.castShadow = true;
+    group.add(head);
+    
+    // Eyes (simple dots)
+    const eyeGeo = new THREE.SphereGeometry(0.04, 8, 8);
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+    leftEye.position.set(-0.08, 1.7, 0.22);
+    group.add(leftEye);
+    const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+    rightEye.position.set(0.08, 1.7, 0.22);
+    group.add(rightEye);
+    
+    // Arms (articulated with hands)
+    const armGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.5, 8);
+    const leftArm = new THREE.Mesh(armGeo, bodyMat);
+    leftArm.position.set(-0.35, 1.1, 0);
+    leftArm.rotation.z = 0.2;
+    leftArm.castShadow = true;
+    group.add(leftArm);
+    
+    const rightArm = new THREE.Mesh(armGeo, bodyMat);
+    rightArm.position.set(0.35, 1.1, 0);
+    rightArm.rotation.z = -0.2;
+    rightArm.castShadow = true;
+    group.add(rightArm);
+    
+    // Hands
+    const handGeo = new THREE.SphereGeometry(0.08, 8, 8);
+    const leftHand = new THREE.Mesh(handGeo, headMat);
+    leftHand.position.set(-0.35, 0.85, 0);
+    group.add(leftHand);
+    const rightHand = new THREE.Mesh(handGeo, headMat);
+    rightHand.position.set(0.35, 0.85, 0);
+    group.add(rightHand);
+    
+    // Legs (articulated with feet)
+    const legGeo = new THREE.CylinderGeometry(0.09, 0.09, 0.6, 8);
+    const legMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+    const leftLeg = new THREE.Mesh(legGeo, legMat);
+    leftLeg.position.set(-0.15, 0.5, 0);
+    leftLeg.castShadow = true;
+    group.add(leftLeg);
+    
+    const rightLeg = new THREE.Mesh(legGeo, legMat);
+    rightLeg.position.set(0.15, 0.5, 0);
+    rightLeg.castShadow = true;
+    group.add(rightLeg);
+    
+    // Feet
+    const footGeo = new THREE.BoxGeometry(0.15, 0.08, 0.2);
+    const leftFoot = new THREE.Mesh(footGeo, legMat);
+    leftFoot.position.set(-0.15, 0.15, 0.05);
+    group.add(leftFoot);
+    const rightFoot = new THREE.Mesh(footGeo, legMat);
+    rightFoot.position.set(0.15, 0.15, 0.05);
+    group.add(rightFoot);
+    
+    // Random position
+    group.position.set(
+        (Math.random() - 0.5) * 15,
+        0,
+        (Math.random() - 0.5) * 10
+    );
+    
+    // Random rotation
+    group.rotation.y = Math.random() * Math.PI * 2;
+    
+    // Store references for animation
+    group.userData = {
+        torso: torso,
+        head: head,
+        leftArm: leftArm,
+        rightArm: rightArm,
+        leftLeg: leftLeg,
+        rightLeg: rightLeg,
+        walkCycle: Math.random() * Math.PI * 2,
+        ...group.userData
+    };
+    
+    scene.add(group);
+    return group;
+}
+
+function createFurniture(type, x, z, rotation = 0) {
+    let geometry, material, mesh;
+    
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.8 });
+    const metalMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.3, metalness: 0.8 });
+    const fabricMat = new THREE.MeshStandardMaterial({ color: 0x4466aa, roughness: 0.9 });
+    
+    switch(type) {
+        case 'sofa':
+            geometry = new THREE.BoxGeometry(2, 0.6, 0.8);
+            mesh = new THREE.Mesh(geometry, fabricMat);
+            mesh.position.set(x, 0.3, z);
+            break;
+        case 'coffee_table':
+            geometry = new THREE.BoxGeometry(1.2, 0.4, 0.6);
+            mesh = new THREE.Mesh(geometry, woodMat);
+            mesh.position.set(x, 0.2, z);
+            break;
+        case 'tv':
+            geometry = new THREE.BoxGeometry(1.5, 0.9, 0.1);
+            mesh = new THREE.Mesh(geometry, metalMat);
+            mesh.position.set(x, 0.8, z);
+            break;
+        case 'bookshelf':
+            geometry = new THREE.BoxGeometry(1, 1.8, 0.4);
+            mesh = new THREE.Mesh(geometry, woodMat);
+            mesh.position.set(x, 0.9, z);
+            break;
+        case 'table':
+            geometry = new THREE.CylinderGeometry(0.6, 0.6, 0.7, 8);
+            mesh = new THREE.Mesh(geometry, woodMat);
+            mesh.position.set(x, 0.35, z);
+            break;
+        case 'chair':
+            geometry = new THREE.BoxGeometry(0.5, 0.8, 0.5);
+            mesh = new THREE.Mesh(geometry, woodMat);
+            mesh.position.set(x, 0.4, z);
+            break;
+        case 'bed':
+            geometry = new THREE.BoxGeometry(2, 0.5, 1.2);
+            mesh = new THREE.Mesh(geometry, fabricMat);
+            mesh.position.set(x, 0.25, z);
+            break;
+        case 'desk':
+            geometry = new THREE.BoxGeometry(1.4, 0.7, 0.7);
+            mesh = new THREE.Mesh(geometry, woodMat);
+            mesh.position.set(x, 0.35, z);
+            break;
+        case 'computer':
+            geometry = new THREE.BoxGeometry(0.5, 0.4, 0.05);
+            mesh = new THREE.Mesh(geometry, metalMat);
+            mesh.position.set(x, 0.7, z);
+            break;
+        case 'tree':
+            geometry = new THREE.CylinderGeometry(0.2, 0.3, 2, 8);
+            const trunk = new THREE.Mesh(geometry, woodMat);
+            trunk.position.set(x, 1, z);
+            furniture.push(trunk);
+            scene.add(trunk);
+            
+            const leavesGeo = new THREE.SphereGeometry(1, 8, 8);
+            const leavesMat = new THREE.MeshStandardMaterial({ color: 0x228822 });
+            const leaves = new THREE.Mesh(leavesGeo, leavesMat);
+            leaves.position.set(x, 2.5, z);
+            furniture.push(leaves);
+            scene.add(leaves);
+            return;
+        case 'bench':
+            geometry = new THREE.BoxGeometry(1.5, 0.4, 0.5);
+            mesh = new THREE.Mesh(geometry, woodMat);
+            mesh.position.set(x, 0.2, z);
+            break;
+        case 'fountain':
+            geometry = new THREE.CylinderGeometry(0.8, 1, 0.5, 16);
+            const stoneMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.6 });
+            mesh = new THREE.Mesh(geometry, stoneMat);
+            mesh.position.set(x, 0.25, z);
+            break;
+        case 'weights':
+            geometry = new THREE.CylinderGeometry(0.15, 0.15, 0.3, 8);
+            mesh = new THREE.Mesh(geometry, metalMat);
+            mesh.position.set(x, 0.15, z);
+            break;
+        case 'treadmill':
+            geometry = new THREE.BoxGeometry(1.5, 0.5, 0.6);
+            mesh = new THREE.Mesh(geometry, metalMat);
+            mesh.position.set(x, 0.25, z);
+            break;
+        default:
+            geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            mesh = new THREE.Mesh(geometry, woodMat);
+            mesh.position.set(x, 0.25, z);
+    }
+    
+    if (mesh) {
+        mesh.rotation.y = rotation;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        furniture.push(mesh);
+        scene.add(mesh);
+    }
+}
+
+function loadLocation(locationName) {
+    currentLocation = locationName;
+    const location = LOCATIONS[locationName];
+    
+    // Update title
+    document.getElementById('location-title').innerText = location.name;
+    
+    // Change scene
+    scene.background = new THREE.Color(location.color);
+    scene.fog.color.setHex(location.color);
+    
+    // Clear old furniture
+    furniture.forEach(f => scene.remove(f));
+    furniture = [];
+    
+    // Add new furniture
+    location.furniture.forEach((item, index) => {
+        const x = (Math.random() - 0.5) * location.size.width * 0.6;
+        const z = (Math.random() - 0.5) * location.size.height * 0.6;
+        createFurniture(item, x, z);
+    });
+    
+    // Move souls to new location
+    souls.forEach(soul => {
+        soul.position.set(
+            (Math.random() - 0.5) * location.size.width * 0.5,
+            0,
+            (Math.random() - 0.5) * location.size.height * 0.5
+        );
+    });
+}
+
+function simulateLife() {
+    souls.forEach(soul => {
+        // Update needs
+        soul.userData.hunger = Math.min(100, soul.userData.hunger + 0.5);
+        soul.userData.energy = Math.max(0, soul.userData.energy - 0.3);
+        
+        // Pick behavior based on needs and personality
+        if (soul.userData.hunger > 70) {
+            soul.userData.behavior = BEHAVIORS.EATING;
+        } else if (soul.userData.energy < 30) {
+            soul.userData.behavior = BEHAVIORS.RESTING;
+        } else if (Math.random() < 0.3) {
+            soul.userData.behavior = BEHAVIORS.WORKING;
+        } else if (Math.random() < 0.4) {
+            const other = findNearbySoul(soul);
+            if (other) {
+                startConversation(soul, other);
+            }
+        } else {
+            soul.userData.behavior = BEHAVIORS.IDLE;
+        }
+    });
+}
+
+function findNearbySoul(soul, maxDistance = 4) {
+    for (let other of souls) {
+        if (other === soul) continue;
+        const distance = soul.position.distanceTo(other.position);
+        if (distance < maxDistance) {
+            return other;
+        }
+    }
+    return null;
+}
+
+function startConversation(soul1, soul2) {
+    // Determine conversation type
+    const roll = Math.random();
+    let type;
+    
+    if (roll < 0.6) type = 'friendly';
+    else if (roll < 0.8) type = 'arguing';
+    else if (roll < 0.95) type = 'challenging';
+    else type = 'thinking';
+    
+    const convos = CONVERSATIONS[type];
+    const convo = convos[Math.floor(Math.random() * convos.length)];
+    
+    // Face each other
+    soul1.lookAt(soul2.position);
+    soul2.lookAt(soul1.position);
+    
+    // Show dialogue
+    showSpeechBubble(soul1, convo.text);
+    
+    if (convo.response) {
+        setTimeout(() => {
+            showSpeechBubble(soul2, convo.response);
+        }, 1500);
+    }
+    
+    // Log
+    logInteraction(soul1.userData.profile.name, soul2.userData.profile.name, type);
+    
+    // Set behaviors
+    soul1.userData.behavior = BEHAVIORS.TALKING;
+    soul2.userData.behavior = BEHAVIORS.TALKING;
+    
+    // End after a while
+    setTimeout(() => {
+        soul1.userData.behavior = BEHAVIORS.IDLE;
+        soul2.userData.behavior = BEHAVIORS.IDLE;
+    }, 5000);
+}
+
+function showSpeechBubble(soul, text) {
+    const bubble = document.createElement('div');
+    bubble.className = 'speech-bubble';
+    bubble.innerText = text;
+    
+    const pos = soul.position.clone();
+    pos.y += 2.5;
+    pos.project(camera);
+    
+    const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-(pos.y * 0.5) + 0.5) * window.innerHeight;
+    
+    bubble.style.left = (x - 110) + 'px';
+    bubble.style.top = (y - 50) + 'px';
+    
+    document.getElementById('game-container').appendChild(bubble);
+    setTimeout(() => bubble.remove(), 4000);
+}
+
+function showThoughtBubble(soul, text) {
+    const bubble = document.createElement('div');
+    bubble.className = 'thought-bubble';
+    bubble.innerText = text;
+    
+    const pos = soul.position.clone();
+    pos.y += 2.8;
+    pos.project(camera);
+    
+    const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-(pos.y * 0.5) + 0.5) * window.innerHeight;
+    
+    bubble.style.left = (x - 90) + 'px';
+    bubble.style.top = (y - 60) + 'px';
+    
+    document.getElementById('game-container').appendChild(bubble);
+    setTimeout(() => bubble.remove(), 3500);
+}
+
+function logInteraction(name1, name2, type) {
+    const log = document.getElementById('interaction-log');
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    
+    const icons = { friendly: '💬', arguing: '😠', challenging: '⚔️', working: '💼' };
+    entry.innerText = `${icons[type] || '💬'} ${name1} ${type === 'friendly' ? 'chats with' : type === 'arguing' ? 'argues with' : type === 'challenging' ? 'challenges' : 'works'} ${name2}`;
+    
+    log.insertBefore(entry, log.firstChild);
+    while (log.children.length > 10) log.removeChild(log.lastChild);
+}
+
+function animateHumanoid(soul, delta) {
+    const data = soul.userData;
+    data.walkCycle += delta * 5;
+    
+    switch(data.behavior) {
+        case BEHAVIORS.WALKING:
+            if (data.target) {
+                const direction = new THREE.Vector3().subVectors(data.target, soul.position);
+                const distance = direction.length();
+                if (distance > 0.5) {
+                    direction.normalize();
+                    soul.position.add(direction.multiplyScalar(0.08));
+                    soul.lookAt(data.target);
+                    data.leftLeg.rotation.x = Math.sin(data.walkCycle) * 0.6;
+                    data.rightLeg.rotation.x = -Math.sin(data.walkCycle) * 0.6;
+                    data.leftArm.rotation.x = -Math.sin(data.walkCycle) * 0.6;
+                    data.rightArm.rotation.x = Math.sin(data.walkCycle) * 0.6;
+                } else {
+                    data.target = null;
+                    data.behavior = BEHAVIORS.IDLE;
+                }
+            }
+            break;
+        case BEHAVIORS.TALKING:
+            data.rightArm.rotation.x = -Math.sin(data.walkCycle * 2) * 0.5 - 1;
+            data.rightArm.rotation.z = -0.5;
+            data.head.rotation.y = Math.sin(data.walkCycle) * 0.1;
+            break;
+        case BEHAVIORS.WORKING:
+            data.torso.rotation.y = Math.sin(data.walkCycle) * 0.05;
+            data.rightArm.rotation.x = -0.5;
+            break;
+        case BEHAVIORS.RESTING:
+            data.torso.rotation.x = 0.1;
+            data.head.rotation.x = 0.2;
+            break;
+        default:
+            // Idle breathing
+            data.torso.position.y = 1.1 + Math.sin(data.walkCycle) * 0.02;
+            data.head.position.y = 1.65 + Math.sin(data.walkCycle) * 0.02;
+    }
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    const delta = clock.getDelta();
+    
+    souls.forEach(soul => animateHumanoid(soul, delta));
+    
+    renderer.render(scene, camera);
+}
+
+// Event listeners
+document.getElementById('enter-btn').addEventListener('click', () => {
+    document.getElementById('start-screen').style.display = 'none';
+});
+
+document.querySelectorAll('.location-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.location-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadLocation(btn.dataset.location);
+    });
+});
+
+// Click on soul
+window.addEventListener('click', (e) => {
+    if (e.target.tagName === 'CANVAS') {
+        const mouse = new THREE.Vector2(
+            (e.clientX / window.innerWidth) * 2 - 1,
+            -(e.clientY / window.innerHeight) * 2 + 1
+        );
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(souls, true);
+        
+        if (intersects.length > 0) {
+            let clickedSoul = intersects[0].object;
+            while (clickedSoul.parent && !clickedSoul.userData.profile) {
+                clickedSoul = clickedSoul.parent;
+            }
+            if (clickedSoul.userData.profile) showSoulInfo(clickedSoul);
+        } else {
+            document.getElementById('soul-info').style.display = 'none';
+        }
+    }
+});
+
+function showSoulInfo(soul) {
+    const panel = document.getElementById('soul-info');
+    const profile = soul.userData.profile;
+    const data = soul.userData;
+    
+    document.getElementById('soul-name').innerText = profile.name;
+    document.getElementById('soul-mood').innerText = data.mood;
+    document.getElementById('soul-energy').innerText = Math.round(data.energy) + '%';
+    document.getElementById('soul-hunger').innerText = Math.round(data.hunger) + '%';
+    document.getElementById('soul-job').innerText = profile.job;
+    document.getElementById('soul-plt').innerText = profile.type.toUpperCase();
+    document.getElementById('soul-goal').innerText = data.currentGoal;
+    
+    panel.style.display = 'block';
+}
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+init();
+console.log('🏠 SOUL HABITAT — Real Living World loaded');
+    </script>
+</body>
+</html>

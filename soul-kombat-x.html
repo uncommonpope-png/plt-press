@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🥊 SOUL KOMBAT X — Ultra Graphics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        body { 
+            background: linear-gradient(135deg, #2a0a0a 0%, #0a0a1a 100%); 
+            overflow: hidden; 
+            font-family: 'Arial Black', sans-serif;
+            touch-action: none;
+        }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+        }
+        
+        .health-container {
+            width: 35%;
+        }
+        
+        .health-bar-frame {
+            background: linear-gradient(90deg, #444, #222);
+            border: 3px solid #ffaa44;
+            border-radius: 10px;
+            height: 35px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(255,170,68,0.5);
+            position: relative;
+        }
+        
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4444, #ff8844, #ffaa44);
+            transition: width 0.3s ease-out;
+            box-shadow: 0 0 30px rgba(255,68,68,0.8);
+        }
+        
+        .health-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #000;
+            z-index: 10;
+        }
+        
+        .fighter-portrait {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid #ffaa44;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffaa44, #ff4444);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 0 20px rgba(255,170,68,0.5);
+        }
+        
+        .fighter-name {
+            color: #ffaa44;
+            font-size: 14px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #ffaa44;
+        }
+        
+        #timer {
+            background: linear-gradient(135deg, #ffaa44, #ff4444);
+            color: #000;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            border: 4px solid #fff;
+            box-shadow: 0 0 40px #ffaa44;
+            animation: pulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Combo Display */
+        #combo-display {
+            position: absolute;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        #combo-text {
+            font-size: 36px;
+            color: #ffaa44;
+            text-shadow: 0 0 30px #ffaa44, 0 0 60px #ff4444;
+            opacity: 0;
+            transition: opacity 0.3s;
+            letter-spacing: 3px;
+        }
+        
+        #combo-count {
+            font-size: 64px;
+            color: #fff;
+            text-shadow: 0 0 40px #ffaa44;
+            font-weight: bold;
+        }
+        
+        /* Hit Effect */
+        .hit-effect {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255,170,68,0.8) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 80;
+            animation: hitFlash 0.3s ease-out;
+        }
+        
+        @keyframes hitFlash {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        
+        /* Blood Effect */
+        .blood-splatter {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(255,0,0,0.9) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 79;
+            animation: bloodSplash 0.5s ease-out;
+        }
+        
+        @keyframes bloodSplash {
+            0% { transform: scale(0.3) rotate(0deg); opacity: 1; }
+            100% { transform: scale(1.5) rotate(180deg); opacity: 0; }
+        }
+        
+        /* Mobile Controls */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+        
+        #dpad {
+            width: 160px;
+            height: 160px;
+            position: relative;
+        }
+        
+        .dpad-btn {
+            position: absolute;
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, rgba(255,170,68,0.4), rgba(255,170,68,0.2));
+            border: 3px solid #ffaa44;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #ffaa44;
+            touch-action: none;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(255,170,68,0.3);
+        }
+        
+        .dpad-btn:active {
+            background: linear-gradient(135deg, rgba(255,170,68,0.8), rgba(255,170,68,0.5));
+            box-shadow: 0 0 40px #ffaa44;
+            transform: scale(0.95);
+        }
+        
+        #up { top: 0; left: 52px; }
+        #down { bottom: 0; left: 52px; }
+        #left { top: 52px; left: 0; }
+        #right { top: 52px; right: 0; }
+        
+        #actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .action-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255,68,68,0.4), rgba(255,68,68,0.2));
+            border: 3px solid #ff4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: #ff4444;
+            touch-action: none;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(255,68,68,0.3);
+            transition: all 0.1s;
+        }
+        
+        .action-btn:active {
+            background: linear-gradient(135deg, rgba(255,68,68,0.9), rgba(255,68,68,0.6));
+            box-shadow: 0 0 50px #ff4444;
+            transform: scale(0.9);
+        }
+        
+        #punch-btn { 
+            background: linear-gradient(135deg, rgba(255,68,68,0.4), rgba(255,68,68,0.2));
+            border-color: #ff4444; 
+            color: #ff4444; 
+        }
+        #kick-btn { 
+            background: linear-gradient(135deg, rgba(68,255,68,0.4), rgba(68,255,68,0.2));
+            border-color: #44ff44; 
+            color: #44ff44; 
+        }
+        #special-btn { 
+            background: linear-gradient(135deg, rgba(68,136,255,0.4), rgba(68,136,255,0.2));
+            border-color: #4488ff; 
+            color: #4488ff; 
+        }
+        
+        /* Start Screen */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        
+        #start-screen h1 {
+            font-size: 56px;
+            background: linear-gradient(135deg, #ffaa44, #ff4444);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+            text-shadow: 0 0 50px rgba(255,170,68,0.5);
+            letter-spacing: 5px;
+        }
+        
+        #start-screen p {
+            color: #aaa;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        
+        #start-btn {
+            background: linear-gradient(135deg, #ffaa44, #ff4444);
+            border: none;
+            color: #000;
+            padding: 20px 80px;
+            font-size: 28px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 0 50px #ffaa44;
+            transition: transform 0.2s;
+        }
+        
+        #start-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* Character Select */
+        #char-select {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 200;
+            padding: 20px;
+        }
+        
+        #char-select h2 {
+            color: #ffaa44;
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 30px #ffaa44;
+        }
+        
+        .char-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .char-card {
+            background: linear-gradient(135deg, rgba(255,170,68,0.2), rgba(255,170,68,0.1));
+            border: 3px solid rgba(255,170,68,0.5);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .char-card:active {
+            background: linear-gradient(135deg, rgba(255,170,68,0.5), rgba(255,170,68,0.3));
+            border-color: #ffaa44;
+            box-shadow: 0 0 50px rgba(255,170,68,0.5);
+            transform: scale(1.05);
+        }
+        
+        .char-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+        
+        .char-name {
+            color: #ffaa44;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .char-stats {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .stat-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+        
+        .stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffaa44, #ff4444);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="canvas"></canvas>
+        
+        <!-- HUD -->
+        <div id="hud">
+            <div class="health-container">
+                <div class="fighter-portrait" id="player-portrait">🥷</div>
+                <div class="health-bar-frame">
+                    <div class="health-text" id="player-hp-text">100%</div>
+                    <div id="player-health" class="health-fill"></div>
+                </div>
+                <div class="fighter-name">PLAYER</div>
+            </div>
+            
+            <div id="timer">60</div>
+            
+            <div class="health-container">
+                <div class="fighter-portrait" id="enemy-portrait">👹</div>
+                <div class="health-bar-frame">
+                    <div class="health-text" id="enemy-hp-text">100%</div>
+                    <div id="enemy-health" class="health-fill"></div>
+                </div>
+                <div class="fighter-name">ENEMY</div>
+            </div>
+        </div>
+        
+        <!-- Combo Display -->
+        <div id="combo-display">
+            <div id="combo-text">COMBO!</div>
+            <div id="combo-count">x0</div>
+        </div>
+        
+        <!-- Mobile Controls -->
+        <div id="controls">
+            <div id="dpad">
+                <div class="dpad-btn" id="up">⬆️</div>
+                <div class="dpad-btn" id="down">⬇️</div>
+                <div class="dpad-btn" id="left">⬅️</div>
+                <div class="dpad-btn" id="right">➡️</div>
+            </div>
+            
+            <div id="actions">
+                <div class="action-btn" id="punch-btn">👊</div>
+                <div class="action-btn" id="kick-btn">🦵</div>
+                <div class="action-btn" id="special-btn">⚡</div>
+            </div>
+        </div>
+        
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1>🥊 SOUL KOMBAT X</h1>
+            <p>Ultra Graphics Edition</p>
+            <p>Blood • Sweat • Combos</p>
+            <button id="start-btn">▶️ FIGHT</button>
+        </div>
+        
+        <!-- Character Select -->
+        <div id="char-select">
+            <h2>SELECT YOUR FIGHTER</h2>
+            <div class="char-grid">
+                <div class="char-card" onclick="selectChar('profit')">
+                    <div class="char-icon">💰</div>
+                    <div class="char-name">PROFIT</div>
+                    <div class="char-stats">High Damage</div>
+                    <div class="stat-bar"><div class="stat-fill" style="width: 90%"></div></div>
+                    <div class="char-stats">Speed</div>
+                    <div class="stat-bar"><div class="stat-fill" style="width: 85%"></div></div>
+                </div>
+                <div class="char-card" onclick="selectChar('love')">
+                    <div class="char-icon">❤️</div>
+                    <div class="char-name">LOVE</div>
+                    <div class="char-stats">High HP</div>
+                    <div class="stat-bar"><div class="stat-fill" style="width: 95%"></div></div>
+                    <div class="char-stats">Defense</div>
+                    <div class="stat-bar"><div class="stat-fill" style="width: 90%"></div></div>
+                </div>
+                <div class="char-card" onclick="selectChar('tax')">
+                    <div class="char-icon">⚖️</div>
+                    <div class="char-name">TAX</div>
+                    <div class="char-stats">Balanced</div>
+                    <div class="stat-bar"><div class="stat-fill" style="width: 75%"></div></div>
+                    <div class="char-stats">Technique</div>
+                    <div class="stat-bar"><div class="stat-fill" style="width: 80%"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+// SOUL KOMBAT X — Ultra Graphics
+// Detailed 3D fighters, smooth animations, blood effects, dynamic camera
+
+let scene, camera, renderer;
+let player, enemy;
+let playerHealth = 100, enemyHealth = 100;
+let combo = 0, comboTimer = null;
+let gameActive = false;
+let timer = 60, timerInterval = null;
+let clock = new THREE.Clock();
+
+// Fighter data with detailed stats
+const FIGHTERS = {
+    profit: { 
+        color: 0xffaa44, 
+        secondary: 0xff8800,
+        speed: 0.18, 
+        damage: 18, 
+        health: 100, 
+        emoji: '💰',
+        name: 'PROFIT'
+    },
+    love: { 
+        color: 0xff44aa, 
+        secondary: 0xff66aa,
+        speed: 0.12, 
+        damage: 12, 
+        health: 150, 
+        emoji: '❤️',
+        name: 'LOVE'
+    },
+    tax: { 
+        color: 0x4488ff, 
+        secondary: 0x6699ff,
+        speed: 0.15, 
+        damage: 15, 
+        health: 120, 
+        emoji: '⚖️',
+        name: 'TAX'
+    }
+};
+
+let selectedChar = null;
+let particles = [];
+let bloodParticles = [];
+
+// Animation states
+const ANIMATIONS = {
+    IDLE: 'idle',
+    WALK: 'walk',
+    PUNCH: 'punch',
+    KICK: 'kick',
+    SPECIAL: 'special',
+    HIT: 'hit',
+    DEAD: 'dead',
+    WIN: 'win'
+};
+
+let currentAnim = ANIMATIONS.IDLE;
+let animTime = 0;
+
+function init() {
+    // Scene
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a0a2e);
+    scene.fog = new THREE.Fog(0x1a0a2e, 15, 40);
+    
+    // Camera (dynamic fighting angle)
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 3, 7);
+    camera.lookAt(0, 1.5, 0);
+    
+    // Renderer with better quality
+    renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    
+    // Dramatic lighting
+    const ambient = new THREE.AmbientLight(0x404040, 0.4);
+    scene.add(ambient);
+    
+    const spotlight1 = new THREE.SpotLight(0xffaa44, 1.2);
+    spotlight1.position.set(8, 10, 8);
+    spotlight1.castShadow = true;
+    spotlight1.shadow.mapSize.width = 2048;
+    spotlight1.shadow.mapSize.height = 2048;
+    scene.add(spotlight1);
+    
+    const spotlight2 = new THREE.SpotLight(0x4488ff, 0.6);
+    spotlight2.position.set(-8, 10, 8);
+    scene.add(spotlight2);
+    
+    // Arena floor with detail
+    const floorGeo = new THREE.PlaneGeometry(30, 15);
+    const floorMat = new THREE.MeshStandardMaterial({ 
+        color: 0x2a1a4e,
+        roughness: 0.6,
+        metalness: 0.4
+    });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    scene.add(floor);
+    
+    // Arena ring
+    const ringGeo = new THREE.TorusGeometry(8, 0.3, 16, 100);
+    const ringMat = new THREE.MeshStandardMaterial({ 
+        color: 0xffaa44,
+        metalness: 0.8,
+        roughness: 0.2
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 0.1;
+    scene.add(ring);
+    
+    // Create detailed fighters
+    createDetailedFighter('player', 0xffaa44, -3);
+    createDetailedFighter('enemy', 0xff4444, 3);
+    
+    // Start animation loop
+    animate();
+}
+
+function createDetailedFighter(type, color, x) {
+    const group = new THREE.Group();
+    
+    const bodyMat = new THREE.MeshStandardMaterial({ 
+        color: color,
+        roughness: 0.5,
+        metalness: 0.3
+    });
+    
+    const skinMat = new THREE.MeshStandardMaterial({ 
+        color: 0xffdbac,
+        roughness: 0.8
+    });
+    
+    // Detailed torso with chest/abs
+    const torsoGeo = new THREE.BoxGeometry(0.6, 0.8, 0.35);
+    const torso = new THREE.Mesh(torsoGeo, bodyMat);
+    torso.position.y = 1.3;
+    torso.castShadow = true;
+    group.add(torso);
+    
+    // Head with more detail
+    const headGeo = new THREE.SphereGeometry(0.28, 24, 24);
+    const head = new THREE.Mesh(headGeo, skinMat);
+    head.position.y = 2.0;
+    head.castShadow = true;
+    group.add(head);
+    
+    // Eyes
+    const eyeGeo = new THREE.SphereGeometry(0.05, 12, 12);
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+    leftEye.position.set(-0.09, 2.05, 0.24);
+    group.add(leftEye);
+    const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+    rightEye.position.set(0.09, 2.05, 0.24);
+    group.add(rightEye);
+    
+    // Shoulder pads
+    const shoulderGeo = new THREE.SphereGeometry(0.2, 16, 16);
+    const leftShoulder = new THREE.Mesh(shoulderGeo, bodyMat);
+    leftShoulder.position.set(-0.45, 1.5, 0);
+    group.add(leftShoulder);
+    const rightShoulder = new THREE.Mesh(shoulderGeo, bodyMat);
+    rightShoulder.position.set(0.45, 1.5, 0);
+    group.add(rightShoulder);
+    
+    // Articulated arms with biceps/forearms
+    const upperArmGeo = new THREE.CylinderGeometry(0.1, 0.09, 0.4, 12);
+    const leftUpperArm = new THREE.Mesh(upperArmGeo, bodyMat);
+    leftUpperArm.position.set(-0.5, 1.35, 0);
+    leftUpperArm.rotation.z = 0.3;
+    leftUpperArm.castShadow = true;
+    group.add(leftUpperArm);
+    
+    const rightUpperArm = new THREE.Mesh(upperArmGeo, bodyMat);
+    rightUpperArm.position.set(0.5, 1.35, 0);
+    rightUpperArm.rotation.z = -0.3;
+    rightUpperArm.castShadow = true;
+    group.add(rightUpperArm);
+    
+    const forearmGeo = new THREE.CylinderGeometry(0.08, 0.07, 0.35, 12);
+    const leftForearm = new THREE.Mesh(forearmGeo, skinMat);
+    leftForearm.position.set(-0.65, 1.15, 0);
+    leftForearm.rotation.z = 0.2;
+    leftForearm.castShadow = true;
+    group.add(leftForearm);
+    
+    const rightForearm = new THREE.Mesh(forearmGeo, skinMat);
+    rightForearm.position.set(0.65, 1.15, 0);
+    rightForearm.rotation.z = -0.2;
+    rightForearm.castShadow = true;
+    group.add(rightForearm);
+    
+    // Fists
+    const fistGeo = new THREE.SphereGeometry(0.1, 12, 12);
+    const leftFist = new THREE.Mesh(fistGeo, skinMat);
+    leftFist.position.set(-0.7, 1.0, 0);
+    group.add(leftFist);
+    const rightFist = new THREE.Mesh(fistGeo, skinMat);
+    rightFist.position.set(0.7, 1.0, 0);
+    group.add(rightFist);
+    
+    // Legs with thighs/calves
+    const thighGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.5, 12);
+    const leftThigh = new THREE.Mesh(thighGeo, bodyMat);
+    leftThigh.position.set(-0.2, 0.75, 0);
+    leftThigh.castShadow = true;
+    group.add(leftThigh);
+    
+    const rightThigh = new THREE.Mesh(thighGeo, bodyMat);
+    rightThigh.position.set(0.2, 0.75, 0);
+    rightThigh.castShadow = true;
+    group.add(rightThigh);
+    
+    const calfGeo = new THREE.CylinderGeometry(0.09, 0.08, 0.45, 12);
+    const leftCalf = new THREE.Mesh(calfGeo, bodyMat);
+    leftCalf.position.set(-0.2, 0.3, 0);
+    leftCalf.castShadow = true;
+    group.add(leftCalf);
+    
+    const rightCalf = new THREE.Mesh(calfGeo, bodyMat);
+    rightCalf.position.set(0.2, 0.3, 0);
+    rightCalf.castShadow = true;
+    group.add(rightCalf);
+    
+    // Feet
+    const footGeo = new THREE.BoxGeometry(0.15, 0.1, 0.25);
+    const leftFoot = new THREE.Mesh(footGeo, bodyMat);
+    leftFoot.position.set(-0.2, 0.1, 0.05);
+    group.add(leftFoot);
+    const rightFoot = new THREE.Mesh(footGeo, bodyMat);
+    rightFoot.position.set(0.2, 0.1, 0.05);
+    group.add(rightFoot);
+    
+    // Fighting stance
+    group.position.x = x;
+    group.rotation.y = x < 0 ? 0 : Math.PI;
+    
+    // Store all parts for animation
+    group.userData = {
+        torso: torso,
+        head: head,
+        leftUpperArm: leftUpperArm,
+        rightUpperArm: rightUpperArm,
+        leftForearm: leftForearm,
+        rightForearm: rightForearm,
+        leftFist: leftFist,
+        rightFist: rightFist,
+        leftThigh: leftThigh,
+        rightThigh: rightThigh,
+        leftCalf: leftCalf,
+        rightCalf: rightCalf,
+        health: type === 'player' ? 100 : 100,
+        maxHealth: type === 'player' ? 100 : 100,
+        state: 'idle',
+        isHit: false,
+        hitTimer: 0
+    };
+    
+    scene.add(group);
+    
+    if (type === 'player') player = group;
+    else enemy = group;
+}
+
+function createBloodParticle(position, velocity) {
+    const geo = new THREE.SphereGeometry(0.05, 8, 8);
+    const mat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const particle = new THREE.Mesh(geo, mat);
+    particle.position.copy(position);
+    particle.userData = {
+        velocity: velocity,
+        lifetime: 1.0
+    };
+    scene.add(particle);
+    bloodParticles.push(particle);
+}
+
+function createHitEffect(position, isBlood = false) {
+    const effect = document.createElement('div');
+    effect.className = isBlood ? 'blood-splatter' : 'hit-effect';
+    
+    const pos = position.clone();
+    pos.y += 1.5;
+    pos.project(camera);
+    
+    const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-(pos.y * 0.5) + 0.5) * window.innerHeight;
+    
+    effect.style.left = (x - 40) + 'px';
+    effect.style.top = (y - 40) + 'px';
+    
+    document.getElementById('game-container').appendChild(effect);
+    setTimeout(() => effect.remove(), 500);
+}
+
+function animateFighter(fighter, delta, isPlayer = true) {
+    if (!fighter) return;
+    
+    const data = fighter.userData;
+    animTime += delta * 5;
+    
+    // Hit flash
+    if (data.isHit) {
+        data.hitTimer -= delta;
+        fighter.children.forEach(child => {
+            if (child.material) {
+                child.material.emissive.setHex(0xff0000);
+                child.material.emissiveIntensity = Math.sin(data.hitTimer * 20) * 0.5;
+            }
+        });
+        if (data.hitTimer <= 0) {
+            data.isHit = false;
+            fighter.children.forEach(child => {
+                if (child.material && child.material.emissive) {
+                    child.material.emissive.setHex(0x000000);
+                    child.material.emissiveIntensity = 0;
+                }
+            });
+        }
+    }
+    
+    switch(data.state) {
+        case ANIMATIONS.IDLE:
+            // Fighting stance breathing
+            data.torso.position.y = 1.3 + Math.sin(animTime) * 0.03;
+            data.head.position.y = 2.0 + Math.sin(animTime) * 0.03;
+            data.leftUpperArm.rotation.z = 0.3 + Math.sin(animTime) * 0.05;
+            data.rightUpperArm.rotation.z = -0.3 - Math.sin(animTime) * 0.05;
+            data.head.rotation.y = isPlayer ? 0.1 : -0.1;
+            break;
+            
+        case ANIMATIONS.WALK:
+            // Smooth walking animation
+            data.leftThigh.rotation.x = Math.sin(animTime) * 0.4;
+            data.rightThigh.rotation.x = -Math.sin(animTime) * 0.4;
+            data.leftCalf.rotation.x = Math.sin(animTime) * 0.3;
+            data.rightCalf.rotation.x = -Math.sin(animTime) * 0.3;
+            data.leftUpperArm.rotation.x = -Math.sin(animTime) * 0.4;
+            data.rightUpperArm.rotation.x = Math.sin(animTime) * 0.4;
+            break;
+            
+        case ANIMATIONS.PUNCH:
+            // Powerful punch with windup
+            data.rightUpperArm.rotation.x = -Math.PI / 2;
+            data.rightUpperArm.rotation.z = -Math.PI / 4;
+            data.rightForearm.rotation.x = -0.5;
+            data.torso.rotation.y = isPlayer ? 0.3 : -0.3;
+            break;
+            
+        case ANIMATIONS.KICK:
+            // High kick
+            data.rightThigh.rotation.x = -Math.PI / 3;
+            data.rightCalf.rotation.x = -0.5;
+            data.torso.rotation.x = -0.2;
+            break;
+            
+        case ANIMATIONS.SPECIAL:
+            // Special attack glow and pose
+            fighter.children.forEach(child => {
+                if (child.material && child.material.emissive) {
+                    child.material.emissive.setHex(0xffaa44);
+                    child.material.emissiveIntensity = Math.sin(animTime * 3) * 0.8 + 0.5;
+                }
+            });
+            data.leftUpperArm.rotation.x = -Math.PI / 2;
+            data.rightUpperArm.rotation.x = -Math.PI / 2;
+            break;
+            
+        case ANIMATIONS.HIT:
+            // Pain reaction
+            data.torso.rotation.z = Math.sin(animTime * 2) * 0.15;
+            data.head.rotation.x = 0.3;
+            break;
+            
+        case ANIMATIONS.WIN:
+            // Victory pose
+            data.leftUpperArm.rotation.x = -Math.PI;
+            data.rightUpperArm.rotation.x = -Math.PI;
+            data.torso.rotation.y = Math.sin(animTime) * 0.1;
+            break;
+    }
+}
+
+function updateParticles(delta) {
+    // Update blood particles
+    for (let i = bloodParticles.length - 1; i >= 0; i--) {
+        const p = bloodParticles[i];
+        p.userData.lifetime -= delta;
+        p.position.add(p.userData.velocity.clone().multiplyScalar(delta));
+        p.userData.velocity.y -= 9.8 * delta; // Gravity
+        
+        if (p.position.y < 0) {
+            p.position.y = 0;
+            p.userData.velocity.multiplyScalar(0.5); // Bounce
+        }
+        
+        if (p.userData.lifetime <= 0) {
+            scene.remove(p);
+            bloodParticles.splice(i, 1);
+        }
+    }
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    
+    const delta = clock.getDelta();
+    
+    // Animate fighters
+    if (player) animateFighter(player, delta, true);
+    if (enemy) animateFighter(enemy, delta, false);
+    
+    // Update particles
+    updateParticles(delta);
+    
+    // Dynamic camera follow
+    if (player && enemy) {
+        const midX = (player.position.x + enemy.position.x) / 2;
+        camera.position.x += (midX - camera.position.x) * 0.05;
+        camera.lookAt(midX, 1.5, 0);
+    }
+    
+    renderer.render(scene, camera);
+}
+
+function attack(type) {
+    if (!gameActive || !player) return;
+    
+    const data = player.userData;
+    const enemyData = enemy.userData;
+    
+    const distance = Math.abs(player.position.x - enemy.position.x);
+    
+    if (distance < 3.5) {
+        let damage = 0;
+        let isHeavy = false;
+        
+        if (type === 'punch') {
+            damage = FIGHTERS[selectedChar].damage;
+            data.state = 'punch';
+            setTimeout(() => { data.state = 'idle'; }, 250);
+        } else if (type === 'kick') {
+            damage = FIGHTERS[selectedChar].damage * 1.4;
+            isHeavy = true;
+            data.state = 'kick';
+            setTimeout(() => { data.state = 'idle'; }, 350);
+        } else if (type === 'special') {
+            damage = FIGHTERS[selectedChar].damage * 2.5;
+            isHeavy = true;
+            data.state = 'special';
+            setTimeout(() => { 
+                data.state = 'idle';
+                player.children.forEach(child => {
+                    if (child.material && child.material.emissive) {
+                        child.material.emissive.setHex(0x000000);
+                        child.material.emissiveIntensity = 0;
+                    }
+                });
+            }, 500);
+        }
+        
+        // Apply damage
+        enemyData.health = Math.max(0, enemyData.health - damage);
+        enemyHealth = (enemyData.health / enemyData.maxHealth) * 100;
+        document.getElementById('enemy-health').style.width = enemyHealth + '%';
+        document.getElementById('enemy-hp-text').innerText = Math.round(enemyHealth) + '%';
+        
+        // Hit reaction
+        enemyData.state = 'hit';
+        enemyData.isHit = true;
+        enemyData.hitTimer = 0.3;
+        setTimeout(() => { enemyData.state = 'idle'; }, 300);
+        
+        // Blood particles for heavy hits
+        if (isHeavy) {
+            const bloodPos = enemy.position.clone();
+            bloodPos.y = 1.5;
+            for (let i = 0; i < 8; i++) {
+                createBloodParticle(bloodPos, new THREE.Vector3(
+                    (Math.random() - 0.5) * 5,
+                    Math.random() * 3,
+                    (Math.random() - 0.5) * 2
+                ));
+            }
+            createHitEffect(enemy.position, true);
+        } else {
+            createHitEffect(enemy.position, false);
+        }
+        
+        // Combo system
+        combo++;
+        clearTimeout(comboTimer);
+        comboTimer = setTimeout(() => { combo = 0; }, 2000);
+        
+        if (combo >= 3) {
+            document.getElementById('combo-text').style.opacity = 1;
+            document.getElementById('combo-count').innerText = 'x' + combo;
+        }
+        
+        // Check win
+        if (enemyData.health <= 0) {
+            endGame('win');
+        }
+    }
+}
+
+function move(direction) {
+    if (!gameActive || !player) return;
+    
+    data = player.userData;
+    data.state = 'walk';
+    
+    if (direction === 'left' && player.position.x > -5) {
+        player.position.x -= FIGHTERS[selectedChar].speed;
+        player.rotation.y = Math.PI / 2;
+    } else if (direction === 'right' && player.position.x < 1) {
+        player.position.x += FIGHTERS[selectedChar].speed;
+        player.rotation.y = -Math.PI / 2;
+    }
+    
+    setTimeout(() => { 
+        if (gameActive) data.state = 'idle'; 
+    }, 150);
+}
+
+function selectChar(char) {
+    selectedChar = char;
+    document.getElementById('char-select').style.display = 'none';
+    document.getElementById('start-screen').style.display = 'none';
+    
+    // Update player fighter
+    scene.remove(player);
+    createDetailedFighter('player', FIGHTERS[char].color, -3);
+    
+    // Update portrait
+    document.getElementById('player-portrait').innerText = FIGHTERS[char].emoji;
+    
+    startGame();
+}
+
+function startGame() {
+    gameActive = true;
+    timer = 60;
+    
+    timerInterval = setInterval(() => {
+        timer--;
+        document.getElementById('timer').innerText = timer;
+        
+        if (timer <= 0) {
+            endGame(playerHealth > enemyHealth ? 'win' : 'lose');
+        }
+    }, 1000);
+    
+    setInterval(enemyAI, 800);
+}
+
+function enemyAI() {
+    if (!gameActive || !enemy) return;
+    
+    const data = enemy.userData;
+    const distance = Math.abs(player.position.x - enemy.position.x);
+    
+    // Move towards player
+    if (distance > 2.5) {
+        if (enemy.position.x > player.position.x) {
+            enemy.position.x -= 0.08;
+            enemy.rotation.y = Math.PI / 2;
+        } else {
+            enemy.position.x += 0.08;
+            enemy.rotation.y = -Math.PI / 2;
+        }
+        data.state = 'walk';
+    } else {
+        data.state = 'idle';
+        
+        // Attack randomly
+        if (Math.random() < 0.6) {
+            const damage = 8 + Math.random() * 7;
+            player.userData.health = Math.max(0, player.userData.health - damage);
+            playerHealth = (player.userData.health / player.userData.maxHealth) * 100;
+            document.getElementById('player-health').style.width = playerHealth + '%';
+            document.getElementById('player-hp-text').innerText = Math.round(playerHealth) + '%';
+            
+            player.userData.state = 'hit';
+            player.userData.isHit = true;
+            player.userData.hitTimer = 0.3;
+            setTimeout(() => { player.userData.state = 'idle'; }, 300);
+            
+            createHitEffect(player.position, false);
+            
+            if (player.userData.health <= 0) {
+                endGame('lose');
+            }
+        }
+    }
+    
+    setTimeout(() => { if (gameActive) data.state = 'idle'; }, 400);
+}
+
+function endGame(result) {
+    gameActive = false;
+    clearInterval(timerInterval);
+    
+    const startScreen = document.getElementById('start-screen');
+    startScreen.style.display = 'flex';
+    
+    const h1 = startScreen.querySelector('h1');
+    const btn = document.getElementById('start-btn');
+    
+    if (result === 'win') {
+        h1.innerText = '🏆 VICTORY!';
+        h1.style.background = 'linear-gradient(135deg, #44ff44, #44aa44)';
+        h1.style.webkitBackgroundClip = 'text';
+    } else {
+        h1.innerText = '💀 DEFEAT';
+        h1.style.background = 'linear-gradient(135deg, #ff4444, #aa4444)';
+        h1.style.webkitBackgroundClip = 'text';
+    }
+    
+    btn.innerText = '🔄 REMATCH';
+    btn.onclick = () => location.reload();
+}
+
+// Touch controls
+document.getElementById('punch-btn').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    attack('punch');
+});
+
+document.getElementById('kick-btn').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    attack('kick');
+});
+
+document.getElementById('special-btn').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    attack('special');
+});
+
+document.getElementById('left').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    move('left');
+});
+
+document.getElementById('right').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    move('right');
+});
+
+// Keyboard controls
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') move('left');
+    if (e.key === 'ArrowRight') move('right');
+    if (e.key === 'z') attack('punch');
+    if (e.key === 'x') attack('kick');
+    if (e.key === 'c') attack('special');
+});
+
+document.getElementById('start-btn').addEventListener('click', () => {
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('char-select').style.display = 'block';
+});
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+init();
+console.log('🥊 SOUL KOMBAT X — Ultra Graphics loaded');
+    </script>
+</body>
+</html>
