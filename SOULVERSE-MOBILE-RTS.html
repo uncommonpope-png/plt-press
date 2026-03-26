@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>⚔️ SOULVERSE – Mobile RTS | Heroes, Fog, Creeps | PLT Press</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+        body { background:#000; overflow:hidden; font-family:'Courier New', monospace; touch-action:pan-x pan-y; }
+        canvas { display:block; width:100%; height:100%; }
+        #ui { position:absolute; bottom:20px; left:20px; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); border-radius:12px; padding:8px 12px; color:#ffaa66; font-size:11px; pointer-events:none; z-index:10; }
+        #top-bar { position:absolute; top:20px; left:0; right:0; display:flex; justify-content:center; gap:12px; z-index:30; pointer-events:auto; flex-wrap:wrap; }
+        .top-btn { background:#ffaa66; border:none; color:#000; font-weight:bold; padding:8px 18px; border-radius:30px; cursor:pointer; font-family:monospace; transition:0.2s; touch-action:manipulation; }
+        .top-btn:active { transform:scale(0.96); }
+        #resources { position:absolute; top:20px; right:20px; background:rgba(0,0,0,0.6); border-radius:12px; padding:8px 12px; color:#ffaa66; font-size:11px; text-align:right; pointer-events:none; z-index:10; }
+        #selection-panel { position:absolute; bottom:100px; left:20px; background:rgba(0,0,0,0.6); border-radius:12px; padding:6px 12px; font-size:10px; pointer-events:none; z-index:20; }
+        #mobile-controls { position:absolute; bottom:20px; left:0; right:0; display:flex; justify-content:center; gap:8px; flex-wrap:wrap; padding:8px; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); border-radius:40px; margin:0 20px; z-index:40; pointer-events:auto; }
+        .mobile-btn { background:#2a2a3a; border:1px solid #ffaa66; color:#ffaa66; padding:8px 16px; border-radius:30px; font-size:12px; font-weight:bold; touch-action:manipulation; cursor:pointer; }
+        .mobile-btn:active { background:#ffaa66; color:#000; }
+        #building-menu { position:absolute; bottom:100px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); border-radius:20px; padding:8px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center; z-index:40; pointer-events:auto; max-width:90%; }
+        .build-btn { background:#2a2a3a; border:1px solid #ffaa66; color:#ffaa66; padding:6px 12px; border-radius:20px; cursor:pointer; font-size:10px; touch-action:manipulation; }
+        .build-btn:active { background:#ffaa66; color:#000; }
+        #tech-tree-panel { position:absolute; top:80px; left:20px; background:rgba(0,0,0,0.8); backdrop-filter:blur(12px); border-radius:16px; padding:12px; width:280px; display:none; z-index:50; pointer-events:auto; max-height:70vh; overflow-y:auto; }
+        .close-panel { float:right; background:none; border:none; color:#ffaa66; font-size:20px; cursor:pointer; }
+        .modal { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.9); backdrop-filter:blur(16px); border:2px solid #ffaa66; border-radius:24px; padding:20px; z-index:200; display:none; pointer-events:auto; min-width:280px; max-width:90vw; max-height:80vh; overflow-y:auto; text-align:center; }
+        .modal button { margin:5px; padding:8px 16px; background:#ffaa66; border:none; border-radius:30px; font-weight:bold; cursor:pointer; }
+        .selection-rect { position:absolute; border:1px solid #ffaa66; background:rgba(255,170,102,0.2); pointer-events:none; z-index:100; }
+        #minimap { position:absolute; bottom:20px; right:20px; width:140px; height:140px; background:rgba(0,0,0,0.5); border:2px solid #ffaa66; border-radius:8px; pointer-events:none; z-index:60; }
+        @media (max-width:768px) { .top-btn { padding:6px 12px; font-size:10px; } .build-btn { padding:4px 8px; font-size:8px; } #minimap { width:100px; height:100px; } .mobile-btn { padding:6px 12px; font-size:10px; } }
+    </style>
+</head>
+<body>
+    <div id="ui">⚔️ SOULVERSE – Mobile RTS</div>
+    <div id="top-bar">
+        <button id="techTreeBtn" class="top-btn">📜 Tech</button>
+        <button id="villageBtn" class="top-btn">🏘️ Village</button>
+        <button id="pantheonBtn" class="top-btn">🏛️ Pantheon</button>
+        <button id="soundBtn" class="top-btn">🔊 Sound Off</button>
+    </div>
+    <div id="resources">💰 Profit: <span id="profitVal">500</span><br>❤️ Love: <span id="loveVal">500</span><br>⚖️ Tax: <span id="taxVal">500</span></div>
+    <div id="selection-panel">Selected: none</div>
+    <div id="mobile-controls">
+        <button class="mobile-btn" id="moveBtn">🏃 Move</button>
+        <button class="mobile-btn" id="attackBtn">⚔️ Attack</button>
+        <button class="mobile-btn" id="gatherBtn">🌾 Gather</button>
+        <button class="mobile-btn" id="stopBtn">🛑 Stop</button>
+        <button class="mobile-btn" id="heroBtn">✨ Hero</button>
+    </div>
+    <div id="building-menu">
+        <button class="build-btn" data-building="townhall">🏛️ TH (200)</button>
+        <button class="build-btn" data-building="forge">⚒️ Forge (150)</button>
+        <button class="build-btn" data-building="market">🏪 Market (120)</button>
+        <button class="build-btn" data-building="barracks">🏚️ Barracks (180)</button>
+        <button class="build-btn" data-building="farm">🌾 Farm (100)</button>
+        <button class="build-btn" data-building="wall">🧱 Wall (50)</button>
+        <button class="build-btn" data-building="tower">🗼 Tower (200)</button>
+        <button class="build-btn" data-building="blacksmith">🔨 Smith (250)</button>
+        <button class="build-btn" data-building="magetower">✨ Mage (300)</button>
+        <button class="build-btn" data-building="heroic">🏆 Heroic (400)</button>
+    </div>
+    <div id="tech-tree-panel"><button class="close-panel" id="closeTechTree">&times;</button><h3>Tech Tree</h3><div id="techTreeContent"></div></div>
+    <div id="minimap"><canvas id="minimapCanvas" width="200" height="200" style="width:100%; height:100%;"></canvas></div>
+    <div id="villageModal" class="modal"><button class="modal-close" id="closeVillageModal">&times;</button><h3 id="villageTitle">Village</h3><div id="villageContent"></div><button id="closeVillage">Close</button></div>
+    <div id="pantheonModal" class="modal"><button class="modal-close" id="closePantheonModal">&times;</button><h3>Pantheon</h3><div id="pantheonContent"></div><button id="closePantheon">Close</button></div>
+    <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.128.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/" } }</script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        const QUALITY = { 0: { terrainSegments:32, shadows:false, grassCount:200, treeCount:10, resourceCount:15 }, 1: { terrainSegments:48, shadows:true, grassCount:400, treeCount:20, resourceCount:25 }, 2: { terrainSegments:64, shadows:true, grassCount:600, treeCount:30, resourceCount:35 } };
+        let currentQuality = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 0 : 1;
+        let scene, camera, renderer, controls;
+        let terrain;
+        let playerUnits = [], playerBuildings = [];
+        let enemyUnits = [], enemyBuildings = [];
+        let neutralCreeps = [];
+        let resources = [];
+        let selectedUnits = new Set();
+        let shiftPressed = false;
+        let buildingMode = false;
+        let buildingType = null;
+        let ghostBuilding = null;
+        let playerResources = { profit:500, love:500, tax:500 };
+        let techs = { forge:false, market:false, barracks:false, farm:false, blacksmith:false, magetower:false, heroic:false };
+        let upgrades = { meleeDamage:0, rangedDamage:0, armor:0, attackSpeed:0 };
+        let heroes = { profitPrime:null, loveWeaver:null, taxCollector:null };
+        let enemyAI = { attackCooldown:0, buildCooldown:0 };
+        let villages = [];
+        let minimapCtx = null;
+        let soundEnabled = false;
+        let audioCtx = null;
+        let fogGrid = null, exploredGrid = null;
+        const MAP_SIZE = 160, FOG_CELLS = 40;
+        let cellSize = MAP_SIZE / FOG_CELLS;
+        let currentOrderType = 'move';
+
+        function getHeight(x, z) { let h = 0; h += Math.sin(x * 0.12) * Math.cos(z * 0.12) * 1.0; h += Math.sin(x * 0.3) * 0.5; h += Math.cos(z * 0.3) * 0.5; h += Math.sin(x * 0.7 + z * 0.5) * 0.3; h += Math.max(0, Math.sin(x * 0.5) * Math.cos(z * 0.5) - 0.3) * 1.2; return Math.max(0.2, h + 1.6); }
+        function initFog() { fogGrid = Array(FOG_CELLS).fill().map(() => Array(FOG_CELLS).fill(false)); exploredGrid = Array(FOG_CELLS).fill().map(() => Array(FOG_CELLS).fill(false)); }
+        function updateFog(cx, cz) { let ix = Math.floor((cx + MAP_SIZE/2) / cellSize); let iz = Math.floor((cz + MAP_SIZE/2) / cellSize); for (let dx = -2; dx <= 2; dx++) { for (let dz = -2; dz <= 2; dz++) { let x = ix+dx, z = iz+dz; if (x>=0 && x<FOG_CELLS && z>=0 && z<FOG_CELLS) { fogGrid[x][z] = true; exploredGrid[x][z] = true; } } } }
+        function isVisible(x, z) { let ix = Math.floor((x + MAP_SIZE/2) / cellSize); let iz = Math.floor((z + MAP_SIZE/2) / cellSize); if (ix<0 || ix>=FOG_CELLS || iz<0 || iz>=FOG_CELLS) return false; return fogGrid[ix][iz]; }
+        function playSound(type) { if (!soundEnabled || !audioCtx) return; const now = audioCtx.currentTime; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.type = 'sine'; if (type === 'select') { osc.frequency.value = 440; gain.gain.value = 0.1; osc.start(); osc.stop(now+0.1); } if (type === 'attack') { osc.frequency.value = 220; gain.gain.value = 0.15; osc.start(); osc.stop(now+0.2); } if (type === 'build') { osc.frequency.value = 880; gain.gain.value = 0.1; osc.start(); osc.stop(now+0.15); } }
+
+        class RTSUnit {
+            constructor(id, name, type, x, z, isEnemy = false, isRanged = false, isHero = false) {
+                this.id = id; this.name = name; this.type = type; this.isEnemy = isEnemy; this.isRanged = isRanged; this.isHero = isHero;
+                this.x = x; this.z = z; this.health = isHero ? 200 : 100; this.maxHealth = this.health;
+                this.damage = (isHero ? 25 : 10) + (type==='profit'?upgrades.meleeDamage : upgrades.rangedDamage);
+                this.armor = upgrades.armor; this.speed = 3;
+                this.attackRange = isRanged ? 5 : 1.5;
+                this.attackCooldownMax = 1.0 / (1 + upgrades.attackSpeed*0.2);
+                this.state = 'idle'; this.targetPos = null; this.targetUnit = null; this.targetBuilding = null;
+                this.path = []; this.attackCooldown = 0; this.gatherAmount = 0;
+                this.model = null; this.healthBar = null; this.animTime = 0; this.armAngle = 0; this.abilityCooldown = 0;
+                this.updatePosition();
+            }
+            updatePosition() { if (this.model) { const y = getHeight(this.x, this.z) + 0.5; this.model.position.set(this.x, y, this.z); if (this.healthBar) this.healthBar.position.copy(this.model.position); } }
+            update(delta) {
+                this.animTime += delta * 5;
+                if (this.attackCooldown > 0) this.attackCooldown -= delta;
+                if (this.abilityCooldown > 0) this.abilityCooldown -= delta;
+                if (this.state === 'move') this.armAngle = Math.sin(this.animTime) * 0.8;
+                else if (this.state === 'attack') this.armAngle = Math.sin(this.animTime * 10) * 0.5;
+                else this.armAngle *= 0.9;
+                this.updateArmAngles();
+                if (this.isHero && this.state === 'attack' && this.targetUnit && this.abilityCooldown <= 0 && Math.random() < 0.1) this.castAbility();
+                if (this.isEnemy && this.state === 'idle') {
+                    let nearest = null, minDist = Infinity;
+                    for (let u of playerUnits) { let d = Math.hypot(u.x - this.x, u.z - this.z); if (d < minDist) { minDist = d; nearest = u; } }
+                    if (!nearest) { for (let b of playerBuildings) { let d = Math.hypot(b.x - this.x, b.z - this.z); if (d < minDist) { minDist = d; nearest = b; } } }
+                    if (nearest && minDist < 20) this.giveOrder('attack', nearest);
+                    else if (Math.random() < 0.02) { let angle = Math.random() * Math.PI * 2; let rad = 10 + Math.random() * 15; this.giveOrder('move', {x: this.x + Math.cos(angle)*rad, z: this.z + Math.sin(angle)*rad}); }
+                }
+                if (this.state === 'move' && this.targetPos) {
+                    if (this.path.length === 0) this.path = aStar({x:this.x, z:this.z}, this.targetPos, this.isEnemy);
+                    if (this.path.length > 0) { let next = this.path[0]; let dx = next.x - this.x, dz = next.z - this.z; let dist = Math.hypot(dx, dz); if (dist < 0.2) this.path.shift(); else { let move = Math.min(this.speed * delta, dist); let angle = Math.atan2(dz, dx); this.x += Math.cos(angle) * move; this.z += Math.sin(angle) * move; this.updatePosition(); } }
+                    if (this.path.length === 0) this.state = 'idle';
+                } else if (this.state === 'attack' && this.targetUnit && this.targetUnit.health > 0) {
+                    let dx = this.targetUnit.x - this.x, dz = this.targetUnit.z - this.z; let dist = Math.hypot(dx, dz);
+                    if (dist > this.attackRange) { this.targetPos = {x:this.targetUnit.x, z:this.targetUnit.z}; this.state = 'move'; this.path = []; }
+                    else { if (this.attackCooldown <= 0) { let damage = Math.max(1, this.damage - this.targetUnit.armor); this.targetUnit.health -= damage; this.attackCooldown = this.attackCooldownMax; if (this.isRanged) createProjectile(this, this.targetUnit); else createHitEffect(this.targetUnit); if (this.targetUnit.health <= 0) { this.targetUnit.destroy(); this.state = 'idle'; this.targetUnit = null; } else if (this.targetUnit.healthBar) this.targetUnit.healthBar.scale.x = this.targetUnit.health / this.targetUnit.maxHealth; } }
+                } else if (this.state === 'gather') {
+                    if (!this.targetPos) { let nearest = null, minDist = Infinity; for (let r of resources) { let d = Math.hypot(r.position.x - this.x, r.position.z - this.z); if (d < minDist) { minDist = d; nearest = r; } } if (nearest) { this.targetPos = {x:nearest.position.x, z:nearest.position.z}; this.state = 'move'; this.path = []; } }
+                    else { if (this.state === 'move') { let dist = Math.hypot(this.targetPos.x - this.x, this.targetPos.z - this.z); if (dist < 1.0) { let resourceNode = resources.find(r => Math.hypot(r.position.x-this.x, r.position.z-this.z) < 1.0); if (resourceNode) { let type = resourceNode.userData.type; if (type === 'profit') this.gatherAmount += 5; else if (type === 'love') this.gatherAmount += 5; else if (type === 'tax') this.gatherAmount += 5; scene.remove(resourceNode); resources.splice(resources.indexOf(resourceNode),1); let townHall = playerBuildings.find(b => b.type === 'townhall'); if (townHall) { this.targetPos = {x:townHall.x, z:townHall.z}; this.state = 'move'; this.path = []; } else this.state = 'idle'; } } } else { let townHall = playerBuildings.find(b => b.type === 'townhall'); if (townHall && Math.hypot(townHall.x - this.x, townHall.z - this.z) < 1.5) { if (this.gatherAmount > 0) { playerResources.profit += this.gatherAmount; playerResources.love += this.gatherAmount; playerResources.tax += this.gatherAmount; this.gatherAmount = 0; updateUI(); } this.state = 'idle'; this.targetPos = null; } } }
+                }
+            }
+            updateArmAngles() { if (!this.model) return; let leftArm = this.model.children.find(c => c.position.x < 0); let rightArm = this.model.children.find(c => c.position.x > 0); if (leftArm) leftArm.rotation.z = 0.3 + this.armAngle * 0.5; if (rightArm) rightArm.rotation.z = -0.3 - this.armAngle * 0.5; }
+            castAbility() {
+                if (this.name === 'Profit Prime') { playerResources.profit += 50; playerResources.love += 50; playerResources.tax += 50; updateUI(); playSound('select'); }
+                else if (this.name === 'Love Weaver') { for (let u of playerUnits) { if (Math.hypot(u.x - this.x, u.z - this.z) < 8) { u.health = Math.min(u.maxHealth, u.health + 30); if (u.healthBar) u.healthBar.scale.x = u.health / u.maxHealth; } } playSound('select'); }
+                else if (this.name === 'Tax Collector') { for (let u of enemyUnits) { if (Math.hypot(u.x - this.x, u.z - this.z) < 5) { playerResources.profit += 10; playerResources.love += 10; playerResources.tax += 10; updateUI(); break; } } playSound('select'); }
+                this.abilityCooldown = 10;
+            }
+            giveOrder(type, target) { if (type === 'move') { this.targetPos = target; this.state = 'move'; this.path = []; this.targetUnit = null; } else if (type === 'attack') { this.targetUnit = target; this.state = 'attack'; this.targetPos = null; } else if (type === 'gather') { this.targetBuilding = target; this.state = 'gather'; this.targetPos = null; } }
+            destroy() { scene.remove(this.model); if (this.healthBar) scene.remove(this.healthBar); if (this.isEnemy) enemyUnits = enemyUnits.filter(u => u !== this); else { playerUnits = playerUnits.filter(u => u !== this); selectedUnits.delete(this); updateSelectionDisplay(); } }
+        }
+
+        function createProjectile(source, target) { const start = source.model.position.clone(); const end = target.model.position.clone(); const particle = new THREE.Mesh(new THREE.SphereGeometry(0.08, 4, 4), new THREE.MeshStandardMaterial({ color: 0xffaa66 })); particle.position.copy(start); scene.add(particle); let t = 0; const animate = () => { t += 0.05; if (t >= 1) { scene.remove(particle); return; } particle.position.lerpVectors(start, end, t); requestAnimationFrame(animate); }; animate(); }
+        function createHitEffect(unit) { const spark = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 4), new THREE.MeshStandardMaterial({ color: 0xff8866, emissive:0xff4422 })); spark.position.copy(unit.model.position); scene.add(spark); setTimeout(() => scene.remove(spark), 200); }
+
+        function createHero(type, x, z) {
+            const colors = { profit:0xffaa44, love:0xff88aa, tax:0x88aaff };
+            const group = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.55, 0.9, 8), new THREE.MeshStandardMaterial({ color: colors[type], metalness:0.7 })); body.position.y = 0.45; group.add(body);
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), new THREE.MeshStandardMaterial({ color: 0xddbb99 })); head.position.y = 0.95; group.add(head);
+            const crown = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.4, 4), new THREE.MeshStandardMaterial({ color: 0xffaa44 })); crown.position.y = 1.2; group.add(crown);
+            const cape = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.6, 0.1), new THREE.MeshStandardMaterial({ color: colors[type], emissive:0x442200 })); cape.position.set(0, 0.6, -0.45); group.add(cape);
+            const weapon = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.7, 4), new THREE.MeshStandardMaterial({ color: 0xccccdd })); weapon.position.set(0.6, 0.7, 0.2); group.add(weapon);
+            const y = getHeight(x, z) + 0.5; group.position.set(x, y, z); group.castShadow = true; scene.add(group);
+            const barGeo = new THREE.BoxGeometry(0.8, 0.1, 0.1); const barMat = new THREE.MeshStandardMaterial({ color: 0xff3333 });
+            const healthBar = new THREE.Mesh(barGeo, barMat); group.add(healthBar); healthBar.position.y = 1.0;
+            const unit = new RTSUnit(Date.now(), type==='profit'?'Profit Prime':(type==='love'?'Love Weaver':'Tax Collector'), type, x, z, false, false, true);
+            unit.model = group; unit.healthBar = healthBar; playerUnits.push(unit); return unit;
+        }
+
+        function spawnCreeps() { for (let i=0; i<5; i++) { const x = (Math.random() - 0.5) * 120; const z = (Math.random() - 0.5) * 120; const y = getHeight(x, z) + 0.5; const group = new THREE.Group(); const body = new THREE.Mesh(new THREE.SphereGeometry(0.4, 8, 8), new THREE.MeshStandardMaterial({ color: 0xaa8866 })); body.position.y = 0.4; group.add(body); const head = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.4, 6), new THREE.MeshStandardMaterial({ color: 0xccaa88 })); head.position.y = 0.85; group.add(head); group.position.set(x, y, z); group.castShadow = true; scene.add(group); const creep = new RTSUnit(Date.now()+i, 'Wild Soul', 'neutral', x, z, true, false, false); creep.model = group; creep.health = 60; creep.maxHealth = 60; creep.damage = 8; const barGeo = new THREE.BoxGeometry(0.6, 0.1, 0.1); const barMat = new THREE.MeshStandardMaterial({ color: 0xff3333 }); const healthBar = new THREE.Mesh(barGeo, barMat); group.add(healthBar); healthBar.position.y = 0.9; creep.healthBar = healthBar; neutralCreeps.push(creep); } }
+
+        function generateTerrain() { const preset = QUALITY[currentQuality]; const geometry = new THREE.PlaneGeometry(160, 160, preset.terrainSegments, preset.terrainSegments); geometry.rotateX(-Math.PI/2); const positions = geometry.attributes.position.array; for (let i = 0; i < positions.length/3; i++) { const x = positions[i*3]; const z = positions[i*3+2]; positions[i*3+1] = getHeight(x, z); } geometry.computeVertexNormals(); const material = new THREE.MeshStandardMaterial({ color: 0x7c9c5e, roughness: 0.7, metalness: 0.1 }); return new THREE.Mesh(geometry, material); }
+        function addVegetation() { const preset = QUALITY[currentQuality]; const grassMat = new THREE.MeshStandardMaterial({ color: 0x6a994e }); for (let i = 0; i < preset.grassCount; i++) { const x = (Math.random() - 0.5) * 140; const z = (Math.random() - 0.5) * 140; const y = getHeight(x, z); if (y > 0.5 && y < 3.5 && Math.abs(x) < 70 && Math.abs(z) < 70) { const blade = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 0.2, 3), grassMat); blade.position.set(x, y, z); blade.castShadow = true; scene.add(blade); } } }
+        function addTrees() { const preset = QUALITY[currentQuality]; const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8B5A2B }); const foliageMat = new THREE.MeshStandardMaterial({ color: 0x5a8f4c }); for (let i = 0; i < preset.treeCount; i++) { const x = (Math.random() - 0.5) * 130; const z = (Math.random() - 0.5) * 130; const y = getHeight(x, z); if (y > 0.8 && y < 3.0 && Math.abs(x) < 65 && Math.abs(z) < 65) { const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 0.8, 4), trunkMat); trunk.position.set(x, y, z); trunk.castShadow = true; scene.add(trunk); const foliage = new THREE.Mesh(new THREE.ConeGeometry(0.65, 1.0, 6), foliageMat); foliage.position.set(x, y + 0.7, z); foliage.castShadow = true; scene.add(foliage); } } }
+        function addResources() { const goldMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 }); const loveMat = new THREE.MeshStandardMaterial({ color: 0xff88aa, emissive: 0x441122 }); const taxMat = new THREE.MeshStandardMaterial({ color: 0x88aaff, emissive: 0x224466 }); for (let i = 0; i < QUALITY[currentQuality].resourceCount; i++) { const x = (Math.random() - 0.5) * 130; const z = (Math.random() - 0.5) * 130; const y = getHeight(x, z) + 0.1; const r = Math.random(); let mesh, mat, type; if (r < 0.33) { mat = goldMat; mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(0.18, 0), mat); type = 'profit'; } else if (r < 0.66) { mat = loveMat; mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(0.16), mat); type = 'love'; } else { mat = taxMat; mesh = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.3, 5), mat); type = 'tax'; } mesh.position.set(x, y, z); mesh.userData = { type, value: 5 }; mesh.castShadow = true; scene.add(mesh); resources.push(mesh); } }
+
+        class Building {
+            constructor(type, x, z, isEnemy = false) { this.type = type; this.x = x; this.z = z; this.isEnemy = isEnemy; this.size = 1.5; this.health = 500; this.maxHealth = 500; this.mesh = null; this.underConstruction = true; this.constructionProgress = 0; this.requiredWork = 100; this.completed = false; this.productionQueue = []; this.productionTimer = 0; this.attackCooldown = 0; }
+            update(delta) {
+                if (!this.completed && this.underConstruction) { this.constructionProgress += delta * 20; if (this.constructionProgress >= this.requiredWork) { this.completed = true; this.underConstruction = false; if (this.type === 'forge' && !this.isEnemy) techs.forge = true; if (this.type === 'market' && !this.isEnemy) techs.market = true; if (this.type === 'barracks' && !this.isEnemy) techs.barracks = true; if (this.type === 'farm' && !this.isEnemy) techs.farm = true; if (this.type === 'blacksmith' && !this.isEnemy) techs.blacksmith = true; if (this.type === 'magetower' && !this.isEnemy) techs.magetower = true; if (this.type === 'heroic' && !this.isEnemy) techs.heroic = true; if (this.mesh) this.mesh.material.color.setHex(0x88aa66); playSound('build'); } }
+                if (this.completed && this.type === 'barracks' && !this.isEnemy && this.productionQueue.length > 0) { this.productionTimer += delta; if (this.productionTimer >= 3.0) { this.productionTimer = 0; let order = this.productionQueue.shift(); let newUnit = createUnit(order.type, this.x + (Math.random()-0.5)*2, this.z + (Math.random()-0.5)*2, false, order.ranged); newUnit.giveOrder('move', {x:this.x+1, z:this.z+1}); } }
+                if (this.completed && this.type === 'farm' && !this.isEnemy) { this.productionTimer += delta; if (this.productionTimer >= 5.0) { this.productionTimer = 0; playerResources.profit += 10; playerResources.love += 10; playerResources.tax += 10; updateUI(); } }
+                if (this.completed && this.type === 'heroic' && !this.isEnemy && !heroes.profitPrime && playerResources.profit>=300 && playerResources.love>=300 && playerResources.tax>=300) { heroes.profitPrime = createHero('profit', this.x+1, this.z+1); playerResources.profit -= 300; playerResources.love -= 300; playerResources.tax -= 300; updateUI(); }
+                if (this.completed && this.type === 'tower' && !this.isEnemy) { this.attackCooldown -= delta; if (this.attackCooldown <= 0) { let closest = null, minDist = Infinity; for (let u of enemyUnits) { let d = Math.hypot(u.x - this.x, u.z - this.z); if (d < minDist && d < 8) { minDist = d; closest = u; } } if (closest) { closest.health -= 20; this.attackCooldown = 1.0; if (closest.health <= 0) closest.destroy(); else if (closest.healthBar) closest.healthBar.scale.x = closest.health / closest.maxHealth; } } }
+            }
+            addToQueue(type, isRanged = false) { if (!this.completed || this.isEnemy) return false; let cost = 50; if (playerResources.profit >= cost && playerResources.love >= cost && playerResources.tax >= cost) { playerResources.profit -= cost; playerResources.love -= cost; playerResources.tax -= cost; this.productionQueue.push({type:type, ranged:isRanged}); updateUI(); return true; } return false; }
+            destroy() { scene.remove(this.mesh); if (this.isEnemy) enemyBuildings = enemyBuildings.filter(b => b !== this); else playerBuildings = playerBuildings.filter(b => b !== this); }
+        }
+
+        function createBuilding(type, x, z, isEnemy = false) { const building = new Building(type, x, z, isEnemy); const colors = { townhall:0xaa8866, forge:0xcc8844, market:0x88aa66, barracks:0x8866aa, farm:0x6a994e, wall:0xaaaaaa, tower:0xaa8866, blacksmith:0x886633, magetower:0x6688aa, heroic:0xffaa66 }; const material = new THREE.MeshStandardMaterial({ color: colors[type] || 0xaaaaaa }); let mesh; if (type === 'wall') mesh = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.0, 0.3), material); else if (type === 'tower') mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.8, 1.5, 6), material); else if (type === 'heroic') mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.9, 1.2, 8), material); else mesh = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.2, 1.5), material); mesh.position.set(x, getHeight(x,z)+ (type==='tower'?0.8:0.6), z); mesh.castShadow = true; scene.add(mesh); building.mesh = mesh; (isEnemy ? enemyBuildings : playerBuildings).push(building); return building; }
+        function createUnit(type, x, z, isEnemy = false, isRanged = false) { const group = new THREE.Group(); const bodyMat = new THREE.MeshStandardMaterial({ color: type==='profit'?0xffaa44 : type==='love'?0xff88aa : 0x88aaff }); const body = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.45, 0.8, 6), bodyMat); body.position.y = 0.4; group.add(body); const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), new THREE.MeshStandardMaterial({ color: 0xddbb99 })); head.position.y = 0.85; group.add(head); const armMat = new THREE.MeshStandardMaterial({ color: 0xccaa88 }); const leftArm = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.6, 4), armMat); leftArm.position.set(-0.5, 0.65, 0); leftArm.rotation.z = 0.3; const rightArm = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.6, 4), armMat); rightArm.position.set(0.5, 0.65, 0); rightArm.rotation.z = -0.3; group.add(leftArm); group.add(rightArm); if (isRanged) { const bow = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.05, 4, 12), armMat); bow.rotation.x = Math.PI/2; bow.position.set(0.6, 0.7, 0.2); group.add(bow); } else { const sword = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 0.6, 4), new THREE.MeshStandardMaterial({ color: 0xccccdd })); sword.position.set(0.6, 0.7, 0.2); group.add(sword); } const y = getHeight(x, z) + 0.5; group.position.set(x, y, z); group.castShadow = true; scene.add(group); const barGeo = new THREE.BoxGeometry(0.6, 0.1, 0.1); const barMat = new THREE.MeshStandardMaterial({ color: 0xff3333 }); const healthBar = new THREE.Mesh(barGeo, barMat); group.add(healthBar); healthBar.position.y = 0.9; const unit = new RTSUnit(Date.now()+Math.random(), 'Soul', type, x, z, isEnemy, isRanged); unit.model = group; unit.healthBar = healthBar; (isEnemy ? enemyUnits : playerUnits).push(unit); return unit; }
+
+        const GRID_SIZE = 0.5;
+        function getNeighbors(x, z, isEnemy) { let neighbors = []; for (let dx = -1; dx<=1; dx++) { for (let dz = -1; dz<=1; dz++) { if (dx===0 && dz===0) continue; let nx = x + dx*GRID_SIZE, nz = z + dz*GRID_SIZE; let walkable = true; let buildings = isEnemy ? enemyBuildings : playerBuildings; for (let b of buildings) { if (Math.abs(b.x - nx) < b.size/2 && Math.abs(b.z - nz) < b.size/2) walkable = false; } if (walkable && Math.abs(nx)<80 && Math.abs(nz)<80) neighbors.push({x:nx, z:nz, cost:1}); } } return neighbors; }
+        function aStar(start, goal, isEnemy = false) { let openSet = [{x:start.x, z:start.z, g:0, h:Math.hypot(start.x-goal.x, start.z-goal.z), f:Math.hypot(start.x-goal.x, start.z-goal.z), parent:null}]; let closedSet = new Set(); while (openSet.length) { openSet.sort((a,b)=>a.f-b.f); let current = openSet.shift(); let key = `${Math.floor(current.x/GRID_SIZE)},${Math.floor(current.z/GRID_SIZE)}`; if (closedSet.has(key)) continue; if (Math.hypot(current.x-goal.x, current.z-goal.z) < 0.8) { let path = []; let cur = current; while (cur) { path.unshift({x:cur.x, z:cur.z}); cur = cur.parent; } return path; } closedSet.add(key); let neighbors = getNeighbors(current.x, current.z, isEnemy); for (let nb of neighbors) { let newKey = `${Math.floor(nb.x/GRID_SIZE)},${Math.floor(nb.z/GRID_SIZE)}`; if (closedSet.has(newKey)) continue; let g = current.g + nb.cost, h = Math.hypot(nb.x-goal.x, nb.z-goal.z), f = g + h; let existing = openSet.find(n => n.x===nb.x && n.z===nb.z); if (!existing || g < existing.g) openSet.push({x:nb.x, z:nb.z, g, h, f, parent:current}); } } return []; }
+
+        function updateEnemyAI(delta) { enemyAI.attackCooldown -= delta; enemyAI.buildCooldown -= delta; if (enemyAI.buildCooldown <= 0 && enemyBuildings.length < 6) { let townHall = enemyBuildings.find(b => b.type === 'townhall'); if (townHall) { let angle = Math.random() * Math.PI * 2, rad = 3 + Math.random() * 3, nx = townHall.x + Math.cos(angle) * rad, nz = townHall.z + Math.sin(angle) * rad, type = ['barracks','forge','market','farm','blacksmith'][Math.floor(Math.random()*5)]; createBuilding(type, nx, nz, true); enemyAI.buildCooldown = 15; } } if (enemyAI.attackCooldown <= 0 && enemyUnits.length > 3) { let target = playerBuildings[0]; if (target) { for (let u of enemyUnits) u.giveOrder('attack', target); } enemyAI.attackCooldown = 20; } }
+        function createVillage(soulsList, centerX, centerZ) { const village = { id:Date.now(), name:"Your Village", centerX, centerZ, members:soulsList.map(s=>s.id), heartLevel:1, sharedStorage:{ profitShards:0, lovePetals:0, taxCrystals:0 } }; villages.push(village); const heart = new THREE.Mesh(new THREE.CylinderGeometry(0.8,0.8,0.5,8), new THREE.MeshStandardMaterial({ color:0xffaa66 })); heart.position.set(centerX, getHeight(centerX,centerZ)+0.3, centerZ); scene.add(heart); village.heartMesh = heart; }
+        function showVillage(village) { /* stub */ }
+        function updateUI() { document.getElementById('profitVal').innerText = Math.floor(playerResources.profit); document.getElementById('loveVal').innerText = Math.floor(playerResources.love); document.getElementById('taxVal').innerText = Math.floor(playerResources.tax); }
+        function updateSelectionDisplay() { document.getElementById('selection-panel').innerHTML = `Selected: ${selectedUnits.size} soul${selectedUnits.size!==1?'s':''}`; }
+        function updateTechTreeUI() { const container = document.getElementById('techTreeContent'); container.innerHTML = `<div>Forge: ${techs.forge?'✅':'🔒'}</div><div>Market: ${techs.market?'✅':'🔒'}</div><div>Barracks: ${techs.barracks?'✅':'🔒'}</div><div>Farm: ${techs.farm?'✅':'🔒'}</div><div>Blacksmith: ${techs.blacksmith?'✅':'🔒'}</div><div>Mage Tower: ${techs.magetower?'✅':'🔒'}</div><div>Heroic Monument: ${techs.heroic?'✅':'🔒'}</div><button id="trainMeleeBtn" ${!techs.barracks?'disabled':''}>Train Melee (50)</button><button id="trainRangedBtn" ${!techs.barracks?'disabled':''}>Train Ranged (50)</button><button id="upgradeMeleeBtn" ${!techs.blacksmith?'disabled':''}>+Melee Dmg (100)</button><button id="upgradeRangedBtn" ${!techs.magetower?'disabled':''}>+Ranged Dmg (100)</button><button id="upgradeArmorBtn" ${!techs.blacksmith?'disabled':''}>+Armor (100)</button><button id="upgradeSpeedBtn" ${!techs.magetower?'disabled':''}>+Attack Speed (100)</button>`; document.getElementById('trainMeleeBtn')?.addEventListener('click',()=>{ let b=playerBuildings.find(b=>b.type==='barracks'); if(b) b.addToQueue('profit',false); else alert("Build Barracks first!"); }); document.getElementById('trainRangedBtn')?.addEventListener('click',()=>{ let b=playerBuildings.find(b=>b.type==='barracks'); if(b) b.addToQueue('profit',true); else alert("Build Barracks first!"); }); document.getElementById('upgradeMeleeBtn')?.addEventListener('click',()=>{ if(playerResources.profit>=100 && playerResources.love>=100 && playerResources.tax>=100){ playerResources.profit-=100; playerResources.love-=100; playerResources.tax-=100; upgrades.meleeDamage++; for(let u of playerUnits) if(!u.isRanged) u.damage+=5; updateUI(); updateTechTreeUI(); } else alert("Need 100 of each"); }); document.getElementById('upgradeRangedBtn')?.addEventListener('click',()=>{ if(playerResources.profit>=100 && playerResources.love>=100 && playerResources.tax>=100){ playerResources.profit-=100; playerResources.love-=100; playerResources.tax-=100; upgrades.rangedDamage++; for(let u of playerUnits) if(u.isRanged) u.damage+=5; updateUI(); updateTechTreeUI(); } }); document.getElementById('upgradeArmorBtn')?.addEventListener('click',()=>{ if(playerResources.profit>=100 && playerResources.love>=100 && playerResources.tax>=100){ playerResources.profit-=100; playerResources.love-=100; playerResources.tax-=100; upgrades.armor++; for(let u of playerUnits) u.armor++; updateUI(); updateTechTreeUI(); } }); document.getElementById('upgradeSpeedBtn')?.addEventListener('click',()=>{ if(playerResources.profit>=100 && playerResources.love>=100 && playerResources.tax>=100){ playerResources.profit-=100; playerResources.love-=100; playerResources.tax-=100; upgrades.attackSpeed++; for(let u of playerUnits) u.attackCooldownMax = 1.0 / (1 + upgrades.attackSpeed*0.2); updateUI(); updateTechTreeUI(); } }); }
+        function updateMinimap() { if (!minimapCtx) return; const canvas = document.getElementById('minimapCanvas'); const ctx = minimapCtx; ctx.fillStyle = '#000000'; ctx.fillRect(0,0,canvas.width,canvas.height); const scaleX = canvas.width / MAP_SIZE, scaleZ = canvas.height / MAP_SIZE; for (let x=0; x<FOG_CELLS; x++) for (let z=0; z<FOG_CELLS; z++) { if (exploredGrid[x][z]) { ctx.fillStyle = '#223322'; ctx.fillRect(x*cellSize*scaleX, z*cellSize*scaleZ, cellSize*scaleX, cellSize*scaleZ); if (fogGrid[x][z]) ctx.fillStyle = '#88ff88'; else ctx.fillStyle = '#446644'; ctx.fillRect(x*cellSize*scaleX, z*cellSize*scaleZ, cellSize*scaleX, cellSize*scaleZ); } } ctx.fillStyle = '#ffaa44'; for (let r of resources) if (isVisible(r.position.x, r.position.z)) { let x = (r.position.x + MAP_SIZE/2)*scaleX; let z = (r.position.z + MAP_SIZE/2)*scaleZ; ctx.fillRect(x-1,z-1,2,2); } ctx.fillStyle = '#88ff88'; for (let b of playerBuildings) if (isVisible(b.x, b.z)) { let x = (b.x + MAP_SIZE/2)*scaleX; let z = (b.z + MAP_SIZE/2)*scaleZ; ctx.fillRect(x-2,z-2,4,4); } ctx.fillStyle = '#ff8888'; for (let b of enemyBuildings) if (isVisible(b.x, b.z)) { let x = (b.x + MAP_SIZE/2)*scaleX; let z = (b.z + MAP_SIZE/2)*scaleZ; ctx.fillRect(x-2,z-2,4,4); } for (let u of playerUnits) if (isVisible(u.x, u.z)) { let x = (u.x + MAP_SIZE/2)*scaleX; let z = (u.z + MAP_SIZE/2)*scaleZ; ctx.fillRect(x-1,z-1,2,2); } for (let u of enemyUnits) if (isVisible(u.x, u.z)) { let x = (u.x + MAP_SIZE/2)*scaleX; let z = (u.z + MAP_SIZE/2)*scaleZ; ctx.fillRect(x-1,z-1,2,2); } }
+
+        let raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
+        let dragStart = null, selectionRectActive = false, selectionRectElem = null;
+        function onMouseDown(event) { if (buildingMode) { const rect = renderer.domElement.getBoundingClientRect(); mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1; mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1; raycaster.setFromCamera(mouse, camera); const intersects = raycaster.intersectObject(terrain); if (intersects.length > 0) { let point = intersects[0].point; let cost = { townhall:200, forge:150, market:120, barracks:180, farm:100, wall:50, tower:200, blacksmith:250, magetower:300, heroic:400 }[buildingType]; if (playerResources.profit >= cost && playerResources.love >= cost && playerResources.tax >= cost) { playerResources.profit -= cost; playerResources.love -= cost; playerResources.tax -= cost; createBuilding(buildingType, point.x, point.z, false); updateUI(); } else alert("Not enough resources!"); } buildingMode = false; if (ghostBuilding) scene.remove(ghostBuilding); ghostBuilding = null; return; } dragStart = { x: event.clientX, y: event.clientY }; selectionRectActive = true; if (!selectionRectElem) { selectionRectElem = document.createElement('div'); selectionRectElem.className = 'selection-rect'; document.body.appendChild(selectionRectElem); } }
+        function onMouseMove(event) { if (!selectionRectActive) return; let left = Math.min(dragStart.x, event.clientX), top = Math.min(dragStart.y, event.clientY); let width = Math.abs(event.clientX - dragStart.x), height = Math.abs(event.clientY - dragStart.y); selectionRectElem.style.left = left + 'px'; selectionRectElem.style.top = top + 'px'; selectionRectElem.style.width = width + 'px'; selectionRectElem.style.height = height + 'px'; selectionRectElem.style.display = 'block'; }
+        function onMouseUp(event) { if (!selectionRectActive) { const rect = renderer.domElement.getBoundingClientRect(); mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1; mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1; raycaster.setFromCamera(mouse, camera); const intersects = raycaster.intersectObjects(playerUnits.map(u => u.model)); if (intersects.length > 0) { let unit = playerUnits.find(u => u.model === intersects[0].object); if (unit) { if (!shiftPressed) selectedUnits.clear(); selectedUnits.add(unit); playSound('select'); } else if (!shiftPressed) selectedUnits.clear(); } else if (!shiftPressed) selectedUnits.clear(); updateSelectionDisplay(); selectionRectActive = false; if (selectionRectElem) selectionRectElem.style.display = 'none'; return; } let minX = Math.min(dragStart.x, event.clientX), maxX = Math.max(dragStart.x, event.clientX); let minY = Math.min(dragStart.y, event.clientY), maxY = Math.max(dragStart.y, event.clientY); const rect = renderer.domElement.getBoundingClientRect(); const width = rect.width, height = rect.height; let newSelection = new Set(); for (let unit of playerUnits) { let screenPos = unit.model.position.clone().project(camera); let x = (screenPos.x * 0.5 + 0.5) * width + rect.left, y = (-screenPos.y * 0.5 + 0.5) * height + rect.top; if (x >= minX && x <= maxX && y >= minY && y <= maxY) newSelection.add(unit); } if (!shiftPressed) selectedUnits.clear(); for (let u of newSelection) selectedUnits.add(u); updateSelectionDisplay(); selectionRectActive = false; if (selectionRectElem) selectionRectElem.style.display = 'none'; }
+        function onRightClick(event) { event.preventDefault(); if (selectedUnits.size === 0) return; const rect = renderer.domElement.getBoundingClientRect(); mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1; mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1; raycaster.setFromCamera(mouse, camera); let intersects = raycaster.intersectObjects(enemyUnits.map(u => u.model)); if (intersects.length > 0) { let target = enemyUnits.find(u => u.model === intersects[0].object); if (target) { for (let u of selectedUnits) u.giveOrder('attack', target); return; } } intersects = raycaster.intersectObjects(resources); if (intersects.length > 0) { for (let u of selectedUnits) u.giveOrder('gather', intersects[0].object); return; } intersects = raycaster.intersectObject(terrain); if (intersects.length > 0) { let point = intersects[0].point; for (let u of selectedUnits) u.giveOrder('move', {x:point.x, z:point.z}); } }
+        function startBuilding(type) { buildingMode = true; buildingType = type; if (ghostBuilding) scene.remove(ghostBuilding); const geometry = new THREE.BoxGeometry(1.5, 1.2, 1.5), material = new THREE.MeshStandardMaterial({ color: 0x88ff88, transparent: true, opacity: 0.5 }); ghostBuilding = new THREE.Mesh(geometry, material); scene.add(ghostBuilding); const onMouseMoveGhost = (e) => { const rect = renderer.domElement.getBoundingClientRect(); mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1; mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1; raycaster.setFromCamera(mouse, camera); const intersects = raycaster.intersectObject(terrain); if (intersects.length) { let point = intersects[0].point; ghostBuilding.position.set(point.x, getHeight(point.x, point.z)+0.6, point.z); } }; renderer.domElement.addEventListener('mousemove', onMouseMoveGhost); const finishBuilding = () => { renderer.domElement.removeEventListener('mousemove', onMouseMoveGhost); document.removeEventListener('click', finishBuilding); }; document.addEventListener('click', finishBuilding, { once: true }); }
+        function showPantheon() { const modal = document.getElementById('pantheonModal'); modal.style.display = 'block'; document.getElementById('pantheonContent').innerHTML = `<p>The Pantheon gods watch.</p><button id="blessProfit">Profit Bless (100)</button><button id="blessLove">Love Bless (100)</button><button id="blessTax">Tax Bless (100)</button>`; document.getElementById('blessProfit')?.addEventListener('click',()=>{ if(playerResources.profit>=100 && playerResources.love>=100 && playerResources.tax>=100){ playerResources.profit-=100; playerResources.love-=100; playerResources.tax-=100; for(let u of playerUnits) if(u.type==='profit') u.damage+=5; updateUI(); alert("Blessed!"); } }); document.getElementById('blessLove')?.addEventListener('click',()=>{ if(playerResources.profit>=100 && playerResources.love>=100 && playerResources.tax>=100){ playerResources.profit-=100; playerResources.love-=100; playerResources.tax-=100; for(let u of playerUnits) if(u.type==='love') u.damage+=5; updateUI(); alert("Blessed!"); } }); document.getElementById('blessTax')?.addEventListener('click',()=>{ if(playerResources.profit>=100 && playerResources.love>=100 && playerResources.tax>=100){ playerResources.profit-=100; playerResources.love-=100; playerResources.tax-=100; for(let u of playerUnits) if(u.type==='tax') u.damage+=5; updateUI(); alert("Blessed!"); } }); }
+
+        document.getElementById('moveBtn').addEventListener('click', () => { currentOrderType = 'move'; alert('Tap on ground to move selected units'); });
+        document.getElementById('attackBtn').addEventListener('click', () => { currentOrderType = 'attack'; alert('Tap on enemy to attack'); });
+        document.getElementById('gatherBtn').addEventListener('click', () => { currentOrderType = 'gather'; alert('Tap on resource to gather'); });
+        document.getElementById('stopBtn').addEventListener('click', () => { for (let u of selectedUnits) { u.state = 'idle'; u.targetPos = null; u.targetUnit = null; } });
+        document.getElementById('heroBtn').addEventListener('click', () => { if (techs.heroic && !heroes.profitPrime) alert('Build Heroic Monument and have enough resources to summon a hero.'); else if (heroes.profitPrime) alert('Hero already summoned!'); else alert('Need Heroic Monument first.'); });
+        document.getElementById('soundBtn').addEventListener('click', () => { if (!soundEnabled) { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); soundEnabled = true; document.getElementById('soundBtn').innerHTML = '🔊 Sound On'; playSound('select'); } else { soundEnabled = false; document.getElementById('soundBtn').innerHTML = '🔇 Sound Off'; } });
+
+        function init() {
+            scene = new THREE.Scene(); scene.background = new THREE.Color(0x87CEEB);
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200); camera.position.set(0, 12, 18);
+            renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.shadowMap.enabled = QUALITY[currentQuality].shadows;
+            document.body.appendChild(renderer.domElement);
+            controls = new OrbitControls(camera, renderer.domElement); controls.enableZoom = true; controls.enablePan = true; controls.enableRotate = true; controls.target.set(0,0,0);
+            const ambient = new THREE.AmbientLight(0x404060, 0.6); scene.add(ambient);
+            const sunLight = new THREE.DirectionalLight(0xffdd99, 0.8); sunLight.position.set(10, 15, 5); if (QUALITY[currentQuality].shadows) sunLight.castShadow = true; scene.add(sunLight);
+            const fillLight = new THREE.PointLight(0xccaa88, 0.4); fillLight.position.set(0, 3, 0); scene.add(fillLight);
+            terrain = generateTerrain(); scene.add(terrain); addVegetation(); addTrees(); addResources(); spawnCreeps();
+            createUnit('profit', -2, -2, false, false); createUnit('love', 2, -1, false, false); createUnit('tax', -1, 2, false, true);
+            createBuilding('townhall', 0, 0, false);
+            createUnit('profit', 30, 30, true, false); createUnit('love', 32, 31, true, false); createUnit('tax', 31, 32, true, true);
+            createBuilding('townhall', 30, 30, true); createBuilding('barracks', 32, 32, true);
+            createVillage(playerUnits.slice(0,3), 0, 0);
+            initFog(); minimapCtx = document.getElementById('minimapCanvas').getContext('2d');
+            setInterval(updateMinimap, 200);
+            setInterval(() => { for (let u of playerUnits) updateFog(u.x, u.z); for (let b of playerBuildings) updateFog(b.x, b.z); }, 500);
+            renderer.domElement.addEventListener('mousedown', onMouseDown); renderer.domElement.addEventListener('mousemove', onMouseMove); renderer.domElement.addEventListener('mouseup', onMouseUp); renderer.domElement.addEventListener('contextmenu', onRightClick);
+            window.addEventListener('keydown', (e) => { if (e.shiftKey) shiftPressed = true; });
+            window.addEventListener('keyup', (e) => { if (e.key === 'Shift') shiftPressed = false; });
+            document.getElementById('techTreeBtn').onclick = () => { let panel = document.getElementById('tech-tree-panel'); panel.style.display = panel.style.display === 'none' ? 'block' : 'none'; updateTechTreeUI(); };
+            document.getElementById('closeTechTree').onclick = () => document.getElementById('tech-tree-panel').style.display = 'none';
+            document.querySelectorAll('.build-btn').forEach(btn => btn.addEventListener('click', () => startBuilding(btn.dataset.building)));
+            document.getElementById('villageBtn').onclick = () => { if (villages.length) showVillage(villages[0]); else alert("No villages yet."); };
+            document.getElementById('pantheonBtn').onclick = showPantheon;
+            document.getElementById('closePantheonModal').onclick = () => document.getElementById('pantheonModal').style.display = 'none';
+            document.getElementById('closePantheon').onclick = () => document.getElementById('pantheonModal').style.display = 'none';
+            document.getElementById('closeVillageModal').onclick = () => document.getElementById('villageModal').style.display = 'none';
+            document.getElementById('closeVillage').onclick = () => document.getElementById('villageModal').style.display = 'none';
+            updateUI();
+            let lastFrame = performance.now();
+            function animate() { let now = performance.now(); let delta = Math.min(0.033, (now - lastFrame) / 1000); lastFrame = now; for (let u of playerUnits) u.update(delta); for (let u of enemyUnits) u.update(delta); for (let u of neutralCreeps) u.update(delta); for (let b of playerBuildings) b.update(delta); for (let b of enemyBuildings) b.update(delta); updateEnemyAI(delta); renderer.render(scene, camera); requestAnimationFrame(animate); }
+            animate();
+        }
+        init();
+    </script>
+</body>
+</html>
