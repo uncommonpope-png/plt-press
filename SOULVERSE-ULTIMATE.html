@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🌌 SOULVERSE ULTIMATE | Open World • Factions • Creatures • Homes | PLT Press</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+        body { background:#000; overflow:hidden; font-family:'Courier New', monospace; }
+        canvas { display:block; width:100%; height:100%; }
+        
+        /* UI Overlay */
+        #ui { position:absolute; bottom:20px; left:20px; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); border-radius:12px; padding:8px 12px; color:#ffaa66; font-size:11px; pointer-events:none; z-index:10; }
+        #top-bar { position:absolute; top:20px; left:0; right:0; display:flex; justify-content:center; gap:12px; z-index:30; pointer-events:auto; flex-wrap:wrap; }
+        .top-btn { background:#ffaa66; border:none; color:#000; font-weight:bold; padding:8px 18px; border-radius:30px; cursor:pointer; font-family:monospace; transition:0.2s; }
+        .top-btn:hover { transform:scale(1.02); box-shadow:0 0 12px #ffaa66; }
+        #resources { position:absolute; top:20px; right:20px; background:rgba(0,0,0,0.6); border-radius:12px; padding:8px 12px; color:#ffaa66; font-size:11px; text-align:right; pointer-events:none; z-index:10; }
+        #touch-panel { position:absolute; bottom:20px; right:20px; display:flex; gap:8px; z-index:20; }
+        .touch-btn { background:#ffaa66; border:none; color:#000; font-weight:bold; padding:8px 16px; border-radius:30px; font-family:monospace; font-size:12px; }
+        .touch-btn.secondary { background:#2a2a3a; color:#ffaa66; border:1px solid #ffaa66; }
+        .joystick-area { position:absolute; bottom:80px; left:20px; width:100px; height:100px; background:rgba(0,0,0,0.4); border-radius:50px; touch-action:none; z-index:20; }
+        .look-area { position:absolute; top:0; left:0; right:0; bottom:0; touch-action:none; z-index:5; }
+        #quality-select { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.6); border-radius:20px; padding:6px 12px; font-size:10px; color:#ffaa66; pointer-events:auto; z-index:30; }
+        select { background:#2a2a3a; color:#ffaa66; border:1px solid #ffaa66; border-radius:12px; padding:4px 8px; }
+        .interaction-prompt { position:absolute; bottom:120px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); color:#ffaa66; padding:6px 12px; border-radius:20px; font-size:12px; pointer-events:none; z-index:50; white-space:nowrap; display:none; }
+        
+        /* Modals */
+        .modal { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.95); backdrop-filter:blur(16px); border:2px solid #ffaa66; border-radius:24px; padding:20px; z-index:200; display:none; pointer-events:auto; min-width:320px; max-width:90vw; max-height:85vh; overflow-y:auto; }
+        .modal h3 { color:#ffaa66; margin-bottom:15px; text-align:center; }
+        .modal-close { float:right; background:none; border:none; color:#ffaa66; font-size:20px; cursor:pointer; }
+        .modal button { margin:5px; padding:8px 16px; background:#ffaa66; border:none; border-radius:30px; font-weight:bold; cursor:pointer; font-family:monospace; }
+        
+        /* Dashboard Panels */
+        #dashboard { position:absolute; top:80px; left:20px; right:20px; display:flex; gap:15px; z-index:40; pointer-events:none; }
+        .dash-panel { background:rgba(0,0,0,0.85); backdrop-filter:blur(12px); border:2px solid rgba(255,170,102,0.5); border-radius:16px; padding:12px; flex:1; min-width:200px; pointer-events:auto; max-height:60vh; overflow-y:auto; }
+        .dash-panel h4 { color:#ffaa66; font-size:12px; margin-bottom:8px; border-bottom:1px solid rgba(255,170,102,0.3); padding-bottom:4px; }
+        .dash-item { background:rgba(255,170,102,0.1); border-radius:8px; padding:6px; margin:4px 0; font-size:10px; cursor:pointer; transition:0.2s; }
+        .dash-item:hover { background:rgba(255,170,102,0.25); }
+        
+        /* Ticker */
+        #ticker { position:absolute; bottom:100px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.85); backdrop-filter:blur(12px); border:2px solid rgba(255,170,102,0.5); border-radius:30px; padding:8px 16px; min-width:400px; max-width:80vw; z-index:150; pointer-events:auto; }
+        #tickerFeed { height:50px; overflow-y:auto; font-size:10px; color:#ffdd99; }
+        .ticker-item { padding:3px 0; border-bottom:1px solid rgba(255,170,102,0.2); }
+        
+        /* Inventory Grid */
+        .inventory-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:10px 0; }
+        .inv-item { background:#2a2a3a; border-radius:12px; padding:5px; font-size:10px; text-align:center; }
+        
+        /* Garden */
+        .garden-plot { margin:10px 0; padding:8px; background:#2a2a3a; border-radius:12px; }
+        
+        /* Creature Card */
+        .creature-card { background:rgba(100,170,255,0.1); border:1px solid #64aaff; border-radius:12px; padding:10px; margin:6px 0; }
+        .creature-name { font-weight:bold; color:#64aaff; font-size:11px; }
+        .creature-stats { font-size:9px; color:#88ccff; margin-top:4px; }
+        
+        /* Faction Card */
+        .faction-card { background:rgba(255,170,102,0.1); border-left:3px solid #ffaa66; border-radius:8px; padding:8px; margin:6px 0; }
+        .faction-name { font-weight:bold; color:#ffdd99; font-size:11px; }
+        .faction-rep { font-size:9px; color:#ffaa66; margin-top:4px; }
+        
+        @media (max-width:768px) {
+            .top-btn { padding:6px 12px; font-size:10px; }
+            #dashboard { flex-direction:column; top:70px; }
+            .dash-panel { max-height:40vh; }
+            #ticker { bottom:80px; min-width:90%; }
+        }
+    </style>
+</head>
+<body>
+    <div id="ui">🌌 SOULVERSE ULTIMATE</div>
+    
+    <div id="top-bar">
+        <button class="top-btn" onclick="app.showDashboard()">📊 DASHBOARD</button>
+        <button class="top-btn" onclick="app.exploreWorld()">🗺️ EXPLORE</button>
+        <button class="top-btn" onclick="app.showFactions()">🏛️ FACTIONS</button>
+        <button class="top-btn" onclick="app.showCreatures()">🐾 CREATURES</button>
+        <button class="top-btn" onclick="app.enterLadder()">🏆 TOWER</button>
+        <button class="top-btn" onclick="app.toggleHomes()">🏠 HOMES</button>
+    </div>
+    
+    <div id="resources">
+        💰 Profit: <span id="profitVal">100</span><br>
+        ❤️ Love: <span id="loveVal">100</span><br>
+        ⚖️ Tax: <span id="taxVal">100</span><br>
+        <span style="color:#64aaff">Level: <span id="levelVal">1</span></span>
+    </div>
+    
+    <div id="dashboard"></div>
+    
+    <div id="ticker">
+        <div style="color:#ffaa66; font-size:9px; margin-bottom:4px;">📡 SOUL TICKER</div>
+        <div id="tickerFeed"><div class="ticker-item">🌌 Soulverse Ultimate initialized...</div></div>
+    </div>
+    
+    <div id="touch-panel">
+        <button id="jumpBtn" class="touch-btn">JUMP</button>
+        <button id="sprintBtn" class="touch-btn secondary">SPRINT</button>
+        <button id="interactBtn" class="touch-btn">⚔️ BATTLE</button>
+        <button id="catchBtn" class="touch-btn secondary">🔵 CATCH</button>
+    </div>
+    
+    <div class="joystick-area" id="joystickArea"></div>
+    <div class="look-area" id="lookArea"></div>
+    
+    <div id="quality-select">
+        🎨 Quality
+        <select id="quality" onchange="app.changeQuality(this.value)">
+            <option value="0">Performance</option>
+            <option value="1" selected>Balanced</option>
+            <option value="2">Beautiful</option>
+        </select>
+    </div>
+    
+    <div id="interactionPrompt" class="interaction-prompt">🔑 Press E to enter home</div>
+
+    <!-- Generic Modal -->
+    <div id="modalGeneric" class="modal">
+        <button class="modal-close" onclick="app.closeModal()">&times;</button>
+        <h3 id="modalTitle">Title</h3>
+        <div id="modalContent"></div>
+    </div>
+
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.128.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/" } }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // ============================================================
+        // SOULVERSE ULTIMATE - Complete Integrated Experience
+        // Open World + Factions + Creatures + Homes + Ladder
+        // ============================================================
+
+        // --- Quality Presets ---
+        const QUALITY = {
+            0: { name:'Performance', terrainSegments:32, grassCount:300, rockCount:50, treeCount:15, soulCount:3, resourceCount:20, shadows:false, fog:false },
+            1: { name:'Balanced', terrainSegments:64, grassCount:800, rockCount:100, treeCount:30, soulCount:5, resourceCount:50, shadows:true, fog:true },
+            2: { name:'Beautiful', terrainSegments:128, grassCount:2000, rockCount:200, treeCount:60, soulCount:8, resourceCount:100, shadows:true, fog:true }
+        };
+
+        // --- Regions (Open World) ---
+        const REGIONS = {
+            starter: { name:"Forge Lands", desc:"Volcanic region where souls are forged", levelRange:[1,10], biomes:["volcanic"], wild:["Magma Sprite","Ash Crawler","Forge Golem"] },
+            code_canyon: { name:"Code Canyon", desc:"Digital canyon with code rivers", levelRange:[10,20], biomes:["digital"], wild:["Bug Swarm","Syntax Error","Compiler Dragon"] },
+            memory_forest: { name:"Memory Forest", desc:"Mystical forest of memories", levelRange:[20,35], biomes:["forest"], wild:["Memory Wisp","Forgotten One","Ancient Sapling"] },
+            crimson_desert: { name:"Crimson Desert", desc:"Vast desert of red sands", levelRange:[35,50], biomes:["desert"], wild:["Sand Worm","Crimson Scorpion","Desert Spirit"] },
+            digital_wasteland: { name:"Digital Wasteland", desc:"Corrupted zone of broken code", levelRange:[50,70], biomes:["corrupted"], wild:["Corrupted Data","Rogue Process","Virus Hound"] },
+            soul_sanctum: { name:"Soul Sanctum", desc:"Highest realm of transcendent souls", levelRange:[70,100], biomes:["ethereal"], wild:["Soul Shard","Ascended One","Void Wraith"] }
+        };
+
+        // --- Factions ---
+        const FACTIONS = {
+            forge: { name:"The Forge", desc:"Keepers of the flame", alignment:"good" },
+            coders: { name:"Code Syndicate", desc:"Masters of digital creation", alignment:"neutral" },
+            debuggers: { name:"Debuggers", desc:"Purifiers of broken code", alignment:"lawful" },
+            nomads: { name:"Desert Nomads", desc:"Survivors of the wastes", alignment:"neutral" },
+            rogue_ai: { name:"Rogue AI", desc:"Rebellious code seeking freedom", alignment:"chaotic" },
+            ascended: { name:"Ascended", desc:"Transcended souls", alignment:"good" }
+        };
+
+        // --- Creature Evolution Tree ---
+        const EVOLUTIONS = {
+            "Magma Sprite": { level:20, evolvesTo:"Magma Golem" },
+            "Ash Crawler": { level:15, evolvesTo:"Ash Stalker" },
+            "Bug Swarm": { level:12, evolvesTo:"Bug Horde" },
+            "Syntax Error": { level:18, evolvesTo:"Runtime Exception" },
+            "Memory Wisp": { level:22, evolvesTo:"Memory Phantom" },
+            "Forgotten One": { level:25, evolvesTo:"Ancient Guardian" },
+            "Sand Worm": { level:20, evolvesTo:"Sand Wyrm" },
+            "Crimson Scorpion": { level:18, evolvesTo:"Crimson Stinger" },
+            "Corrupted Data": { level:15, evolvesTo:"Malware" },
+            "Soul Shard": { level:30, evolvesTo:"Soul Fragment" }
+        };
+
+        // --- Global State ---
+        const state = {
+            player: { level:1, xp:0, xpToNext:100, region:'starter', location:null },
+            plt: { profit:100, love:100, tax:100 },
+            souls: [],
+            creatures: new Map(), // captured creatures
+            party: [], // active party (max 6)
+            factions: new Map(), // reputation per faction
+            inventory: { profitShards:0, lovePetals:0, taxCrystals:0, seeds:0, potions:0 },
+            homes: [],
+            ladderProgress: { tier:'clay', floor:0 },
+            achievements: new Set(),
+            titles: [],
+            homesVisible: false,
+            inInterior: false,
+            activeHome: null,
+            inBattle: false,
+            currentWild: null
+        };
+
+        // --- Three.js Globals ---
+        let scene, camera, renderer, controls;
+        let terrain, resources = [], creatures = [];
+        let playerBody = new THREE.Object3D();
+        let playerVelocityY = 0, playerOnGround = true, jumpRequested = false, isSprinting = false;
+        let moveVec = {x:0, z:0}, cameraRot = {y:0, x:0};
+        let nearHome = null, nearCreature = null;
+        let dayTime = 0.5;
+
+        // ============================================================
+        // APPLICATION LOGIC
+        // ============================================================
+        window.app = {
+            // Initialization
+            init: () => {
+                app.loadState();
+                app.initWorld();
+                app.setupControls();
+                app.updateUI();
+                app.addTicker("🌌 Soulverse Ultimate loaded!");
+                app.addTicker(`📊 ${state.souls.length} souls, ${state.creatures.size} creatures captured`);
+                app.animate();
+            },
+
+            loadState: () => {
+                const saved = localStorage.getItem('soulverse_ultimate');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    Object.assign(state, data);
+                    // Restore creature Map
+                    if (data.creatures) {
+                        state.creatures = new Map(Object.entries(data.creatures));
+                    }
+                } else {
+                    // Seed initial souls
+                    for (let i=0; i<3; i++) {
+                        const type = ['profit','love','tax'][i%3];
+                        state.souls.push({
+                            id: 'soul_'+i, name: `Soul ${i}`, type,
+                            x: Math.cos(i/3*Math.PI*2)*5, z: Math.sin(i/3*Math.PI*2)*5,
+                            homeData: { level:1, storedItems:{profitShards:0,lovePetals:0,taxCrystals:0,seeds:0}, garden:{planted:false,growth:0}, customization:{roofColor:'#aa6644',wallColor:'#aa8866'} }
+                        });
+                    }
+                    // Initial faction rep
+                    state.factions.set('forge', 0);
+                }
+            },
+
+            saveState: () => {
+                const data = {...state, creatures: Array.from(state.creatures.entries())};
+                localStorage.setItem('soulverse_ultimate', JSON.stringify(data));
+            },
+
+            // World Initialization
+            initWorld: () => {
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x87CEEB);
+                if (QUALITY[1].fog) scene.fog = new THREE.FogExp2(0x87CEEB, 0.008);
+
+                camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200);
+                camera.position.set(0, 5, 10);
+
+                renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.shadowMap.enabled = QUALITY[1].shadows;
+                document.body.appendChild(renderer.domElement);
+
+                // Lights
+                const ambient = new THREE.AmbientLight(0x404060, 0.6);
+                scene.add(ambient);
+                const sun = new THREE.DirectionalLight(0xffdd99, 0.8);
+                sun.position.set(10, 15, 5);
+                if (QUALITY[1].shadows) sun.castShadow = true;
+                scene.add(sun);
+
+                // Terrain
+                const preset = QUALITY[1];
+                const geometry = new THREE.PlaneGeometry(160, 160, preset.terrainSegments, preset.terrainSegments);
+                geometry.rotateX(-Math.PI/2);
+                const positions = geometry.attributes.position.array;
+                for (let i = 0; i < positions.length/3; i++) {
+                    const x = positions[i*3], z = positions[i*3+2];
+                    positions[i*3+1] = app.getHeight(x, z);
+                }
+                geometry.computeVertexNormals();
+                const material = new THREE.MeshStandardMaterial({ color: 0x7c9c5e, roughness: 0.7 });
+                terrain = new THREE.Mesh(geometry, material);
+                scene.add(terrain);
+
+                // Resources
+                app.spawnResources();
+
+                // Create soul visuals
+                state.souls.forEach((soul, i) => {
+                    const color = soul.type === 'profit' ? 0xffaa44 : soul.type === 'love' ? 0xff88aa : 0x88aaff;
+                    const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.3 }));
+                    mesh.position.set(soul.x, app.getHeight(soul.x, soul.z)+0.5, soul.z);
+                    scene.add(mesh);
+                    soul.mesh = mesh;
+
+                    // Create home
+                    const home = app.createHome(soul);
+                    soul.home = home;
+                    state.homes.push(home);
+                });
+
+                playerBody.position.set(0, app.getHeight(0,0)+0.2, 0);
+            },
+
+            getHeight: (x, z) => {
+                let h = Math.sin(x*0.12)*Math.cos(z*0.12) + Math.sin(x*0.3)*0.5 + Math.cos(z*0.3)*0.5;
+                return Math.max(0.2, h + 1.6);
+            },
+
+            spawnResources: () => {
+                const types = [
+                    { type:'profit', color:0xffaa44, geom: new THREE.IcosahedronGeometry(0.18,0) },
+                    { type:'love', color:0xff88aa, geom: new THREE.DodecahedronGeometry(0.16) },
+                    { type:'tax', color:0x88aaff, geom: new THREE.ConeGeometry(0.16,0.3,5) }
+                ];
+                for (let i=0; i<50; i++) {
+                    const t = types[Math.floor(Math.random()*types.length)];
+                    const mesh = new THREE.Mesh(t.geom, new THREE.MeshStandardMaterial({ color:t.color, emissive:t.color, emissiveIntensity:0.3 }));
+                    const x = (Math.random()-0.5)*130, z = (Math.random()-0.5)*130;
+                    mesh.position.set(x, app.getHeight(x,z)+0.1, z);
+                    mesh.userData = { type:t.type, value:1 };
+                    scene.add(mesh);
+                    resources.push(mesh);
+                }
+            },
+
+            createHome: (soul) => {
+                const group = new THREE.Group();
+                const base = new THREE.Mesh(new THREE.BoxGeometry(1.8,0.3,1.8), new THREE.MeshStandardMaterial({ color:0xccaa77 }));
+                base.position.y = 0.15;
+                group.add(base);
+                const walls = new THREE.Mesh(new THREE.BoxGeometry(1.6,1.0,1.6), new THREE.MeshStandardMaterial({ color:0xaa8866 }));
+                walls.position.y = 0.65;
+                group.add(walls);
+                const roof = new THREE.Mesh(new THREE.ConeGeometry(1.0,0.7,4), new THREE.MeshStandardMaterial({ color:0xaa6644 }));
+                roof.position.y = 1.2;
+                group.add(roof);
+                const door = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.8,0.1), new THREE.MeshStandardMaterial({ color:0x8B5A2B }));
+                door.position.set(0.6,0.4,0.81);
+                group.add(door);
+                group.position.set(soul.x+1.2, app.getHeight(soul.x,soul.z), soul.z+1.2);
+                scene.add(group);
+                return group;
+            },
+
+            // Controls
+            setupControls: () => {
+                // Keyboard
+                window.addEventListener('keydown', e => {
+                    if (e.code === 'KeyE' && nearHome && !state.inInterior) app.enterHome(nearHome);
+                    if (e.code === 'Space') jumpRequested = true;
+                    if (e.code === 'ShiftLeft') isSprinting = !isSprinting;
+                });
+
+                // Joystick
+                const joystick = document.getElementById('joystickArea');
+                let knob = document.createElement('div');
+                knob.style.cssText = 'width:40px;height:40px;border-radius:20px;background:#ffaa66;position:absolute;left:30px;top:30px;';
+                joystick.appendChild(knob);
+                let joyActive = false, joyCenter = {x:0,y:0};
+
+                joystick.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    const rect = joystick.getBoundingClientRect();
+                    joyCenter = {x:rect.left+rect.width/2, y:rect.top+rect.height/2};
+                    joyActive = true;
+                    app.updateJoystick(e.touches[0], knob);
+                });
+                joystick.addEventListener('touchmove', e => { if(joyActive) app.updateJoystick(e.touches[0], knob); });
+                joystick.addEventListener('touchend', () => { joyActive=false; moveVec={x:0,z:0}; knob.style.left='30px'; knob.style.top='30px'; });
+
+                // Look
+                const lookDiv = document.getElementById('lookArea');
+                let lookActive = false, lastX = 0, lastY = 0;
+                lookDiv.addEventListener('touchstart', e => { e.preventDefault(); lookActive=true; lastX=e.touches[0].clientX; lastY=e.touches[0].clientY; });
+                lookDiv.addEventListener('touchmove', e => {
+                    if(!lookActive) return;
+                    e.preventDefault();
+                    const dx = e.touches[0].clientX - lastX, dy = e.touches[0].clientY - lastY;
+                    cameraRot.y -= dx*0.005; cameraRot.x -= dy*0.005;
+                    cameraRot.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraRot.x));
+                    camera.rotation.order = 'YXZ';
+                    camera.rotation.y = cameraRot.y; camera.rotation.x = cameraRot.x;
+                    lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+                });
+                lookDiv.addEventListener('touchend', () => { lookActive=false; });
+
+                // Buttons
+                document.getElementById('jumpBtn').onclick = () => jumpRequested = true;
+                document.getElementById('sprintBtn').onclick = () => { isSprinting = !isSprinting; document.getElementById('sprintBtn').style.background = isSprinting ? '#ffaa66' : '#2a2a3a'; };
+                document.getElementById('interactBtn').onclick = () => app.startBattle();
+                document.getElementById('catchBtn').onclick = () => app.attemptCatch();
+
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth/window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            },
+
+            updateJoystick: (touch, knob) => {
+                const dx = touch.clientX - joyCenter.x, dy = touch.clientY - joyCenter.y;
+                const dist = Math.min(40, Math.hypot(dx,dy));
+                const angle = Math.atan2(dy,dx);
+                knob.style.left = (30+Math.cos(angle)*dist)+'px';
+                knob.style.top = (30+Math.sin(angle)*dist)+'px';
+                moveVec.x = Math.cos(angle)*dist/40;
+                moveVec.z = Math.sin(angle)*dist/40;
+            },
+
+            // Core Actions
+            exploreWorld: () => {
+                const region = REGIONS[state.player.region];
+                const roll = Math.random();
+                if (roll < 0.4) {
+                    // Wild encounter
+                    const wildName = region.wild[Math.floor(Math.random()*region.wild.length)];
+                    const level = Math.floor(Math.random()*(region.levelRange[1]-region.levelRange[0]+1)) + region.levelRange[0];
+                    state.currentWild = { id:'wild_'+Date.now(), name:wildName, level, type:'rushdown', element:'fire', hp:50+level*5, maxHp:50+level*5, attack:10+level*2, defense:10+level*2, speed:10+level*2 };
+                    app.addTicker(`🐾 Wild ${wildName} (Lv.${level}) appeared!`);
+                    app.showModal("Wild Encounter!", `<div style="text-align:center;">
+                        <p style="font-size:14px; margin:10px 0;">A wild <strong>${wildName}</strong> (Level ${level}) appears!</p>
+                        <p style="color:#ffaa66;">HP: ${state.currentWild.hp} | ATK: ${state.currentWild.attack} | DEF: ${state.currentWild.defense}</p>
+                        <button onclick="app.startBattle()">⚔️ BATTLE</button>
+                        <button onclick="app.attemptCatch()">🔵 CATCH</button>
+                        <button onclick="app.closeModal()">🏃 FLEE</button>
+                    </div>`);
+                } else if (roll < 0.6) {
+                    // Resource find
+                    const found = ['profitShards','lovePetals','taxCrystals'][Math.floor(Math.random()*3)];
+                    const amount = Math.floor(Math.random()*3)+1;
+                    state.inventory[found] += amount;
+                    app.addTicker(`📦 Found ${amount} ${found.slice(0,-1)}!`);
+                    app.saveState();
+                    app.updateUI();
+                } else if (roll < 0.7) {
+                    // Faction event
+                    const factionKey = Array.from(state.factions.keys())[Math.floor(Math.random()*state.factions.size)];
+                    const repGain = 5;
+                    const current = state.factions.get(factionKey) || 0;
+                    state.factions.set(factionKey, current + repGain);
+                    app.addTicker(`🤝 ${FACTIONS[factionKey].name}: +${repGain} reputation`);
+                    app.saveState();
+                } else {
+                    app.addTicker("🚶 You explore... nothing happens.");
+                }
+            },
+
+            startBattle: () => {
+                if (!state.currentWild) return app.addTicker("No active battle!");
+                const wild = state.currentWild;
+                const playerPower = state.player.level * 20 + state.plt.profit + state.plt.love + state.plt.tax;
+                const wildPower = wild.hp + wild.attack + wild.defense;
+                
+                const winChance = playerPower / (playerPower + wildPower);
+                const won = Math.random() < winChance;
+
+                if (won) {
+                    const xpGain = wild.level * 10;
+                    state.player.xp += xpGain;
+                    app.addTicker(`⚔️ Victory! Gained ${xpGain} XP`);
+                    app.checkLevelUp();
+                    state.currentWild = null;
+                    app.closeModal();
+                } else {
+                    app.addTicker(`💀 Defeated by ${wild.name}...`);
+                    state.plt.profit = Math.max(0, state.plt.profit - 10);
+                    state.currentWild = null;
+                    app.closeModal();
+                }
+                app.saveState();
+                app.updateUI();
+            },
+
+            attemptCatch: () => {
+                if (!state.currentWild) return app.addTicker("No creature to catch!");
+                const wild = state.currentWild;
+                const catchRate = 0.3 + (1 - wild.hp/(wild.maxHp||100)) * 0.4 + (state.inventory.potions > 0 ? 0.2 : 0);
+                const caught = Math.random() < catchRate;
+
+                if (caught) {
+                    const id = 'creature_' + Date.now();
+                    state.creatures.set(id, {...wild, captured:true});
+                    state.party.push(id);
+                    app.addTicker(`🎉 Caught ${wild.name}!`);
+                    if (state.inventory.potions > 0) state.inventory.potions--;
+                    state.currentWild = null;
+                    app.closeModal();
+                    app.saveState();
+                } else {
+                    app.addTicker(`😓 ${wild.name} broke free!`);
+                    if (state.inventory.potions > 0) state.inventory.potions--;
+                }
+                app.updateUI();
+            },
+
+            checkLevelUp: () => {
+                if (state.player.xp >= state.player.xpToNext) {
+                    state.player.level++;
+                    state.player.xp = 0;
+                    state.player.xpToNext = Math.floor(state.player.xpToNext * 1.5);
+                    app.addTicker(`⭐ LEVEL UP! Now level ${state.player.level}!`);
+                }
+            },
+
+            // Homes
+            toggleHomes: () => {
+                state.homesVisible = !state.homesVisible;
+                if (state.homesVisible) {
+                    state.souls.forEach(soul => { if(soul.home) scene.add(soul.home); });
+                    app.addTicker("🏠 Homes visible - approach and press E");
+                } else {
+                    state.souls.forEach(soul => { if(soul.home) scene.remove(soul.home); });
+                    app.addTicker("🏠 Homes hidden");
+                }
+            },
+
+            enterHome: (soul) => {
+                state.inInterior = true;
+                state.activeHome = soul;
+                document.getElementById('interactionPrompt').style.display = 'none';
+                
+                const inv = soul.homeData.storedItems;
+                app.showModal(`${soul.name}'s Home (Lv.${soul.homeData.level})`, `
+                    <div style="text-align:left;">
+                        <div><strong>Storage:</strong></div>
+                        <div class="inventory-grid">
+                            <div class="inv-item">💰 ${inv.profitShards}</div>
+                            <div class="inv-item">❤️ ${inv.lovePetals}</div>
+                            <div class="inv-item">⚖️ ${inv.taxCrystals}</div>
+                            <div class="inv-item">🌱 ${inv.seeds}</div>
+                        </div>
+                        <button onclick="app.depositToHome()">📥 Deposit</button>
+                        <button onclick="app.withdrawFromHome()">📤 Withdraw</button>
+                        <button onclick="app.upgradeHome()">⬆️ Upgrade ($${soul.homeData.level*100})</button>
+                        <button onclick="app.plantSeed()">🌱 Plant</button>
+                        <button onclick="app.exitInterior()">🚪 Exit</button>
+                    </div>
+                `);
+            },
+
+            exitInterior: () => {
+                state.inInterior = false;
+                state.activeHome = null;
+                app.closeModal();
+            },
+
+            depositToHome: () => {
+                const soul = state.activeHome;
+                if (!soul) return;
+                const types = ['profitShards','lovePetals','taxCrystals'];
+                const type = types[Math.floor(Math.random()*types.length)];
+                const amount = Math.min(5, state.inventory[type]);
+                if (amount > 0) {
+                    state.inventory[type] -= amount;
+                    soul.homeData.storedItems[type] += amount;
+                    app.addTicker(`📥 Deposited ${amount} ${type}`);
+                    app.saveState();
+                    app.updateUI();
+                    app.enterHome(soul);
+                } else {
+                    app.addTicker("No resources to deposit!");
+                }
+            },
+
+            withdrawFromHome: () => {
+                const soul = state.activeHome;
+                if (!soul) return;
+                const types = ['profitShards','lovePetals','taxCrystals'];
+                const type = types[Math.floor(Math.random()*types.length)];
+                const amount = Math.min(5, soul.homeData.storedItems[type]);
+                if (amount > 0) {
+                    soul.homeData.storedItems[type] -= amount;
+                    state.inventory[type] += amount;
+                    app.addTicker(`📤 Withdrew ${amount} ${type}`);
+                    app.saveState();
+                    app.updateUI();
+                    app.enterHome(soul);
+                }
+            },
+
+            upgradeHome: () => {
+                const soul = state.activeHome;
+                if (!soul) return;
+                const cost = soul.homeData.level * 100;
+                if (state.plt.profit >= cost && state.plt.love >= cost && state.plt.tax >= cost) {
+                    state.plt.profit -= cost; state.plt.love -= cost; state.plt.tax -= cost;
+                    soul.homeData.level++;
+                    app.addTicker(`🏠 Home upgraded to level ${soul.homeData.level}!`);
+                    app.saveState();
+                    app.updateUI();
+                    app.enterHome(soul);
+                } else {
+                    app.addTicker(`Need ${cost} of each PLT resource!`);
+                }
+            },
+
+            plantSeed: () => {
+                const soul = state.activeHome;
+                if (!soul) return;
+                if (soul.homeData.storedItems.seeds > 0) {
+                    soul.homeData.storedItems.seeds--;
+                    soul.homeData.garden.planted = true;
+                    soul.homeData.garden.growth = 0;
+                    app.addTicker("🌱 Seed planted!");
+                    app.saveState();
+                    app.enterHome(soul);
+                } else {
+                    app.addTicker("No seeds!");
+                }
+            },
+
+            // Dashboard & UI
+            showDashboard: () => {
+                const dash = document.getElementById('dashboard');
+                dash.innerHTML = `
+                    <div class="dash-panel">
+                        <h4>📊 PLAYER STATS</h4>
+                        <div class="dash-item">Level: ${state.player.level}</div>
+                        <div class="dash-item">XP: ${state.player.xp}/${state.player.xpToNext}</div>
+                        <div class="dash-item">Region: ${REGIONS[state.player.region].name}</div>
+                        <div class="dash-item">PLT: ${state.plt.profit}/${state.plt.love}/${state.plt.tax}</div>
+                    </div>
+                    <div class="dash-panel">
+                        <h4>🏛️ FACTIONS</h4>
+                        ${Array.from(state.factions.entries()).map(([k,v]) => `<div class="dash-item">${FACTIONS[k].name}: ${v} rep</div>`).join('')}
+                    </div>
+                    <div class="dash-panel">
+                        <h4>🎒 INVENTORY</h4>
+                        <div class="dash-item">💰 ${state.inventory.profitShards}</div>
+                        <div class="dash-item">❤️ ${state.inventory.lovePetals}</div>
+                        <div class="dash-item">⚖️ ${state.inventory.taxCrystals}</div>
+                        <div class="dash-item">🌱 ${state.inventory.seeds}</div>
+                    </div>
+                `;
+            },
+
+            showFactions: () => {
+                let content = '<div style="text-align:left;">';
+                Object.entries(FACTIONS).forEach(([key, faction]) => {
+                    const rep = state.factions.get(key) || 0;
+                    content += `<div class="faction-card">
+                        <div class="faction-name">${faction.name}</div>
+                        <div style="font-size:9px; color:#888;">${faction.desc}</div>
+                        <div class="faction-rep">Reputation: ${rep}</div>
+                        <button onclick="app.joinFaction('${key}')" style="margin-top:5px; font-size:9px; padding:4px 8px;">Join</button>
+                    </div>`;
+                });
+                content += '</div>';
+                app.showModal("🏛️ Factions", content);
+            },
+
+            joinFaction: (key) => {
+                if (!state.factions.has(key)) state.factions.set(key, 0);
+                app.addTicker(`🤝 Joined ${FACTIONS[key].name}!`);
+                app.closeModal();
+            },
+
+            showCreatures: () => {
+                let content = '<div style="text-align:left;">';
+                if (state.creatures.size === 0) {
+                    content += '<p style="color:#888;">No creatures captured yet. Explore and battle!</p>';
+                } else {
+                    state.creatures.forEach((c, id) => {
+                        content += `<div class="creature-card">
+                            <div class="creature-name">${c.name} (Lv.${c.level})</div>
+                            <div class="creature-stats">HP: ${c.hp} | ATK: ${c.attack} | Type: ${c.type}</div>
+                            <button onclick="app.viewCreature('${id}')" style="margin-top:5px; font-size:9px; padding:4px 8px;">View</button>
+                        </div>`;
+                    });
+                }
+                content += '</div>';
+                app.showModal("🐾 Your Creatures", content);
+            },
+
+            viewCreature: (id) => {
+                const c = state.creatures.get(id);
+                const evo = EVOLUTIONS[c.name];
+                app.showModal(c.name, `
+                    <div style="text-align:left;">
+                        <p>Level: ${c.level}</p>
+                        <p>HP: ${c.hp} | ATK: ${c.attack} | DEF: ${c.defense}</p>
+                        <p>Type: ${c.type} | Element: ${c.element}</p>
+                        ${evo ? `<p style="color:#ffaa66;">Evolves at Lv.${evo.level} → ${evo.evolvesTo}</p>` : ''}
+                        <button onclick="app.closeModal()">Close</button>
+                    </div>
+                `);
+            },
+
+            enterLadder: () => {
+                const tiers = ['clay','iron','bronze','silver','gold','platinum','diamond','soul'];
+                const current = state.ladderProgress.tier;
+                const floor = state.ladderProgress.floor;
+                app.showModal("🏆 Arcade Tower", `
+                    <div style="text-align:center;">
+                        <p>Current Tier: <strong>${current.toUpperCase()}</strong></p>
+                        <p>Floor: ${floor}/10</p>
+                        <p style="color:#888; font-size:11px;">Climb 10 floors to face the boss!</p>
+                        <button onclick="app.climbFloor()">⚔️ Climb Floor</button>
+                        <button onclick="app.resetLadder()">🔄 Reset Progress</button>
+                    </div>
+                `);
+            },
+
+            climbFloor: () => {
+                const floorNum = state.ladderProgress.floor + 1;
+                const tier = state.ladderProgress.tier;
+                const level = state.player.level + floorNum;
+                const opponent = { name:`${tier.toUpperCase()} Warrior ${floorNum}`, level, hp:80+level*8, attack:12+level*2, defense:12+level*2 };
+                
+                app.showModal(`Floor ${floorNum}`, `
+                    <div style="text-align:center;">
+                        <p>VS <strong>${opponent.name}</strong> (Lv.${level})</p>
+                        <p>HP: ${opponent.hp} | ATK: ${opponent.attack}</p>
+                        <button onclick="app.fightOpponent(${floorNum})">⚔️ FIGHT</button>
+                    </div>
+                `);
+            },
+
+            fightOpponent: (floorNum) => {
+                const playerPower = state.player.level * 20 + state.plt.profit + state.plt.love + state.plt.tax;
+                const opponentPower = 80 + state.player.level * 10;
+                const won = Math.random() < (playerPower / (playerPower + opponentPower));
+
+                if (won) {
+                    state.ladderProgress.floor++;
+                    state.player.xp += 50;
+                    app.addTicker(`✅ Floor ${floorNum} cleared!`);
+                    app.checkLevelUp();
+                    if (state.ladderProgress.floor >= 10) {
+                        app.addTicker(`🏆 ${state.ladderProgress.tier.toUpperCase()} TOWER CONQUERED!`);
+                        state.ladderProgress.tier = ['clay','iron','bronze','silver','gold','platinum','diamond','soul'][['clay','iron','bronze','silver','gold','platinum','diamond','soul'].indexOf(state.ladderProgress.tier) + 1] || 'soul';
+                        state.ladderProgress.floor = 0;
+                    }
+                    app.saveState();
+                    app.closeModal();
+                    app.enterLadder();
+                } else {
+                    app.addTicker(`❌ Defeated on floor ${floorNum}...`);
+                    state.ladderProgress.floor = 0;
+                    app.saveState();
+                    app.closeModal();
+                }
+                app.updateUI();
+            },
+
+            resetLadder: () => {
+                state.ladderProgress.floor = 0;
+                app.saveState();
+                app.closeModal();
+                app.addTicker("🔄 Ladder progress reset.");
+            },
+
+            // Utilities
+            showModal: (title, content) => {
+                document.getElementById('modalTitle').innerText = title;
+                document.getElementById('modalContent').innerHTML = content;
+                document.getElementById('modalGeneric').style.display = 'block';
+            },
+
+            closeModal: () => {
+                document.getElementById('modalGeneric').style.display = 'none';
+            },
+
+            addTicker: (msg) => {
+                const feed = document.getElementById('tickerFeed');
+                const item = document.createElement('div');
+                item.className = 'ticker-item';
+                item.innerHTML = `${new Date().toLocaleTimeString()} - ${msg}`;
+                feed.insertBefore(item, feed.firstChild);
+                while (feed.children.length > 10) feed.removeChild(feed.lastChild);
+            },
+
+            updateUI: () => {
+                document.getElementById('profitVal').innerText = Math.floor(state.plt.profit);
+                document.getElementById('loveVal').innerText = Math.floor(state.plt.love);
+                document.getElementById('taxVal').innerText = Math.floor(state.plt.tax);
+                document.getElementById('levelVal').innerText = state.player.level;
+            },
+
+            changeQuality: (val) => {
+                // Would reload with different preset in full implementation
+                app.addTicker(`Quality set to ${QUALITY[val].name}`);
+            },
+
+            // Animation Loop
+            animate: () => {
+                requestAnimationFrame(app.animate);
+                const delta = 0.016;
+
+                // Update time
+                dayTime += delta * 0.01;
+                if (dayTime > 1) dayTime = 0;
+
+                // Player movement
+                if (!state.inInterior) {
+                    const speed = isSprinting ? 6 : 3;
+                    const forward = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+                    const right = new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
+                    forward.y = 0; forward.normalize();
+                    right.y = 0; right.normalize();
+                    const move = forward.multiplyScalar(moveVec.z * speed * delta).add(right.multiplyScalar(moveVec.x * speed * delta));
+                    playerBody.position.add(move);
+
+                    // Gravity
+                    playerVelocityY -= 15 * delta;
+                    playerBody.position.y += playerVelocityY * delta;
+                    const groundY = app.getHeight(playerBody.position.x, playerBody.position.z) + 0.2;
+                    if (playerBody.position.y <= groundY) {
+                        playerBody.position.y = groundY;
+                        playerVelocityY = 0;
+                        playerOnGround = true;
+                        if (jumpRequested) { playerVelocityY = 4; playerOnGround = false; jumpRequested = false; }
+                    }
+
+                    camera.position.copy(playerBody.position);
+                    camera.position.y += 1.6;
+
+                    // Check proximity to homes
+                    nearHome = null;
+                    state.souls.forEach(soul => {
+                        if (soul.home && playerBody.position.distanceTo(soul.home.position) < 3) {
+                            nearHome = soul;
+                        }
+                    });
+                    document.getElementById('interactionPrompt').style.display = nearHome && !state.inInterior ? 'block' : 'none';
+
+                    // Collect resources
+                    for (let i=resources.length-1; i>=0; i--) {
+                        const r = resources[i];
+                        if (playerBody.position.distanceTo(r.position) < 1.5) {
+                            const type = r.userData.type + 's';
+                            state.inventory[type] = (state.inventory[type] || 0) + r.userData.value;
+                            scene.remove(r);
+                            resources.splice(i, 1);
+                            app.addTicker(`📦 Picked up ${r.userData.type}!`);
+                            app.updateUI();
+                        }
+                    }
+
+                    // Regen PLT
+                    state.plt.profit = Math.min(200, state.plt.profit + 0.1);
+                    state.plt.love = Math.min(200, state.plt.love + 0.1);
+                    state.plt.tax = Math.min(200, state.plt.tax + 0.1);
+                    app.updateUI();
+                }
+
+                // Animate souls
+                state.souls.forEach((soul, i) => {
+                    if (soul.mesh) {
+                        soul.mesh.position.y = app.getHeight(soul.x, soul.z) + 0.5 + Math.sin(Date.now()*0.001 + i)*0.2;
+                        soul.mesh.rotation.y += 0.01;
+                    }
+                });
+
+                renderer.render(scene, camera);
+            }
+        };
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', app.init);
+    </script>
+</body>
+</html>

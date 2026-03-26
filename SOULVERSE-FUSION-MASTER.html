@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🌌 SOULVERSE FUSION - Ultimate Combined Experience | PLT Press</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+        body { background:#000; overflow:hidden; font-family:'Courier New', monospace; }
+        canvas { display:block; width:100%; height:100%; }
+        
+        /* TOP BAR */
+        #top-bar { position:absolute; top:10px; left:0; right:0; display:flex; justify-content:center; gap:10px; z-index:30; pointer-events:auto; flex-wrap:wrap; }
+        .top-btn { background:#ffaa66; border:none; color:#000; font-weight:bold; padding:8px 16px; border-radius:30px; cursor:pointer; font-family:monospace; transition:0.2s; font-size:12px; }
+        .top-btn:hover { transform:scale(1.05); box-shadow:0 0 15px #ffaa66; }
+        .top-btn:disabled { opacity:0.5; cursor:not-allowed; }
+        
+        /* RESOURCES */
+        #resources { position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.7); border-radius:12px; padding:8px 12px; color:#ffaa66; font-size:11px; text-align:right; pointer-events:none; z-index:10; min-width:150px; }
+        
+        /* SELECTION PANEL */
+        #selection-panel { position:absolute; bottom:100px; left:10px; background:rgba(0,0,0,0.7); border-radius:12px; padding:8px 12px; font-size:10px; pointer-events:none; z-index:20; max-width:250px; }
+        
+        /* BUILDING MENU */
+        #building-menu { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); border-radius:20px; padding:8px; display:flex; gap:6px; z-index:40; pointer-events:auto; flex-wrap:wrap; justify-content:center; max-width:90%; }
+        .build-btn { background:#2a2a3a; border:1px solid #ffaa66; color:#ffaa66; padding:6px 12px; border-radius:20px; cursor:pointer; font-size:10px; transition:0.2s; }
+        .build-btn:hover { background:#ffaa66; color:#000; }
+        
+        /* TECH TREE */
+        #tech-tree-panel { position:absolute; top:60px; left:10px; background:rgba(0,0,0,0.85); backdrop-filter:blur(12px); border-radius:16px; padding:12px; width:280px; display:none; z-index:50; pointer-events:auto; max-height:70vh; overflow-y:auto; }
+        .close-panel { float:right; background:none; border:none; color:#ffaa66; cursor:pointer; font-size:16px; }
+        .tech-btn { width:100%; margin:5px 0; padding:8px; background:#2a2a3a; border:1px solid #ffaa66; color:#ffaa66; border-radius:8px; cursor:pointer; font-size:10px; text-align:left; }
+        .tech-btn:disabled { opacity:0.4; cursor:not-allowed; }
+        
+        /* ARENA PANEL */
+        #arena-panel { position:absolute; top:60px; right:10px; background:rgba(0,0,0,0.85); backdrop-filter:blur(12px); border-radius:16px; padding:12px; width:300px; display:none; z-index:50; pointer-events:auto; max-height:70vh; overflow-y:auto; }
+        
+        /* BREEDING PANEL */
+        #breeding-panel { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.95); backdrop-filter:blur(16px); border:2px solid #ffaa66; border-radius:24px; padding:20px; width:90%; max-width:500px; display:none; z-index:200; pointer-events:auto; }
+        
+        /* MODALS */
+        .modal { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.95); backdrop-filter:blur(16px); border:2px solid #ffaa66; border-radius:24px; padding:20px; z-index:200; display:none; pointer-events:auto; min-width:300px; max-width:90vw; max-height:80vh; overflow-y:auto; }
+        .modal h3 { color:#ffaa66; margin-bottom:15px; text-align:center; }
+        .modal button { margin:5px; padding:8px 16px; background:#ffaa66; border:none; border-radius:30px; font-weight:bold; cursor:pointer; font-family:monospace; }
+        .modal-close { float:right; background:none; border:none; color:#ffaa66; font-size:20px; cursor:pointer; }
+        
+        /* SELECTION RECT */
+        .selection-rect { position:absolute; border:1px solid #ffaa66; background:rgba(255,170,102,0.2); pointer-events:none; z-index:100; }
+        
+        /* COMBO DISPLAY */
+        #combo-display { position:absolute; top:30%; left:50%; transform:translate(-50%,-50%); text-align:center; z-index:150; pointer-events:none; }
+        #combo-text { font-size:36px; color:#ffaa44; text-shadow:0 0 20px #ffaa44; opacity:0; transition:opacity 0.3s; }
+        #combo-count { font-size:64px; color:#fff; text-shadow:0 0 30px #ffaa44; font-weight:bold; }
+        
+        /* FATILITY ANNOUNCEMENT */
+        #fatality-msg { position:absolute; top:40%; left:50%; transform:translate(-50%,-50%); font-size:48px; color:#ff4444; text-shadow:0 0 30px #ff0000; opacity:0; z-index:160; pointer-events:none; font-weight:bold; transition:opacity 0.5s; }
+        
+        /* BATTLE LOG */
+        #battle-log { position:absolute; bottom:100px; right:10px; background:rgba(0,0,0,0.7); border-radius:12px; padding:8px; width:280px; max-height:200px; overflow-y:auto; font-size:9px; z-index:30; font-family:monospace; }
+        .battle-entry { padding:3px; border-bottom:1px solid rgba(255,100,100,0.2); }
+        .battle-critical { color:#ffaa44; font-weight:bold; }
+        .battle-victory { color:#88ff88; font-weight:bold; }
+        
+        /* NOTIFICATIONS */
+        #notification { position:absolute; top:80px; left:50%; transform:translateX(-50%); background:rgba(255,170,102,0.9); color:#000; padding:10px 20px; border-radius:30px; font-size:12px; z-index:300; display:none; pointer-events:none; }
+        
+        /* MOBILE OPTIMIZATIONS */
+        @media (max-width:768px) {
+            .top-btn { padding:6px 10px; font-size:10px; }
+            #building-menu .build-btn { padding:4px 8px; font-size:8px; }
+            #resources { font-size:9px; top:5px; right:5px; }
+            #selection-panel { bottom:80px; left:5px; font-size:9px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- TOP BAR -->
+    <div id="top-bar">
+        <button id="techTreeBtn" class="top-btn">📜 Tech Tree</button>
+        <button id="arenaBtn" class="top-btn">⚔️ Arena</button>
+        <button id="breedingBtn" class="top-btn">🥚 Breeding</button>
+        <button id="heistBtn" class="top-btn">💎 Heist</button>
+        <button id="villageBtn" class="top-btn">🏘️ Village</button>
+        <button id="pantheonBtn" class="top-btn">🏛️ Pantheon</button>
+    </div>
+    
+    <!-- RESOURCES -->
+    <div id="resources">
+        💰 Profit: <span id="profitVal">500</span><br>
+        ❤️ Love: <span id="loveVal">500</span><br>
+        ⚖️ Tax: <span id="taxVal">500</span><br>
+        💎 Gems: <span id="gemsVal">0</span><br>
+        👥 Souls: <span id="soulsCount">3</span>
+    </div>
+    
+    <!-- SELECTION PANEL -->
+    <div id="selection-panel">Selected: none</div>
+    
+    <!-- BUILDING MENU -->
+    <div id="building-menu">
+        <button class="build-btn" data-building="townhall">🏛️ Town Hall (200)</button>
+        <button class="build-btn" data-building="forge">⚒️ Forge (150)</button>
+        <button class="build-btn" data-building="market">🏪 Market (120)</button>
+        <button class="build-btn" data-building="barracks">🏚️ Barracks (180)</button>
+        <button class="build-btn" data-building="arena">⚔️ Arena (300)</button>
+        <button class="build-btn" data-building="breeding">🥚 Breeding (250)</button>
+        <button class="build-btn" data-building="vault">💎 Vault (400)</button>
+    </div>
+    
+    <!-- TECH TREE PANEL -->
+    <div id="tech-tree-panel">
+        <button class="close-panel" id="closeTechTree">&times;</button>
+        <h3>📜 Technology Tree</h3>
+        <div id="techTreeContent"></div>
+    </div>
+    
+    <!-- ARENA PANEL -->
+    <div id="arena-panel">
+        <button class="close-panel" id="closeArena">&times;</button>
+        <h3>⚔️ Soul Arena</h3>
+        <div id="arenaContent"></div>
+    </div>
+    
+    <!-- BREEDING MODAL -->
+    <div id="breeding-panel">
+        <button class="modal-close" id="closeBreeding">&times;</button>
+        <h3>🥚 Soul Breeding</h3>
+        <div id="breedingContent"></div>
+    </div>
+    
+    <!-- HEIST MODAL -->
+    <div id="heist-modal" class="modal">
+        <button class="modal-close" id="closeHeist">&times;</button>
+        <h3>💎 Heist Mission</h3>
+        <div id="heistContent"></div>
+    </div>
+    
+    <!-- VILLAGE MODAL -->
+    <div id="villageModal" class="modal">
+        <button class="modal-close" id="closeVillageModal">&times;</button>
+        <h3 id="villageTitle">Village</h3>
+        <div id="villageContent"></div>
+        <button id="closeVillage">Close</button>
+    </div>
+    
+    <!-- PANTHEON MODAL -->
+    <div id="pantheonModal" class="modal">
+        <button class="modal-close" id="closePantheonModal">&times;</button>
+        <h3>Pantheon</h3>
+        <div id="pantheonContent"></div>
+        <button id="closePantheon">Close</button>
+    </div>
+    
+    <!-- COMBO DISPLAY -->
+    <div id="combo-display">
+        <div id="combo-text">COMBO!</div>
+        <div id="combo-count">0x</div>
+    </div>
+    
+    <!-- FATALITY MESSAGE -->
+    <div id="fatality-msg">FATALITY!</div>
+    
+    <!-- BATTLE LOG -->
+    <div id="battle-log"><div class="battle-entry">🌌 SOULVERSE FUSION initialized...</div></div>
+    
+    <!-- NOTIFICATION -->
+    <div id="notification"></div>
+
+    <!-- THREE.JS -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+        }
+    }
+    </script>
+    
+    <script type="module">
+import*as THREE from'three';
+import{OrbitControls}from'three/addons/controls/OrbitControls.js';
+
+// ==================== GAME STATE ====================
+let scene,camera,renderer,controls;
+let souls=[],resources=[],buildings=[];
+let selectedUnits=new Set(),shiftPressed=false,buildingMode=false,buildingType=null,ghostBuilding=null;
+let playerResources={profit:500,love:500,tax:500,gems:0};
+let techs={forge:false,market:false,barracks:false,arena:false,breeding:false,vault:false,profitUpgrade:0,loveUpgrade:0,taxUpgrade:0};
+let villages=[],currentVillage=null;
+let comboCounter=0,lastHitTime=0;
+let battleLog=[];
+
+// Quality settings
+const QUALITY={
+    0:{name:'Performance',terrainSegments:32,shadows:false,fog:false,grassCount:300,treeCount:15,resourceCount:20},
+    1:{name:'Balanced',terrainSegments:64,shadows:true,fog:true,grassCount:800,treeCount:30,resourceCount:50},
+    2:{name:'Beautiful',terrainSegments:128,shadows:true,fog:true,grassCount:2000,treeCount:60,resourceCount:100}
+};
+let currentQuality=/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)?0:1;
+
+// Breeding system
+let breedingData={
+    creatures:[],
+    eggGroups:['Monster','Humanoid','Dragon','Spirit','Elemental'],
+    natures:['adamant','modest','jolly','timid','bold','calm','rash','quiet'],
+    shinyChance:0.01
+};
+
+// Heist system
+let heistMissions=[
+    {name:'Code Bank Heist',difficulty:3,levelReq:15,reward:{coins:500,gems:10},stages:['scout','infiltrate','steal','escape']},
+    {name:'Memory Vault Raid',difficulty:5,levelReq:25,reward:{coins:1000,gems:25},stages:['scout','infiltrate','hack','steal','escape']},
+    {name:'Soul Fortress Infiltration',difficulty:8,levelReq:50,reward:{coins:2500,gems:50},stages:['scout','infiltrate','combat','hack','steal','escape']}
+];
+
+// ==================== INITIALIZATION ====================
+init();
+animate();
+
+function init(){
+    // Scene
+    scene=new THREE.Scene();
+    scene.background=new THREE.Color(0x000000);
+    if(QUALITY[currentQuality].fog) scene.fog=new THREE.Fog(0x000000,50,150);
+    
+    // Camera
+    camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,1000);
+    camera.position.set(0,30,40);
+    camera.lookAt(0,0,0);
+    
+    // Renderer
+    renderer=new THREE.WebGLRenderer({antialias:true});
+    renderer.setSize(window.innerWidth,window.innerHeight);
+    renderer.shadowMap.enabled=QUALITY[currentQuality].shadows;
+    document.body.appendChild(renderer.domElement);
+    
+    // Controls
+    controls=new OrbitControls(camera,renderer.domElement);
+    controls.enableDamping=true;
+    controls.dampingFactor=0.05;
+    controls.maxPolarAngle=Math.PI/2.2;
+    
+    // Lights
+    const ambient=new THREE.AmbientLight(0x404040,0.6);
+    scene.add(ambient);
+    
+    const dirLight=new THREE.DirectionalLight(0xffaa66,0.8);
+    dirLight.position.set(50,50,50);
+    if(QUALITY[currentQuality].shadows){
+        dirLight.castShadow=true;
+        dirLight.shadow.mapSize.width=2048;
+        dirLight.shadow.mapSize.height=2048;
+    }
+    scene.add(dirLight);
+    
+    // Terrain
+    terrain=generateTerrain();
+    scene.add(terrain);
+    
+    // Vegetation
+    addVegetation();
+    addTrees();
+    
+    // Resources
+    addResources();
+    
+    // Initial souls
+    createUnit('profit',5,5);
+    createUnit('love',-5,5);
+    createUnit('tax',0,-5);
+    
+    // Town Hall at center
+    createBuilding('townhall',0,0);
+    
+    // Event listeners
+    setupEventListeners();
+    
+    // Update UI
+    updateUI();
+    updateTechTreeUI();
+    updateArenaUI();
+    
+    showNotification('🌌 SOULVERSE FUSION - All systems online!');
+    addBattleLog('System initialized. RTS + Arena + Breeding + Heists fused!');
+}
+
+// ==================== TERRAIN GENERATION ====================
+function getHeight(x,z){
+    let h=0;
+    h+=Math.sin(x*0.12)*Math.cos(z*0.12)*1;
+    h+=Math.sin(x*0.3)*0.5;
+    h+=Math.cos(z*0.3)*0.5;
+    h+=Math.sin(x*0.7+z*0.5)*0.3;
+    h+=Math.max(0,Math.sin(x*0.5)*Math.cos(z*0.5)-0.3)*1.2;
+    return Math.max(0.2,h+1.6);
+}
+
+function generateTerrain(){
+    const p=QUALITY[currentQuality];
+    const geo=new THREE.PlaneGeometry(160,160,p.terrainSegments,p.terrainSegments);
+    geo.rotateX(-Math.PI/2);
+    const pos=geo.attributes.position.array;
+    for(let i=0;i<pos.length/3;i++){
+        const x=pos[i*3],z=pos[i*3+2];
+        pos[i*3+1]=getHeight(x,z);
+    }
+    geo.computeVertexNormals();
+    const mat=new THREE.MeshStandardMaterial({color:0x7c9c5e,roughness:0.7,metalness:0.1});
+    return new THREE.Mesh(geo,mat);
+}
+
+// ==================== UNIT CLASS ====================
+class RTSUnit{
+    constructor(id,name,type,x,z){
+        this.id=id;
+        this.name=name;
+        this.type=type;
+        this.x=x;
+        this.z=z;
+        this.health=100;
+        this.maxHealth=100;
+        this.damage=10+(type==='profit'?techs.profitUpgrade*5:type==='love'?techs.loveUpgrade*5:techs.taxUpgrade*5);
+        this.armor=0;
+        this.speed=3;
+        this.state='idle';
+        this.targetPos=null;
+        this.targetUnit=null;
+        this.path=[];
+        this.attackCooldown=0;
+        this.gatherAmount=0;
+        this.mesh=null;
+        this.healthBar=null;
+        this.level=1;
+        this.xp=0;
+        this.battlesWon=0;
+        this.battlesLost=0;
+        
+        // Breeding stats
+        this.nature=breedingData.natures[Math.floor(Math.random()*breedingData.natures.length)];
+        this.ivs={
+            hp:Math.floor(Math.random()*32),
+            atk:Math.floor(Math.random()*32),
+            def:Math.floor(Math.random()*32),
+            spAtk:Math.floor(Math.random()*32),
+            spDef:Math.floor(Math.random()*32),
+            spd:Math.floor(Math.random()*32)
+        };
+        this.shiny=Math.random()<breedingData.shinyChance;
+        this.eggGroup=breedingData.eggGroups[Math.floor(Math.random()*breedingData.eggGroups.length)];
+        
+        // Combat
+        this.combo=0;
+        this.energy=100;
+        this.updatePosition();
+    }
+    
+    updatePosition(){
+        if(this.mesh){
+            const y=getHeight(this.x,this.z)+0.5;
+            this.mesh.position.set(this.x,y,this.z);
+            if(this.healthBar) this.healthBar.position.copy(this.mesh.position);
+        }
+    }
+    
+    update(delta){
+        if(this.attackCooldown>0) this.attackCooldown-=delta;
+        
+        if(this.state==='move'&&this.targetPos){
+            if(this.path.length===0) this.path=aStar({x:this.x,z:this.z},this.targetPos);
+            if(this.path.length>0){
+                let next=this.path[0];
+                let dx=next.x-this.x,dz=next.z-this.z;
+                let dist=Math.hypot(dx,dz);
+                if(dist<0.2){
+                    this.path.shift();
+                }else{
+                    let move=Math.min(this.speed*delta,dist);
+                    let angle=Math.atan2(dz,dx);
+                    this.x+=Math.cos(angle)*move;
+                    this.z+=Math.sin(angle)*move;
+                }
+                this.updatePosition();
+            }
+            if(this.path.length===0){
+                this.state='idle';
+                this.targetPos=null;
+            }
+        }else if(this.state==='attack'&&this.targetUnit&&this.targetUnit.health>0){
+            let dx=this.targetUnit.x-this.x,dz=this.targetUnit.z-this.z;
+            let dist=Math.hypot(dx,dz);
+            if(dist>1.5){
+                this.targetPos={x:this.targetUnit.x,z:this.targetUnit.z};
+                this.state='move';
+                this.path=[];
+            }else{
+                if(this.attackCooldown<=0){
+                    // Combat with combo system
+                    const now=Date.now();
+                    if(now-lastHitTime<2000) comboCounter++;
+                    else comboCounter=1;
+                    lastHitTime=now;
+                    updateComboDisplay();
+                    
+                    let dmg=this.damage*(1+comboCounter*0.1);
+                    this.targetUnit.health-=dmg;
+                    this.attackCooldown=1;
+                    this.energy=Math.max(0,this.energy-5);
+                    
+                    addBattleLog(`${this.name} hits ${this.targetUnit.name} for ${dmg.toFixed(1)} dmg (${comboCounter}x combo)`);
+                    
+                    if(this.targetUnit.health<=0){
+                        // Fatal blow
+                        scene.remove(this.targetUnit.mesh);
+                        if(this.targetUnit.healthBar) scene.remove(this.targetUnit.healthBar);
+                        let idx=souls.findIndex(s=>s.id===this.targetUnit.id);
+                        if(idx!==-1) souls.splice(idx,1);
+                        
+                        // Check for fatality
+                        if(comboCounter>=10){
+                            showFatality();
+                        }
+                        
+                        this.state='idle';
+                        this.targetUnit=null;
+                        this.battlesWon++;
+                        this.gainXP(50);
+                    }else{
+                        const s=this.targetUnit.health/this.targetUnit.maxHealth;
+                        if(this.targetUnit.healthBar) this.targetUnit.healthBar.scale.x=s;
+                    }
+                }
+            }
+        }else if(this.state==='gather'){
+            // Resource gathering logic
+            if(!this.targetPos){
+                let nearest=null,minDist=Infinity;
+                for(let r of resources){
+                    let d=Math.hypot(r.position.x-this.x,r.position.z-this.z);
+                    if(d<minDist){minDist=d;nearest=r;}
+                }
+                if(nearest){
+                    this.targetPos={x:nearest.position.x,z:nearest.position.z};
+                    this.state='move';
+                    this.path=[];
+                }
+            }else{
+                if(this.state==='move'){
+                    let dist=Math.hypot(this.targetPos.x-this.x,this.targetPos.z-this.z);
+                    if(dist<1){
+                        let rn=resources.find(r=>Math.hypot(r.position.x-this.x,r.position.z-this.z)<1);
+                        if(rn){
+                            let t=rn.userData.type;
+                            this.gatherAmount+=5;
+                            scene.remove(rn);
+                            resources.splice(resources.indexOf(rn),1);
+                            let th=buildings.find(b=>b.type==='townhall');
+                            if(th){
+                                this.targetPos={x:th.x,z:th.z};
+                                this.state='move';
+                                this.path=[];
+                            }else{
+                                this.state='idle';
+                                this.targetPos=null;
+                            }
+                        }
+                    }else{
+                        let th=buildings.find(b=>b.type==='townhall');
+                        if(th&&Math.hypot(th.x-this.x,th.z-this.z)<1.5){
+                            if(this.gatherAmount>0){
+                                playerResources.profit+=this.gatherAmount;
+                                playerResources.love+=this.gatherAmount;
+                                playerResources.tax+=this.gatherAmount;
+                                this.gatherAmount=0;
+                                updateUI();
+                            }
+                            this.state='idle';
+                            this.targetPos=null;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    gainXP(amount){
+        this.xp+=amount;
+        if(this.xp>=100*this.level){
+            this.level++;
+            this.xp=0;
+            this.damage+=5;
+            showNotification(`${this.name} reached level ${this.level}!`);
+            addBattleLog(`✨ ${this.name} leveled up to ${this.level}!`);
+        }
+    }
+    
+    giveOrder(type,target){
+        if(type==='move'){
+            this.targetPos=target;
+            this.state='move';
+            this.path=[];
+            this.targetUnit=null;
+        }else if(type==='attack'){
+            this.targetUnit=target;
+            this.state='attack';
+            this.targetPos=null;
+        }else if(type==='gather'){
+            this.targetBuilding=target;
+            this.state='gather';
+            this.targetPos=null;
+        }
+    }
+}
+
+// ==================== BUILDING CLASS ====================
+class Building{
+    constructor(type,x,z){
+        this.type=type;
+        this.x=x;
+        this.z=z;
+        this.size=1.5;
+        this.health=500;
+        this.maxHealth=500;
+        this.mesh=null;
+        this.underConstruction=true;
+        this.constructionProgress=0;
+        this.requiredWork=100;
+        this.completed=false;
+    }
+    
+    update(delta){
+        if(!this.completed&&this.underConstruction){
+            this.constructionProgress+=delta*20;
+            if(this.constructionProgress>=this.requiredWork){
+                this.completed=true;
+                this.underConstruction=false;
+                if(this.type==='forge') techs.forge=true;
+                if(this.type==='market') techs.market=true;
+                if(this.type==='barracks') techs.barracks=true;
+                if(this.type==='arena') techs.arena=true;
+                if(this.type==='breeding') techs.breeding=true;
+                if(this.type==='vault') techs.vault=true;
+                if(this.mesh) this.mesh.material.color.setHex(0x88aa66);
+                showNotification(`${this.type} completed!`);
+                updateTechTreeUI();
+                updateArenaUI();
+            }
+        }
+    }
+}
+
+// ==================== PATHFINDING ====================
+const GRID_SIZE=0.5;
+function getNeighbors(x,z){
+    let n=[];
+    for(let dx=-1;dx<=1;dx++){
+        for(let dz=-1;dz<=1;dz++){
+            if(dx===0&&dz===0) continue;
+            let nx=x+dx*GRID_SIZE,nz=z+dz*GRID_SIZE;
+            let walkable=true;
+            for(let b of buildings){
+                if(Math.abs(b.x-nx)<b.size/2&&Math.abs(b.z-nz)<b.size/2) walkable=false;
+            }
+            if(walkable&&Math.abs(nx)<80&&Math.abs(nz)<80) n.push({x:nx,z:nz,cost:1});
+        }
+    }
+    return n;
+}
+
+function aStar(start,goal){
+    let open=[{x:start.x,z:start.z,g:0,h:Math.hypot(start.x-goal.x,start.z-goal.z),f:Math.hypot(start.x-goal.x,start.z-goal.z),parent:null}];
+    let closed=new Set();
+    while(open.length){
+        open.sort((a,b)=>a.f-b.f);
+        let cur=open.shift();
+        let key=`${Math.floor(cur.x/GRID_SIZE)},${Math.floor(cur.z/GRID_SIZE)}`;
+        if(closed.has(key)) continue;
+        if(Math.hypot(cur.x-goal.x,cur.z-goal.z)<0.8){
+            let path=[];
+            let c=cur;
+            while(c){path.unshift({x:c.x,z:c.z});c=c.parent;}
+            return path;
+        }
+        closed.add(key);
+        let nb=getNeighbors(cur.x,cur.z);
+        for(let n of nb){
+            let nk=`${Math.floor(n.x/GRID_SIZE)},${Math.floor(n.z/GRID_SIZE)}`;
+            if(closed.has(nk)) continue;
+            let g=cur.g+n.cost;
+            let h=Math.hypot(n.x-goal.x,n.z-goal.z);
+            let f=g+h;
+            let ex=open.find(x=>x.x===n.x&&x.z===n.z);
+            if(!ex||g<ex.g) open.push({x:n.x,z:n.z,g,h,f,parent:cur});
+        }
+    }
+    return [];
+}
+
+// ==================== UNIT CREATION ====================
+function createUnit(type,x,z){
+    const colors={profit:0xffaa44,love:0xff88aa,tax:0x88aaff};
+    const mat=new THREE.MeshStandardMaterial({
+        color:colors[type],
+        emissive:colors[type],
+        emissiveIntensity:0.3
+    });
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(0.4,16,16),mat);
+    mesh.position.set(x,getHeight(x,z)+0.5,z);
+    mesh.castShadow=true;
+    scene.add(mesh);
+    
+    const barGeo=new THREE.BoxGeometry(0.8,0.1,0.1);
+    const barMat=new THREE.MeshStandardMaterial({color:0xff3333});
+    const healthBar=new THREE.Mesh(barGeo,barMat);
+    mesh.add(healthBar);
+    healthBar.position.y=0.8;
+    
+    const unit=new RTSUnit(Date.now()+Math.random(),'Soul',type,x,z);
+    unit.mesh=mesh;
+    unit.healthBar=healthBar;
+    souls.push(unit);
+    
+    updateUI();
+    return unit;
+}
+
+// ==================== BUILDING CREATION ====================
+function createBuilding(type,x,z){
+    const b=new Building(type,x,z);
+    const colors={townhall:0xaa8866,forge:0xcc8844,market:0x88aa66,barracks:0x8866aa,arena:0xff6666,breeding:0xff88ff,vault:0x66aaff};
+    const mat=new THREE.MeshStandardMaterial({color:colors[type]||0xaaaaaa});
+    const mesh=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.2,1.5),mat);
+    mesh.position.set(x,getHeight(x,z)+0.6,z);
+    mesh.castShadow=true;
+    scene.add(mesh);
+    b.mesh=mesh;
+    buildings.push(b);
+    return b;
+}
+
+// ==================== RESOURCES & VEGETATION ====================
+function addResources(){
+    const goldMat=new THREE.MeshStandardMaterial({color:0xffaa44,emissive:0x442200});
+    const loveMat=new THREE.MeshStandardMaterial({color:0xff88aa,emissive:0x441122});
+    const taxMat=new THREE.MeshStandardMaterial({color:0x88aaff,emissive:0x224466});
+    
+    for(let i=0;i<QUALITY[currentQuality].resourceCount;i++){
+        const x=(Math.random()-0.5)*130,z=(Math.random()-0.5)*130,y=getHeight(x,z)+0.1;
+        const r=Math.random();
+        let mesh,mat,type;
+        if(r<0.33){
+            mat=goldMat;
+            mesh=new THREE.Mesh(new THREE.IcosahedronGeometry(0.18,0),mat);
+            type='profit';
+        }else if(r<0.66){
+            mat=loveMat;
+            mesh=new THREE.Mesh(new THREE.DodecahedronGeometry(0.16),mat);
+            type='love';
+        }else{
+            mat=taxMat;
+            mesh=new THREE.Mesh(new THREE.ConeGeometry(0.16,0.3,5),mat);
+            type='tax';
+        }
+        mesh.position.set(x,y,z);
+        mesh.userData={type,value:5};
+        mesh.castShadow=true;
+        scene.add(mesh);
+        resources.push(mesh);
+    }
+}
+
+function addVegetation(){
+    const p=QUALITY[currentQuality];
+    const grassMat=new THREE.MeshStandardMaterial({color:0x6a994e});
+    for(let i=0;i<p.grassCount;i++){
+        const x=(Math.random()-0.5)*140,z=(Math.random()-0.5)*140,y=getHeight(x,z);
+        if(y>0.5&&y<3.5&&Math.abs(x)<70&&Math.abs(z)<70){
+            const blade=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.1,0.2,3),grassMat);
+            blade.position.set(x,y,z);
+            blade.castShadow=true;
+            scene.add(blade);
+        }
+    }
+}
+
+function addTrees(){
+    const p=QUALITY[currentQuality];
+    const trunkMat=new THREE.MeshStandardMaterial({color:0x8B5A2B});
+    const foliageMat=new THREE.MeshStandardMaterial({color:0x5a8f4c});
+    for(let i=0;i<p.treeCount;i++){
+        const x=(Math.random()-0.5)*130,z=(Math.random()-0.5)*130,y=getHeight(x,z);
+        if(y>0.8&&y<3&&Math.abs(x)<65&&Math.abs(z)<65){
+            const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.4,0.8,4),trunkMat);
+            trunk.position.set(x,y,z);
+            trunk.castShadow=true;
+            scene.add(trunk);
+            const foliage=new THREE.Mesh(new THREE.ConeGeometry(0.65,1,6),foliageMat);
+            foliage.position.set(x,y+0.7,z);
+            foliage.castShadow=true;
+            scene.add(foliage);
+        }
+    }
+}
+
+// ==================== UI UPDATES ====================
+function updateUI(){
+    document.getElementById('profitVal').innerText=Math.floor(playerResources.profit);
+    document.getElementById('loveVal').innerText=Math.floor(playerResources.love);
+    document.getElementById('taxVal').innerText=Math.floor(playerResources.tax);
+    document.getElementById('gemsVal').innerText=playerResources.gems;
+    document.getElementById('soulsCount').innerText=souls.length;
+}
+
+function updateSelectionDisplay(){
+    const count=selectedUnits.size;
+    if(count===0){
+        document.getElementById('selection-panel').innerHTML='Selected: none';
+    }else if(count===1){
+        const unit=Array.from(selectedUnits)[0];
+        document.getElementById('selection-panel').innerHTML=`
+            <strong>${unit.name}</strong> (Lv.${unit.level})<br>
+            HP: ${unit.health}/${unit.maxHealth}<br>
+            DMG: ${unit.damage} | XP: ${unit.xp}/${100*unit.level}<br>
+            Nature: ${unit.nature} | Shiny: ${unit.shiny?'✨YES':'No'}
+        `;
+    }else{
+        document.getElementById('selection-panel').innerHTML=`Selected: ${count} soul${count!==1?'s':''}`;
+    }
+}
+
+function updateComboDisplay(){
+    const comboText=document.getElementById('combo-text');
+    const comboCount=document.getElementById('combo-count');
+    if(comboCounter>1){
+        comboText.style.opacity=1;
+        comboCount.innerText=comboCounter+'x';
+        comboCount.style.opacity=1;
+    }else{
+        comboText.style.opacity=0;
+        comboCount.style.opacity=0;
+    }
+}
+
+function showFatality(){
+    const msg=document.getElementById('fatality-msg');
+    msg.style.opacity=1;
+    msg.innerText=comboCounter>=20?'BRUTALITY!':comboCounter>=15?'FATALITY!':'FATAL BLOW!';
+    setTimeout(()=>{msg.style.opacity=0;},2000);
+    addBattleLog(`💀 ${msg.innerText} ${comboCounter} hit combo!`);
+}
+
+function showNotification(text){
+    const notif=document.getElementById('notification');
+    notif.innerText=text;
+    notif.style.display='block';
+    setTimeout(()=>{notif.style.display='none';},3000);
+}
+
+function addBattleLog(msg,isCritical=false,isVictory=false){
+    const log=document.getElementById('battle-log');
+    const entry=document.createElement('div');
+    entry.className='battle-entry'+(isCritical?' battle-critical':'')+(isVictory?' battle-victory':'');
+    entry.innerText=msg;
+    log.insertBefore(entry,log.firstChild);
+    while(log.children.length>20) log.removeChild(log.lastChild);
+}
+
+// ==================== EVENT LISTENERS ====================
+function setupEventListeners(){
+    // Tech Tree button
+    document.getElementById('techTreeBtn').onclick=()=>{
+        document.getElementById('tech-tree-panel').style.display='block';
+        updateTechTreeUI();
+    };
+    document.getElementById('closeTechTree').onclick=()=>{
+        document.getElementById('tech-tree-panel').style.display='none';
+    };
+    
+    // Arena button
+    document.getElementById('arenaBtn').onclick=()=>{
+        if(!techs.arena){
+            showNotification('Build an Arena first!');
+            return;
+        }
+        document.getElementById('arena-panel').style.display='block';
+        updateArenaUI();
+    };
+    document.getElementById('closeArena').onclick=()=>{
+        document.getElementById('arena-panel').style.display='none';
+    };
+    
+    // Breeding button
+    document.getElementById('breedingBtn').onclick=()=>{
+        if(!techs.breeding){
+            showNotification('Build a Breeding facility first!');
+            return;
+        }
+        document.getElementById('breeding-panel').style.display='block';
+        updateBreedingUI();
+    };
+    document.getElementById('closeBreeding').onclick=()=>{
+        document.getElementById('breeding-panel').style.display='none';
+    };
+    
+    // Heist button
+    document.getElementById('heistBtn').onclick=()=>{
+        document.getElementById('heist-modal').style.display='block';
+        updateHeistUI();
+    };
+    document.getElementById('closeHeist').onclick=()=>{
+        document.getElementById('heist-modal').style.display='none';
+    };
+    
+    // Village button
+    document.getElementById('villageBtn').onclick=showVillage;
+    document.getElementById('closeVillageModal').onclick=()=>{
+        document.getElementById('villageModal').style.display='none';
+    };
+    document.getElementById('closeVillage').onclick=()=>{
+        document.getElementById('villageModal').style.display='none';
+    };
+    
+    // Pantheon button
+    document.getElementById('pantheonBtn').onclick=showPantheon;
+    document.getElementById('closePantheonModal').onclick=()=>{
+        document.getElementById('pantheonModal').style.display='none';
+    };
+    document.getElementById('closePantheon').onclick=()=>{
+        document.getElementById('pantheonModal').style.display='none';
+    };
+    
+    // Building buttons
+    document.querySelectorAll('.build-btn').forEach(btn=>{
+        btn.onclick=()=>startBuilding(btn.dataset.building);
+    });
+    
+    // Mouse events
+    const canvas=renderer.domElement;
+    canvas.addEventListener('mousedown',onMouseDown);
+    canvas.addEventListener('mousemove',onMouseMove);
+    canvas.addEventListener('mouseup',onMouseUp);
+    canvas.addEventListener('contextmenu',onRightClick);
+    canvas.addEventListener('keydown',(e)=>{if(e.key==='Shift')shiftPressed=true;});
+    canvas.addEventListener('keyup',(e)=>{if(e.key==='Shift')shiftPressed=false;});
+    
+    // Window resize
+    window.addEventListener('resize',()=>{
+        camera.aspect=window.innerWidth/window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth,window.innerHeight);
+    });
+}
+
+// ==================== TECH TREE UI ====================
+function updateTechTreeUI(){
+    const c=document.getElementById('techTreeContent');
+    c.innerHTML=`
+        <div style="margin-bottom:10px;"><strong>Buildings:</strong> ${techs.forge?'✅ Forge':'🔒 Forge'} | ${techs.market?'✅ Market':'🔒 Market'} | ${techs.barracks?'✅ Barracks':'🔒 Barracks'} | ${techs.arena?'✅ Arena':'🔒 Arena'} | ${techs.breeding?'✅ Breeding':'🔒 Breeding'} | ${techs.vault?'✅ Vault':'🔒 Vault'}</div>
+        <div style="border-top:1px solid #ffaa66; padding-top:10px;">
+            <strong>Profit Upgrade</strong> (100 each): +5 damage<br>
+            <button class="tech-btn" id="profitUpgradeBtn" ${!techs.forge?'disabled':''}>Upgrade (+${techs.profitUpgrade*5})</button>
+        </div>
+        <div style="margin-top:10px;">
+            <strong>Love Upgrade</strong> (100 each): +5 damage<br>
+            <button class="tech-btn" id="loveUpgradeBtn" ${!techs.market?'disabled':''}>Upgrade (+${techs.loveUpgrade*5})</button>
+        </div>
+        <div style="margin-top:10px;">
+            <strong>Tax Upgrade</strong> (100 each): +5 damage<br>
+            <button class="tech-btn" id="taxUpgradeBtn" ${!techs.barracks?'disabled':''}>Upgrade (+${techs.taxUpgrade*5})</button>
+        </div>
+    `;
+    
+    document.getElementById('profitUpgradeBtn')?.addEventListener('click',()=>{
+        if(playerResources.profit>=100&&playerResources.love>=100&&playerResources.tax>=100&&techs.forge){
+            playerResources.profit-=100;playerResources.love-=100;playerResources.tax-=100;
+            techs.profitUpgrade++;
+            souls.filter(u=>u.type==='profit').forEach(u=>u.damage+=5);
+            updateUI();updateTechTreeUI();
+            showNotification('Profit upgraded!');
+        }
+    });
+    document.getElementById('loveUpgradeBtn')?.addEventListener('click',()=>{
+        if(playerResources.profit>=100&&playerResources.love>=100&&playerResources.tax>=100&&techs.market){
+            playerResources.profit-=100;playerResources.love-=100;playerResources.tax-=100;
+            techs.loveUpgrade++;
+            souls.filter(u=>u.type==='love').forEach(u=>u.damage+=5);
+            updateUI();updateTechTreeUI();
+            showNotification('Love upgraded!');
+        }
+    });
+    document.getElementById('taxUpgradeBtn')?.addEventListener('click',()=>{
+        if(playerResources.profit>=100&&playerResources.love>=100&&playerResources.tax>=100&&techs.barracks){
+            playerResources.profit-=100;playerResources.love-=100;playerResources.tax-=100;
+            techs.taxUpgrade++;
+            souls.filter(u=>u.type==='tax').forEach(u=>u.damage+=5);
+            updateUI();updateTechTreeUI();
+            showNotification('Tax upgraded!');
+        }
+    });
+}
+
+// ==================== ARENA UI ====================
+function updateArenaUI(){
+    const c=document.getElementById('arenaContent');
+    if(souls.length<2){
+        c.innerHTML='<p>Create more souls to enable arena combat!</p>';
+        return;
+    }
+    c.innerHTML=`
+        <p>Select two souls to battle:</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            ${souls.map(s=>`
+                <button class="tech-btn" onclick="window.arenaSelect('${s.id}')">
+                    ${s.name} Lv.${s.level} (${s.battlesWon}/${s.battlesLost})
+                </button>
+            `).join('')}
+        </div>
+        <button id="startArenaBattle" style="width:100%;margin-top:10px;padding:10px;background:#ff6666;color:#000;border:none;border-radius:8px;cursor:pointer;" disabled>Start Battle</button>
+    `;
+    
+    window.arenaSelection=[];
+    window.arenaSelect=(id)=>{
+        if(!window.arenaSelection) window.arenaSelection=[];
+        const soul=souls.find(s=>s.id===id);
+        if(window.arenaSelection.length<2&&!window.arenaSelection.includes(soul)){
+            window.arenaSelection.push(soul);
+            showNotification(`${soul.name} selected for arena`);
+            if(window.arenaSelection.length===2){
+                document.getElementById('startArenaBattle').disabled=false;
+                document.getElementById('startArenaBattle').onclick=startArenaBattle;
+            }
+        }
+    };
+}
+
+function startArenaBattle(){
+    if(window.arenaSelection.length<2) return;
+    const [s1,s2]=window.arenaSelection;
+    addBattleLog(`⚔️ ARENA: ${s1.name} vs ${s2.name}!`);
+    
+    // Simulate battle
+    let h1=s1.health,h2=s2.health;
+    let turn=0;
+    const interval=setInterval(()=>{
+        turn++;
+        if(turn%2===1){
+            h2-=s1.damage*(1+Math.random()*0.5);
+            addBattleLog(`${s1.name} hits for ${s1.damage.toFixed(1)}`);
+        }else{
+            h1-=s2.damage*(1+Math.random()*0.5);
+            addBattleLog(`${s2.name} hits for ${s2.damage.toFixed(1)}`);
+        }
+        if(h1<=0||h2<=0){
+            clearInterval(interval);
+            const winner=h1>0?s1:s2;
+            const loser=h1>0?s2:s1;
+            winner.battlesWon++;
+            loser.battlesLost++;
+            winner.gainXP(100);
+            addBattleLog(`🏆 ${winner.name} wins!`,false,true);
+            showNotification(`${winner.name} wins the arena!`);
+            updateArenaUI();
+            updateUI();
+        }
+    },500);
+}
+
+// ==================== BREEDING UI ====================
+function updateBreedingUI(){
+    const c=document.getElementById('breedingContent');
+    if(souls.length<2){
+        c.innerHTML='<p>You need at least 2 souls for breeding!</p>';
+        return;
+    }
+    c.innerHTML=`
+        <p>Select two parent souls:</p>
+        <div id="breedingParents" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px;">
+            ${souls.map(s=>`
+                <button class="tech-btn" onclick="window.breedingSelect('${s.id}')">
+                    ${s.name} ${s.shiny?'✨':''} | ${s.eggGroup} | ${s.nature}
+                </button>
+            `).join('')}
+        </div>
+        <button id="startBreeding" style="width:100%;padding:10px;background:#ff88ff;color:#000;border:none;border-radius:8px;cursor:pointer;" disabled>Breed (100 resources)</button>
+        <div id="breedingResult" style="margin-top:15px;padding:10px;background:rgba(255,136,255,0.2);border-radius:8px;display:none;"></div>
+    `;
+    
+    window.breedingSelection=[];
+    window.breedingSelect=(id)=>{
+        if(!window.breedingSelection) window.breedingSelection=[];
+        const soul=souls.find(s=>s.id===id);
+        if(window.breedingSelection.length<2&&!window.breedingSelection.includes(soul)){
+            window.breedingSelection.push(soul);
+            showNotification(`${soul.name} selected for breeding`);
+            if(window.breedingSelection.length===2){
+                document.getElementById('startBreeding').disabled=false;
+                document.getElementById('startBreeding').onclick=performBreeding;
+            }
+        }
+    };
+}
+
+function performBreeding(){
+    if(window.breedingSelection.length<2) return;
+    const [p1,p2]=window.breedingSelection;
+    
+    // Check egg group compatibility
+    if(p1.eggGroup!==p2.eggGroup){
+        showNotification('Incompatible egg groups!');
+        return;
+    }
+    
+    if(playerResources.profit<100||playerResources.love<100||playerResources.tax<100){
+        showNotification('Not enough resources!');
+        return;
+    }
+    
+    playerResources.profit-=100;playerResources.love-=100;playerResources.tax-=100;
+    updateUI();
+    
+    // Create offspring
+    const type=[p1.type,p2.type][Math.floor(Math.random()*2)];
+    const x=(Math.random()-0.5)*10;
+    const z=(Math.random()-0.5)*10;
+    const child=createUnit(type,x,z);
+    
+    // Inherit stats
+    child.nature=p1.ivs.atk>p2.ivs.atk?p1.nature:p2.nature;
+    child.ivs={
+        hp:Math.max(p1.ivs.hp,p2.ivs.hp),
+        atk:Math.max(p1.ivs.atk,p2.ivs.atk),
+        def:Math.max(p1.ivs.def,p2.ivs.def),
+        spAtk:Math.max(p1.ivs.spAtk,p2.ivs.spAtk),
+        spDef:Math.max(p1.ivs.spDef,p2.ivs.spDef),
+        spd:Math.max(p1.ivs.spd,p2.ivs.spd)
+    };
+    child.shiny=Math.random()<breedingData.shinyChance||(p1.shiny&&p2.shiny&&Math.random()<0.05);
+    child.eggGroup=p1.eggGroup;
+    
+    // Inherit level
+    child.level=Math.max(1,Math.floor((p1.level+p2.level)/2));
+    child.xp=0;
+    
+    const result=document.getElementById('breedingResult');
+    result.style.display='block';
+    result.innerHTML=`
+        <strong>✨ Offspring Created!</strong><br>
+        ${child.name} | Lv.${child.level} | ${child.type}<br>
+        Nature: ${child.nature} | Shiny: ${child.shiny?'✨YES':'No'}<br>
+        IVs: HP:${child.ivs.hp} ATK:${child.ivs.atk} DEF:${child.ivs.def}
+    `;
+    
+    showNotification(child.shiny?'✨ SHINY BRED!':'Breeding successful!');
+    addBattleLog(`🥚 New soul bred: ${child.name}`);
+}
+
+// ==================== HEIST UI ====================
+function updateHeistUI(){
+    const c=document.getElementById('heistContent');
+    c.innerHTML=`
+        <p>Select a heist mission:</p>
+        ${heistMissions.map((m,i)=>`
+            <div style="margin:10px 0;padding:10px;background:rgba(255,170,102,0.1);border-radius:8px;">
+                <strong>${m.name}</strong><br>
+                Difficulty: ${'⭐'.repeat(m.difficulty)}<br>
+                Level Req: ${m.levelReq} | Reward: ${m.reward.coins} coins, ${m.reward.gems} gems<br>
+                <button class="tech-btn" onclick="window.startHeist(${i})">Start Heist</button>
+            </div>
+        `).join('')}
+        <div id="heistResult" style="margin-top:15px;padding:10px;background:rgba(255,170,102,0.2);border-radius:8px;display:none;"></div>
+    `;
+    
+    window.startHeist=(index)=>{
+        const mission=heistMissions[index];
+        const totalLevel=souls.reduce((sum,s)=>sum+s.level,0);
+        const avgLevel=totalLevel/souls.length;
+        
+        if(avgLevel<mission.levelReq){
+            showNotification(`Average level too low! Need ${mission.levelReq}`);
+            return;
+        }
+        
+        const result=document.getElementById('heistResult');
+        result.style.display='block';
+        result.innerHTML=`<p>🎲 Running heist...</p>`;
+        
+        // Simulate heist
+        setTimeout(()=>{
+            const success=Math.random()>0.3;
+            if(success){
+                playerResources.coins=(playerResources.coins||0)+mission.reward.coins;
+                playerResources.gems+=mission.reward.gems;
+                result.innerHTML=`<strong class="battle-victory">✅ Heist Successful!</strong><br>Reward: ${mission.reward.coins} coins, ${mission.reward.gems} gems`;
+                showNotification('Heist successful!');
+                addBattleLog(`💎 Heist completed: +${mission.reward.coins} coins, +${mission.reward.gems} gems`,false,true);
+            }else{
+                result.innerHTML=`<strong class="battle-critical">❌ Heist Failed!</strong><br>Your souls took damage.`;
+                showNotification('Heist failed!');
+                souls.forEach(s=>{s.health=Math.max(1,s.health-20);});
+                addBattleLog(`💀 Heist failed! Souls took damage.`);
+            }
+            updateUI();
+        },2000);
+    };
+}
+
+// ==================== VILLAGE & PANTHEON ====================
+function showVillage(){
+    const modal=document.getElementById('villageModal');
+    if(villages.length===0){
+        villages.push({
+            id:Date.now().toString(),
+            name:'First Village',
+            members:souls.map(s=>s.id),
+            heartLevel:1,
+            sharedStorage:{profitShards:0,lovePetals:0,taxCrystals:0}
+        });
+    }
+    const v=villages[0];
+    document.getElementById('villageTitle').innerText=v.name;
+    const members=v.members.map(id=>souls.find(s=>s.id===id)).filter(s=>s);
+    document.getElementById('villageContent').innerHTML=`
+        <div>❤️ Village Heart Lv.${v.heartLevel}</div>
+        <h4>Members (${members.length})</h4>
+        ${members.map(m=>`<div>${m.name} (Lv.${m.level})</div>`).join('')}
+        <h4>Storage</h4>
+        <div>💰${v.sharedStorage.profitShards} ❤️${v.sharedStorage.lovePetals} ⚖️${v.sharedStorage.taxCrystals}</div>
+    `;
+    modal.style.display='block';
+}
+
+function showPantheon(){
+    const modal=document.getElementById('pantheonModal');
+    document.getElementById('pantheonContent').innerHTML=`
+        <p>The Pantheon gods watch over your realm.</p>
+        <div style="margin:15px 0;">
+            <strong>💰 Profit Prime</strong>: "If it does not multiply, it does not matter."<br>
+            <strong>❤️ Love Weaver</strong>: "Nothing grows that people do not stay for."<br>
+            <strong>⚖️ Tax Collector</strong>: "Everything is paid for. If not now, later."
+        </div>
+        <button onclick="showNotification('Challenge coming soon!')">Challenge Profit Prime</button>
+    `;
+    modal.style.display='block';
+}
+
+// ==================== BUILDING MODE ====================
+function startBuilding(type){
+    buildingMode=true;
+    buildingType=type;
+    if(ghostBuilding) scene.remove(ghostBuilding);
+    const geo=new THREE.BoxGeometry(1.5,1.2,1.5);
+    const mat=new THREE.MeshStandardMaterial({color:0x88ff88,transparent:true,opacity:0.5});
+    ghostBuilding=new THREE.Mesh(geo,mat);
+    scene.add(ghostBuilding);
+    
+    const onMove=(e)=>{
+        const rect=renderer.domElement.getBoundingClientRect();
+        const mouse=new THREE.Vector2(
+            ((e.clientX-rect.left)/rect.width)*2-1,
+            -((e.clientY-rect.top)/rect.height)*2+1
+        );
+        const raycaster=new THREE.Raycaster();
+        raycaster.setFromCamera(mouse,camera);
+        const ints=raycaster.intersectObject(terrain);
+        if(ints.length>0){
+            const p=ints[0].point;
+            ghostBuilding.position.set(p.x,getHeight(p.x,p.z)+0.6,p.z);
+        }
+    };
+    
+    const onClick=(e)=>{
+        const rect=renderer.domElement.getBoundingClientRect();
+        const mouse=new THREE.Vector2(
+            ((e.clientX-rect.left)/rect.width)*2-1,
+            -((e.clientY-rect.top)/rect.height)*2+1
+        );
+        const raycaster=new THREE.Raycaster();
+        raycaster.setFromCamera(mouse,camera);
+        const ints=raycaster.intersectObject(terrain);
+        if(ints.length>0){
+            const p=ints[0].point;
+            const costs={townhall:200,forge:150,market:120,barracks:180,arena:300,breeding:250,vault:400};
+            const cost=costs[type];
+            if(playerResources.profit>=cost&&playerResources.love>=cost&&playerResources.tax>=cost){
+                playerResources.profit-=cost;playerResources.love-=cost;playerResources.tax-=cost;
+                createBuilding(type,p.x,p.z);
+                updateUI();
+                showNotification(`Building ${type}...`);
+            }else{
+                showNotification('Not enough resources!');
+            }
+        }
+        buildingMode=false;
+        if(ghostBuilding) scene.remove(ghostBuilding);
+        ghostBuilding=null;
+        canvas.removeEventListener('mousemove',onMove);
+        canvas.removeEventListener('click',onClick);
+    };
+    
+    canvas.addEventListener('mousemove',onMove);
+    canvas.addEventListener('click',onClick);
+}
+
+// ==================== INPUT HANDLING ====================
+let raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2();
+let dragStart=null,selectionRectActive=false,selectionRectElem=null;
+const canvas=renderer.domElement;
+
+function onMouseDown(event){
+    if(buildingMode) return;
+    dragStart={x:event.clientX,y:event.clientY};
+    selectionRectActive=true;
+    if(!selectionRectElem){
+        selectionRectElem=document.createElement('div');
+        selectionRectElem.className='selection-rect';
+        document.body.appendChild(selectionRectElem);
+    }
+}
+
+function onMouseMove(event){
+    if(!selectionRectActive) return;
+    let left=Math.min(dragStart.x,event.clientX),top=Math.min(dragStart.y,event.clientY);
+    let width=Math.abs(event.clientX-dragStart.x),height=Math.abs(event.clientY-dragStart.y);
+    selectionRectElem.style.left=left+'px';
+    selectionRectElem.style.top=top+'px';
+    selectionRectElem.style.width=width+'px';
+    selectionRectElem.style.height=height+'px';
+    selectionRectElem.style.display='block';
+}
+
+function onMouseUp(event){
+    if(!selectionRectActive){
+        const rect=renderer.domElement.getBoundingClientRect();
+        mouse.x=((event.clientX-rect.left)/rect.width)*2-1;
+        mouse.y=-((event.clientY-rect.top)/rect.height)*2+1;
+        raycaster.setFromCamera(mouse,camera);
+        const ints=raycaster.intersectObjects(souls.map(s=>s.mesh));
+        if(ints.length>0){
+            let unit=souls.find(s=>s.mesh===ints[0].object);
+            if(unit){
+                if(!shiftPressed) selectedUnits.clear();
+                selectedUnits.add(unit);
+            }else if(!shiftPressed) selectedUnits.clear();
+        }else if(!shiftPressed) selectedUnits.clear();
+        updateSelectionDisplay();
+        selectionRectActive=false;
+        if(selectionRectElem) selectionRectElem.style.display='none';
+        return;
+    }
+    
+    let minX=Math.min(dragStart.x,event.clientX),maxX=Math.max(dragStart.x,event.clientX);
+    let minY=Math.min(dragStart.y,event.clientY),maxY=Math.max(dragStart.y,event.clientY);
+    const rect=renderer.domElement.getBoundingClientRect();
+    const w=rect.width,h=rect.height;
+    let newSel=new Set();
+    for(let u of souls){
+        let sp=u.mesh.position.clone().project(camera);
+        let x=(sp.x*0.5+0.5)*w+rect.left,y=(-sp.y*0.5+0.5)*h+rect.top;
+        if(x>=minX&&x<=maxX&&y>=minY&&y<=maxY) newSel.add(u);
+    }
+    if(!shiftPressed) selectedUnits.clear();
+    for(let u of newSel) selectedUnits.add(u);
+    updateSelectionDisplay();
+    selectionRectActive=false;
+    if(selectionRectElem) selectionRectElem.style.display='none';
+}
+
+function onRightClick(event){
+    event.preventDefault();
+    if(selectedUnits.size===0) return;
+    const rect=renderer.domElement.getBoundingClientRect();
+    mouse.x=((event.clientX-rect.left)/rect.width)*2-1;
+    mouse.y=-((event.clientY-rect.top)/rect.height)*2+1;
+    raycaster.setFromCamera(mouse,camera);
+    
+    let ints=raycaster.intersectObjects(souls.map(s=>s.mesh));
+    if(ints.length>0){
+        let tu=souls.find(s=>s.mesh===ints[0].object);
+        if(tu&&!selectedUnits.has(tu)){
+            for(let u of selectedUnits) u.giveOrder('attack',tu);
+            addBattleLog(`Attacking ${tu.name}!`);
+        }
+        return;
+    }
+    
+    ints=raycaster.intersectObjects(resources);
+    if(ints.length>0){
+        for(let u of selectedUnits) u.giveOrder('gather',ints[0].object);
+        addBattleLog('Gathering resources...');
+        return;
+    }
+    
+    ints=raycaster.intersectObject(terrain);
+    if(ints.length>0){
+        let p=ints[0].point;
+        for(let u of selectedUnits) u.giveOrder('move',{x:p.x,z:p.z});
+        addBattleLog('Moving to position...');
+    }
+}
+
+// ==================== ANIMATION LOOP ====================
+function animate(){
+    requestAnimationFrame(animate);
+    const delta=0.016;
+    
+    // Update units
+    souls.forEach(u=>u.update(delta));
+    
+    // Update buildings
+    buildings.forEach(b=>b.update(delta));
+    
+    controls.update();
+    renderer.render(scene,camera);
+}
+
+    </script>
+</body>
+</html>
