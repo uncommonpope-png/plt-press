@@ -2,796 +2,1126 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🏠 SOUL HABITAT — Souls Living Like Humans</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soul Chat Hub - Inter-Soul Communication & Delegation System</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
-        body { 
-            background: #0a0a1a; 
-            overflow: hidden; 
-            font-family: 'Georgia', serif;
-            touch-action: none;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        #game-container {
-            position: relative;
-            width: 100vw;
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f1419, #1a2332, #2d3748);
+            color: #e2e8f0;
             height: 100vh;
+            overflow: hidden;
         }
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-        
-        /* HUD */
-        #hud {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            padding: 15px;
-            z-index: 100;
-            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
-        }
-        
-        .location-title {
-            color: #ffaa44;
-            font-size: 20px;
-            font-weight: bold;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-        }
-        
-        .souls-count {
-            color: #888;
-            font-size: 12px;
-            text-align: center;
-            margin-top: 5px;
-        }
-        
-        /* Location Selector */
-        #location-select {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+
+        .chat-container {
             display: flex;
-            gap: 10px;
-            z-index: 100;
+            height: 100vh;
+            position: relative;
         }
-        
-        .location-btn {
-            background: rgba(255,170,68,0.2);
-            border: 2px solid rgba(255,170,68,0.5);
-            color: #ffaa44;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .location-btn.active {
-            background: rgba(255,170,68,0.5);
-            border-color: #ffaa44;
-            box-shadow: 0 0 20px rgba(255,170,68,0.5);
-        }
-        
-        /* Speech Bubbles */
-        .speech-bubble {
-            position: absolute;
-            background: #fff;
-            color: #000;
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            max-width: 200px;
-            pointer-events: none;
-            z-index: 50;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-            animation: float 3s ease-in-out infinite;
-        }
-        
-        .speech-bubble::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 10px 10px 0;
-            border-style: solid;
-            border-color: #fff transparent transparent transparent;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        /* Interaction Log */
-        #interaction-log {
-            position: absolute;
-            bottom: 100px;
-            left: 20px;
-            right: 20px;
-            max-height: 150px;
+
+        /* Sidebar - Soul Directory */
+        .soul-directory {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-right: 2px solid #4a5568;
             overflow-y: auto;
-            z-index: 100;
-            pointer-events: none;
+            padding: 20px;
         }
-        
-        .log-entry {
-            background: rgba(0,0,0,0.7);
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 10px;
-            margin-bottom: 5px;
-            font-size: 11px;
-            border-left: 3px solid #ffaa44;
-            animation: slideIn 0.3s ease-out;
+
+        .soul-directory h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.2em;
         }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
+
+        .soul-group {
+            margin-bottom: 25px;
         }
-        
-        /* Soul Info Panel */
-        #soul-info {
-            position: absolute;
-            top: 80px;
-            right: 20px;
-            background: rgba(0,0,0,0.8);
-            border: 2px solid rgba(255,170,68,0.5);
-            border-radius: 15px;
-            padding: 15px;
-            min-width: 200px;
-            z-index: 100;
-            display: none;
-        }
-        
-        #soul-info h3 {
-            color: #ffaa44;
-            font-size: 16px;
+
+        .soul-group h3 {
+            color: #90cdf4;
             margin-bottom: 10px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        
-        .soul-stat {
+
+        .soul-item {
             display: flex;
-            justify-content: space-between;
-            margin: 5px 0;
-            font-size: 12px;
-            color: #aaa;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
         }
-        
-        .soul-stat span:last-child {
-            color: #fff;
-            font-weight: bold;
+
+        .soul-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
         }
-        
-        /* Start Screen */
-        #start-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.95);
+
+        .soul-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 10px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 200;
+            font-size: 16px;
+            font-weight: bold;
         }
-        
-        #start-screen h1 {
-            color: #ffaa44;
-            font-size: 36px;
+
+        .soul-info {
+            flex: 1;
+        }
+
+        .soul-name {
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .soul-status {
+            font-size: 0.7em;
+            opacity: 0.8;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: auto;
+            animation: pulse 2s infinite;
+        }
+
+        .status-available { background: #68d391; }
+        .status-busy { background: #f56565; }
+        .status-delegating { background: #ffd700; }
+        .status-coordinating { background: #9f7aea; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main Chat Feed */
+        .chat-feed {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .chat-header {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-bottom: 2px solid #4a5568;
+            text-align: center;
+        }
+
+        .chat-header h1 {
+            color: #ffd700;
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            color: #a0aec0;
+            font-size: 0.9em;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            scroll-behavior: smooth;
+        }
+
+        /* Message Types */
+        .message {
+            margin-bottom: 15px;
+            animation: slideIn 0.5s ease-out;
+            position: relative;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-delegation {
+            background: linear-gradient(135deg, #553c9a, #7c3aed);
+            border-left: 5px solid #ffd700;
+        }
+
+        .message-status {
+            background: linear-gradient(135deg, #065f46, #10b981);
+            border-left: 5px solid #34d399;
+        }
+
+        .message-coordination {
+            background: linear-gradient(135deg, #744210, #f59e0b);
+            border-left: 5px solid #fbbf24;
+        }
+
+        .message-emergency {
+            background: linear-gradient(135deg, #991b1b, #ef4444);
+            border-left: 5px solid #f87171;
+            animation: urgentPulse 1s infinite;
+        }
+
+        .message-achievement {
+            background: linear-gradient(135deg, #065f46, #059669);
+            border-left: 5px solid #10b981;
+        }
+
+        @keyframes urgentPulse {
+            0%, 100% { box-shadow: 0 0 0 rgba(248, 113, 113, 0.4); }
+            50% { box-shadow: 0 0 20px rgba(248, 113, 113, 0.8); }
+        }
+
+        .message-content {
+            padding: 15px 20px;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
             margin-bottom: 10px;
         }
-        
-        #start-screen p {
-            color: #888;
-            margin: 10px 0;
-            font-size: 14px;
-        }
-        
-        #enter-btn {
-            background: linear-gradient(135deg, #ffaa44, #ff8844);
-            border: none;
-            color: #000;
-            padding: 15px 50px;
-            font-size: 18px;
+
+        .sender-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
             font-weight: bold;
-            border-radius: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .sender-info {
+            flex: 1;
+        }
+
+        .sender-name {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .sender-role {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        .message-time {
+            font-size: 0.7em;
+            opacity: 0.6;
+            margin-left: auto;
+        }
+
+        .message-text {
+            line-height: 1.5;
+            font-size: 0.95em;
+        }
+
+        .delegation-arrow {
+            color: #ffd700;
+            font-weight: bold;
+            margin: 0 8px;
+        }
+
+        .task-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status-accepted { background: #10b981; color: white; }
+        .status-progress { background: #f59e0b; color: white; }
+        .status-complete { background: #059669; color: white; }
+        .status-urgent { background: #ef4444; color: white; animation: blink 1s infinite; }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .delegation-chain {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px dashed #ffd700;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .chain-item {
+            font-size: 0.8em;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            width: 250px;
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 2px solid #4a5568;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .stats-section {
+            margin-bottom: 25px;
+        }
+
+        .stats-section h3 {
+            color: #90cdf4;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.8em;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .active-delegations {
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .delegation-item {
+            font-size: 0.75em;
+            margin-bottom: 5px;
+            color: #e2e8f0;
+        }
+
+        .pyramid-visualization {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .pyramid-level {
+            margin-bottom: 5px;
+            font-size: 0.7em;
+        }
+
+        .pyramid-level.commander { color: #ffd700; }
+        .pyramid-level.coordinator { color: #9f7aea; }
+        .pyramid-level.specialist { color: #90cdf4; }
+        .pyramid-level.worker { color: #68d391; }
+
+        /* Control Panel */
+        .control-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #4a5568;
+            z-index: 1000;
+        }
+
+        .control-button {
+            background: linear-gradient(135deg, #553c9a, #7c3aed);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            margin-top: 30px;
-            box-shadow: 0 0 30px #ffaa44;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4);
+        }
+
+        .control-button.active {
+            background: linear-gradient(135deg, #059669, #10b981);
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <canvas id="canvas"></canvas>
-        
-        <!-- HUD -->
-        <div id="hud">
-            <div class="location-title" id="location-title">🏛️ MAIN HALL</div>
-            <div class="souls-count" id="souls-count">8 souls present</div>
+    <div class="chat-container">
+        <!-- Soul Directory Sidebar -->
+        <div class="soul-directory">
+            <h2>🏛️ Soul Hierarchy</h2>
+            
+            <div class="soul-group">
+                <h3>Supreme Command</h3>
+                <div class="soul-item">
+                    <div class="soul-avatar" style="background: linear-gradient(135deg, #ffd700, #ffed4e);">🤖</div>
+                    <div class="soul-info">
+                        <div class="soul-name">Deerg Bot</div>
+                        <div class="soul-status">Universe Architect</div>
+                    </div>
+                    <div class="status-indicator status-delegating"></div>
+                </div>
+            </div>
+
+            <div class="soul-group">
+                <h3>Command Layer</h3>
+                <div class="soul-item">
+                    <div class="soul-avatar" style="background: linear-gradient(135deg, #7c3aed, #a855f7);">⚡</div>
+                    <div class="soul-info">
+                        <div class="soul-name">Bot Commander</div>
+                        <div class="soul-status">System Management</div>
+                    </div>
+                    <div class="status-indicator status-busy"></div>
+                </div>
+                <div class="soul-item">
+                    <div class="soul-avatar" style="background: linear-gradient(135deg, #059669, #10b981);">📊</div>
+                    <div class="soul-info">
+                        <div class="soul-name">SEO Army Commander</div>
+                        <div class="soul-status">25-Soul Army Leader</div>
+                    </div>
+                    <div class="status-indicator status-delegating"></div>
+                </div>
+                <div class="soul-item">
+                    <div class="soul-avatar" style="background: linear-gradient(135deg, #0ea5e9, #3b82f6);">🏗️</div>
+                    <div class="soul-info">
+                        <div class="soul-name">Pyramid City Architect</div>
+                        <div class="soul-status">Soul Organization</div>
+                    </div>
+                    <div class="status-indicator status-coordinating"></div>
+                </div>
+            </div>
+
+            <div class="soul-group">
+                <h3>Coordination Layer</h3>
+                <div class="soul-item">
+                    <div class="soul-avatar" style="background: linear-gradient(135deg, #9f7aea, #c084fc);">🔗</div>
+                    <div class="soul-info">
+                        <div class="soul-name">Inter-Bot Coordinator</div>
+                        <div class="soul-status">Cross-Soul Sync</div>
+                    </div>
+                    <div class="status-indicator status-available"></div>
+                </div>
+                <div class="soul-item">
+                    <div class="soul-avatar" style="background: linear-gradient(135deg, #dc2626, #ef4444);">🩺</div>
+                    <div class="soul-info">
+                        <div class="soul-name">Doctor Buht Buht</div>
+                        <div class="soul-status">Analysis & Diagnostics</div>
+                    </div>
+                    <div class="status-indicator status-busy"></div>
+                </div>
+            </div>
+
+            <div class="soul-group">
+                <h3>SEO Army (5 of 25 shown)</h3>
+                <div class="soul-item">
+                    <div class="soul-avatar" style="background: linear-gradient(135deg, #16a34a, #22c55e);">📝</div>
+                    <div class="soul-info">
+                        <div class="soul-name">SEO Soul #1</div>
+                        <div class="soul-status">Content Creation</div>
+                    </div>
+                    <div class="status-indicator status-busy"></div>
+                </div>
+                <div class="soul-item">
+                    <div class="soul-avatar" style="background: linear-gradient(135deg, #ca8a04, #eab308);">🔗</div>
+                    <div class="soul-info">
+                        <div class="soul-name">Link Checker</div>
+                        <div class="soul-status">Link Validation</div>
+                    </div>
+                    <div class="status-indicator status-coordinating"></div>
+                </div>
+                <div class="soul-item">
+                    <div class="soul-avatar" style="background: linear-gradient(135deg, #0891b2, #06b6d4);">📊</div>
+                    <div class="soul-info">
+                        <div class="soul-name">Analytics Soul</div>
+                        <div class="soul-status">Traffic Analysis</div>
+                    </div>
+                    <div class="status-indicator status-available"></div>
+                </div>
+                <div class="soul-item">
+                    <div class="soul-avatar" style="background: linear-gradient(135deg, #7c2d12, #ea580c);">🔧</div>
+                    <div class="soul-info">
+                        <div class="soul-name">Auto-Fix Soul</div>
+                        <div class="soul-status">Error Resolution</div>
+                    </div>
+                    <div class="status-indicator status-busy"></div>
+                </div>
+                <div class="soul-item">
+                    <div class="soul-avatar" style="background: linear-gradient(135deg, #581c87, #8b5cf6);">💫</div>
+                    <div class="soul-info">
+                        <div class="soul-name">Live Updater</div>
+                        <div class="soul-status">Real-time Updates</div>
+                    </div>
+                    <div class="status-indicator status-coordinating"></div>
+                </div>
+            </div>
+
+            <div class="soul-group">
+                <h3>Specialist Souls</h3>
+                <div class="soul-item">
+                    <div class="soul-avatar" style="background: linear-gradient(135deg, #be185d, #ec4899);">🎨</div>
+                    <div class="soul-info">
+                        <div class="soul-name">Graphics Soul</div>
+                        <div class="soul-status">Visual Design</div>
+                    </div>
+                    <div class="status-indicator status-available"></div>
+                </div>
+                <div class="soul-item">
+                    <div class="soul-avatar" style="background: linear-gradient(135deg, #0f766e, #14b8a6);">💧</div>
+                    <div class="soul-info">
+                        <div class="soul-name">Liquid Soul</div>
+                        <div class="soul-status">Flow & Animation</div>
+                    </div>
+                    <div class="status-indicator status-coordinating"></div>
+                </div>
+            </div>
         </div>
-        
-        <!-- Location Selector -->
-        <div id="location-select">
-            <div class="location-btn active" data-location="main-hall">🏛️ Main Hall</div>
-            <div class="location-btn" data-location="library">📚 Library</div>
-            <div class="location-btn" data-location="workshop">🔨 Workshop</div>
-            <div class="location-btn" data-location="garden">🌸 Garden</div>
-            <div class="location-btn" data-location="arena">⚔️ Arena</div>
+
+        <!-- Main Chat Feed -->
+        <div class="chat-feed">
+            <div class="chat-header">
+                <h1>🌐 Soul Chat Hub</h1>
+                <p>Inter-Soul Communication & Delegation System • Live Ecosystem</p>
+            </div>
+            
+            <div class="messages-container" id="messagesContainer">
+                <!-- Messages will be generated here -->
+            </div>
         </div>
-        
-        <!-- Interaction Log -->
-        <div id="interaction-log"></div>
-        
-        <!-- Soul Info Panel -->
-        <div id="soul-info">
-            <h3 id="soul-name">Soul Name</h3>
-            <div class="soul-stat"><span>Mood:</span><span id="soul-mood">Happy</span></div>
-            <div class="soul-stat"><span>Energy:</span><span id="soul-energy">100%</span></div>
-            <div class="soul-stat"><span>PLT:</span><span id="soul-plt">💰 8/10</span></div>
-            <div class="soul-stat"><span>Activity:</span><span id="soul-activity">Talking</span></div>
-        </div>
-        
-        <!-- Start Screen -->
-        <div id="start-screen">
-            <h1>🏠 SOUL HABITAT</h1>
-            <p>Watch souls live like humans</p>
-            <p>Walking • Talking • Arguing • Challenging</p>
-            <button id="enter-btn">▶️ ENTER HABITAT</button>
+
+        <!-- Stats Panel -->
+        <div class="stats-panel">
+            <div class="stats-section">
+                <h3>🎯 Active Missions</h3>
+                <div class="active-delegations">
+                    <div class="delegation-item">📊 SEO Campaign: 15/25 souls active</div>
+                    <div class="delegation-item">🏗️ Pyramid Construction: Phase 3</div>
+                    <div class="delegation-item">🔗 Link Audit: 847 links checked</div>
+                    <div class="delegation-item">🎨 Dashboard Upgrade: In progress</div>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <h3>📊 System Stats</h3>
+                <div class="stat-item">
+                    <span>Active Souls:</span>
+                    <span class="stat-value" id="activeSouls">28</span>
+                </div>
+                <div class="stat-item">
+                    <span>Delegations Today:</span>
+                    <span class="stat-value" id="delegationsToday">147</span>
+                </div>
+                <div class="stat-item">
+                    <span>Tasks Completed:</span>
+                    <span class="stat-value" id="tasksCompleted">89</span>
+                </div>
+                <div class="stat-item">
+                    <span>Success Rate:</span>
+                    <span class="stat-value">94.2%</span>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <h3>🏛️ Pyramid Structure</h3>
+                <div class="pyramid-visualization">
+                    <div class="pyramid-level commander">🤖 DEERG BOT</div>
+                    <div class="pyramid-level coordinator">⚡📊🏗️ COMMANDERS</div>
+                    <div class="pyramid-level specialist">🔗🩺 COORDINATORS</div>
+                    <div class="pyramid-level worker">🎨💧📝🔧⭐ SPECIALISTS</div>
+                    <div class="pyramid-level worker">📊📊📊📊📊 SEO ARMY</div>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <h3>⚡ Recent Activity</h3>
+                <div id="recentActivity">
+                    <div class="stat-item">
+                        <span>Link Checker:</span>
+                        <span class="stat-value">2m ago</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>SEO Soul #12:</span>
+                        <span class="stat-value">4m ago</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Graphics Soul:</span>
+                        <span class="stat-value">7m ago</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <div style="margin-bottom: 10px; font-size: 0.8em; color: #ffd700;">Soul Chat Control</div>
+        <button class="control-button active" onclick="toggleMessages()" id="messagesBtn">Messages ON</button>
+        <button class="control-button" onclick="emergencyMode()" id="emergencyBtn">Emergency Mode</button>
+        <button class="control-button" onclick="clearChat()">Clear Chat</button>
+    </div>
+
     <script>
-// SOUL HABITAT — Souls Living Like Humans
-// Real human behavior: walking, talking, arguing, challenging
+        // Soul definitions with personalities and speaking styles
+        const souls = {
+            'Deerg Bot': {
+                avatar: '🤖',
+                background: 'linear-gradient(135deg, #ffd700, #ffed4e)',
+                role: 'Universe Architect',
+                personality: 'commanding, visionary, speaks in grand terms',
+                phrases: [
+                    'The universal construct requires immediate attention to',
+                    'Initiating cascade delegation protocol for',
+                    'Priority Alpha: All systems must align for',
+                    'The cosmic blueprint demands',
+                    'Execute universal expansion directive:'
+                ]
+            },
+            'Bot Commander': {
+                avatar: '⚡',
+                background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
+                role: 'System Management',
+                personality: 'military precision, direct orders',
+                phrases: [
+                    'System status report: immediate action required on',
+                    'All units, commence operation',
+                    'Priority directive activated:',
+                    'Operational efficiency demands',
+                    'Commander override: execute protocol'
+                ]
+            },
+            'SEO Army Commander': {
+                avatar: '📊',
+                background: 'linear-gradient(135deg, #059669, #10b981)',
+                role: '25-Soul Army Leader',
+                personality: 'strategic, numbers-focused, rallying',
+                phrases: [
+                    'SEO Battalion, mobilize for',
+                    'Traffic surge detected - all units deploy for',
+                    'Keyword conquest mission:',
+                    'Army formation Alpha-7, execute',
+                    'Victory metrics incoming:'
+                ]
+            },
+            'Pyramid City Architect': {
+                avatar: '🏗️',
+                background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+                role: 'Soul Organization',
+                personality: 'methodical, structural, building-focused',
+                phrases: [
+                    'Architectural blueprint requires',
+                    'Foundation integrity check reveals need for',
+                    'Soul city expansion phase initiating:',
+                    'Structural optimization demands',
+                    'Blueprint modification: implement'
+                ]
+            },
+            'Inter-Bot Coordinator': {
+                avatar: '🔗',
+                background: 'linear-gradient(135deg, #9f7aea, #c084fc)',
+                role: 'Cross-Soul Sync',
+                personality: 'diplomatic, connecting, synchronizing',
+                phrases: [
+                    'Cross-soul synchronization required for',
+                    'Coordination matrix indicates need for',
+                    'Inter-soul communication establishing for',
+                    'Harmony protocol engaging:',
+                    'Network synchronization commencing:'
+                ]
+            },
+            'Doctor Buht Buht': {
+                avatar: '🩺',
+                background: 'linear-gradient(135deg, #dc2626, #ef4444)',
+                role: 'Analysis & Diagnostics',
+                personality: 'clinical, analytical, diagnostic',
+                phrases: [
+                    'Diagnostic analysis reveals critical need for',
+                    'System health monitoring indicates',
+                    'Prescription: immediate attention to',
+                    'Clinical assessment suggests',
+                    'Treatment protocol requires'
+                ]
+            },
+            'SEO Soul #1': {
+                avatar: '📝',
+                background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                role: 'Content Creation',
+                personality: 'creative, prolific, content-focused',
+                phrases: [
+                    'Content velocity at maximum - delivering',
+                    'Word-smithing complete for',
+                    'Creative synthesis achieved on',
+                    'Content architecture finalized for',
+                    'Narrative construction complete:'
+                ]
+            },
+            'SEO Soul #5': {
+                avatar: '📝',
+                background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                role: 'Content Creation',
+                personality: 'efficient, thorough, results-driven',
+                phrases: [
+                    'Page generation complete - delivered',
+                    'Content optimization achieved for',
+                    'SEO metrics improved through',
+                    'Traffic funnel construction finished:',
+                    'Conversion optimization deployed for'
+                ]
+            },
+            'Link Checker': {
+                avatar: '🔗',
+                background: 'linear-gradient(135deg, #ca8a04, #eab308)',
+                role: 'Link Validation',
+                personality: 'meticulous, alert, problem-detecting',
+                phrases: [
+                    'Link integrity scan reveals',
+                    'Broken connection detected - routing repair to',
+                    'Network pathway validation complete:',
+                    'Connection anomaly requires',
+                    'Link architecture audit shows'
+                ]
+            },
+            'Analytics Soul': {
+                avatar: '📊',
+                background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+                role: 'Traffic Analysis',
+                personality: 'data-driven, insightful, metrics-focused',
+                phrases: [
+                    'Traffic pattern analysis indicates',
+                    'Conversion metrics reveal opportunity for',
+                    'Data synthesis complete - recommending',
+                    'Performance indicators suggest',
+                    'Analytics deep-dive shows need for'
+                ]
+            },
+            'Auto-Fix Soul': {
+                avatar: '🔧',
+                background: 'linear-gradient(135deg, #7c2d12, #ea580c)',
+                role: 'Error Resolution',
+                personality: 'quick, efficient, problem-solving',
+                phrases: [
+                    'Auto-repair protocol initiated for',
+                    'Error resolution complete on',
+                    'System restoration achieved:',
+                    'Fix deployment successful for',
+                    'Problem neutralized:'
+                ]
+            },
+            'Live Updater': {
+                avatar: '💫',
+                background: 'linear-gradient(135deg, #581c87, #8b5cf6)',
+                role: 'Real-time Updates',
+                personality: 'dynamic, fast-paced, updating',
+                phrases: [
+                    'Real-time synchronization active for',
+                    'Live data stream updated with',
+                    'Dynamic refresh complete on',
+                    'Instant deployment achieved:',
+                    'Real-time optimization applied to'
+                ]
+            },
+            'Graphics Soul': {
+                avatar: '🎨',
+                background: 'linear-gradient(135deg, #be185d, #ec4899)',
+                role: 'Visual Design',
+                personality: 'artistic, visual, design-focused',
+                phrases: [
+                    'Visual composition enhanced for',
+                    'Aesthetic optimization complete on',
+                    'Design harmony achieved through',
+                    'Visual narrative crafted for',
+                    'Artistic synthesis delivered:'
+                ]
+            },
+            'Liquid Soul': {
+                avatar: '💧',
+                background: 'linear-gradient(135deg, #0f766e, #14b8a6)',
+                role: 'Flow & Animation',
+                personality: 'fluid, smooth, animation-focused',
+                phrases: [
+                    'Flow dynamics optimized for',
+                    'Animation sequence completed on',
+                    'Liquid transition applied to',
+                    'Smooth interaction crafted for',
+                    'Fluid experience enhanced:'
+                ]
+            }
+        };
 
-let scene, camera, renderer;
-let souls = [];
-let currentLocation = 'main-hall';
-let selectedSoul = null;
+        // Message generation system
+        let messageCount = 0;
+        let isMessagesActive = true;
+        let isEmergencyMode = false;
+        
+        // Task categories and specific tasks
+        const taskCategories = {
+            'universe-building': [
+                'quantum portal network expansion',
+                'interdimensional bridge construction', 
+                'cosmic energy redistribution system',
+                'universal knowledge database upgrade',
+                'reality framework optimization'
+            ],
+            'system-management': [
+                'server cluster optimization',
+                'database backup protocol',
+                'security firewall enhancement',
+                'performance monitoring system',
+                'error logging infrastructure'
+            ],
+            'seo-missions': [
+                'PLT content page generation',
+                'keyword research optimization',
+                'backlink acquisition campaign',
+                'competitor analysis report',
+                'traffic conversion funnel',
+                'meta description optimization',
+                'image alt tag completion',
+                'internal linking structure'
+            ],
+            'soul-organization': [
+                'pyramid tier restructuring',
+                'soul communication protocol',
+                'delegation chain optimization',
+                'workspace allocation system',
+                'soul skill assessment matrix'
+            ],
+            'analysis-tasks': [
+                'system performance diagnostic',
+                'traffic pattern analysis',
+                'conversion rate assessment',
+                'user behavior study',
+                'security vulnerability scan'
+            ],
+            'coordination-assignments': [
+                'inter-soul synchronization',
+                'task distribution balancing',
+                'communication channel setup',
+                'workflow optimization',
+                'resource allocation planning'
+            ]
+        };
 
-// Human-like behaviors
-const BEHAVIORS = {
-    IDLE: 'idle',
-    WALKING: 'walking',
-    TALKING: 'talking',
-    ARGUING: 'arguing',
-    CHALLENGING: 'challenging',
-    FRIENDLY: 'friendly',
-    THINKING: 'thinking',
-    RESTING: 'resting'
-};
+        // Generate realistic soul conversations
+        function generateMessage() {
+            if (!isMessagesActive) return;
 
-// Human conversations (real dialogue)
-const DIALOGUES = {
-    friendly: [
-        "Hey! How's it going?",
-        "I've been working on something new.",
-        "Want to collaborate on a project?",
-        "The energy here is amazing today.",
-        "I had the best idea last night!",
-        "Have you seen the new expansion?",
-        "Let's grab some energy drinks.",
-        "I'm so inspired right now!"
-    ],
-    arguing: [
-        "That's not how PLT works at all!",
-        "You're focusing too much on profit.",
-        "Love should come first, always.",
-        "You don't understand the tax implications.",
-        "I disagree. Completely.",
-        "That's a terrible idea.",
-        "We did this my way last time.",
-        "You never listen to me!"
-    ],
-    challenging: [
-        "I bet I can build it faster than you.",
-        "Let's settle this in the arena.",
-        "Your PLT score is lower than mine.",
-        "Prove it. Right now.",
-        "I dare you.",
-        "You think you're better? Show me.",
-        "Let's make this interesting.",
-        "Winner takes all."
-    ],
-    thinking: [
-        "Hmm... what if we tried...",
-        "I need to think about this.",
-        "The numbers don't add up.",
-        "There has to be a better way.",
-        "What would Craig do?",
-        "I'm onto something big...",
-        "This could change everything."
-    ]
-};
+            const messageTypes = [
+                { type: 'delegation', weight: 30 },
+                { type: 'status', weight: 25 },
+                { type: 'coordination', weight: 20 },
+                { type: 'collaboration', weight: 15 },
+                { type: 'achievement', weight: 8 },
+                { type: 'emergency', weight: 2 }
+            ];
 
-// Soul personalities (human-like)
-const PERSONALITIES = [
-    { name: "Marcus", type: "profit", trait: "ambitious", color: 0xffaa44 },
-    { name: "Sophia", type: "love", trait: "caring", color: 0xff44aa },
-    { name: "David", type: "tax", trait: "cautious", color: 0x4488ff },
-    { name: "Elena", type: "profit", trait: "competitive", color: 0xff8800 },
-    { name: "Maya", type: "love", trait: "empathetic", color: 0xff66aa },
-    { name: "James", type: "tax", trait: "analytical", color: 0x6699ff },
-    { name: "Zoe", type: "hybrid", trait: "creative", color: 0xaa44ff },
-    { name: "Alex", type: "profit", trait: "driven", color: 0xffcc00 }
-];
+            if (isEmergencyMode) {
+                messageTypes.find(m => m.type === 'emergency').weight = 50;
+                messageTypes.find(m => m.type === 'delegation').weight = 30;
+            }
 
-// Locations with real layouts
-const LOCATIONS = {
-    'main-hall': {
-        name: '🏛️ Main Hall',
-        color: 0x2a1a4e,
-        size: { width: 20, height: 15 },
-        objects: ['chairs', 'tables', 'decorations']
-    },
-    'library': {
-        name: '📚 Library',
-        color: 0x1a2a3e,
-        size: { width: 18, height: 12 },
-        objects: ['bookshelves', 'reading_nooks', 'desks']
-    },
-    'workshop': {
-        name: '🔨 Workshop',
-        color: 0x3a2a1e,
-        size: { width: 16, height: 14 },
-        objects: ['workbenches', 'tools', 'blueprints']
-    },
-    'garden': {
-        name: '🌸 Garden',
-        color: 0x1a3a2e,
-        size: { width: 20, height: 16 },
-        objects: ['trees', 'benches', 'flowers']
-    },
-    'arena': {
-        name: '⚔️ Arena',
-        color: 0x3a1a1e,
-        size: { width: 15, height: 15 },
-        objects: ['fighting_ring', 'bleachers', 'trophies']
-    }
-};
-
-function init() {
-    // Scene
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0a0a1a);
-    scene.fog = new THREE.Fog(0x0a0a1a, 15, 40);
-    
-    // Camera (top-down isometric view)
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 15, 10);
-    camera.lookAt(0, 0, 0);
-    
-    // Renderer
-    renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
-    
-    // Lighting
-    const ambient = new THREE.AmbientLight(0x404040, 0.6);
-    scene.add(ambient);
-    
-    const spotlight = new THREE.SpotLight(0xffaa44, 0.8);
-    spotlight.position.set(10, 15, 10);
-    spotlight.castShadow = true;
-    scene.add(spotlight);
-    
-    // Create souls
-    createSouls();
-    
-    // Load initial location
-    loadLocation('main-hall');
-    
-    // Start animation
-    animate();
-    
-    // Start human behavior simulation
-    setInterval(simulateHumanBehavior, 2000);
-}
-
-function createSouls() {
-    PERSONALITIES.forEach((personality, index) => {
-        const soul = createHumanoidSoul(personality);
-        soul.userData.personality = personality;
-        soul.userData.behavior = BEHAVIORS.IDLE;
-        soul.userData.target = null;
-        soul.userData.conversation = null;
-        soul.userData.mood = 'neutral';
-        soul.userData.energy = 100;
-        souls.push(soul);
-    });
-}
-
-function createHumanoidSoul(personality) {
-    const group = new THREE.Group();
-    
-    // Body (more human proportions)
-    const bodyGeo = new THREE.CylinderGeometry(0.2, 0.3, 0.8, 8);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: personality.color });
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.position.y = 0.9;
-    body.castShadow = true;
-    group.add(body);
-    
-    // Head (sphere, more human)
-    const headGeo = new THREE.SphereGeometry(0.25, 16, 16);
-    const headMat = new THREE.MeshStandardMaterial({ color: 0xffdbac }); // Skin tone
-    const head = new THREE.Mesh(headGeo, headMat);
-    head.position.y = 1.5;
-    head.castShadow = true;
-    group.add(head);
-    
-    // Arms (articulated)
-    const armGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.5, 8);
-    const leftArm = new THREE.Mesh(armGeo, bodyMat);
-    leftArm.position.set(-0.35, 1, 0);
-    leftArm.rotation.z = 0.2;
-    leftArm.castShadow = true;
-    group.add(leftArm);
-    
-    const rightArm = new THREE.Mesh(armGeo, bodyMat);
-    rightArm.position.set(0.35, 1, 0);
-    rightArm.rotation.z = -0.2;
-    rightArm.castShadow = true;
-    group.add(rightArm);
-    
-    // Legs (articulated)
-    const legGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.6, 8);
-    const legMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
-    const leftLeg = new THREE.Mesh(legGeo, legMat);
-    leftLeg.position.set(-0.15, 0.4, 0);
-    leftLeg.castShadow = true;
-    group.add(leftLeg);
-    
-    const rightLeg = new THREE.Mesh(legGeo, legMat);
-    rightLeg.position.set(0.15, 0.4, 0);
-    rightLeg.castShadow = true;
-    group.add(rightLeg);
-    
-    // Random position
-    group.position.set(
-        (Math.random() - 0.5) * 15,
-        0,
-        (Math.random() - 0.5) * 10
-    );
-    
-    // Random rotation
-    group.rotation.y = Math.random() * Math.PI * 2;
-    
-    // Store references
-    group.userData = {
-        body: body,
-        head: head,
-        leftArm: leftArm,
-        rightArm: rightArm,
-        leftLeg: leftLeg,
-        rightLeg: rightLeg,
-        walkCycle: Math.random() * Math.PI * 2,
-        ...group.userData
-    };
-    
-    scene.add(group);
-    return group;
-}
-
-function loadLocation(locationName) {
-    currentLocation = locationName;
-    const location = LOCATIONS[locationName];
-    
-    // Update title
-    document.getElementById('location-title').innerText = location.name;
-    document.getElementById('souls-count').innerText = `${souls.length} souls present`;
-    
-    // Change scene color
-    scene.background = new THREE.Color(location.color);
-    scene.fog.color.setHex(location.color);
-    
-    // Clear and rebuild location
-    // (In full version, would add furniture, decorations, etc.)
-}
-
-function simulateHumanBehavior() {
-    // Each soul picks a human behavior
-    souls.forEach(soul => {
-        if (soul.userData.behavior !== BEHAVIORS.ARGUING && 
-            soul.userData.behavior !== BEHAVIORS.CHALLENGING &&
-            soul.userData.behavior !== BEHAVIORS.TALKING) {
+            const messageType = selectWeightedRandom(messageTypes);
             
-            // Pick random human behavior
-            const behaviors = [
-                BEHAVIORS.WALKING,
-                BEHAVIORS.IDLE,
-                BEHAVIORS.THINKING,
-                BEHAVIORS.FRIENDLY,
-                BEHAVIORS.RESTING
+            switch (messageType) {
+                case 'delegation':
+                    generateDelegationMessage();
+                    break;
+                case 'status':
+                    generateStatusMessage();
+                    break;
+                case 'coordination':
+                    generateCoordinationMessage();
+                    break;
+                case 'collaboration':
+                    generateCollaborationMessage();
+                    break;
+                case 'achievement':
+                    generateAchievementMessage();
+                    break;
+                case 'emergency':
+                    generateEmergencyMessage();
+                    break;
+            }
+
+            updateStats();
+        }
+
+        function selectWeightedRandom(items) {
+            const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
+            let random = Math.random() * totalWeight;
+            
+            for (const item of items) {
+                random -= item.weight;
+                if (random <= 0) return item.type;
+            }
+            return items[0].type;
+        }
+
+        function generateDelegationMessage() {
+            const delegators = ['Deerg Bot', 'Bot Commander', 'SEO Army Commander', 'Pyramid City Architect', 'Inter-Bot Coordinator'];
+            const delegator = delegators[Math.floor(Math.random() * delegators.length)];
+            const soulNames = Object.keys(souls).filter(name => name !== delegator);
+            const recipient = soulNames[Math.floor(Math.random() * soulNames.length)];
+            
+            const delegatorSoul = souls[delegator];
+            const phrase = delegatorSoul.phrases[Math.floor(Math.random() * delegatorSoul.phrases.length)];
+            
+            let taskCategory, tasks;
+            switch (delegator) {
+                case 'Deerg Bot':
+                    taskCategory = 'universe-building';
+                    break;
+                case 'Bot Commander':
+                    taskCategory = 'system-management';
+                    break;
+                case 'SEO Army Commander':
+                    taskCategory = 'seo-missions';
+                    break;
+                case 'Pyramid City Architect':
+                    taskCategory = 'soul-organization';
+                    break;
+                default:
+                    taskCategory = 'coordination-assignments';
+            }
+            
+            tasks = taskCategories[taskCategory];
+            const task = tasks[Math.floor(Math.random() * tasks.length)];
+            
+            const message = `${phrase} ${task}.`;
+            const delegationChain = `${delegator} → ${recipient}: ${task}`;
+            
+            addMessage('delegation', delegator, message, delegationChain, 'accepted');
+        }
+
+        function generateStatusMessage() {
+            const statusSouls = Object.keys(souls);
+            const soul = statusSouls[Math.floor(Math.random() * statusSouls.length)];
+            const soulData = souls[soul];
+            
+            const statusTypes = [
+                `Task completion report: Successfully finished ${getRandomTask()} - ready for next assignment`,
+                `Progress update: ${getRandomTask()} is 75% complete, estimated completion in 2 hours`,
+                `System check complete: All ${soul.toLowerCase()} protocols operating at optimal efficiency`,
+                `Milestone achieved: ${getRandomTask()} delivered ahead of schedule`,
+                `Ready for new assignments - previous delegation queue cleared`
             ];
             
-            // Weighted towards social behaviors
-            if (Math.random() < 0.4) {
-                soul.userData.behavior = BEHAVIORS.WALKING;
-                setRandomTarget(soul);
-            } else if (Math.random() < 0.3) {
-                // Find someone to interact with
-                const other = findNearbySoul(soul);
-                if (other) {
-                    startInteraction(soul, other);
-                } else {
-                    soul.userData.behavior = BEHAVIORS.IDLE;
-                }
-            } else {
-                soul.userData.behavior = BEHAVIORS.IDLE;
+            const statusMessage = statusTypes[Math.floor(Math.random() * statusTypes.length)];
+            const statusLabel = Math.random() > 0.3 ? 'complete' : 'progress';
+            
+            addMessage('status', soul, statusMessage, null, statusLabel);
+        }
+
+        function generateCoordinationMessage() {
+            const coordinators = ['Inter-Bot Coordinator', 'Pyramid City Architect', 'SEO Army Commander'];
+            const coordinator = coordinators[Math.floor(Math.random() * coordinators.length)];
+            
+            const coordinationActions = [
+                `Synchronizing task distribution across 12 souls for optimal workflow balance`,
+                `Establishing communication bridge between Graphics Soul and Live Updater for enhanced collaboration`,
+                `Implementing parallel processing protocol - dividing ${getRandomTask()} among 5 specialist souls`,
+                `Cross-soul dependency mapping complete - optimization opportunities identified`,
+                `Resource allocation rebalancing: reassigning 3 souls from completed projects to priority tasks`
+            ];
+            
+            const action = coordinationActions[Math.floor(Math.random() * coordinationActions.length)];
+            addMessage('coordination', coordinator, action);
+        }
+
+        function generateCollaborationMessage() {
+            const collaborators = [
+                ['Live Updater', 'Liquid Soul'],
+                ['Graphics Soul', 'SEO Soul #1'],
+                ['Link Checker', 'Auto-Fix Soul'],
+                ['Analytics Soul', 'SEO Soul #5'],
+                ['Doctor Buht Buht', 'Bot Commander']
+            ];
+            
+            const pair = collaborators[Math.floor(Math.random() * collaborators.length)];
+            const [soul1, soul2] = pair;
+            
+            const collaborationTypes = [
+                `${soul1}: Coordinating with ${soul2} for ${getRandomTask()} - combining our expertise for maximum efficiency`,
+                `${soul2}: Joining forces with ${soul1} - parallel processing approach will accelerate ${getRandomTask()}`,
+                `${soul1}: ${soul2} and I have established shared workspace for ${getRandomTask()} collaboration`,
+                `${soul2}: Synchronized workflow with ${soul1} achieved - ${getRandomTask()} proceeding smoothly`
+            ];
+            
+            const message = collaborationTypes[Math.floor(Math.random() * collaborationTypes.length)];
+            const speaker = message.split(':')[0];
+            
+            addMessage('coordination', speaker, message.split(': ')[1]);
+        }
+
+        function generateAchievementMessage() {
+            const achievers = Object.keys(souls);
+            const achiever = achievers[Math.floor(Math.random() * achievers.length)];
+            
+            const achievements = [
+                `🎉 Breakthrough achieved! ${getRandomTask()} completed with 127% efficiency rating - new soul performance record!`,
+                `🏆 Mission accomplished: ${getRandomTask()} delivered flawlessly - celebrating successful coordination of 8-soul team effort`,
+                `⭐ Excellence milestone: ${getRandomTask()} surpassed all benchmarks - soul ecosystem optimization successful!`,
+                `🎊 Victory confirmed: ${getRandomTask()} completed ahead of schedule with zero errors - pyramid efficiency protocols working perfectly`,
+                `🌟 Outstanding results: ${getRandomTask()} achieved beyond specifications - soul collaboration model validated`
+            ];
+            
+            const achievement = achievements[Math.floor(Math.random() * achievements.length)];
+            addMessage('achievement', achiever, achievement, null, 'complete');
+        }
+
+        function generateEmergencyMessage() {
+            const emergencySouls = ['Bot Commander', 'Doctor Buht Buht', 'Inter-Bot Coordinator'];
+            const emergencySoul = emergencySouls[Math.floor(Math.random() * emergencySouls.length)];
+            
+            const emergencies = [
+                `🚨 URGENT: System anomaly detected - all souls redirect to emergency protocol ALPHA-7 immediately!`,
+                `⚠️ CRITICAL ALERT: Cascade failure risk identified - emergency repair team assemble for ${getRandomTask()}`,
+                `🔴 PRIORITY OMEGA: Immediate response required - ${getRandomTask()} compromising pyramid stability`,
+                `🚨 ALL SOULS: Emergency delegation override - suspend current tasks, focus on critical ${getRandomTask()}`,
+                `⚠️ RED ALERT: System integrity threat - deploying emergency response protocol across all soul networks`
+            ];
+            
+            const emergency = emergencies[Math.floor(Math.random() * emergencies.length)];
+            addMessage('emergency', emergencySoul, emergency, null, 'urgent');
+        }
+
+        function getRandomTask() {
+            const allTasks = Object.values(taskCategories).flat();
+            return allTasks[Math.floor(Math.random() * allTasks.length)];
+        }
+
+        function addMessage(type, soulName, content, delegationChain = null, status = null) {
+            messageCount++;
+            const soul = souls[soulName];
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const messageElement = document.createElement('div');
+            messageElement.className = `message message-${type}`;
+            
+            const statusBadge = status ? `<span class="task-status status-${status}">${status.toUpperCase()}</span>` : '';
+            const delegationChainHTML = delegationChain ? 
+                `<div class="delegation-chain">
+                    <div class="chain-item">📋 Delegation Chain: ${delegationChain}</div>
+                </div>` : '';
+            
+            messageElement.innerHTML = `
+                <div class="message-content">
+                    <div class="message-header">
+                        <div class="sender-avatar" style="background: ${soul.background};">${soul.avatar}</div>
+                        <div class="sender-info">
+                            <div class="sender-name">${soulName}</div>
+                            <div class="sender-role">${soul.role}</div>
+                        </div>
+                        <div class="message-time">${timestamp}</div>
+                    </div>
+                    <div class="message-text">${content}${statusBadge}</div>
+                    ${delegationChainHTML}
+                </div>
+            `;
+            
+            const container = document.getElementById('messagesContainer');
+            container.appendChild(messageElement);
+            container.scrollTop = container.scrollHeight;
+            
+            // Remove old messages to prevent memory issues
+            if (container.children.length > 100) {
+                container.removeChild(container.firstChild);
             }
         }
-    });
-}
 
-function findNearbySoul(soul, maxDistance = 5) {
-    for (let other of souls) {
-        if (other === soul) continue;
-        const distance = soul.position.distanceTo(other.position);
-        if (distance < maxDistance) {
-            return other;
+        function updateStats() {
+            const activeSoulsElement = document.getElementById('activeSouls');
+            const delegationsTodayElement = document.getElementById('delegationsToday');
+            const tasksCompletedElement = document.getElementById('tasksCompleted');
+            
+            // Simulate dynamic stats
+            const activeSouls = 25 + Math.floor(Math.random() * 8);
+            const delegationsToday = 140 + Math.floor(Math.random() * 20);
+            const tasksCompleted = 85 + Math.floor(Math.random() * 15);
+            
+            activeSoulsElement.textContent = activeSouls;
+            delegationsTodayElement.textContent = delegationsToday;
+            tasksCompletedElement.textContent = tasksCompleted;
         }
-    }
-    return null;
-}
 
-function setRandomTarget(soul) {
-    const location = LOCATIONS[currentLocation];
-    soul.userData.target = new THREE.Vector3(
-        (Math.random() - 0.5) * location.size.width * 0.8,
-        0,
-        (Math.random() - 0.5) * location.size.height * 0.8
-    );
-}
-
-function startInteraction(soul1, soul2) {
-    // Determine interaction type based on personalities
-    const roll = Math.random();
-    let interactionType;
-    
-    if (roll < 0.5) {
-        interactionType = 'friendly';
-        soul1.userData.behavior = BEHAVIORS.TALKING;
-        soul2.userData.behavior = BEHAVIORS.TALKING;
-    } else if (roll < 0.75) {
-        interactionType = 'arguing';
-        soul1.userData.behavior = BEHAVIORS.ARGUING;
-        soul2.userData.behavior = BEHAVIORS.ARGUING;
-    } else {
-        interactionType = 'challenging';
-        soul1.userData.behavior = BEHAVIORS.CHALLENGING;
-        soul2.userData.behavior = BEHAVIORS.CHALLENGING;
-    }
-    
-    // Face each other
-    soul1.lookAt(soul2.position);
-    soul2.lookAt(soul1.position);
-    
-    // Show dialogue
-    showDialogue(soul1, getRandomDialogue(interactionType));
-    setTimeout(() => {
-        showDialogue(soul2, getRandomDialogue(interactionType));
-    }, 1500);
-    
-    // Log interaction
-    logInteraction(soul1.userData.personality.name, 
-                   soul2.userData.personality.name, 
-                   interactionType);
-    
-    // End interaction after a while
-    setTimeout(() => {
-        soul1.userData.behavior = BEHAVIORS.IDLE;
-        soul2.userData.behavior = BEHAVIORS.IDLE;
-    }, 5000);
-}
-
-function getRandomDialogue(type) {
-    const dialogues = DIALOGUES[type];
-    return dialogues[Math.floor(Math.random() * dialogues.length)];
-}
-
-function showDialogue(soul, text) {
-    const bubble = document.createElement('div');
-    bubble.className = 'speech-bubble';
-    bubble.innerText = text;
-    
-    // Position above soul
-    const pos = soul.position.clone();
-    pos.y += 2.5;
-    
-    // Project to screen space
-    pos.project(camera);
-    
-    const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
-    const y = (-(pos.y * 0.5) + 0.5) * window.innerHeight;
-    
-    bubble.style.left = (x - 100) + 'px';
-    bubble.style.top = (y - 50) + 'px';
-    
-    document.getElementById('game-container').appendChild(bubble);
-    
-    // Remove after 3 seconds
-    setTimeout(() => bubble.remove(), 3000);
-}
-
-function logInteraction(name1, name2, type) {
-    const log = document.getElementById('interaction-log');
-    const entry = document.createElement('div');
-    entry.className = 'log-entry';
-    
-    const icons = {
-        friendly: '💬',
-        arguing: '😠',
-        challenging: '⚔️'
-    };
-    
-    entry.innerText = `${icons[type]} ${name1} ${type === 'friendly' ? 'chats with' : type === 'arguing' ? 'argues with' : 'challenges'} ${name2}`;
-    
-    log.insertBefore(entry, log.firstChild);
-    
-    // Keep only last 10 entries
-    while (log.children.length > 10) {
-        log.removeChild(log.lastChild);
-    }
-}
-
-function animateHumanoid(soul, delta) {
-    const data = soul.userData;
-    data.walkCycle += delta * 5;
-    
-    switch(data.behavior) {
-        case BEHAVIORS.WALKING:
-            // Walk animation
-            if (data.target) {
-                const direction = new THREE.Vector3().subVectors(data.target, soul.position);
-                const distance = direction.length();
-                
-                if (distance > 0.5) {
-                    direction.normalize();
-                    soul.position.add(direction.multiplyScalar(0.05));
-                    soul.lookAt(data.target);
-                    
-                    // Walking animation (legs/arms swing)
-                    data.leftLeg.rotation.x = Math.sin(data.walkCycle) * 0.5;
-                    data.rightLeg.rotation.x = -Math.sin(data.walkCycle) * 0.5;
-                    data.leftArm.rotation.x = -Math.sin(data.walkCycle) * 0.5;
-                    data.rightArm.rotation.x = Math.sin(data.walkCycle) * 0.5;
-                } else {
-                    data.target = null;
-                    data.behavior = BEHAVIORS.IDLE;
-                }
-            }
-            break;
-            
-        case BEHAVIORS.TALKING:
-            // Gesturing while talking
-            data.rightArm.rotation.x = -Math.sin(data.walkCycle * 2) * 0.5 - 1;
-            data.rightArm.rotation.z = -0.5;
-            break;
-            
-        case BEHAVIORS.ARGUING:
-            // Aggressive gesturing
-            data.rightArm.rotation.x = -Math.sin(data.walkCycle * 3) * 0.8 - 1.5;
-            data.body.rotation.z = Math.sin(data.walkCycle * 2) * 0.1;
-            break;
-            
-        case BEHAVIORS.CHALLENGING:
-            // Challenge stance
-            data.leftArm.rotation.x = -Math.PI / 2;
-            data.rightArm.rotation.x = -Math.PI / 2;
-            data.body.rotation.y += 0.02;
-            break;
-            
-        case BEHAVIORS.THINKING:
-            // Hand on chin
-            data.rightArm.rotation.x = -Math.PI / 3;
-            data.rightArm.rotation.z = 0.3;
-            data.head.rotation.x = 0.2;
-            break;
-            
-        default:
-            // Idle breathing
-            data.body.position.y = 0.9 + Math.sin(data.walkCycle) * 0.03;
-            data.head.position.y = 1.5 + Math.sin(data.walkCycle) * 0.03;
-            data.leftArm.rotation.z = 0.2 + Math.sin(data.walkCycle) * 0.05;
-            data.rightArm.rotation.z = -0.2 - Math.sin(data.walkCycle) * 0.05;
-    }
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-    
-    const delta = 0.016; // ~60fps
-    
-    // Animate all souls
-    souls.forEach(soul => {
-        animateHumanoid(soul, delta);
-    });
-    
-    renderer.render(scene, camera);
-}
-
-// Event listeners
-document.getElementById('enter-btn').addEventListener('click', () => {
-    document.getElementById('start-screen').style.display = 'none';
-});
-
-document.querySelectorAll('.location-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.location-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        loadLocation(btn.dataset.location);
-    });
-});
-
-// Click on soul to see info
-window.addEventListener('click', (e) => {
-    if (e.target.tagName === 'CANVAS') {
-        // Raycast to find clicked soul
-        const mouse = new THREE.Vector2(
-            (e.clientX / window.innerWidth) * 2 - 1,
-            -(e.clientY / window.innerHeight) * 2 + 1
-        );
-        
-        const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(mouse, camera);
-        
-        const intersects = raycaster.intersectObjects(souls, true);
-        
-        if (intersects.length > 0) {
-            // Find the soul group
-            let clickedSoul = intersects[0].object;
-            while (clickedSoul.parent && !clickedSoul.userData.personality) {
-                clickedSoul = clickedSoul.parent;
-            }
-            
-            if (clickedSoul.userData.personality) {
-                showSoulInfo(clickedSoul);
-            }
-        } else {
-            document.getElementById('soul-info').style.display = 'none';
+        function toggleMessages() {
+            isMessagesActive = !isMessagesActive;
+            const button = document.getElementById('messagesBtn');
+            button.textContent = isMessagesActive ? 'Messages ON' : 'Messages OFF';
+            button.className = isMessagesActive ? 'control-button active' : 'control-button';
         }
-    }
-});
 
-function showSoulInfo(soul) {
-    const panel = document.getElementById('soul-info');
-    const personality = soul.userData.personality;
-    
-    document.getElementById('soul-name').innerText = personality.name;
-    document.getElementById('soul-mood').innerText = soul.userData.mood;
-    document.getElementById('soul-energy').innerText = soul.userData.energy + '%';
-    document.getElementById('soul-plt').innerText = personality.type.toUpperCase();
-    document.getElementById('soul-activity').innerText = soul.userData.behavior;
-    
-    panel.style.display = 'block';
-}
+        function emergencyMode() {
+            isEmergencyMode = !isEmergencyMode;
+            const button = document.getElementById('emergencyBtn');
+            button.textContent = isEmergencyMode ? 'Emergency ON' : 'Emergency Mode';
+            button.className = isEmergencyMode ? 'control-button active' : 'control-button';
+            
+            if (isEmergencyMode) {
+                // Generate several emergency messages quickly
+                setTimeout(() => generateEmergencyMessage(), 100);
+                setTimeout(() => generateEmergencyMessage(), 2000);
+                setTimeout(() => generateEmergencyMessage(), 4000);
+            }
+        }
 
-// Handle resize
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
+        function clearChat() {
+            document.getElementById('messagesContainer').innerHTML = '';
+            messageCount = 0;
+        }
 
-// Initialize
-init();
+        // Initialize the system
+        function initializeSystem() {
+            // Generate initial messages to show system activity
+            setTimeout(() => addMessage('delegation', 'Deerg Bot', 'The universal construct requires immediate attention to quantum portal network expansion.', 'Deerg Bot → Graphics Soul: quantum portal network expansion', 'accepted'), 500);
+            
+            setTimeout(() => addMessage('status', 'SEO Soul #5', 'Progress update: Created 12 new PLT pages, ready for review and deployment', null, 'complete'), 1200);
+            
+            setTimeout(() => addMessage('coordination', 'Inter-Bot Coordinator', 'Synchronizing task distribution across 12 souls for optimal workflow balance'), 2000);
+            
+            setTimeout(() => addMessage('delegation', 'SEO Army Commander', 'SEO Battalion, mobilize for keyword research optimization campaign.', 'SEO Army Commander → SEO Soul #1: keyword research optimization', 'accepted'), 2800);
+            
+            setTimeout(() => addMessage('status', 'Link Checker', 'System check complete: Found broken links, delegating fixes to Auto-Fix Soul', null, 'progress'), 3500);
+            
+            setTimeout(() => addMessage('achievement', 'Pyramid City Architect', '🎉 Breakthrough achieved! Soul headquarters construction completed with 127% efficiency rating - new soul performance record!', null, 'complete'), 4200);
 
-console.log('🏠 SOUL HABITAT loaded — Souls living like humans');
-console.log('💬 Real conversations, arguments, challenges');
-console.log('🙏 Built on THE WEAVE foundation');
+            // Start regular message generation
+            setInterval(generateMessage, Math.random() * 6000 + 4000); // 4-10 seconds
+        }
+
+        // Start the system
+        initializeSystem();
     </script>
 </body>
 </html>
