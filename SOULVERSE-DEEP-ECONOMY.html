@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🌀 SOULVERSE – Deep Economy | Autonomous Agents | Real Work</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+        body { background:#000; overflow:hidden; font-family:'Courier New', monospace; }
+        canvas { display:block; width:100%; height:100%; }
+        #ui { position:absolute; bottom:20px; left:20px; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); border-radius:12px; padding:8px 12px; color:#ffaa66; font-size:11px; pointer-events:none; z-index:10; }
+        #top-bar { position:absolute; top:20px; left:0; right:0; display:flex; justify-content:center; gap:12px; z-index:30; pointer-events:auto; flex-wrap:wrap; }
+        .top-btn { background:#ffaa66; border:none; color:#000; font-weight:bold; padding:8px 18px; border-radius:30px; cursor:pointer; font-family:monospace; transition:0.2s; touch-action:manipulation; }
+        .top-btn:active { transform:scale(0.96); }
+        #resources { position:absolute; top:20px; right:20px; background:rgba(0,0,0,0.6); border-radius:12px; padding:8px 12px; color:#ffaa66; font-size:11px; text-align:right; pointer-events:none; z-index:10; }
+        #selection-panel { position:absolute; bottom:100px; left:20px; background:rgba(0,0,0,0.6); border-radius:12px; padding:6px 12px; font-size:10px; pointer-events:none; z-index:20; }
+        #mobile-controls { position:absolute; bottom:20px; left:0; right:0; display:flex; justify-content:center; gap:8px; flex-wrap:wrap; padding:8px; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); border-radius:40px; margin:0 20px; z-index:40; pointer-events:auto; }
+        .mobile-btn { background:#2a2a3a; border:1px solid #ffaa66; color:#ffaa66; padding:8px 16px; border-radius:30px; font-size:12px; font-weight:bold; touch-action:manipulation; cursor:pointer; }
+        .mobile-btn:active { background:#ffaa66; color:#000; }
+        #building-menu { position:absolute; bottom:100px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); border-radius:20px; padding:8px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center; z-index:40; pointer-events:auto; max-width:90%; }
+        .build-btn { background:#2a2a3a; border:1px solid #ffaa66; color:#ffaa66; padding:6px 12px; border-radius:20px; cursor:pointer; font-size:10px; touch-action:manipulation; }
+        .build-btn:active { background:#ffaa66; color:#000; }
+        .modal { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.9); backdrop-filter:blur(16px); border:2px solid #ffaa66; border-radius:24px; padding:20px; z-index:200; display:none; pointer-events:auto; min-width:300px; max-width:90vw; max-height:80vh; overflow-y:auto; text-align:center; }
+        .modal button { margin:5px; padding:8px 16px; background:#ffaa66; border:none; border-radius:30px; font-weight:bold; cursor:pointer; }
+        .modal-close { float:right; background:none; border:none; color:#ffaa66; font-size:20px; cursor:pointer; }
+        .agent-panel { position:absolute; top:80px; right:20px; width:300px; background:rgba(0,0,0,0.8); backdrop-filter:blur(12px); border-radius:16px; padding:12px; display:block; z-index:50; pointer-events:auto; text-align:left; }
+        .agent-panel h3 { color:#ffaa66; margin-bottom:8px; }
+        .agent-card { background:#2a2a3a; border-radius:12px; padding:10px; margin-bottom:10px; cursor:pointer; transition:0.2s; }
+        .agent-card:hover { background:#ffaa66; color:#000; transform:translateX(-5px); }
+        .task-output { background:#000; border-radius:8px; padding:8px; font-size:10px; margin-top:8px; white-space:pre-wrap; }
+        input, textarea, select { width:100%; margin:5px 0; padding:8px; background:#2a2a3a; border:1px solid #ffaa66; color:#ffaa66; border-radius:8px; font-family:monospace; }
+        .status-badge { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; }
+        .status-active { background:#88ff88; }
+        .status-idle { background:#888888; }
+        #minimap { position:absolute; bottom:20px; right:20px; width:140px; height:140px; background:rgba(0,0,0,0.5); border:2px solid #ffaa66; border-radius:8px; pointer-events:none; z-index:60; }
+        @media (max-width:768px) { .top-btn { padding:6px 12px; font-size:10px; } .build-btn { padding:4px 8px; font-size:8px; } #minimap { width:100px; height:100px; } .mobile-btn { padding:6px 12px; font-size:10px; } .agent-panel { width:260px; top:70px; right:10px; } }
+    </style>
+</head>
+<body>
+    <div id="ui">🌀 SOULVERSE – Deep Economy | Autonomous Agents</div>
+    <div id="top-bar">
+        <button id="purchaseBtn" class="top-btn">💰 Buy Game ($47)</button>
+        <button id="marketplaceBtn" class="top-btn">🤖 Agent Marketplace</button>
+        <button id="economyBtn" class="top-btn">📊 Economy</button>
+        <button id="trainBtn" class="top-btn">🎓 Train Agent</button>
+        <button id="automateBtn" class="top-btn">⚙️ Automate</button>
+        <button id="settingsBtn" class="top-btn">⚙️ API Keys</button>
+        <button id="soundBtn" class="top-btn">🔊 Sound Off</button>
+    </div>
+    <div id="resources">💰 Profit: <span id="profitVal">500</span><br>❤️ Love: <span id="loveVal">500</span><br>⚖️ Tax: <span id="taxVal">500</span></div>
+    <div id="selection-panel">Selected: none</div>
+    <div id="mobile-controls">
+        <button class="mobile-btn" id="moveBtn">🏃 Move</button>
+        <button class="mobile-btn" id="attackBtn">⚔️ Attack</button>
+        <button class="mobile-btn" id="gatherBtn">🌾 Gather</button>
+        <button class="mobile-btn" id="stopBtn">🛑 Stop</button>
+    </div>
+    <div id="building-menu">
+        <button class="build-btn" data-building="townhall">🏛️ TH (200)</button>
+        <button class="build-btn" data-building="forge">⚒️ Forge (150)</button>
+        <button class="build-btn" data-building="market">🏪 Market (120)</button>
+        <button class="build-btn" data-building="barracks">🏚️ Barracks (180)</button>
+        <button class="build-btn" data-building="farm">🌾 Farm (100)</button>
+        <button class="build-btn" data-building="wall">🧱 Wall (50)</button>
+        <button class="build-btn" data-building="tower">🗼 Tower (200)</button>
+        <button class="build-btn" data-building="blacksmith">🔨 Smith (250)</button>
+        <button class="build-btn" data-building="magetower">✨ Mage (300)</button>
+        <button class="build-btn" data-building="heroic">🏆 Heroic (400)</button>
+        <button class="build-btn" data-building="exchange">🏦 Exchange (500)</button>
+    </div>
+    <div id="minimap"><canvas id="minimapCanvas" width="200" height="200"></canvas></div>
+
+    <!-- Modals -->
+    <div id="purchaseModal" class="modal"><button class="modal-close" id="closePurchase">&times;</button><h3>🔥 Unlock Soulverse Deep Economy</h3><p>$47 – includes agent automation, training, and full economic systems.</p><button id="confirmPurchase">Buy Now (Simulated)</button><button id="demoMode">Demo Mode</button></div>
+    <div id="settingsModal" class="modal"><button class="modal-close" id="closeSettings">&times;</button><h3>⚙️ API Keys</h3><input type="password" id="openaiKey" placeholder="OpenAI Key"><input type="password" id="githubToken" placeholder="GitHub Token"><input id="githubRepo" placeholder="owner/repo"><button id="saveSettings">Save</button></div>
+    <div id="marketplaceModal" class="modal"><button class="modal-close" id="closeMarketplace">&times;</button><h3>🤖 Agent Marketplace</h3><div id="agentList"></div></div>
+    <div id="economyModal" class="modal"><button class="modal-close" id="closeEconomy">&times;</button><h3>📊 Global Economy</h3><div id="economyContent"></div></div>
+    <div id="trainModal" class="modal"><button class="modal-close" id="closeTrain">&times;</button><h3>🎓 Train Agent</h3><select id="trainAgentSelect"></select><input id="trainTask" placeholder="Task to train on (e.g., 'code', 'content')"><button id="startTraining">Start Training</button><div id="trainingLog"></div></div>
+    <div id="automateModal" class="modal"><button class="modal-close" id="closeAutomate">&times;</button><h3>⚙️ Automation Hub</h3><div id="automationList"></div><button id="createAutomation">New Automation</button></div>
+    <div id="agentTaskModal" class="modal"><button class="modal-close" id="closeTaskModal">&times;</button><h3 id="taskAgentName">Agent Task</h3><select id="taskType"><option value="code">Code</option><option value="content">Content</option><option value="research">Research</option><option value="analyze">Analyze</option><option value="github_file">GitHub File</option><option value="github_issue">GitHub Issue</option></select><textarea id="taskPrompt" rows="3" placeholder="Task description"></textarea><input id="taskParam" placeholder="Optional param"><button id="executeTask">Execute</button><div id="taskResult" class="task-output"></div></div>
+
+    <div id="agentPanel" class="agent-panel"><h3>🛠️ My Agents</h3><div id="myAgentsList"></div></div>
+
+    <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.128.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/" } }</script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        const QUALITY = {0:{terrainSegments:32,shadows:false,grassCount:200,treeCount:10,resourceCount:15},1:{terrainSegments:48,shadows:true,grassCount:400,treeCount:20,resourceCount:25}};
+        let currentQuality = /Mobi/i.test(navigator.userAgent) ? 0 : 1;
+        let scene,camera,renderer,controls,terrain;
+        let playerBuildings=[], playerUnits=[], enemyUnits=[], resources=[];
+        let playerResources = { profit:500, love:500, tax:500 };
+        let gameUnlocked = localStorage.getItem('soulverse_unlocked') === 'true';
+        let apiKeys = { openai: localStorage.getItem('openai_key')||'', githubToken: localStorage.getItem('github_token')||'', githubRepo: localStorage.getItem('github_repo')||'' };
+        let agents = [], automations = [];
+        let economy = { gdp: 1000, inflation: 0.02, marketSentiment: 0.5, events: [] };
+        let soundEnabled = false, audioCtx = null;
+
+        class Agent {
+            constructor(template) {
+                this.id = Date.now()+'_'+Math.random();
+                this.name = template.name; this.type = template.type; this.cost = template.cost;
+                this.skills = { code:0, content:0, research:0, analyze:0 };
+                this.experience = 0; this.level = 1; this.status = 'idle'; this.automation = null; this.history = [];
+            }
+            async execute(taskType, prompt, param='') {
+                if (this.status === 'working') throw new Error("Agent busy");
+                this.status = 'working'; updateAgentPanel();
+                let result = "";
+                try {
+                    if (taskType === 'code') result = await callOpenAI(prompt, `You are ${this.name}, a coding expert.`);
+                    else if (taskType === 'content') result = await callOpenAI(prompt, `You are ${this.name}, a content creator.`);
+                    else if (taskType === 'research') result = await callOpenAI(prompt, `You are ${this.name}, a researcher.`);
+                    else if (taskType === 'analyze') result = await callOpenAI(prompt, `You are ${this.name}, a data analyst.`);
+                    else if (taskType === 'github_file') result = await githubCreateFile(prompt, param);
+                    else if (taskType === 'github_issue') result = await githubCreateIssue(prompt, param);
+                    else result = "Unknown task.";
+                    this.skills[taskType] = (this.skills[taskType] || 0) + 1;
+                    this.experience += 10;
+                    if (this.experience >= 100 * this.level) { this.level++; this.experience = 0; }
+                    this.history.push({ task:taskType, prompt, result, timestamp:Date.now() });
+                    playerResources.profit += 10; playerResources.love += 10; playerResources.tax += 10;
+                    updateUI(); return result;
+                } catch(err) { result = `Error: ${err.message}`; throw err; }
+                finally { this.status = 'idle'; updateAgentPanel(); saveAgents(); }
+            }
+        }
+
+        async function callOpenAI(prompt, system) {
+            if (!apiKeys.openai) throw new Error("OpenAI key missing.");
+            const res = await fetch('https://api.openai.com/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKeys.openai}`}, body:JSON.stringify({ model:'gpt-4-turbo-preview', messages:[{role:'system',content:system},{role:'user',content:prompt}], max_tokens:800 }) });
+            if(!res.ok) throw new Error(`OpenAI error`);
+            const data = await res.json(); return data.choices[0].message.content;
+        }
+        async function githubCreateFile(content, path) {
+            if (!apiKeys.githubToken || !apiKeys.githubRepo) throw new Error("GitHub missing");
+            const [owner,repo] = apiKeys.githubRepo.split('/');
+            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+            const encoded = btoa(unescape(encodeURIComponent(content)));
+            const res = await fetch(url, { method:'PUT', headers:{'Authorization':`token ${apiKeys.githubToken}`,'Content-Type':'application/json'}, body:JSON.stringify({ message:'Soulverse commit', content:encoded, branch:'main' }) });
+            if(!res.ok) throw new Error(`GitHub error`); return await res.json();
+        }
+        async function githubCreateIssue(title, body) {
+            if (!apiKeys.githubToken || !apiKeys.githubRepo) throw new Error("GitHub missing");
+            const [owner,repo] = apiKeys.githubRepo.split('/');
+            const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues`, { method:'POST', headers:{'Authorization':`token ${apiKeys.githubToken}`,'Content-Type':'application/json'}, body:JSON.stringify({ title, body }) });
+            if(!res.ok) throw new Error(`GitHub error`); return await res.json();
+        }
+
+        function loadAgents() { agents = JSON.parse(localStorage.getItem('soulverse_agents')||'[]'); updateAgentPanel(); }
+        function saveAgents() { localStorage.setItem('soulverse_agents',JSON.stringify(agents)); }
+        function updateAgentPanel() {
+            const container = document.getElementById('myAgentsList'); if(!container) return;
+            if(agents.length===0) { container.innerHTML='<div>No agents. Buy from marketplace.</div>'; return; }
+            container.innerHTML = agents.map(a => `<div class="agent-card"><div><strong>${a.name}</strong> Lv.${a.level} <span class="status-badge ${a.status==='working'?'status-active':'status-idle'}"></span></div><div>Skills: ${Object.entries(a.skills).map(([k,v])=>`${k}:${v}`).join(', ')}</div><button class="assign-task" data-id="${a.id}">Task</button><button class="automate-agent" data-id="${a.id}">⚙️ Automate</button></div>`).join('');
+            document.querySelectorAll('.assign-task').forEach(btn => btn.addEventListener('click',()=>openTaskModal(agents.find(a=>a.id===btn.dataset.id))));
+            document.querySelectorAll('.automate-agent').forEach(btn => btn.addEventListener('click',()=>setupAutomation(agents.find(a=>a.id===btn.dataset.id))));
+        }
+        function buyAgent(template) {
+            if(!gameUnlocked) { alert("Purchase game first"); return; }
+            if(playerResources.profit>=template.cost && playerResources.love>=template.cost && playerResources.tax>=template.cost) {
+                playerResources.profit-=template.cost; playerResources.love-=template.cost; playerResources.tax-=template.cost;
+                agents.push(new Agent(template)); saveAgents(); updateAgentPanel(); updateUI(); alert(`Agent ${template.name} purchased!`);
+            } else alert("Not enough resources");
+        }
+        function openTaskModal(agent) {
+            const modal = document.getElementById('agentTaskModal');
+            document.getElementById('taskAgentName').innerText = `Task for ${agent.name}`;
+            document.getElementById('taskResult').innerHTML = ''; document.getElementById('taskPrompt').value = '';
+            modal.style.display = 'block';
+            document.getElementById('executeTask').onclick = async () => {
+                const type = document.getElementById('taskType').value, prompt = document.getElementById('taskPrompt').value, param = document.getElementById('taskParam').value;
+                if(!prompt.trim()) { alert("Describe task"); return; }
+                const btn = document.getElementById('executeTask'); btn.disabled = true;
+                const resultDiv = document.getElementById('taskResult'); resultDiv.innerHTML = "⏳ Executing...";
+                try { const result = await agent.execute(type, prompt, param); resultDiv.innerHTML = `<strong>Result:</strong><br>${result.replace(/\n/g,'<br>')}`; }
+                catch(err) { resultDiv.innerHTML = `<strong>Error:</strong><br>${err.message}`; }
+                finally { btn.disabled = false; }
+            };
+        }
+        function setupAutomation(agent) {
+            const type = prompt("Automation type: code / content / research / analyze", "code");
+            const interval = parseInt(prompt("Run every seconds (e.g., 30)", "30"));
+            if(!type || !interval) return;
+            automations.push({ agentId:agent.id, type, interval, lastRun:Date.now(), active:true });
+            localStorage.setItem('soulverse_automations',JSON.stringify(automations));
+            alert(`Automation set for ${agent.name} every ${interval}s`);
+        }
+        function runAutomations() {
+            const now = Date.now();
+            for(let a of automations) {
+                if(!a.active) continue;
+                const agent = agents.find(ag=>ag.id===a.agentId);
+                if(agent && agent.status!=='working' && now - a.lastRun >= a.interval*1000) {
+                    a.lastRun = now; agent.execute(a.type, `Auto task: ${a.type}`, '').catch(console.error);
+                }
+            }
+        }
+
+        function updateEconomy() {
+            economy.gdp += (playerResources.profit+playerResources.love+playerResources.tax)*0.01;
+            economy.inflation = 0.02 + Math.random()*0.03 - 0.01;
+            if(Math.random()<0.1) { let event = ["Market boom","Tech bubble","Resource shortage","Peace treaty"][Math.floor(Math.random()*4)]; economy.events.unshift({text:event,time:Date.now()}); if(economy.events.length>5) economy.events.pop(); }
+            const container = document.getElementById('economyContent');
+            if(container) container.innerHTML = `<div>GDP: ${economy.gdp.toFixed(0)}</div><div>Inflation: ${(economy.inflation*100).toFixed(1)}%</div><div>Events: ${economy.events.map(e=>e.text).join(', ')}</div>`;
+        }
+
+        async function trainAgent(agent, skill) {
+            if(!apiKeys.openai) { alert("OpenAI key required"); return; }
+            const prompt = `Generate a training exercise for a ${skill} expert.`;
+            const result = await callOpenAI(prompt, "You are a training simulator.");
+            agent.skills[skill] = (agent.skills[skill]||0) + 2; agent.experience += 5;
+            document.getElementById('trainingLog').innerHTML = `Training complete! ${skill} skill increased.<br>${result.substring(0,200)}`;
+            saveAgents(); updateAgentPanel();
+        }
+
+        function updateUI() { document.getElementById('profitVal').innerText = Math.floor(playerResources.profit); document.getElementById('loveVal').innerText = Math.floor(playerResources.love); document.getElementById('taxVal').innerText = Math.floor(playerResources.tax); }
+
+        function getHeight(x,z) { let h=0; h+=Math.sin(x*0.12)*Math.cos(z*0.12)*1.0; h+=Math.sin(x*0.3)*0.5; h+=Math.cos(z*0.3)*0.5; h+=Math.sin(x*0.7+z*0.5)*0.3; return Math.max(0.2,h+1.6); }
+        function generateTerrain() { const geom = new THREE.PlaneGeometry(160,160,32,32); geom.rotateX(-Math.PI/2); const pos=geom.attributes.position.array; for(let i=0;i<pos.length/3;i++){ const x=pos[i*3],z=pos[i*3+2]; pos[i*3+1]=getHeight(x,z); } geom.computeVertexNormals(); return new THREE.Mesh(geom,new THREE.MeshStandardMaterial({color:0x7c9c5e,roughness:0.7})); }
+        function initWorld() {
+            scene=new THREE.Scene(); scene.background=new THREE.Color(0x87CEEB);
+            camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,200); camera.position.set(0,12,18);
+            renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(window.innerWidth,window.innerHeight); document.body.appendChild(renderer.domElement);
+            controls=new OrbitControls(camera,renderer.domElement); controls.enableZoom=true; controls.target.set(0,0,0);
+            scene.add(new THREE.AmbientLight(0x404060,0.6)); const sunLight=new THREE.DirectionalLight(0xffdd99,0.8); sunLight.position.set(10,15,5); scene.add(sunLight);
+            terrain=generateTerrain(); scene.add(terrain);
+            const townHall=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.2,1.5),new THREE.MeshStandardMaterial({color:0xaa8866})); townHall.position.set(0,getHeight(0,0)+0.6,0); scene.add(townHall); playerBuildings.push({mesh:townHall,type:'townhall'});
+            for(let i=0;i<3;i++){ const u=new THREE.Mesh(new THREE.SphereGeometry(0.4,8,8),new THREE.MeshStandardMaterial({color:[0xffaa44,0xff88aa,0x88aaff][i]})); u.position.set(-2+i*2,getHeight(-2+i*2,-2)+0.5,-2); scene.add(u); playerUnits.push({mesh:u}); }
+        }
+
+        function bindUI() {
+            document.getElementById('purchaseBtn').onclick=()=>{ if(gameUnlocked) alert("Already purchased"); else document.getElementById('purchaseModal').style.display='block'; };
+            document.getElementById('confirmPurchase').onclick=()=>{ gameUnlocked=true; localStorage.setItem('soulverse_unlocked','true'); document.getElementById('purchaseModal').style.display='none'; alert("Unlocked!"); };
+            document.getElementById('demoMode').onclick=()=>{ gameUnlocked=false; localStorage.setItem('soulverse_unlocked','false'); document.getElementById('purchaseModal').style.display='none'; alert("Demo mode"); };
+            document.getElementById('closePurchase').onclick=()=>document.getElementById('purchaseModal').style.display='none';
+            document.getElementById('settingsBtn').onclick=()=>{ document.getElementById('settingsModal').style.display='block'; document.getElementById('openaiKey').value=apiKeys.openai; document.getElementById('githubToken').value=apiKeys.githubToken; document.getElementById('githubRepo').value=apiKeys.githubRepo; };
+            document.getElementById('saveSettings').onclick=()=>{ apiKeys.openai=document.getElementById('openaiKey').value; apiKeys.githubToken=document.getElementById('githubToken').value; apiKeys.githubRepo=document.getElementById('githubRepo').value; localStorage.setItem('openai_key',apiKeys.openai); localStorage.setItem('github_token',apiKeys.githubToken); localStorage.setItem('github_repo',apiKeys.githubRepo); document.getElementById('settingsModal').style.display='none'; alert("Saved"); };
+            document.getElementById('closeSettings').onclick=()=>document.getElementById('settingsModal').style.display='none';
+            document.getElementById('marketplaceBtn').onclick=()=>{ if(!gameUnlocked){ alert("Purchase first"); return; } const container=document.getElementById('agentList'); container.innerHTML=`<div class="agent-card"><strong>Profit Prime Agent</strong> (200 each)<br><button id="buyProfitAgent">Buy</button></div><div class="agent-card"><strong>Love Weaver Agent</strong> (200)<br><button id="buyLoveAgent">Buy</button></div><div class="agent-card"><strong>Tax Collector Agent</strong> (200)<br><button id="buyTaxAgent">Buy</button></div>`; document.getElementById('buyProfitAgent').onclick=()=>buyAgent({name:'Profit Prime Agent',type:'profit',cost:200}); document.getElementById('buyLoveAgent').onclick=()=>buyAgent({name:'Love Weaver Agent',type:'love',cost:200}); document.getElementById('buyTaxAgent').onclick=()=>buyAgent({name:'Tax Collector Agent',type:'tax',cost:200}); document.getElementById('marketplaceModal').style.display='block'; };
+            document.getElementById('closeMarketplace').onclick=()=>document.getElementById('marketplaceModal').style.display='none';
+            document.getElementById('economyBtn').onclick=()=>{ updateEconomy(); document.getElementById('economyModal').style.display='block'; };
+            document.getElementById('closeEconomy').onclick=()=>document.getElementById('economyModal').style.display='none';
+            document.getElementById('trainBtn').onclick=()=>{ if(agents.length===0){ alert("Buy agent first"); return; } const sel=document.getElementById('trainAgentSelect'); sel.innerHTML=agents.map(a=>`<option value="${a.id}">${a.name}</option>`).join(''); document.getElementById('trainingLog').innerHTML=''; document.getElementById('trainModal').style.display='block'; };
+            document.getElementById('startTraining').onclick=async()=>{ const id=document.getElementById('trainAgentSelect').value; const agent=agents.find(a=>a.id===id); const skill=document.getElementById('trainTask').value; if(!skill) { alert("Enter skill"); return; } await trainAgent(agent,skill); };
+            document.getElementById('closeTrain').onclick=()=>document.getElementById('trainModal').style.display='none';
+            document.getElementById('automateBtn').onclick=()=>{ const listDiv=document.getElementById('automationList'); listDiv.innerHTML=automations.map(a=>`<div>Agent ${agents.find(ag=>ag.id===a.agentId)?.name} - ${a.type} every ${a.interval}s <button class="stop-auto" data-id="${a.agentId}">Stop</button></div>`).join(''); document.getElementById('automateModal').style.display='block'; document.querySelectorAll('.stop-auto').forEach(btn=>btn.addEventListener('click',()=>{ automations=automations.filter(a=>a.agentId!==btn.dataset.id); localStorage.setItem('soulverse_automations',JSON.stringify(automations)); document.getElementById('automateBtn').click(); })); };
+            document.getElementById('createAutomation').onclick=()=>{ if(agents.length===0){ alert("No agents"); return; } setupAutomation(agents[0]); };
+            document.getElementById('closeAutomate').onclick=()=>document.getElementById('automateModal').style.display='none';
+            document.getElementById('closeTaskModal').onclick=()=>document.getElementById('agentTaskModal').style.display='none';
+            document.getElementById('soundBtn').onclick=()=>{ soundEnabled=!soundEnabled; if(soundEnabled && !audioCtx) audioCtx=new AudioContext(); document.getElementById('soundBtn').innerHTML=soundEnabled?"🔊 Sound On":"🔇 Sound Off"; };
+            setInterval(runAutomations, 2000); setInterval(updateEconomy, 30000);
+        }
+
+        function animate(){ renderer.render(scene,camera); requestAnimationFrame(animate); }
+
+        initWorld(); bindUI(); loadAgents(); updateUI(); animate();
+    </script>
+</body>
+</html>

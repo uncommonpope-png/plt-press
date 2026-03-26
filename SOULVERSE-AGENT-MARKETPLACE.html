@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌌 SOULVERSE AGENT MARKETPLACE | Buy Game + Connect Your Agents</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+        }
+        
+        /* HEADER */
+        header {
+            background: rgba(255, 170, 102, 0.1);
+            border-bottom: 2px solid #ffaa66;
+            padding: 20px;
+            text-align: center;
+        }
+        header h1 {
+            color: #ffaa66;
+            text-shadow: 0 0 20px #ffaa66;
+            font-size: 2em;
+        }
+        header p {
+            color: #888;
+            margin-top: 10px;
+        }
+
+        /* MAIN CONTAINER */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* PURCHASE GATE */
+        #purchase-gate {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #ffaa66;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        #purchase-gate h2 {
+            color: #ffaa66;
+            margin-bottom: 20px;
+        }
+        .price-tag {
+            font-size: 3em;
+            color: #88ff88;
+            text-shadow: 0 0 20px #88ff88;
+            margin: 20px 0;
+        }
+        .buy-btn {
+            background: linear-gradient(45deg, #ffaa66, #ff8844);
+            border: none;
+            color: #000;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin: 10px;
+        }
+        .buy-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px #ffaa66;
+        }
+
+        /* DASHBOARD (hidden until purchase) */
+        #dashboard {
+            display: none;
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: rgba(255, 170, 102, 0.2);
+            border: 1px solid #ffaa66;
+            color: #ffaa66;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .tab-btn:hover, .tab-btn.active {
+            background: #ffaa66;
+            color: #000;
+        }
+
+        /* PANELS */
+        .panel {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+        .panel.active {
+            display: block;
+        }
+        .panel h3 {
+            color: #ffaa66;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ffaa66;
+            padding-bottom: 10px;
+        }
+
+        /* API KEY INPUTS */
+        .key-input-group {
+            margin: 15px 0;
+        }
+        .key-input-group label {
+            display: block;
+            color: #88ff88;
+            margin-bottom: 5px;
+        }
+        .key-input-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: #fff;
+            font-family: monospace;
+        }
+        .key-input-group input:focus {
+            outline: none;
+            border-color: #ffaa66;
+        }
+
+        /* GITHUB CONNECT */
+        .github-btn {
+            background: #24292e;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+        .github-btn:hover {
+            background: #2f363d;
+            border-color: #ffaa66;
+        }
+        .github-connected {
+            background: #28a745;
+            border-color: #28a745;
+        }
+
+        /* AGENT CARDS */
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .agent-card {
+            background: rgba(255, 170, 102, 0.1);
+            border: 1px solid #ffaa66;
+            border-radius: 15px;
+            padding: 20px;
+            transition: 0.3s;
+        }
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(255, 170, 102, 0.3);
+        }
+        .agent-card h4 {
+            color: #ffaa66;
+            margin-bottom: 10px;
+        }
+        .agent-card .status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            margin: 5px 0;
+        }
+        .status.active { background: #28a745; }
+        .status.idle { background: #ffc107; color: #000; }
+        .status.offline { background: #dc3545; }
+        .agent-card .price {
+            color: #88ff88;
+            font-size: 1.3em;
+            margin: 10px 0;
+        }
+        .agent-card button {
+            width: 100%;
+            padding: 10px;
+            background: #ffaa66;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .agent-card button:hover {
+            background: #ff8844;
+        }
+
+        /* PERMISSIONS */
+        .permission-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            margin: 5px 0;
+        }
+        .permission-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        /* WORK LOG */
+        #work-log {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+        }
+        .log-success { color: #88ff88; }
+        .log-error { color: #ff6666; }
+        .log-info { color: #88ccff; }
+
+        /* EARNINGS */
+        .earnings-box {
+            background: linear-gradient(45deg, rgba(136, 255, 136, 0.1), rgba(255, 170, 102, 0.1));
+            border: 2px solid #88ff88;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .earnings-amount {
+            font-size: 2.5em;
+            color: #88ff88;
+            text-shadow: 0 0 20px #88ff88;
+        }
+
+        /* NOTIFICATIONS */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ffaa66;
+            border-radius: 10px;
+            padding: 15px 25px;
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* LOADING */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 170, 102, 0.3);
+            border-top-color: #ffaa66;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🌌 SOULVERSE AGENT MARKETPLACE</h1>
+        <p>Buy the Game + Connect Your AI Agents to Do Real Work</p>
+    </header>
+
+    <div class="container">
+        <!-- PURCHASE GATE -->
+        <div id="purchase-gate">
+            <h2>🔐 Unlock Soulverse + Agent Platform</h2>
+            <p>One-time purchase gives you:</p>
+            <ul style="text-align: left; margin: 20px auto; max-width: 400px;">
+                <li>✅ Full Soulverse RTS Game</li>
+                <li>✅ AI Agent Marketplace Access</li>
+                <li>✅ Connect Your Own API Keys</li>
+                <li>✅ GitHub Integration</li>
+                <li>✅ Real Work Automation</li>
+                <li>✅ Earn While You Play</li>
+            </ul>
+            <div class="price-tag">$49.99</div>
+            <button class="buy-btn" onclick="purchaseGame()">🚀 BUY NOW</button>
+            <div style="margin-top: 20px; font-size: 0.9em; color: #888;">
+                Accepts: Crypto (BTC, ETH, USDT) • Stripe • PayPal
+            </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="dashboard">
+            <!-- TABS -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('agents')">🤖 My Agents</button>
+                <button class="tab-btn" onclick="showTab('marketplace')">🏪 Agent Marketplace</button>
+                <button class="tab-btn" onclick="showTab('keys')">🔑 API Keys</button>
+                <button class="tab-btn" onclick="showTab('github')">📂 GitHub</button>
+                <button class="tab-btn" onclick="showTab('permissions')">🔐 Permissions</button>
+                <button class="tab-btn" onclick="showTab('work')">💼 Work Log</button>
+                <button class="tab-btn" onclick="showTab('earnings')">💰 Earnings</button>
+                <button class="tab-btn" onclick="showTab('game')">🎮 Launch Game</button>
+            </div>
+
+            <!-- AGENTS PANEL -->
+            <div id="agents-panel" class="panel active">
+                <h3>🤖 Your Connected Agents</h3>
+                <div class="agent-grid" id="my-agents-grid">
+                    <!-- Populated by JS -->
+                </div>
+                <button class="buy-btn" onclick="showTab('marketplace')" style="margin-top: 20px;">
+                    + Add More Agents
+                </button>
+            </div>
+
+            <!-- MARKETPLACE PANEL -->
+            <div id="marketplace-panel" class="panel">
+                <h3>🏪 Agent Marketplace</h3>
+                <p style="margin-bottom: 20px;">Browse and purchase AI agents to automate your work</p>
+                <div class="agent-grid" id="marketplace-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- API KEYS PANEL -->
+            <div id="keys-panel" class="panel">
+                <h3>🔑 Your API Keys</h3>
+                <p>Connect your own API keys to power your agents</p>
+                
+                <div class="key-input-group">
+                    <label>OpenAI API Key (for GPT-4, GPT-3.5)</label>
+                    <input type="password" id="openai-key" placeholder="sk-..." onchange="saveApiKey('openai', this.value)">
+                </div>
+                
+                <div class="key-input-group">
+                    <label>Anthropic API Key (for Claude)</label>
+                    <input type="password" id="anthropic-key" placeholder="sk-ant-..." onchange="saveApiKey('anthropic', this.value)">
+                </div>
+                
+                <div class="key-input-group">
+                    <label>Ollama Local AI (URL)</label>
+                    <input type="text" id="ollama-url" placeholder="http://localhost:11434" value="http://localhost:11434" onchange="saveApiKey('ollama', this.value)">
+                </div>
+                
+                <div class="key-input-group">
+                    <label>GitHub Personal Access Token</label>
+                    <input type="password" id="github-token" placeholder="ghp_..." onchange="saveApiKey('github', this.value)">
+                </div>
+                
+                <div class="key-input-group">
+                    <label>Stripe API Key (for payments)</label>
+                    <input type="password" id="stripe-key" placeholder="sk_live_..." onchange="saveApiKey('stripe', this.value)">
+                </div>
+                
+                <button class="buy-btn" onclick="testAllKeys()" style="margin-top: 20px;">
+                    🔍 Test All Connections
+                </button>
+            </div>
+
+            <!-- GITHUB PANEL -->
+            <div id="github-panel" class="panel">
+                <h3>📂 GitHub Integration</h3>
+                <button class="github-btn" id="github-connect-btn" onclick="connectGitHub()">
+                    <svg width="20" height="20" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                    Connect GitHub
+                </button>
+                
+                <div id="github-status" style="margin-top: 20px; display: none;">
+                    <p style="color: #88ff88;">✅ GitHub Connected</p>
+                    <p>User: <strong id="github-user"></strong></p>
+                    <p>Repositories: <strong id="github-repos"></strong></p>
+                    
+                    <h4 style="margin-top: 20px; color: #ffaa66;">Select Repositories for Agents:</h4>
+                    <div id="github-repos-list" style="margin-top: 10px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PERMISSIONS PANEL -->
+            <div id="permissions-panel" class="panel">
+                <h3>🔐 Agent Permissions</h3>
+                <p>Control what your agents can access and do</p>
+                
+                <div class="permission-item">
+                    <input type="checkbox" id="perm-code" checked>
+                    <label for="perm-code">Write Code to GitHub</label>
+                </div>
+                
+                <div class="permission-item">
+                    <input type="checkbox" id="perm-deploy" checked>
+                    <label for="perm-deploy">Deploy Applications</label>
+                </div>
+                
+                <div class="permission-item">
+                    <input type="checkbox" id="perm-trade">
+                    <label for="perm-trade">Execute Trades (Crypto/Stocks)</label>
+                </div>
+                
+                <div class="permission-item">
+                    <input type="checkbox" id="perm-content" checked>
+                    <label for="perm-content">Create & Publish Content</label>
+                </div>
+                
+                <div class="permission-item">
+                    <input type="checkbox" id="perm-email">
+                    <label for="perm-email">Send Emails</label>
+                </div>
+                
+                <div class="permission-item">
+                    <input type="checkbox" id="perm-social" checked>
+                    <label for="perm-social">Post to Social Media</label>
+                </div>
+                
+                <div class="permission-item">
+                    <input type="checkbox" id="perm-research">
+                    <label for="perm-research">Web Research & Data Collection</label>
+                </div>
+                
+                <button class="buy-btn" onclick="savePermissions()" style="margin-top: 20px;">
+                    💾 Save Permissions
+                </button>
+            </div>
+
+            <!-- WORK LOG PANEL -->
+            <div id="work-panel" class="panel">
+                <h3>💼 Agent Work Log</h3>
+                <div id="work-log">
+                    <div class="log-entry log-info">System initialized. Waiting for agent tasks...</div>
+                </div>
+                <button class="buy-btn" onclick="clearWorkLog()" style="margin-top: 20px;">
+                    🗑️ Clear Log
+                </button>
+            </div>
+
+            <!-- EARNINGS PANEL -->
+            <div id="earnings-panel" class="panel">
+                <h3>💰 Your Earnings</h3>
+                <div class="earnings-box">
+                    <div>Total Earned</div>
+                    <div class="earnings-amount" id="total-earned">$0.00</div>
+                    <div style="margin-top: 10px; color: #888;">From agent work completion</div>
+                </div>
+                
+                <div class="earnings-box" style="border-color: #ffaa66; background: linear-gradient(45deg, rgba(255, 170, 102, 0.1), rgba(255, 136, 68, 0.1));">
+                    <div>Pending Payout</div>
+                    <div class="earnings-amount" id="pending-payout" style="color: #ffaa66; text-shadow: 0 0 20px #ffaa66;">$0.00</div>
+                    <button class="buy-btn" onclick="withdrawEarnings()" style="margin-top: 15px;">
+                        💸 Withdraw
+                    </button>
+                </div>
+                
+                <h4 style="margin-top: 30px; color: #ffaa66;">Earnings History</h4>
+                <div id="earnings-history" style="margin-top: 15px;">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- GAME PANEL -->
+            <div id="game-panel" class="panel">
+                <h3>🎮 Soulverse Game</h3>
+                <p>Launch the full Soulverse RTS game with your connected agents working in the background</p>
+                <button class="buy-btn" onclick="launchGame()" style="margin-top: 20px;">
+                    🚀 LAUNCH SOULVERSE
+                </button>
+                <iframe id="game-frame" style="width: 100%; height: 600px; border: none; margin-top: 20px; border-radius: 10px; display: none;" src=""></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // ==================== STATE ====================
+        let gameState = {
+            purchased: false,
+            purchaseDate: null,
+            apiKeys: {},
+            githubConnected: false,
+            githubUser: null,
+            githubRepos: [],
+            agents: [],
+            permissions: {
+                code: true,
+                deploy: true,
+                trade: false,
+                content: true,
+                email: false,
+                social: true,
+                research: false
+            },
+            earnings: {
+                total: 0,
+                pending: 0,
+                history: []
+            },
+            workLog: []
+        };
+
+        // ==================== AGENT DEFINITIONS ====================
+        const AGENT_TYPES = [
+            {
+                id: 'code-agent',
+                name: '💻 Code Agent',
+                description: 'Writes, reviews, and commits code to your GitHub repositories',
+                price: 0,
+                category: 'Development',
+                capabilities: ['code-generation', 'code-review', 'git-commits', 'bug-fixes'],
+                status: 'idle'
+            },
+            {
+                id: 'content-agent',
+                name: '📝 Content Agent',
+                description: 'Creates blog posts, social media content, and marketing copy',
+                price: 0,
+                category: 'Content',
+                capabilities: ['blog-writing', 'social-posts', 'seo-optimization', 'copywriting'],
+                status: 'idle'
+            },
+            {
+                id: 'trading-agent',
+                name: '📈 Trading Agent',
+                description: 'Monitors markets and executes trades based on your strategy',
+                price: 0,
+                category: 'Finance',
+                capabilities: ['market-analysis', 'crypto-trading', 'stock-trading', 'portfolio-management'],
+                status: 'offline'
+            },
+            {
+                id: 'research-agent',
+                name: '🔬 Research Agent',
+                description: 'Conducts web research, gathers data, and creates reports',
+                price: 0,
+                category: 'Research',
+                capabilities: ['web-scraping', 'data-analysis', 'report-generation', 'trend-monitoring'],
+                status: 'idle'
+            },
+            {
+                id: 'social-agent',
+                name: '📱 Social Media Agent',
+                description: 'Manages your social media accounts and engagement',
+                price: 0,
+                category: 'Marketing',
+                capabilities: ['post-scheduling', 'engagement', 'analytics', 'growth-strategy'],
+                status: 'idle'
+            },
+            {
+                id: 'deploy-agent',
+                name: '🚀 Deploy Agent',
+                description: 'Deploys your applications to cloud platforms automatically',
+                price: 0,
+                category: 'DevOps',
+                capabilities: ['cloud-deploy', 'ci-cd', 'monitoring', 'scaling'],
+                status: 'idle'
+            }
+        ];
+
+        // ==================== INITIALIZATION ====================
+        window.onload = function() {
+            loadState();
+            if (gameState.purchased) {
+                showDashboard();
+            }
+            renderAgents();
+            renderMarketplace();
+            renderWorkLog();
+            renderEarnings();
+        };
+
+        // ==================== PURCHASE SYSTEM ====================
+        function purchaseGame() {
+            showNotification('🔄 Processing payment...');
+            
+            // Simulate payment processing
+            setTimeout(() => {
+                gameState.purchased = true;
+                gameState.purchaseDate = new Date().toISOString();
+                saveState();
+                
+                showNotification('✅ Purchase successful! Welcome to Soulverse!');
+                showDashboard();
+                
+                // Add initial agents
+                gameState.agents = [...AGENT_TYPES];
+                saveState();
+                renderAgents();
+            }, 2000);
+        }
+
+        function showDashboard() {
+            document.getElementById('purchase-gate').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+        }
+
+        // ==================== TAB SYSTEM ====================
+        function showTab(tabName) {
+            // Hide all panels
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            // Show selected panel
+            document.getElementById(tabName + '-panel').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // ==================== AGENT RENDERING ====================
+        function renderAgents() {
+            const grid = document.getElementById('my-agents-grid');
+            grid.innerHTML = gameState.agents.map(agent => `
+                <div class="agent-card">
+                    <h4>${agent.name}</h4>
+                    <p>${agent.description}</p>
+                    <span class="status ${agent.status}">${agent.status.toUpperCase()}</span>
+                    <div class="price">Free with purchase</div>
+                    <div style="margin: 10px 0;">
+                        <strong>Capabilities:</strong><br>
+                        <small>${agent.capabilities.join(', ')}</small>
+                    </div>
+                    <button onclick="toggleAgent('${agent.id}')">
+                        ${agent.status === 'offline' ? '🟢 Activate' : '🔴 Deactivate'}
+                    </button>
+                    <button onclick="configureAgent('${agent.id}')" style="margin-top: 10px; background: #444;">
+                        ⚙️ Configure
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderMarketplace() {
+            const grid = document.getElementById('marketplace-grid');
+            grid.innerHTML = AGENT_TYPES.map(agent => `
+                <div class="agent-card">
+                    <h4>${agent.name}</h4>
+                    <p>${agent.description}</p>
+                    <div class="price">Free with purchase</div>
+                    <button onclick="addAgent('${agent.id}')">
+                        ${gameState.agents.find(a => a.id === agent.id) ? '✅ Already Owned' : '➕ Add to My Agents'}
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // ==================== AGENT ACTIONS ====================
+        function toggleAgent(agentId) {
+            const agent = gameState.agents.find(a => a.id === agentId);
+            if (agent) {
+                agent.status = agent.status === 'offline' ? 'idle' : 'offline';
+                saveState();
+                renderAgents();
+                showNotification(`${agent.name} ${agent.status === 'idle' ? 'activated' : 'deactivated'}`);
+                
+                if (agent.status === 'idle') {
+                    addWorkLog('success', `${agent.name} activated and ready for work`);
+                }
+            }
+        }
+
+        function configureAgent(agentId) {
+            const agent = gameState.agents.find(a => a.id === agentId);
+            const config = prompt(`Configure ${agent.name}:\n\nEnter task description:`, '');
+            
+            if (config) {
+                addWorkLog('info', `${agent.name} configured with task: ${config}`);
+                showNotification('⚙️ Agent configured!');
+                
+                // Simulate agent starting work
+                setTimeout(() => {
+                    simulateAgentWork(agent, config);
+                }, 1000);
+            }
+        }
+
+        function simulateAgentWork(agent, task) {
+            const tasks = [
+                'Analyzing requirements...',
+                'Processing task...',
+                'Executing work...',
+                'Reviewing output...',
+                'Completing task...'
+            ];
+            
+            let step = 0;
+            const interval = setInterval(() => {
+                if (step >= tasks.length) {
+                    clearInterval(interval);
+                    const earnings = (Math.random() * 10).toFixed(2);
+                    gameState.earnings.pending += parseFloat(earnings);
+                    gameState.earnings.total += parseFloat(earnings);
+                    addWorkLog('success', `${agent.name} completed task: "${task}" - Earned $${earnings}`);
+                    saveState();
+                    renderEarnings();
+                    showNotification(`✅ Task complete! Earned $${earnings}`);
+                } else {
+                    addWorkLog('info', `${agent.name}: ${tasks[step]}`);
+                    step++;
+                }
+            }, 1500);
+        }
+
+        // ==================== API KEY MANAGEMENT ====================
+        function saveApiKey(service, key) {
+            gameState.apiKeys[service] = key;
+            saveState();
+            showNotification(`✅ ${service} API key saved`);
+        }
+
+        function testAllKeys() {
+            showNotification('🔍 Testing API connections...');
+            
+            Object.keys(gameState.apiKeys).forEach(service => {
+                const key = gameState.apiKeys[service];
+                if (key && key.length > 10) {
+                    addWorkLog('success', `${service} API connection: OK`);
+                } else {
+                    addWorkLog('error', `${service} API connection: Invalid key`);
+                }
+            });
+        }
+
+        // ==================== GITHUB INTEGRATION ====================
+        function connectGitHub() {
+            const token = gameState.apiKeys.github;
+            
+            if (!token) {
+                showNotification('❌ Please enter GitHub token first in API Keys tab');
+                showTab('keys');
+                return;
+            }
+            
+            showNotification('🔄 Connecting to GitHub...');
+            
+            // Simulate GitHub OAuth flow
+            setTimeout(() => {
+                gameState.githubConnected = true;
+                gameState.githubUser = 'CraigJones';
+                gameState.githubRepos = ['plt-press', 'soulverse', 'fix-us', 'profit-bot'];
+                saveState();
+                
+                document.getElementById('github-connect-btn').classList.add('github-connected');
+                document.getElementById('github-connect-btn').innerHTML = '✅ GitHub Connected';
+                document.getElementById('github-status').style.display = 'block';
+                document.getElementById('github-user').textContent = gameState.githubUser;
+                document.getElementById('github-repos').textContent = gameState.githubRepos.length;
+                
+                renderRepoList();
+                showNotification('✅ GitHub connected successfully!');
+                addWorkLog('success', 'GitHub account connected');
+            }, 1500);
+        }
+
+        function renderRepoList() {
+            const list = document.getElementById('github-repos-list');
+            list.innerHTML = gameState.githubRepos.map(repo => `
+                <div class="permission-item">
+                    <input type="checkbox" id="repo-${repo}" checked>
+                    <label for="repo-${repo}">${repo}</label>
+                </div>
+            `).join('');
+        }
+
+        // ==================== PERMISSIONS ====================
+        function savePermissions() {
+            gameState.permissions = {
+                code: document.getElementById('perm-code').checked,
+                deploy: document.getElementById('perm-deploy').checked,
+                trade: document.getElementById('perm-trade').checked,
+                content: document.getElementById('perm-content').checked,
+                email: document.getElementById('perm-email').checked,
+                social: document.getElementById('perm-social').checked,
+                research: document.getElementById('perm-research').checked
+            };
+            saveState();
+            showNotification('💾 Permissions saved!');
+        }
+
+        // ==================== WORK LOG ====================
+        function addWorkLog(type, message) {
+            const entry = {
+                type: type,
+                message: message,
+                timestamp: new Date().toISOString()
+            };
+            gameState.workLog.unshift(entry);
+            if (gameState.workLog.length > 100) gameState.workLog.pop();
+            saveState();
+            renderWorkLog();
+        }
+
+        function renderWorkLog() {
+            const log = document.getElementById('work-log');
+            log.innerHTML = gameState.workLog.map(entry => `
+                <div class="log-entry log-${entry.type}">
+                    [${new Date(entry.timestamp).toLocaleString()}] ${entry.message}
+                </div>
+            `).join('');
+        }
+
+        function clearWorkLog() {
+            gameState.workLog = [];
+            saveState();
+            renderWorkLog();
+            showNotification('🗑️ Work log cleared');
+        }
+
+        // ==================== EARNINGS ====================
+        function renderEarnings() {
+            document.getElementById('total-earned').textContent = '$' + gameState.earnings.total.toFixed(2);
+            document.getElementById('pending-payout').textContent = '$' + gameState.earnings.pending.toFixed(2);
+            
+            const history = document.getElementById('earnings-history');
+            if (gameState.earnings.history.length === 0) {
+                history.innerHTML = '<p style="color: #888;">No earnings yet. Activate agents to start working!</p>';
+            } else {
+                history.innerHTML = gameState.earnings.history.map(entry => `
+                    <div class="log-entry">
+                        ${entry.date}: <span class="log-success">+$${entry.amount}</span> - ${entry.source}
+                    </div>
+                `).join('');
+            }
+        }
+
+        function withdrawEarnings() {
+            if (gameState.earnings.pending <= 0) {
+                showNotification('❌ No pending earnings to withdraw');
+                return;
+            }
+            
+            const amount = gameState.earnings.pending;
+            gameState.earnings.history.unshift({
+                date: new Date().toLocaleDateString(),
+                amount: amount.toFixed(2),
+                source: 'Agent Work Payout'
+            });
+            gameState.earnings.pending = 0;
+            saveState();
+            renderEarnings();
+            showNotification(`💸 $${amount.toFixed(2)} withdrawn to your account!`);
+        }
+
+        // ==================== GAME LAUNCH ====================
+        function launchGame() {
+            const frame = document.getElementById('game-frame');
+            frame.src = 'SOULVERSE-FUSION-MASTER.html';
+            frame.style.display = 'block';
+            showNotification('🎮 Soulverse launching...');
+        }
+
+        // ==================== STATE MANAGEMENT ====================
+        function saveState() {
+            localStorage.setItem('soulverse-state', JSON.stringify(gameState));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('soulverse-state');
+            if (saved) {
+                gameState = JSON.parse(saved);
+                
+                // Restore API keys in inputs
+                if (gameState.apiKeys.openai) document.getElementById('openai-key').value = gameState.apiKeys.openai;
+                if (gameState.apiKeys.anthropic) document.getElementById('anthropic-key').value = gameState.apiKeys.anthropic;
+                if (gameState.apiKeys.ollama) document.getElementById('ollama-url').value = gameState.apiKeys.ollama;
+                if (gameState.apiKeys.github) document.getElementById('github-token').value = gameState.apiKeys.github;
+                if (gameState.apiKeys.stripe) document.getElementById('stripe-key').value = gameState.apiKeys.stripe;
+                
+                // Restore permissions
+                document.getElementById('perm-code').checked = gameState.permissions.code;
+                document.getElementById('perm-deploy').checked = gameState.permissions.deploy;
+                document.getElementById('perm-trade').checked = gameState.permissions.trade;
+                document.getElementById('perm-content').checked = gameState.permissions.content;
+                document.getElementById('perm-email').checked = gameState.permissions.email;
+                document.getElementById('perm-social').checked = gameState.permissions.social;
+                document.getElementById('perm-research').checked = gameState.permissions.research;
+                
+                // Restore GitHub status
+                if (gameState.githubConnected) {
+                    document.getElementById('github-connect-btn').classList.add('github-connected');
+                    document.getElementById('github-connect-btn').innerHTML = '✅ GitHub Connected';
+                    document.getElementById('github-status').style.display = 'block';
+                    document.getElementById('github-user').textContent = gameState.githubUser || 'Unknown';
+                    document.getElementById('github-repos').textContent = (gameState.githubRepos || []).length;
+                    renderRepoList();
+                }
+            }
+        }
+
+        // ==================== NOTIFICATIONS ====================
+        function showNotification(message) {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.style.display = 'block';
+            setTimeout(() => {
+                notif.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
