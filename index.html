@@ -66,6 +66,128 @@
         
         @media(max-width:768px){.top-btn{padding:6px 12px;font-size:10px}.dex-grid{grid-template-columns:repeat(3,1fr)}}
     </style>
+
+    <script>
+        // Add missing features
+        let soulOrbs = 10;
+        let chatBubbles = [];
+        let lastChatTime = Date.now();
+        
+        // Floating chat bubbles above souls
+        function createChatBubble(soul, text) {
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble';
+            bubble.innerHTML = '<strong style="color:#ffaa66">'+soul.name+'</strong>: '+text;
+            document.getElementById('ui').appendChild(bubble);
+            
+            // Position above soul
+            const mesh = soulMeshes.find(m => m.userData.soulId === soul.id);
+            if (mesh) {
+                const vec = mesh.position.clone();
+                vec.y += 1.5;
+                vec.project(camera);
+                const x = (vec.x * 0.5 + 0.5) * window.innerWidth;
+                const y = (-(vec.y * 0.5) + 0.5) * window.innerHeight;
+                bubble.style.left = (x - 100) + 'px';
+                bubble.style.top = (y - 30) + 'px';
+            }
+            
+            setTimeout(() => bubble.remove(), 4000);
+        }
+        
+        // Auto conversations between souls
+        function autoChat() {
+            const phrases = {
+                profit: ["The numbers look good.", "Time to scale up.", "Opportunity everywhere."],
+                love: ["Feeling connected today.", "Trust is everything.", "Growing together."],
+                tax: ["All accounted for.", "Balance maintained.", "Costs tracked."]
+            };
+            
+            souls.forEach((soul, i) => {
+                if (Math.random() < 0.02) {
+                    const text = phrases[soul.type][Math.floor(Math.random()*3)];
+                    createChatBubble(soul, text);
+                }
+            });
+        }
+        
+        // Speak to world
+        function speakToWorld() {
+            const msg = prompt("Speak to the world:");
+            if (msg) {
+                createChatBubble({name:'You',type:'hybrid'}, msg);
+                souls.forEach(soul => {
+                    if (Math.random() > 0.5) {
+                        setTimeout(() => {
+                            const responses = ["Interesting.", "I hear you.", "The world listens."];
+                            createChatBubble(soul, responses[Math.floor(Math.random()*3)]);
+                        }, 1000);
+                    }
+                });
+            }
+        }
+        
+        // Jump
+        let playerVelocityY = 0;
+        let isJumping = false;
+        function jump() {
+            if (!isJumping) {
+                isJumping = true;
+                playerVelocityY = 0.3;
+            }
+        }
+        
+        // Sprint
+        let isSprinting = false;
+        
+        // Soul radar
+        function drawRadar() {
+            const ctx = document.getElementById('radarCanvas').getContext('2d');
+            ctx.clearRect(0, 0, 150, 150);
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(0, 0, 150, 150);
+            
+            // Player dot
+            ctx.fillStyle = '#ffaa66';
+            ctx.beginPath();
+            ctx.arc(75, 75, 4, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Soul dots
+            const colors = {profit:'#ffaa44', love:'#ff88aa', tax:'#88aaff'};
+            souls.forEach(soul => {
+                const x = 75 + (soul.x - player.position.x) * 3;
+                const y = 75 + (soul.z - player.position.z) * 3;
+                if (x > 0 && x < 150 && y > 0 && y < 150) {
+                    ctx.fillStyle = colors[soul.type] || '#fff';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 3, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            });
+        }
+        
+        // Achievements
+        const achievements = [
+            {name:'First Soul', unlocked:false, check:()=>souls.length>=1},
+            {name:'Home Owner', unlocked:false, check:()=>souls.some(s=>s.home.tier>=2)},
+            {name:'Soul Collector', unlocked:false, check:()=>caughtSouls.length>=5},
+            {name:'Master Builder', unlocked:false, check:()=>souls.some(s=>s.home.tier>=4)},
+            {name:'Completionist', unlocked:false, check:()=>caughtSouls.length>=16}
+        ];
+        
+        function checkAchievements() {
+            achievements.forEach(ach => {
+                if (!ach.unlocked && ach.check()) {
+                    ach.unlocked = true;
+                    notify('🏆 Achievement: '+ach.name);
+                    resources.profit += 50;
+                    resources.love += 50;
+                    resources.tax += 50;
+                }
+            });
+        }
+    </script>
 </head>
 <body>
     <!-- UI OVERLAY -->
@@ -307,7 +429,17 @@
                 if (keys['KeyW'] || keys['ArrowUp']) player.position.z -= speed;
                 if (keys['KeyS'] || keys['ArrowDown']) player.position.z += speed;
                 if (keys['KeyA'] || keys['ArrowLeft']) player.position.x -= speed;
-                if (keys['KeyD'] || keys['ArrowRight']) player.position.x += speed;
+                if (keys['KeyD'] || keys['ArrowRight']) player.position.x += speed * (isSprinting?2:1);
+                
+                // Jump physics
+                if (isJumping) {
+                    player.position.y += playerVelocityY;
+                    playerVelocityY -= 0.015;
+                    if (player.position.y <= 1) {
+                        player.position.y = 1;
+                        isJumping = false;
+                    }
+                }
                 
                 // Keep in bounds
                 player.position.x = Math.max(-14, Math.min(14, player.position.x));
@@ -556,6 +688,9 @@
             `).join('');
         }
         
+        function buyOrb() { if (resources.profit >= 100) { resources.profit -= 100; soulOrbs++; notify('🔮 Bought Soul Orb!'); updateUI(); } else { notify('Need 100 Profit!'); } }
+        function sellOrb() { if (soulOrbs >= 1) { soulOrbs--; resources.profit += 80; notify('💰 Sold Soul Orb!'); updateUI(); } else { notify('No orbs!'); } }
+        
         function viewSoul(id) {
             const entry = soulDex.find(d => d.id === id);
             if (entry && entry.caught) {
@@ -592,6 +727,10 @@
             
             saveGame();
             updateUI();
+            autoChat();
+            checkAchievements();
+            drawRadar();
+            document.getElementById('orbCount').innerText = soulOrbs;
         }, 1000);
         
         // === EVENT LISTENERS ===
@@ -613,5 +752,46 @@
         
         console.log('🌌 SOULVERSE ULTIMATE - All systems merged!');
     </script>
+
+<!-- Soul Radar -->
+<div id="soulRadar" style="position:absolute;top:20px;right:20px;width:150px;height:150px;background:rgba(0,0,0,0.6);border:2px solid #ffaa66;border-radius:50%;overflow:hidden;z-index:10">
+    <canvas id="radarCanvas" width="150" height="150"></canvas>
+</div>
+
+<!-- Voice/Speak Button -->
+<button class="top-btn" onclick="speakToWorld()" style="position:absolute;top:20px;left:50%;transform:translateX(-50%);z-index:30">🗣️ SPEAK</button>
+
+<!-- Jump & Sprint -->
+<button class="touch-btn" id="jumpBtn" onclick="jump()" style="position:absolute;bottom:100px;right:100px;z-index:20">JUMP</button>
+<button class="touch-btn secondary" id="sprintBtn" onmousedown="isSprinting=true" onmouseup="isSprinting=false" style="position:absolute;bottom:100px;right:20px;z-index:20">SPRINT</button>
+
+<!-- Build Tools -->
+<button class="touch-btn secondary" style="position:absolute;bottom:200px;right:20px;z-index:20">🔨</button>
+<button class="touch-btn" style="position:absolute;bottom:200px;right:80px;z-index:20">🛠️</button>
+
+<!-- Achievements Panel -->
+<div id="achievementsPanel" class="panel">
+    <button class="close-panel" onclick="togglePanel('achievementsPanel')">&times;</button>
+    <h3>🏆 ACHIEVEMENTS</h3>
+    <div id="achievementsList"></div>
+</div>
+
+<!-- Metaverse Panel -->
+<div id="metaversePanel" class="panel">
+    <button class="close-panel" onclick="togglePanel('metaversePanel')">&times;</button>
+    <h3>🌐 METAVERSE TRADE</h3>
+    <div style="text-align:center;padding:20px">
+        <div style="font-size:24px;margin-bottom:10px">🔮 Soul Orbs: <span id="orbCount">10</span></div>
+        <button class="btn" onclick="buyOrb()">Buy Orb (100 PLT)</button>
+        <button class="btn btn-secondary" onclick="sellOrb()">Sell Orb (+80 PLT)</button>
+    </div>
+</div>
+
+<!-- Add to top bar -->
+<script>
+    const topBar = document.getElementById('top-bar');
+    topBar.innerHTML += '<button class="top-btn" onclick="togglePanel('metaversePanel')">🌐 METAVERSE</button>';
+    topBar.innerHTML += '<button class="top-btn" onclick="togglePanel('achievementsPanel')">🏆 ACHIEVEMENTS</button>';
+</script>
 </body>
 </html>
