@@ -1,394 +1,354 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🌀 SOULVERSE | Complete - Agents, Economy, Combat, Diplomacy</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;user-select:none}
-        body{background:#000;overflow:hidden;font-family:'Courier New',monospace}
-        canvas{display:block;width:100%;height:100%}
-        #ui{position:absolute;bottom:20px;left:20px;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border-radius:12px;padding:8px 12px;color:#ffaa66;font-size:11px;pointer-events:none;z-index:10}
-        #top-bar{position:absolute;top:20px;left:0;right:0;display:flex;justify-content:center;gap:12px;z-index:30;pointer-events:auto;flex-wrap:wrap}
-        .top-btn{background:#ffaa66;border:none;color:#000;font-weight:bold;padding:8px 18px;border-radius:30px;cursor:pointer;font-family:monospace;transition:0.2s;touch-action:manipulation}
-        .top-btn:active{transform:scale(0.96)}
-        #resources{position:absolute;top:20px;right:20px;background:rgba(0,0,0,0.6);border-radius:12px;padding:8px 12px;color:#ffaa66;font-size:11px;text-align:right;pointer-events:none;z-index:10}
-        #selection-panel{position:absolute;bottom:100px;left:20px;background:rgba(0,0,0,0.6);border-radius:12px;padding:6px 12px;font-size:10px;pointer-events:none;z-index:20}
-        #mobile-controls{position:absolute;bottom:20px;left:0;right:0;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:8px;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border-radius:40px;margin:0 20px;z-index:40;pointer-events:auto}
-        .mobile-btn{background:#2a2a3a;border:1px solid #ffaa66;color:#ffaa66;padding:8px 16px;border-radius:30px;font-size:12px;font-weight:bold;touch-action:manipulation;cursor:pointer}
-        .mobile-btn:active{background:#ffaa66;color:#000}
-        #building-menu{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);border-radius:20px;padding:8px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;z-index:40;pointer-events:auto;max-width:90%}
-        .build-btn{background:#2a2a3a;border:1px solid #ffaa66;color:#ffaa66;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:10px;touch-action:manipulation}
-        .build-btn:active{background:#ffaa66;color:#000}
-        .modal{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.9);backdrop-filter:blur(16px);border:2px solid #ffaa66;border-radius:24px;padding:20px;z-index:200;display:none;pointer-events:auto;min-width:300px;max-width:90vw;max-height:80vh;overflow-y:auto;text-align:center}
-        .modal button{margin:5px;padding:8px 16px;background:#ffaa66;border:none;border-radius:30px;font-weight:bold;cursor:pointer}
-        .modal-close{float:right;background:none;border:none;color:#ffaa66;font-size:20px;cursor:pointer}
-        .agent-panel{position:absolute;top:80px;right:20px;width:300px;background:rgba(0,0,0,0.8);backdrop-filter:blur(12px);border-radius:16px;padding:12px;display:block;z-index:50;pointer-events:auto;text-align:left}
-        .agent-panel h3{color:#ffaa66;margin-bottom:8px}
-        .agent-card{background:#2a2a3a;border-radius:12px;padding:10px;margin-bottom:10px;cursor:pointer;transition:0.2s}
-        .agent-card:hover{background:#ffaa66;color:#000;transform:translateX(-5px)}
-        .task-output{background:#000;border-radius:8px;padding:8px;font-size:10px;margin-top:8px;white-space:pre-wrap}
-        input,textarea,select{width:100%;margin:5px 0;padding:8px;background:#2a2a3a;border:1px solid #ffaa66;color:#ffaa66;border-radius:8px;font-family:monospace}
-        .status-badge{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
-        .status-active{background:#88ff88}.status-idle{background:#888}
-        #minimap{position:absolute;bottom:20px;right:20px;width:140px;height:140px;background:rgba(0,0,0,0.5);border:2px solid #ffaa66;border-radius:8px;pointer-events:none;z-index:60}
-        .health-bar{width:200px;height:12px;background:#333;border-radius:6px;overflow:hidden}.health-fill{height:100%;background:#ff4444;width:100%}
-        .combo-counter{font-size:32px;font-weight:bold;text-align:center;color:#ffaa44;text-shadow:0 0 10px #ffaa44;margin:10px 0}
-        .super-meter{width:200px;height:8px;background:#333;border-radius:4px;overflow:hidden}.super-fill{height:100%;background:#4f4;width:0}
-        .limit-break-btn{background:#ffaa44;border:none;padding:8px 16px;border-radius:40px;font-weight:bold;margin-top:8px}
-        .move-buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:20px}
-        .move-btn{background:#222;border:1px solid #ffaa44;padding:14px;border-radius:40px;color:#fff;font-size:16px;font-weight:bold;text-align:center;cursor:pointer}
-        .fatality-prompt{background:red;color:#fff;font-weight:bold;text-align:center;padding:12px;border-radius:40px;margin-top:20px;cursor:pointer}
-        @media(max-width:768px){.top-btn{padding:6px 12px;font-size:10px}.build-btn{padding:4px 8px;font-size:8px}#minimap{width:100px;height:100px}.mobile-btn{padding:6px 12px;font-size:10px}.agent-panel{width:260px;top:70px;right:10px}}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌀 SOULVERSE</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#ffaa66;font-family:monospace;overflow:hidden}
+#ui{position:fixed;top:10px;left:10px;background:rgba(0,0,0,0.8);padding:15px;border-radius:12px;border:2px solid #ffaa66;z-index:100}
+#ui h3{margin-bottom:10px}
+#ui div{margin:5px 0}
+#controls{position:fixed;bottom:20px;left:20px;background:rgba(0,0,0,0.8);padding:15px;border-radius:12px;border:2px solid #ffaa66;z-index:100}
+.btn{background:#ffaa66;color:#000;border:none;padding:10px 20px;margin:5px;border-radius:8px;cursor:pointer;font-weight:bold}
+.btn:hover{background:#fff}
+#log{position:fixed;bottom:20px;right:20px;width:300px;height:200px;background:rgba(0,0,0,0.8);border:2px solid #ffaa66;border-radius:12px;padding:10px;overflow-y:auto;font-size:11px}
+#minimap{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:150px;height:150px;background:rgba(0,0,0,0.8);border:2px solid #ffaa66;border-radius:50%}
+canvas{display:block}
+.modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;border:2px solid #ffaa66;border-radius:12px;padding:20px;z-index:200;min-width:300px}
+.modal h3{margin-bottom:15px}
+.modal input,.modal textarea,.modal select{width:100%;margin:5px 0;padding:8px;background:#222;border:1px solid #ffaa66;color:#ffaa66;border-radius:4px}
+.modal button{margin:5px}
+</style>
 </head>
 <body>
-    <div id="ui">🌀 SOULVERSE | Complete</div>
-    <div id="top-bar">
-        <button id="purchaseBtn" class="top-btn" style="display:none">💰 Unlock ($47)</button>
-        <button id="marketplaceBtn" class="top-btn">🤖 Agents</button>
-        <button id="economyBtn" class="top-btn">📊 Economy</button>
-        <button id="diplomacyBtn" class="top-btn">🤝 Diplomacy</button>
-        <button id="tradeBtn" class="top-btn">💱 Trade</button>
-        <button id="questBtn" class="top-btn">📜 Quests</button>
-        <button id="trainBtn" class="top-btn">🎓 Train</button>
-        <button id="automateBtn" class="top-btn">⚙️ Auto</button>
-        <button id="settingsBtn" class="top-btn">⚙️ API</button>
-    </div>
-    <div id="resources">💰 <span id="profitVal">500</span> ❤️ <span id="loveVal">500</span> ⚖️ <span id="taxVal">500</span></div>
-    <div id="selection-panel">Selected: <span id="selected-name">none</span></div>
-    <div id="mobile-controls">
-        <button class="mobile-btn" id="moveBtn">🏃 Move</button>
-        <button class="mobile-btn" id="attackBtn">⚔️ Attack</button>
-        <button class="mobile-btn" id="gatherBtn">🌾 Gather</button>
-        <button class="mobile-btn" id="stopBtn">🛑 Stop</button>
-    </div>
-    <div id="building-menu">
-        <button class="build-btn" data-building="townhall">🏛️ TH(200)</button>
-        <button class="build-btn" data-building="forge">⚒️ Forge(150)</button>
-        <button class="build-btn" data-building="market">🏪 Market(120)</button>
-        <button class="build-btn" data-building="barracks">🏚️ Barracks(180)</button>
-        <button class="build-btn" data-building="farm">🌾 Farm(100)</button>
-        <button class="build-btn" data-building="wall">🧱 Wall(50)</button>
-        <button class="build-btn" data-building="tower">🗼 Tower(200)</button>
-        <button class="build-btn" data-building="exchange">🏦 Exchange(500)</button>
-    </div>
-    <div id="minimap"><canvas id="minimapCanvas" width="140" height="140"></canvas></div>
-    <div id="battle-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;flex-direction:column;justify-content:space-between;padding:20px;z-index:100;pointer-events:auto">
-        <div style="display:flex;justify-content:space-between;color:#fff">
-            <div><div id="opponent-name"></div><div class="health-bar"><div id="opponent-health-fill" class="health-fill"></div></div></div>
-            <div><div>You</div><div class="health-bar"><div id="player-health-fill" class="health-fill"></div></div></div>
-        </div>
-        <div class="combo-counter" id="combo-counter">0</div>
-        <div class="super-meter"><div id="super-fill" class="super-fill"></div></div>
-        <button id="limit-break-btn" class="limit-break-btn" style="display:none">Limit Break!</button>
-        <div class="move-buttons" id="move-buttons"></div>
-        <div class="fatality-prompt" id="fatality-prompt" style="display:none">💀 FATALITY 💀</div>
-    </div>
-    <div id="agentPanel" class="agent-panel"><h3>🛠️ My Agents</h3><div id="myAgentsList"></div></div>
+<div id="ui">
+<h3>🌀 SOULVERSE</h3>
+<div>💰 Profit: <span id="profit">500</span></div>
+<div>❤️ Love: <span id="love">500</span></div>
+<div>⚖️ Tax: <span id="tax">500</span></div>
+<div>⭐ Level: <span id="level">1</span></div>
+<div>🤖 Agents: <span id="agents">0</span></div>
+</div>
 
-    <!-- Modals -->
-    <div id="purchaseModal" class="modal"><button class="modal-close" id="closePurchase">&times;</button><h3>🔥 Unlock Soulverse</h3><p>$47 - Complete platform with agents, economy, combat</p><button id="confirmPurchase">Buy Now</button><button id="demoMode">Demo</button></div>
-    <div id="settingsModal" class="modal"><button class="modal-close" id="closeSettings">&times;</button><h3>⚙️ API Keys</h3><input type="password" id="openaiKey" placeholder="OpenAI Key"><input type="password" id="githubToken" placeholder="GitHub Token"><input id="githubRepo" placeholder="owner/repo"><button id="saveSettings">Save</button></div>
-    <div id="marketplaceModal" class="modal"><button class="modal-close" id="closeMarketplace">&times;</button><h3>🤖 Agent Marketplace</h3><div id="agentList"></div></div>
-    <div id="economyModal" class="modal"><button class="modal-close" id="closeEconomy">&times;</button><h3>📊 Economy</h3><div id="economyContent"></div></div>
-    <div id="diplomacyModal" class="modal"><button class="modal-close" id="closeDiplomacy">&times;</button><h3>🤝 Diplomacy</h3><div id="diplomacyContent"></div></div>
-    <div id="tradeModal" class="modal"><button class="modal-close" id="closeTrade">&times;</button><h3>💱 Trade</h3><div id="tradeContent"></div></div>
-    <div id="questModal" class="modal"><button class="modal-close" id="closeQuest">&times;</button><h3>📜 Quests</h3><div id="questContent"></div></div>
-    <div id="trainModal" class="modal"><button class="modal-close" id="closeTrain">&times;</button><h3>🎓 Train Agent</h3><select id="trainAgentSelect"></select><input id="trainTask" placeholder="Skill to train"><button id="startTraining">Train</button><div id="trainingLog"></div></div>
-    <div id="automateModal" class="modal"><button class="modal-close" id="closeAutomate">&times;</button><h3>⚙️ Automation</h3><div id="automationList"></div><button id="createAutomation">New</button></div>
-    <div id="agentTaskModal" class="modal"><button class="modal-close" id="closeTaskModal">&times;</button><h3 id="taskAgentName">Task</h3><select id="taskType"><option value="code">Code</option><option value="content">Content</option><option value="research">Research</option><option value="analyze">Analyze</option><option value="github_file">GitHub File</option><option value="github_issue">GitHub Issue</option></select><textarea id="taskPrompt" rows="3" placeholder="Task..."></textarea><input id="taskParam" placeholder="Optional param"><button id="executeTask">Execute</button><div id="taskResult" class="task-output"></div></div>
+<div id="controls">
+<div style="margin-bottom:10px"><strong>CONTROLS:</strong></div>
+<div>WASD / Arrows = Move</div>
+<div>Click = Select/Interact</div>
+<div style="margin-top:10px">
+<button class="btn" onclick="openModal('agentsModal')">🤖 Agents</button>
+<button class="btn" onclick="openModal('combatModal')">⚔️ Combat</button>
+<button class="btn" onclick="openModal('workModal')">💼 Work</button>
+</div>
+</div>
 
-    <canvas id="game-canvas"></canvas>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/OrbitControls.js"></script>
-    <script>
-        // === CORE STATE ===
-        const QUALITY={0:{terrainSegments:32,shadows:false,grass:200,trees:10,resources:15},1:{terrainSegments:48,shadows:true,grass:400,trees:20,resources:25}};
-        let currentQuality=/Mobi/i.test(navigator.userAgent)?0:1;
-        let scene,camera,renderer,controls,terrain;
-        let playerUnits=[],playerBuildings=[],enemyUnits=[],resources=[];
-        let playerResources={profit:500,love:500,tax:500};
-        let gameUnlocked=true; // Always unlocked
-        let apiKeys={openai:localStorage.getItem('openai_key')||'',githubToken:localStorage.getItem('github_token')||'',githubRepo:localStorage.getItem('github_repo')||''};
-        let agents=[],automations=[],quests=[];
-        let economy={gdp:1000,inflation:0.02,sentiment:0.5,events:[]};
-        let diplomacy={merchants:0,forest:0};
-        let marketPrices={profit:1,love:1,tax:1};
-        let activeBattle=null,combo=0,superMeter=0,limitMeter=0;
-        let soundEnabled=false,audioCtx=null;
+<div id="log"><div>🌀 Soulverse initialized...</div></div>
 
-        // === AGENT CLASS ===
-        class Agent{
-            constructor(t){this.id=Date.now()+'_'+Math.random();this.name=t.name;this.type=t.type;this.cost=t.cost;this.skills={code:0,content:0,research:0,analyze:0};this.xp=0;this.level=1;this.status='idle';}
-            async execute(type,prompt,param=''){
-                if(this.status==='working')throw new Error('Busy');
-                this.status='working';updateAgentPanel();
-                let result='';
-                try{
-                    if(type==='code')result=await callOpenAI(prompt,'You are '+this.name+', a coding expert.');
-                    else if(type==='content')result=await callOpenAI(prompt,'You are '+this.name+', a content creator.');
-                    else if(type==='research')result=await callOpenAI(prompt,'You are '+this.name+', a researcher.');
-                    else if(type==='analyze')result=await callOpenAI(prompt,'You are '+this.name+', an analyst.');
-                    else if(type==='github_file')result=await githubCreateFile(prompt,param);
-                    else if(type==='github_issue')result=await githubCreateIssue(prompt,param);
-                    else result='Unknown task.';
-                    this.skills[type]=(this.skills[type]||0)+1;this.xp+=10;
-                    if(this.xp>=100*this.level){this.level++;this.xp=0;}
-                    playerResources.profit+=10;playerResources.love+=10;playerResources.tax+=10;
-                    updateUI();return result;
-                }catch(e){result='Error: '+e.message;throw e;}
-                finally{this.status='idle';updateAgentPanel();saveAgents();}
-            }
-        }
+<div id="minimap"><canvas id="minimapCanvas" width="150" height="150"></canvas></div>
 
-        // === API CALLS ===
-        async function callOpenAI(prompt,system){
-            if(!apiKeys.openai)throw new Error('OpenAI key missing');
-            const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKeys.openai},body:JSON.stringify({model:'gpt-4-turbo-preview',messages:[{role:'system',content:system},{role:'user',content:prompt}],max_tokens:800})});
-            if(!res.ok)throw new Error('OpenAI error');
-            return(await res.json()).choices[0].message.content;
-        }
-        async function githubCreateFile(content,path){
-            if(!apiKeys.githubToken||!apiKeys.githubRepo)throw new Error('GitHub missing');
-            const[owner,repo]=apiKeys.githubRepo.split('/');
-            const url='https://api.github.com/repos/'+owner+'/'+repo+'/contents/'+path;
-            const encoded=btoa(unescape(encodeURIComponent(content)));
-            const res=await fetch(url,{method:'PUT',headers:{'Authorization':'token '+apiKeys.githubToken,'Content-Type':'application/json'},body:JSON.stringify({message:'Soulverse commit',content:encoded,branch:'main'})});
-            if(!res.ok)throw new Error('GitHub error');
-            return await res.json();
-        }
-        async function githubCreateIssue(title,body){
-            if(!apiKeys.githubToken||!apiKeys.githubRepo)throw new Error('GitHub missing');
-            const[owner,repo]=apiKeys.githubRepo.split('/');
-            const res=await fetch('https://api.github.com/repos/'+owner+'/'+repo+'/issues',{method:'POST',headers:{'Authorization':'token '+apiKeys.githubToken,'Content-Type':'application/json'},body:JSON.stringify({title,body})});
-            if(!res.ok)throw new Error('GitHub error');
-            return await res.json();
-        }
+<!-- Agents Modal -->
+<div id="agentsModal" class="modal">
+<h3>🤖 Agent Marketplace</h3>
+<div style="margin:10px 0">
+<div class="btn" onclick="buyAgent('profit')">Buy Profit Agent (200 PLT)</div>
+<div class="btn" onclick="buyAgent('love')">Buy Love Agent (200 PLT)</div>
+<div class="btn" onclick="buyAgent('tax')">Buy Tax Agent (200 PLT)</div>
+</div>
+<div id="myAgents" style="margin-top:10px"></div>
+<button class="btn" onclick="closeModal('agentsModal')">Close</button>
+</div>
 
-        // === AGENT MANAGEMENT ===
-        function loadAgents(){agents=JSON.parse(localStorage.getItem('soulverse_agents')||'[]');updateAgentPanel();}
-        function saveAgents(){localStorage.setItem('soulverse_agents',JSON.stringify(agents));}
-        function updateAgentPanel(){
-            const c=document.getElementById('myAgentsList');if(!c)return;
-            if(agents.length===0){c.innerHTML='<div>No agents. Buy from marketplace.</div>';return;}
-            c.innerHTML=agents.map(a=>'<div class="agent-card"><div><strong>'+a.name+'</strong> Lv.'+a.level+' <span class="status-badge '+ (a.status==='working'?'status-active':'status-idle')+'"></span></div><div>Skills: '+Object.entries(a.skills).map(([k,v])=>k+':'+v).join(', ')+'</div><button class="assign-task" data-id="'+a.id+'">Task</button><button class="automate-agent" data-id="'+a.id+'">⚙️ Auto</button></div>').join('');
-            document.querySelectorAll('.assign-task').forEach(b=>b.addEventListener('click',()=>openTaskModal(agents.find(x=>x.id===b.dataset.id))));
-            document.querySelectorAll('.automate-agent').forEach(b=>b.addEventListener('click',()=>setupAutomation(agents.find(x=>x.id===b.dataset.id))));
-        }
-        function buyAgent(t){
-            if(!gameUnlocked){alert('Purchase game first');return;}
-            if(playerResources.profit>=t.cost&&playerResources.love>=t.cost&&playerResources.tax>=t.cost){
-                playerResources.profit-=t.cost;playerResources.love-=t.cost;playerResources.tax-=t.cost;
-                agents.push(new Agent(t));saveAgents();updateAgentPanel();updateUI();alert('Agent '+t.name+' purchased!');
-            }else alert('Not enough resources');
-        }
-        function openTaskModal(agent){
-            const m=document.getElementById('agentTaskModal');
-            document.getElementById('taskAgentName').innerText='Task for '+agent.name;
-            document.getElementById('taskResult').innerHTML='';document.getElementById('taskPrompt').value='';
-            m.style.display='block';
-            document.getElementById('executeTask').onclick=async()=>{
-                const type=document.getElementById('taskType').value,prompt=document.getElementById('taskPrompt').value,param=document.getElementById('taskParam').value;
-                if(!prompt.trim()){alert('Describe task');return;}
-                const btn=document.getElementById('executeTask');btn.disabled=true;
-                const r=document.getElementById('taskResult');r.innerHTML='⏳ Executing...';
-                try{const result=await agent.execute(type,prompt,param);r.innerHTML='<strong>Result:</strong><br>'+result.replace(/\n/g,'<br>');}
-                catch(e){r.innerHTML='<strong>Error:</strong><br>'+e.message;}
-                finally{btn.disabled=false;}
-            };
-        }
-        function setupAutomation(agent){
-            const type=prompt('Type: code/content/research/analyze','code');
-            const interval=parseInt(prompt('Seconds','30'));
-            if(!type||!interval)return;
-            automations.push({agentId:agent.id,type,interval,lastRun:Date.now(),active:true});
-            localStorage.setItem('soulverse_automations',JSON.stringify(automations));
-            alert('Automation set for '+agent.name+' every '+interval+'s');
-        }
-        function runAutomations(){
-            const now=Date.now();
-            for(let a of automations){
-                if(!a.active)continue;
-                const agent=agents.find(x=>x.id===a.agentId);
-                if(agent&&agent.status!=='working'&&now-a.lastRun>=interval*1000){
-                    a.lastRun=now;agent.execute(a.type,'Auto: '+a.type,'').catch(console.error);
-                }
-            }
-        }
+<!-- Combat Modal -->
+<div id="combatModal" class="modal">
+<h3>⚔️ Combat Arena</h3>
+<div id="combatStatus" style="margin:10px 0">Ready to fight!</div>
+<div id="combatLog" style="height:100px;overflow-y:auto;background:#111;padding:5px;margin:10px 0;font-size:11px"></div>
+<button class="btn" onclick="startCombat()">Start Battle</button>
+<button class="btn" onclick="closeModal('combatModal')">Close</button>
+</div>
 
-        // === ECONOMY ===
-        function updateEconomy(){
-            economy.gdp+=(playerResources.profit+playerResources.love+playerResources.tax)*0.01;
-            economy.inflation=0.02+Math.random()*0.03-0.01;
-            if(Math.random()<0.1){economy.events.unshift({text:['Boom','Bubble','Shortage','Peace'][Math.floor(Math.random()*4)],time:Date.now()});if(economy.events.length>5)economy.events.pop();}
-            const c=document.getElementById('economyContent');
-            if(c)c.innerHTML='<div>GDP: '+economy.gdp.toFixed(0)+'</div><div>Inflation: '+(economy.inflation*100).toFixed(1)+'%</div><div>Events: '+economy.events.map(e=>e.text).join(', ')+'</div>';
-        }
+<!-- Work Modal -->
+<div id="workModal" class="modal">
+<h3>💼 AI Work</h3>
+<p style="font-size:11px;margin:10px 0">Set your API keys to use AI features:</p>
+<input type="password" id="openaiKey" placeholder="OpenAI API Key (sk-...)">
+<input type="password" id="githubToken" placeholder="GitHub Token (ghp_...)">
+<input id="githubRepo" placeholder="GitHub Repo (owner/repo)">
+<button class="btn" onclick="saveAPIKeys()">Save Keys</button>
+<div style="margin-top:10px">
+<button class="btn" onclick="aiWork('code')">Generate Code</button>
+<button class="btn" onclick="aiWork('content')">Generate Content</button>
+</div>
+<div id="workResult" style="margin-top:10px;height:100px;overflow-y:auto;background:#111;padding:5px;font-size:11px"></div>
+<button class="btn" onclick="closeModal('workModal')">Close</button>
+</div>
 
-        // === DIPLOMACY ===
-        function updateDiplomacyUI(){
-            const c=document.getElementById('diplomacyContent');
-            c.innerHTML='<h4>Merchants: '+diplomacy.merchants+'</h4><button id="bribeM">Bribe (50 each) +10</button><button id="tradeD" '+(diplomacy.merchants<20?'disabled':'')+'>Trade Deal (need 20)</button><h4>Forest: '+diplomacy.forest+'</h4><button id="giftF">Gift (50 each) +10</button><button id="allyF" '+(diplomacy.forest<30?'disabled':'')+'>Ally (need 30)</button>';
-            document.getElementById('bribeM').onclick=()=>{if(playerResources.profit>=50&&playerResources.love>=50&&playerResources.tax>=50){playerResources.profit-=50;playerResources.love-=50;playerResources.tax-=50;diplomacy.merchants=Math.min(100,diplomacy.merchants+10);updateUI();updateDiplomacyUI();}else alert('Not enough');};
-            document.getElementById('tradeD').onclick=()=>{marketPrices.profit*=0.9;marketPrices.love*=0.9;marketPrices.tax*=0.9;alert('10% discount!');};
-            document.getElementById('giftF').onclick=()=>{if(playerResources.profit>=50&&playerResources.love>=50&&playerResources.tax>=50){playerResources.profit-=50;playerResources.love-=50;playerResources.tax-=50;diplomacy.forest=Math.min(100,diplomacy.forest+10);updateUI();updateDiplomacyUI();}else alert('Not enough');};
-            document.getElementById('allyF').onclick=()=>{alert('Forest spirits aid you!');};
-        }
+<canvas id="gameCanvas"></canvas>
 
-        // === TRADE ===
-        function updateTradeUI(){
-            const c=document.getElementById('tradeContent');
-            c.innerHTML='<div>Prices: P:'+marketPrices.profit.toFixed(2)+' L:'+marketPrices.love.toFixed(2)+' T:'+marketPrices.tax.toFixed(2)+'</div><button id="buyP">Buy 10 P ('+Math.floor(10*marketPrices.profit)+')</button><button id="sellP">Sell 10 P (+ '+Math.floor(10*marketPrices.profit)+')</button>';
-            document.getElementById('buyP').onclick=()=>{if(playerResources.profit>=Math.floor(10*marketPrices.profit)){playerResources.profit-=Math.floor(10*marketPrices.profit);playerResources.profit+=10;updateUI();}else alert('Not enough');};
-            document.getElementById('sellP').onclick=()=>{if(playerResources.profit>=10){playerResources.profit-=10;playerResources.profit+=Math.floor(10*marketPrices.profit);updateUI();}else alert('Not enough');};
-        }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/OrbitControls.js"></script>
+<script>
+// === GAME STATE ===
+let resources = {profit:500, love:500, tax:500};
+let level = 1;
+let agents = [];
+let apiKeys = {openai:'', githubToken:'', githubRepo:''};
 
-        // === QUESTS ===
-        function generateQuest(){
-            const r=Math.random();
-            let q={id:Date.now(),completed:false};
-            if(r<0.33){q.type='kill';q.amount=3+Math.floor(Math.random()*3);q.progress=0;q.reward=100;q.desc='Defeat '+q.amount+' creeps';}
-            else if(r<0.66){q.type='gather';q.resource=['profit','love','tax'][Math.floor(Math.random()*3)];q.amount=50+Math.floor(Math.random()*50);q.progress=0;q.reward=80;q.desc='Gather '+q.amount+' '+q.resource;}
-            else{q.type='build';q.building=['farm','forge','market'][Math.floor(Math.random()*3)];q.amount=1;q.progress=0;q.reward=150;q.desc='Build '+q.building;}
-            quests.push(q);updateQuestUI();
-        }
-        function updateQuestUI(){
-            const c=document.getElementById('questContent');
-            c.innerHTML=quests.map(q=>'<div style="margin:10px 0;padding:8px;background:#2a2a3a;border-radius:12px"><strong>'+q.desc+'</strong><br>Progress: '+q.progress+'/'+q.amount+' Reward: '+q.reward+' PLT</div>').join('');
-        }
+// Load from localStorage
+if(localStorage.getItem('soulverse_resources')) resources = JSON.parse(localStorage.getItem('soulverse_resources'));
+if(localStorage.getItem('soulverse_agents')) agents = JSON.parse(localStorage.getItem('soulverse_agents'));
+if(localStorage.getItem('soulverse_api')) apiKeys = JSON.parse(localStorage.getItem('soulverse_api'));
 
-        // === TRAINING ===
-        async function trainAgent(agent,skill){
-            if(!apiKeys.openai){alert('OpenAI key required');return;}
-            const result=await callOpenAI('Generate training exercise for '+skill+' expert.','Training simulator');
-            agent.skills[skill]=(agent.skills[skill]||0)+2;agent.xp+=5;
-            document.getElementById('trainingLog').innerHTML='Training complete! '+skill+' increased.<br>'+result.substring(0,200);
-            saveAgents();updateAgentPanel();
-        }
+// === THREE.JS WORLD ===
+let scene, camera, renderer, controls, player;
+const keys = {};
 
-        // === COMBAT ===
-        function startBattle(opp){
-            activeBattle={player:{hp:100,maxHp:100,attack:10,defense:10},opponent:opp};
-            document.getElementById('battle-overlay').style.display='flex';
-            document.getElementById('opponent-name').innerText=opp.name;
-            updateBattleUI();generateMoveButtons();
-            combo=0;superMeter=0;limitMeter=0;
-        }
-        function updateBattleUI(){
-            if(!activeBattle)return;
-            document.getElementById('player-health-fill').style.width=(activeBattle.player.hp/activeBattle.player.maxHp*100)+'%';
-            document.getElementById('opponent-health-fill').style.width=(activeBattle.opponent.hp/activeBattle.opponent.maxHp*100)+'%';
-        }
-        function generateMoveButtons(){
-            const c=document.getElementById('move-buttons');c.innerHTML='';
-            [{name:'Punch',dmg:15},{name:'Kick',dmg:12},{name:'Special',dmg:40},{name:'Ultimate',dmg:80}].forEach(m=>{
-                const b=document.createElement('div');b.className='move-btn';b.innerText=m.name;
-                b.onclick=()=>performMove(m);c.appendChild(b);
-            });
-        }
-        function performMove(m){
-            if(!activeBattle)return;
-            let dmg=m.dmg+activeBattle.player.attack-activeBattle.opponent.defense/2;
-            if(Math.random()<0.1)dmg*=1.5;
-            activeBattle.opponent.hp-=dmg;combo++;superMeter=Math.min(100,superMeter+dmg/2);
-            document.getElementById('combo-counter').innerText=combo+' HIT COMBO!';
-            document.getElementById('super-fill').style.width=superMeter+'%';
-            updateBattleUI();
-            if(activeBattle.opponent.hp<=0){endBattle(true);return;}
-            const oppDmg=Math.max(1,Math.floor(activeBattle.opponent.attack-activeBattle.player.defense/2+Math.random()*5));
-            activeBattle.player.hp-=oppDmg;limitMeter=Math.min(100,limitMeter+oppDmg);
-            if(limitMeter>=100)document.getElementById('limit-break-btn').style.display='block';
-            updateBattleUI();
-            if(activeBattle.player.hp<=0)endBattle(false);
-            if(activeBattle.opponent.hp<=10)document.getElementById('fatality-prompt').style.display='block';
-        }
-        function endBattle(win){
-            if(win){alert('Victory!');playerResources.profit+=50;playerResources.love+=50;playerResources.tax+=50;updateUI();}
-            else alert('Defeat...');
-            activeBattle=null;document.getElementById('battle-overlay').style.display='none';
-            document.getElementById('fatality-prompt').style.display='none';
-            document.getElementById('limit-break-btn').style.display='none';
-        }
-        document.getElementById('limit-break-btn').onclick=()=>{
-            if(limitMeter>=100&&activeBattle){limitMeter=0;activeBattle.opponent.hp-=80;document.getElementById('limit-break-btn').style.display='none';updateBattleUI();if(activeBattle.opponent.hp<=0)endBattle(true);}
-        };
+function init(){
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a0a2e);
+    
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 10, 15);
+    
+    renderer = new THREE.WebGLRenderer({canvas:document.getElementById('gameCanvas'), antialias:true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableZoom = true;
+    controls.enablePan = true;
+    
+    // Ground
+    const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(100, 100),
+        new THREE.MeshStandardMaterial({color: 0x2d1b4e, wireframe:true})
+    );
+    ground.rotation.x = -Math.PI / 2;
+    scene.add(ground);
+    
+    // Player
+    player = new THREE.Mesh(
+        new THREE.BoxGeometry(1, 2, 1),
+        new THREE.MeshStandardMaterial({color: 0xffaa66, emissive:0xffaa66, emissiveIntensity:0.3})
+    );
+    player.position.y = 1;
+    scene.add(player);
+    
+    // Lights
+    scene.add(new THREE.AmbientLight(0x404040, 2));
+    const sun = new THREE.DirectionalLight(0xffffff, 1);
+    sun.position.set(10, 20, 10);
+    scene.add(sun);
+    
+    // Add some buildings
+    for(let i=0; i<5; i++){
+        const building = new THREE.Mesh(
+            new THREE.BoxGeometry(2, 3+Math.random()*3, 2),
+            new THREE.MeshStandardMaterial({color: Math.random()*0xffffff})
+        );
+        building.position.set((Math.random()-0.5)*40, building.geometry.parameters.height/2, (Math.random()-0.5)*40);
+        scene.add(building);
+    }
+    
+    // Event listeners
+    window.addEventListener('keydown', e=>keys[e.key.toLowerCase()]=true);
+    window.addEventListener('keyup', e=>keys[e.key.toLowerCase()]=false);
+    window.addEventListener('resize', ()=>{
+        camera.aspect = window.innerWidth/window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    
+    updateUI();
+    updateMinimap();
+    animate();
+    log('🌀 Welcome to Soulverse!');
+}
 
-        // === WORLD ===
-        function getHeight(x,z){let h=0;h+=Math.sin(x*0.12)*Math.cos(z*0.12);h+=Math.sin(x*0.3)*0.5;h+=Math.cos(z*0.3)*0.5;return Math.max(0.2,h+1.6);}
-        function initWorld(){
-            scene=new THREE.Scene();scene.background=new THREE.Color(0x87CEEB);
-            camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,200);camera.position.set(0,12,18);
-            renderer=new THREE.WebGLRenderer({canvas:document.getElementById('game-canvas'),antialias:true});renderer.setSize(window.innerWidth,window.innerHeight);
-            controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableZoom=true;controls.target.set(0,0,0);
-            scene.add(new THREE.AmbientLight(0x404060,0.6));const sun=new THREE.DirectionalLight(0xffdd99,0.8);sun.position.set(10,15,5);scene.add(sun);
-            const geom=new THREE.PlaneGeometry(160,160,32,32);geom.rotateX(-Math.PI/2);const pos=geom.attributes.position.array;for(let i=0;i<pos.length/3;i++)pos[i*3+1]=getHeight(pos[i*3],pos[i*3+2]);
-            terrain=new THREE.Mesh(geom,new THREE.MeshStandardMaterial({color:0x7c9c5e}));scene.add(terrain);
-            const th=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.2,1.5),new THREE.MeshStandardMaterial({color:0xaa8866}));th.position.set(0,getHeight(0,0)+0.6,0);scene.add(th);playerBuildings.push({mesh:th,type:'townhall'});
-            for(let i=0;i<3;i++){const u=new THREE.Mesh(new THREE.SphereGeometry(0.4),new THREE.MeshStandardMaterial({color:[0xffaa44,0xff88aa,0x88aaff][i]}));u.position.set(-2+i*2,getHeight(-2+i*2,-2)+0.5,-2);scene.add(u);playerUnits.push({mesh:u});}
+function animate(){
+    requestAnimationFrame(animate);
+    
+    // Movement
+    const speed = 0.3;
+    if(keys['w'] || keys['arrowup']) player.position.z -= speed;
+    if(keys['s'] || keys['arrowdown']) player.position.z += speed;
+    if(keys['a'] || keys['arrowleft']) player.position.x -= speed;
+    if(keys['d'] || keys['arrowright']) player.position.x += speed;
+    
+    // Camera follow
+    camera.position.x = player.position.x;
+    camera.position.z = player.position.z + 15;
+    camera.position.y = player.position.y + 10;
+    controls.target.copy(player.position);
+    
+    // Update minimap
+    updateMinimap();
+    
+    renderer.render(scene, camera);
+}
+
+function updateUI(){
+    document.getElementById('profit').innerText = Math.floor(resources.profit);
+    document.getElementById('love').innerText = Math.floor(resources.love);
+    document.getElementById('tax').innerText = Math.floor(resources.tax);
+    document.getElementById('level').innerText = level;
+    document.getElementById('agents').innerText = agents.length;
+    
+    // Save
+    localStorage.setItem('soulverse_resources', JSON.stringify(resources));
+    localStorage.setItem('soulverse_agents', JSON.stringify(agents));
+}
+
+function updateMinimap(){
+    const ctx = document.getElementById('minimapCanvas').getContext('2d');
+    ctx.fillStyle = '#1a0a2e';
+    ctx.fillRect(0, 0, 150, 150);
+    
+    // Player dot
+    ctx.fillStyle = '#ffaa66';
+    ctx.beginPath();
+    ctx.arc(75, 75, 5, 0, Math.PI*2);
+    ctx.fill();
+}
+
+function log(msg){
+    const log = document.getElementById('log');
+    log.innerHTML = '<div>'+msg+'</div>' + log.innerHTML;
+}
+
+// === MODALS ===
+function openModal(id){
+    document.querySelectorAll('.modal').forEach(m=>m.style.display='none');
+    document.getElementById(id).style.display='block';
+    if(id==='agentsModal') updateAgentsList();
+}
+
+function closeModal(id){
+    document.getElementById(id).style.display='none';
+}
+
+// === AGENTS ===
+function buyAgent(type){
+    const cost = 200;
+    if(resources.profit >= cost && resources.love >= cost && resources.tax >= cost){
+        resources.profit -= cost;
+        resources.love -= cost;
+        resources.tax -= cost;
+        agents.push({type, level:1, xp:0});
+        updateUI();
+        log('🤖 Bought '+type+' agent!');
+        updateAgentsList();
+    } else {
+        alert('Not enough resources! Need 200 of each.');
+    }
+}
+
+function updateAgentsList(){
+    const div = document.getElementById('myAgents');
+    if(agents.length === 0){
+        div.innerHTML = '<div style="color:#666">No agents yet</div>';
+        return;
+    }
+    div.innerHTML = agents.map((a,i)=>'<div style="padding:5px;background:#222;margin:5px 0;border-radius:4px">🤖 '+a.type.toUpperCase()+' Agent (Lv.'+a.level+')</div>').join('');
+}
+
+// === COMBAT ===
+function startCombat(){
+    const enemyTypes = ['Wild Spirit', 'Code Golem', 'Bug Swarm', 'Data Phantom'];
+    const enemy = enemyTypes[Math.floor(Math.random()*enemyTypes.length)];
+    const enemyHp = 50 + Math.random()*50;
+    
+    let combatLog = document.getElementById('combatLog');
+    combatLog.innerHTML = '⚔️ Fighting '+enemy+' (HP:'+Math.floor(enemyHp)+')<br>';
+    
+    // Simple turn-based combat
+    let playerHp = 100;
+    let enemyHpCurrent = enemyHp;
+    let round = 1;
+    
+    const fightInterval = setInterval(()=>{
+        // Player attacks
+        const dmg = Math.floor(Math.random()*20) + 10;
+        enemyHpCurrent -= dmg;
+        combatLog.innerHTML += 'Round '+round+': You deal '+dmg+' dmg<br>';
+        
+        if(enemyHpCurrent <= 0){
+            combatLog.innerHTML += '🏆 Victory! Earned 50 PLT<br>';
+            resources.profit += 50;
+            resources.love += 50;
+            resources.tax += 50;
+            updateUI();
+            clearInterval(fightInterval);
+            return;
         }
         
-        // === MOVEMENT CONTROLS ===
-        const keys={};
-        window.addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);
-        window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
-        function handleMovement(){
-            const speed=0.3;
-            if(playerUnits.length>0){
-                const p=playerUnits[0].mesh;
-                if(keys['w']||keys['arrowup']){p.position.z-=speed;p.position.y=getHeight(p.position.x,p.position.z)+0.5;}
-                if(keys['s']||keys['arrowdown']){p.position.z+=speed;p.position.y=getHeight(p.position.x,p.position.z)+0.5;}
-                if(keys['a']||keys['arrowleft']){p.position.x-=speed;p.position.y=getHeight(p.position.x,p.position.z)+0.5;}
-                if(keys['d']||keys['arrowright']){p.position.x+=speed;p.position.y=getHeight(p.position.x,p.position.z)+0.5;}
-                camera.position.x=p.position.x;camera.position.z=p.position.z+15;camera.position.y=p.position.y+10;
-                controls.target.copy(p.position);
-            }
+        // Enemy attacks
+        const enemyDmg = Math.floor(Math.random()*15) + 5;
+        playerHp -= enemyDmg;
+        combatLog.innerHTML += 'Enemy deals '+enemyDmg+' dmg (You: '+playerHp+' HP)<br>';
+        
+        if(playerHp <= 0){
+            combatLog.innerHTML += '💀 Defeat...<br>';
+            clearInterval(fightInterval);
+            return;
         }
-function animate(){handleMovement();renderer.render(scene,camera);requestAnimationFrame(animate);}
+        
+        round++;
+        combatLog.scrollTop = combatLog.scrollHeight;
+    }, 1000);
+}
 
-        // === UI BINDING ===
-        function bindUI(){
-            document.getElementById('purchaseBtn').onclick=()=>{if(gameUnlocked)alert('Already purchased');else document.getElementById('purchaseModal').style.display='block';};
-            document.getElementById('confirmPurchase').onclick=()=>{gameUnlocked=true;localStorage.setItem('soulverse_unlocked','true');document.getElementById('purchaseModal').style.display='none';alert('Unlocked!');};
-            document.getElementById('demoMode').onclick=()=>{gameUnlocked=false;localStorage.setItem('soulverse_unlocked','false');document.getElementById('purchaseModal').style.display='none';alert('Demo mode');};
-            document.getElementById('closePurchase').onclick=()=>document.getElementById('purchaseModal').style.display='none';
-            document.getElementById('settingsBtn').onclick=()=>{document.getElementById('settingsModal').style.display='block';document.getElementById('openaiKey').value=apiKeys.openai;document.getElementById('githubToken').value=apiKeys.githubToken;document.getElementById('githubRepo').value=apiKeys.githubRepo;};
-            document.getElementById('saveSettings').onclick=()=>{apiKeys.openai=document.getElementById('openaiKey').value;apiKeys.githubToken=document.getElementById('githubToken').value;apiKeys.githubRepo=document.getElementById('githubRepo').value;localStorage.setItem('openai_key',apiKeys.openai);localStorage.setItem('github_token',apiKeys.githubToken);localStorage.setItem('github_repo',apiKeys.githubRepo);document.getElementById('settingsModal').style.display='none';alert('Saved');};
-            document.getElementById('closeSettings').onclick=()=>document.getElementById('settingsModal').style.display='none';
-            document.getElementById('marketplaceBtn').onclick=()=>{if(!gameUnlocked){alert('Purchase first');return;}const c=document.getElementById('agentList');c.innerHTML='<div class="agent-card"><strong>Profit Agent</strong> (200)<br><button id="buyP">Buy</button></div><div class="agent-card"><strong>Love Agent</strong> (200)<br><button id="buyL">Buy</button></div><div class="agent-card"><strong>Tax Agent</strong> (200)<br><button id="buyT">Buy</button></div>';
-                document.getElementById('buyP').onclick=()=>buyAgent({name:'Profit Agent',type:'profit',cost:200});
-                document.getElementById('buyL').onclick=()=>buyAgent({name:'Love Agent',type:'love',cost:200});
-                document.getElementById('buyT').onclick=()=>buyAgent({name:'Tax Agent',type:'tax',cost:200});
-                document.getElementById('marketplaceModal').style.display='block';
-            };
-            document.getElementById('closeMarketplace').onclick=()=>document.getElementById('marketplaceModal').style.display='none';
-            document.getElementById('economyBtn').onclick=()=>{updateEconomy();document.getElementById('economyModal').style.display='block';};
-            document.getElementById('closeEconomy').onclick=()=>document.getElementById('economyModal').style.display='none';
-            document.getElementById('diplomacyBtn').onclick=()=>{updateDiplomacyUI();document.getElementById('diplomacyModal').style.display='block';};
-            document.getElementById('closeDiplomacy').onclick=()=>document.getElementById('diplomacyModal').style.display='none';
-            document.getElementById('tradeBtn').onclick=()=>{updateTradeUI();document.getElementById('tradeModal').style.display='block';};
-            document.getElementById('closeTrade').onclick=()=>document.getElementById('tradeModal').style.display='none';
-            document.getElementById('questBtn').onclick=()=>{updateQuestUI();document.getElementById('questModal').style.display='block';};
-            document.getElementById('closeQuest').onclick=()=>document.getElementById('questModal').style.display='none';
-            document.getElementById('trainBtn').onclick=()=>{if(agents.length===0){alert('Buy agent first');return;}document.getElementById('trainAgentSelect').innerHTML=agents.map(a=>'<option value="'+a.id+'">'+a.name+'</option>').join('');document.getElementById('trainingLog').innerHTML='';document.getElementById('trainModal').style.display='block';};
-            document.getElementById('startTraining').onclick=async()=>{const agent=agents.find(a=>a.id===document.getElementById('trainAgentSelect').value);const skill=document.getElementById('trainTask').value;if(!skill){alert('Enter skill');return;}await trainAgent(agent,skill);};
-            document.getElementById('closeTrain').onclick=()=>document.getElementById('trainModal').style.display='none';
-            document.getElementById('automateBtn').onclick=()=>{const c=document.getElementById('automationList');c.innerHTML=automations.map(a=>'<div>Agent '+ (agents.find(x=>x.id===a.agentId)?.name||'?')+' - '+a.type+' every '+a.interval+'s <button class="stop-auto" data-id="'+a.agentId+'">Stop</button></div>').join('');document.getElementById('automateModal').style.display='block';document.querySelectorAll('.stop-auto').forEach(b=>b.addEventListener('click',()=>{automations=automations.filter(a=>a.agentId!==b.dataset.id);localStorage.setItem('soulverse_automations',JSON.stringify(automations));document.getElementById('automateBtn').click();}));};
-            document.getElementById('createAutomation').onclick=()=>{if(agents.length===0){alert('No agents');return;}setupAutomation(agents[0]);};
-            document.getElementById('closeAutomate').onclick=()=>document.getElementById('automateModal').style.display='none';
-            document.getElementById('closeTaskModal').onclick=()=>document.getElementById('agentTaskModal').style.display='none';
-            setInterval(runAutomations,2000);setInterval(updateEconomy,30000);
-        }
+// === AI WORK ===
+function saveAPIKeys(){
+    apiKeys.openai = document.getElementById('openaiKey').value;
+    apiKeys.githubToken = document.getElementById('githubToken').value;
+    apiKeys.githubRepo = document.getElementById('githubRepo').value;
+    localStorage.setItem('soulverse_api', JSON.stringify(apiKeys));
+    log('✅ API keys saved');
+    alert('API keys saved!');
+}
 
-        function updateUI(){
-            document.getElementById('profitVal').innerText=Math.floor(playerResources.profit);
-            document.getElementById('loveVal').innerText=Math.floor(playerResources.love);
-            document.getElementById('taxVal').innerText=Math.floor(playerResources.tax);
-        }
+async function aiWork(type){
+    if(!apiKeys.openai){
+        alert('Please enter your OpenAI API key first!');
+        return;
+    }
+    
+    const resultDiv = document.getElementById('workResult');
+    resultDiv.innerHTML = '⏳ Working...';
+    
+    try{
+        const prompt = type==='code' ? 'Write a useful JavaScript function' : 'Write engaging content about AI';
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + apiKeys.openai
+            },
+            body: JSON.stringify({
+                model: 'gpt-4-turbo-preview',
+                messages: [{role:'user', content: prompt}],
+                max_tokens: 200
+            })
+        });
+        
+        if(!res.ok) throw new Error('API error: '+res.status);
+        const data = await res.json();
+        resultDiv.innerHTML = data.choices[0].message.content;
+        
+        // Reward
+        resources.profit += 20;
+        resources.love += 20;
+        resources.tax += 20;
+        updateUI();
+        log('✅ AI work complete! Earned 20 PLT');
+    } catch(e){
+        resultDiv.innerHTML = '❌ Error: '+e.message;
+    }
+}
 
-        // === START ===
-        initWorld();bindUI();loadAgents();updateUI();animate();
-        console.log('🌀 SOULVERSE | Complete - All systems unified');
-    </script>
+// Start
+init();
+</script>
 </body>
 </html>
