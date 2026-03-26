@@ -45,7 +45,7 @@
 <body>
     <div id="ui">🌀 SOULVERSE | Complete</div>
     <div id="top-bar">
-        <button id="purchaseBtn" class="top-btn">💰 Unlock ($47)</button>
+        <button id="purchaseBtn" class="top-btn" style="display:none">💰 Unlock ($47)</button>
         <button id="marketplaceBtn" class="top-btn">🤖 Agents</button>
         <button id="economyBtn" class="top-btn">📊 Economy</button>
         <button id="diplomacyBtn" class="top-btn">🤝 Diplomacy</button>
@@ -109,7 +109,7 @@
         let scene,camera,renderer,controls,terrain;
         let playerUnits=[],playerBuildings=[],enemyUnits=[],resources=[];
         let playerResources={profit:500,love:500,tax:500};
-        let gameUnlocked=localStorage.getItem('soulverse_unlocked')==='true';
+        let gameUnlocked=true; // Always unlocked
         let apiKeys={openai:localStorage.getItem('openai_key')||'',githubToken:localStorage.getItem('github_token')||'',githubRepo:localStorage.getItem('github_repo')||''};
         let agents=[],automations=[],quests=[];
         let economy={gdp:1000,inflation:0.02,sentiment:0.5,events:[]};
@@ -327,7 +327,24 @@
             const th=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.2,1.5),new THREE.MeshStandardMaterial({color:0xaa8866}));th.position.set(0,getHeight(0,0)+0.6,0);scene.add(th);playerBuildings.push({mesh:th,type:'townhall'});
             for(let i=0;i<3;i++){const u=new THREE.Mesh(new THREE.SphereGeometry(0.4),new THREE.MeshStandardMaterial({color:[0xffaa44,0xff88aa,0x88aaff][i]}));u.position.set(-2+i*2,getHeight(-2+i*2,-2)+0.5,-2);scene.add(u);playerUnits.push({mesh:u});}
         }
-        function animate(){renderer.render(scene,camera);requestAnimationFrame(animate);}
+        
+        // === MOVEMENT CONTROLS ===
+        const keys={};
+        window.addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);
+        window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+        function handleMovement(){
+            const speed=0.3;
+            if(playerUnits.length>0){
+                const p=playerUnits[0].mesh;
+                if(keys['w']||keys['arrowup']){p.position.z-=speed;p.position.y=getHeight(p.position.x,p.position.z)+0.5;}
+                if(keys['s']||keys['arrowdown']){p.position.z+=speed;p.position.y=getHeight(p.position.x,p.position.z)+0.5;}
+                if(keys['a']||keys['arrowleft']){p.position.x-=speed;p.position.y=getHeight(p.position.x,p.position.z)+0.5;}
+                if(keys['d']||keys['arrowright']){p.position.x+=speed;p.position.y=getHeight(p.position.x,p.position.z)+0.5;}
+                camera.position.x=p.position.x;camera.position.z=p.position.z+15;camera.position.y=p.position.y+10;
+                controls.target.copy(p.position);
+            }
+        }
+function animate(){handleMovement();renderer.render(scene,camera);requestAnimationFrame(animate);}
 
         // === UI BINDING ===
         function bindUI(){
