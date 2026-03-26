@@ -3,86 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌀 SOULVERSE</title>
+<title>🌀 SOULVERSE | Living World</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;color:#ffaa66;font-family:monospace;overflow:hidden}
-#ui{position:fixed;top:10px;left:10px;background:rgba(0,0,0,0.8);padding:15px;border-radius:12px;border:2px solid #ffaa66;z-index:100}
-#ui h3{margin-bottom:10px}
-#ui div{margin:5px 0}
+#ui{position:fixed;top:10px;left:10px;background:rgba(0,0,0,0.8);padding:15px;border-radius:12px;border:2px solid #ffaa66;z-index:100;max-height:80vh;overflow-y:auto}
+#ui h3{margin-bottom:10px;color:#fff}
+#ui div{margin:5px 0;font-size:12px}
 #controls{position:fixed;bottom:20px;left:20px;background:rgba(0,0,0,0.8);padding:15px;border-radius:12px;border:2px solid #ffaa66;z-index:100}
-.btn{background:#ffaa66;color:#000;border:none;padding:10px 20px;margin:5px;border-radius:8px;cursor:pointer;font-weight:bold}
+.btn{background:#ffaa66;color:#000;border:none;padding:10px 20px;margin:5px;border-radius:8px;cursor:pointer;font-weight:bold;font-size:12px}
 .btn:hover{background:#fff}
-#log{position:fixed;bottom:20px;right:20px;width:300px;height:200px;background:rgba(0,0,0,0.8);border:2px solid #ffaa66;border-radius:12px;padding:10px;overflow-y:auto;font-size:11px}
-#minimap{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:150px;height:150px;background:rgba(0,0,0,0.8);border:2px solid #ffaa66;border-radius:50%}
+.btn:disabled{background:#444;color:#888;cursor:not-allowed}
+#log{position:fixed;bottom:20px;right:20px;width:350px;height:180px;background:rgba(0,0,0,0.8);border:2px solid #ffaa66;border-radius:12px;padding:10px;overflow-y:auto;font-size:11px}
+#minimap{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:160px;height:160px;background:rgba(0,0,0,0.8);border:2px solid #ffaa66;border-radius:50%;overflow:hidden}
+#agentPanel{position:fixed;top:10px;right:10px;background:rgba(0,0,0,0.8);padding:15px;border-radius:12px;border:2px solid #ffaa66;z-index:100;width:250px;max-height:80vh;overflow-y:auto}
+#agentPanel h3{margin-bottom:10px;color:#fff}
+.agent-item{background:#222;padding:8px;margin:5px 0;border-radius:6px;border-left:3px solid #ffaa66}
+.agent-item .name{font-weight:bold;color:#fff}
+.agent-item .task{font-size:10px;color:#88ccff}
+.agent-item .status{font-size:10px;color:#88ff88}
 canvas{display:block}
-.modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;border:2px solid #ffaa66;border-radius:12px;padding:20px;z-index:200;min-width:300px}
-.modal h3{margin-bottom:15px}
-.modal input,.modal textarea,.modal select{width:100%;margin:5px 0;padding:8px;background:#222;border:1px solid #ffaa66;color:#ffaa66;border-radius:4px}
-.modal button{margin:5px}
+.tooltip{position:fixed;background:rgba(0,0,0,0.9);padding:8px;border-radius:6px;border:1px solid #ffaa66;pointer-events:none;z-index:300;font-size:11px;display:none}
 </style>
 </head>
 <body>
 <div id="ui">
 <h3>🌀 SOULVERSE</h3>
-<div>💰 Profit: <span id="profit">500</span></div>
-<div>❤️ Love: <span id="love">500</span></div>
-<div>⚖️ Tax: <span id="tax">500</span></div>
-<div>⭐ Level: <span id="level">1</span></div>
-<div>🤖 Agents: <span id="agents">0</span></div>
+<div>💰 Profit: <strong id="profit" style="color:#ffaa66">500</strong></div>
+<div>❤️ Love: <strong id="love" style="color:#ff88aa">500</strong></div>
+<div>⚖️ Tax: <strong id="tax" style="color:#88aaff">500</strong></div>
+<div>⭐ Level: <strong id="level">1</strong></div>
+<div>🏠 Buildings: <strong id="buildings">1</strong></div>
+<div style="margin-top:10px;border-top:1px solid #444;padding-top:10px">
+<strong>🎮 CONTROLS:</strong><br>
+WASD / Arrows = Move<br>
+Click agent = View details<br>
+Right-click = Camera rotate
+</div>
+</div>
+
+<div id="agentPanel">
+<h3>🤖 My Agents</h3>
+<div id="agentList"><div style="color:#666;font-size:11px">No agents yet<br>Click "Buy Agent"</div></div>
+<div style="margin-top:10px">
+<button class="btn" onclick="buyAgent('profit')" style="width:100%">💰 Buy Agent (200)</button>
+<button class="btn" onclick="buyAgent('love')" style="width:100%">❤️ Buy Agent (200)</button>
+<button class="btn" onclick="buyAgent('tax')" style="width:100%">⚖️ Buy Agent (200)</button>
+</div>
 </div>
 
 <div id="controls">
-<div style="margin-bottom:10px"><strong>CONTROLS:</strong></div>
-<div>WASD / Arrows = Move</div>
-<div>Click = Select/Interact</div>
-<div style="margin-top:10px">
-<button class="btn" onclick="openModal('agentsModal')">🤖 Agents</button>
-<button class="btn" onclick="openModal('combatModal')">⚔️ Combat</button>
-<button class="btn" onclick="openModal('workModal')">💼 Work</button>
-</div>
+<button class="btn" onclick="toggleWork()">▶️ Start Work</button>
+<button class="btn" onclick="gatherResources()">🌾 Gather</button>
+<button class="btn" onclick="buildBuilding()">🏗️ Build (100)</button>
+<button class="btn" onclick="startFight()">⚔️ Fight</button>
 </div>
 
-<div id="log"><div>🌀 Soulverse initialized...</div></div>
+<div id="log"><div>🌀 World initialized...</div></div>
 
-<div id="minimap"><canvas id="minimapCanvas" width="150" height="150"></canvas></div>
+<div id="minimap"><canvas id="minimapCanvas" width="160" height="160"></canvas></div>
 
-<!-- Agents Modal -->
-<div id="agentsModal" class="modal">
-<h3>🤖 Agent Marketplace</h3>
-<div style="margin:10px 0">
-<div class="btn" onclick="buyAgent('profit')">Buy Profit Agent (200 PLT)</div>
-<div class="btn" onclick="buyAgent('love')">Buy Love Agent (200 PLT)</div>
-<div class="btn" onclick="buyAgent('tax')">Buy Tax Agent (200 PLT)</div>
-</div>
-<div id="myAgents" style="margin-top:10px"></div>
-<button class="btn" onclick="closeModal('agentsModal')">Close</button>
-</div>
-
-<!-- Combat Modal -->
-<div id="combatModal" class="modal">
-<h3>⚔️ Combat Arena</h3>
-<div id="combatStatus" style="margin:10px 0">Ready to fight!</div>
-<div id="combatLog" style="height:100px;overflow-y:auto;background:#111;padding:5px;margin:10px 0;font-size:11px"></div>
-<button class="btn" onclick="startCombat()">Start Battle</button>
-<button class="btn" onclick="closeModal('combatModal')">Close</button>
-</div>
-
-<!-- Work Modal -->
-<div id="workModal" class="modal">
-<h3>💼 AI Work</h3>
-<p style="font-size:11px;margin:10px 0">Set your API keys to use AI features:</p>
-<input type="password" id="openaiKey" placeholder="OpenAI API Key (sk-...)">
-<input type="password" id="githubToken" placeholder="GitHub Token (ghp_...)">
-<input id="githubRepo" placeholder="GitHub Repo (owner/repo)">
-<button class="btn" onclick="saveAPIKeys()">Save Keys</button>
-<div style="margin-top:10px">
-<button class="btn" onclick="aiWork('code')">Generate Code</button>
-<button class="btn" onclick="aiWork('content')">Generate Content</button>
-</div>
-<div id="workResult" style="margin-top:10px;height:100px;overflow-y:auto;background:#111;padding:5px;font-size:11px"></div>
-<button class="btn" onclick="closeModal('workModal')">Close</button>
-</div>
+<div id="tooltip" class="tooltip"></div>
 
 <canvas id="gameCanvas"></canvas>
 
@@ -92,63 +73,100 @@ canvas{display:block}
 // === GAME STATE ===
 let resources = {profit:500, love:500, tax:500};
 let level = 1;
+let buildings = [];
 let agents = [];
-let apiKeys = {openai:'', githubToken:'', githubRepo:''};
+let workActive = false;
+let lastSave = Date.now();
 
 // Load from localStorage
-if(localStorage.getItem('soulverse_resources')) resources = JSON.parse(localStorage.getItem('soulverse_resources'));
-if(localStorage.getItem('soulverse_agents')) agents = JSON.parse(localStorage.getItem('soulverse_agents'));
-if(localStorage.getItem('soulverse_api')) apiKeys = JSON.parse(localStorage.getItem('soulverse_api'));
+if(localStorage.getItem('sv_resources')) resources = JSON.parse(localStorage.getItem('sv_resources'));
+if(localStorage.getItem('sv_level')) level = parseInt(localStorage.getItem('sv_level'));
+if(localStorage.getItem('sv_agents')) agents = JSON.parse(localStorage.getItem('sv_agents'));
+if(localStorage.getItem('sv_buildings')) buildings = JSON.parse(localStorage.getItem('sv_buildings'));
 
 // === THREE.JS WORLD ===
 let scene, camera, renderer, controls, player;
+let agentMeshes = [];
+let buildingMeshes = [];
 const keys = {};
+const clock = new THREE.Clock();
+
+// Agent types with colors
+const agentColors = {
+    profit: 0xffaa44,
+    love: 0xff88aa,
+    tax: 0x88aaff
+};
+
+const agentIcons = {
+    profit: '💰',
+    love: '❤️',
+    tax: '⚖️'
+};
 
 function init(){
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a0a2e);
+    scene.background = new THREE.Color(0x0a0a1a);
+    scene.fog = new THREE.Fog(0x0a0a1a, 30, 80);
     
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 10, 15);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 200);
+    camera.position.set(0, 20, 30);
     
     renderer = new THREE.WebGLRenderer({canvas:document.getElementById('gameCanvas'), antialias:true});
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
     
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableZoom = true;
     controls.enablePan = true;
+    controls.maxPolarAngle = Math.PI/2.2;
     
-    // Ground
+    // Ground grid
     const ground = new THREE.Mesh(
-        new THREE.PlaneGeometry(100, 100),
-        new THREE.MeshStandardMaterial({color: 0x2d1b4e, wireframe:true})
+        new THREE.PlaneGeometry(200, 200),
+        new THREE.MeshStandardMaterial({color: 0x1a1a2e, roughness:0.8})
     );
     ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
     scene.add(ground);
     
-    // Player
+    // Grid helper
+    const grid = new THREE.GridHelper(200, 50, 0x333366, 0x222244);
+    scene.add(grid);
+    
+    // Player (Craig)
     player = new THREE.Mesh(
-        new THREE.BoxGeometry(1, 2, 1),
-        new THREE.MeshStandardMaterial({color: 0xffaa66, emissive:0xffaa66, emissiveIntensity:0.3})
+        new THREE.BoxGeometry(1.5, 3, 1.5),
+        new THREE.MeshStandardMaterial({color: 0xffaa66, emissive:0xffaa66, emissiveIntensity:0.5})
     );
-    player.position.y = 1;
+    player.position.y = 1.5;
+    player.castShadow = true;
+    
+    // Player label
+    const label = createLabel('YOU');
+    label.position.set(0, 4, 0);
+    player.add(label);
+    
     scene.add(player);
     
     // Lights
-    scene.add(new THREE.AmbientLight(0x404040, 2));
-    const sun = new THREE.DirectionalLight(0xffffff, 1);
-    sun.position.set(10, 20, 10);
+    const ambient = new THREE.AmbientLight(0x404060, 1);
+    scene.add(ambient);
+    
+    const sun = new THREE.DirectionalLight(0xffddaa, 1.5);
+    sun.position.set(20, 30, 20);
+    sun.castShadow = true;
+    sun.shadow.mapSize.width = 2048;
+    sun.shadow.mapSize.height = 2048;
     scene.add(sun);
     
-    // Add some buildings
-    for(let i=0; i<5; i++){
-        const building = new THREE.Mesh(
-            new THREE.BoxGeometry(2, 3+Math.random()*3, 2),
-            new THREE.MeshStandardMaterial({color: Math.random()*0xffffff})
-        );
-        building.position.set((Math.random()-0.5)*40, building.geometry.parameters.height/2, (Math.random()-0.5)*40);
-        scene.add(building);
-    }
+    // Add town hall
+    addBuilding('townhall', 0, 0);
+    
+    // Restore buildings
+    buildings.forEach(b=>{
+        if(b.type !== 'townhall') addBuilding(b.type, b.x, b.z);
+    });
     
     // Event listeners
     window.addEventListener('keydown', e=>keys[e.key.toLowerCase()]=true);
@@ -159,32 +177,242 @@ function init(){
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
     
+    // Raycaster for clicking
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    
+    window.addEventListener('click', e=>{
+        if(e.target.tagName !== 'CANVAS') return;
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(agentMeshes);
+        if(intersects.length > 0){
+            const agentIdx = agentMeshes.indexOf(intersects[0].object);
+            if(agentIdx >= 0 && agents[agentIdx]){
+                showAgentDetails(agents[agentIdx]);
+            }
+        }
+    });
+    
     updateUI();
-    updateMinimap();
+    updateAgentPanel();
+    log('🌀 Welcome to Soulverse Living World!');
+    log('📍 WASD to move, buy agents to see them work');
+    
     animate();
-    log('🌀 Welcome to Soulverse!');
+}
+
+function createLabel(text){
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'rgba(0,0,0,0)';
+    ctx.fillRect(0, 0, 256, 64);
+    ctx.fillStyle = '#ffaa66';
+    ctx.font = 'bold 32px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(text, 128, 40);
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.SpriteMaterial({map:texture});
+    const sprite = new THREE.Sprite(material);
+    sprite.scale.set(4, 1, 1);
+    return sprite;
+}
+
+function addBuilding(type, x, z){
+    const colors = {
+        townhall: 0xaa8866,
+        farm: 0x6a994e,
+        forge: 0xcc8844,
+        market: 0x88aa66,
+        barracks: 0x8866aa,
+        exchange: 0xffdd66
+    };
+    
+    const sizes = {
+        townhall: [4, 4, 4],
+        farm: [3, 2, 3],
+        forge: [3, 3, 3],
+        market: [4, 2, 4],
+        barracks: [4, 3, 4],
+        exchange: [5, 3, 5]
+    };
+    
+    const building = new THREE.Mesh(
+        new THREE.BoxGeometry(...sizes[type]),
+        new THREE.MeshStandardMaterial({color: colors[type] || 0x888888})
+    );
+    building.position.set(x, sizes[type][1]/2, z);
+    building.castShadow = true;
+    building.receiveShadow = true;
+    
+    // Label
+    const label = createLabel(type.toUpperCase());
+    label.position.set(0, sizes[type][1]/2 + 2, 0);
+    building.add(label);
+    
+    scene.add(building);
+    buildingMeshes.push(building);
+}
+
+function addAgentMesh(agent, index){
+    const color = agentColors[agent.type] || 0xffaa44;
+    
+    // Agent body
+    const mesh = new THREE.Mesh(
+        new THREE.SphereGeometry(0.8, 16, 16),
+        new THREE.MeshStandardMaterial({color, emissive:color, emissiveIntensity:0.3})
+    );
+    mesh.position.set(
+        (Math.random()-0.5) * 20,
+        0.8,
+        (Math.random()-0.5) * 20
+    );
+    mesh.castShadow = true;
+    
+    // Icon label
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'rgba(0,0,0,0)';
+    ctx.fillRect(0, 0, 128, 64);
+    ctx.font = '32px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(agentIcons[agent.type] || '🤖', 64, 40);
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.SpriteMaterial({map:texture});
+    const label = new THREE.Sprite(material);
+    label.position.set(0, 1.5, 0);
+    label.scale.set(2, 1, 1);
+    mesh.add(label);
+    
+    // Status indicator
+    const statusGeo = new THREE.RingGeometry(0.3, 0.4, 16);
+    const statusMat = new THREE.MeshBasicMaterial({
+        color: agent.status === 'working' ? 0x88ff88 : 0x888888,
+        side: THREE.DoubleSide
+    });
+    const status = new THREE.Mesh(statusGeo, statusMat);
+    status.rotation.x = -Math.PI/2;
+    status.position.set(0, 2, 0);
+    mesh.add(status);
+    
+    scene.add(mesh);
+    agentMeshes[index] = mesh;
+    mesh.userData = {agentIndex: index};
+}
+
+function updateAgentMesh(index){
+    if(!agentMeshes[index] || !agents[index]) return;
+    const mesh = agentMeshes[index];
+    const agent = agents[index];
+    
+    // Update position based on task
+    if(agent.task === 'gathering'){
+        mesh.position.x += (Math.random()-0.5) * 0.5;
+        mesh.position.z += (Math.random()-0.5) * 0.5;
+    } else if(agent.task === 'building'){
+        // Move toward construction site
+    } else if(agent.task === 'trading'){
+        // Move toward market
+    }
+    
+    // Keep in bounds
+    mesh.position.x = Math.max(-50, Math.min(50, mesh.position.x));
+    mesh.position.z = Math.max(-50, Math.min(50, mesh.position.z));
+    mesh.position.y = 0.8;
+    
+    // Update status indicator color
+    const status = mesh.children.find(c=>c.geometry?.type==='RingGeometry');
+    if(status){
+        status.material.color.setHex(agent.status === 'working' ? 0x88ff88 : 0x888888);
+    }
 }
 
 function animate(){
     requestAnimationFrame(animate);
     
-    // Movement
-    const speed = 0.3;
+    const delta = clock.getDelta();
+    
+    // Player movement
+    const speed = 8 * delta;
     if(keys['w'] || keys['arrowup']) player.position.z -= speed;
     if(keys['s'] || keys['arrowdown']) player.position.z += speed;
     if(keys['a'] || keys['arrowleft']) player.position.x -= speed;
     if(keys['d'] || keys['arrowright']) player.position.x += speed;
     
-    // Camera follow
+    // Camera follow player
     camera.position.x = player.position.x;
-    camera.position.z = player.position.z + 15;
-    camera.position.y = player.position.y + 10;
+    camera.position.z = player.position.z + 20;
+    camera.position.y = player.position.y + 15;
     controls.target.copy(player.position);
+    controls.update();
     
-    // Update minimap
+    // Update agents
+    agents.forEach((agent, i)=>{
+        if(agent.status === 'working' && workActive){
+            // Agent earns resources
+            if(Math.random() < 0.02){
+                const earned = Math.floor(Math.random() * 3) + 1;
+                resources[agent.type] += earned;
+                agent.xp += 1;
+                if(agent.xp >= 100){
+                    agent.level++;
+                    agent.xp = 0;
+                    log('⭐ '+agent.type.toUpperCase()+' agent leveled up to '+agent.level+'!');
+                }
+                updateUI();
+            }
+        }
+        updateAgentMesh(i);
+    });
+    
+    // Auto-save
+    if(Date.now() - lastSave > 30000){
+        saveGame();
+        lastSave = Date.now();
+    }
+    
     updateMinimap();
-    
     renderer.render(scene, camera);
+}
+
+function updateMinimap(){
+    const ctx = document.getElementById('minimapCanvas').getContext('2d');
+    ctx.fillStyle = '#0a0a1a';
+    ctx.fillRect(0, 0, 160, 160);
+    
+    const scale = 1.5;
+    const cx = 80, cy = 80;
+    
+    // Player
+    ctx.fillStyle = '#ffaa66';
+    ctx.beginPath();
+    ctx.arc(cx - player.position.x*scale, cy - player.position.z*scale, 4, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Agents
+    agents.forEach((agent, i)=>{
+        if(agentMeshes[i]){
+            ctx.fillStyle = '#'+agentColors[agent.type].toString(16).padStart(6,'0');
+            ctx.beginPath();
+            ctx.arc(cx - agentMeshes[i].position.x*scale, cy - agentMeshes[i].position.z*scale, 3, 0, Math.PI*2);
+            ctx.fill();
+        }
+    });
+    
+    // Buildings
+    buildingMeshes.forEach(b=>{
+        ctx.fillStyle = '#666';
+        ctx.fillRect(
+            cx - b.position.x*scale - 3,
+            cy - b.position.z*scale - 3,
+            6, 6
+        );
+    });
 }
 
 function updateUI(){
@@ -192,159 +420,120 @@ function updateUI(){
     document.getElementById('love').innerText = Math.floor(resources.love);
     document.getElementById('tax').innerText = Math.floor(resources.tax);
     document.getElementById('level').innerText = level;
-    document.getElementById('agents').innerText = agents.length;
-    
-    // Save
-    localStorage.setItem('soulverse_resources', JSON.stringify(resources));
-    localStorage.setItem('soulverse_agents', JSON.stringify(agents));
+    document.getElementById('buildings').innerText = buildings.length;
 }
 
-function updateMinimap(){
-    const ctx = document.getElementById('minimapCanvas').getContext('2d');
-    ctx.fillStyle = '#1a0a2e';
-    ctx.fillRect(0, 0, 150, 150);
-    
-    // Player dot
-    ctx.fillStyle = '#ffaa66';
-    ctx.beginPath();
-    ctx.arc(75, 75, 5, 0, Math.PI*2);
-    ctx.fill();
+function updateAgentPanel(){
+    const div = document.getElementById('agentList');
+    if(agents.length === 0){
+        div.innerHTML = '<div style="color:#666;font-size:11px">No agents yet<br>Click "Buy Agent"</div>';
+        return;
+    }
+    div.innerHTML = agents.map((a,i)=>`
+        <div class="agent-item">
+            <div class="name">${agentIcons[a.type]} ${a.type.toUpperCase()} Agent</div>
+            <div class="task">Task: ${a.task || 'idle'}</div>
+            <div class="status">Lv.${a.level} | XP: ${a.xp}/100</div>
+            <div class="status">${a.status === 'working' ? '✅ Working' : '⏸️ Idle'}</div>
+        </div>
+    `).join('');
 }
 
 function log(msg){
     const log = document.getElementById('log');
-    log.innerHTML = '<div>'+msg+'</div>' + log.innerHTML;
+    log.innerHTML = '<div style="padding:2px 0">['+new Date().toLocaleTimeString().split(':')[0]+':'+new Date().toLocaleTimeString().split(':')[1]+'] '+msg+'</div>' + log.innerHTML;
+    if(log.children.length > 20) log.removeChild(log.lastChild);
 }
 
-// === MODALS ===
-function openModal(id){
-    document.querySelectorAll('.modal').forEach(m=>m.style.display='none');
-    document.getElementById(id).style.display='block';
-    if(id==='agentsModal') updateAgentsList();
+function saveGame(){
+    localStorage.setItem('sv_resources', JSON.stringify(resources));
+    localStorage.setItem('sv_level', level.toString());
+    localStorage.setItem('sv_agents', JSON.stringify(agents));
+    localStorage.setItem('sv_buildings', JSON.stringify(buildings));
+    log('💾 Game saved');
 }
 
-function closeModal(id){
-    document.getElementById(id).style.display='none';
-}
-
-// === AGENTS ===
+// === ACTIONS ===
 function buyAgent(type){
     const cost = 200;
     if(resources.profit >= cost && resources.love >= cost && resources.tax >= cost){
         resources.profit -= cost;
         resources.love -= cost;
         resources.tax -= cost;
-        agents.push({type, level:1, xp:0});
+        agents.push({
+            type,
+            level: 1,
+            xp: 0,
+            status: 'idle',
+            task: null
+        });
+        addAgentMesh(agents[agents.length-1], agents.length-1);
         updateUI();
-        log('🤖 Bought '+type+' agent!');
-        updateAgentsList();
+        updateAgentPanel();
+        log('🤖 Bought '+type.toUpperCase()+' agent! Watch it on the map.');
+        saveGame();
     } else {
         alert('Not enough resources! Need 200 of each.');
     }
 }
 
-function updateAgentsList(){
-    const div = document.getElementById('myAgents');
-    if(agents.length === 0){
-        div.innerHTML = '<div style="color:#666">No agents yet</div>';
-        return;
-    }
-    div.innerHTML = agents.map((a,i)=>'<div style="padding:5px;background:#222;margin:5px 0;border-radius:4px">🤖 '+a.type.toUpperCase()+' Agent (Lv.'+a.level+')</div>').join('');
+function showAgentDetails(agent){
+    log('📊 Agent: '+agent.type.toUpperCase()+' | Lv.'+agent.level+' | XP:'+agent.xp+'/100');
 }
 
-// === COMBAT ===
-function startCombat(){
-    const enemyTypes = ['Wild Spirit', 'Code Golem', 'Bug Swarm', 'Data Phantom'];
-    const enemy = enemyTypes[Math.floor(Math.random()*enemyTypes.length)];
-    const enemyHp = 50 + Math.random()*50;
-    
-    let combatLog = document.getElementById('combatLog');
-    combatLog.innerHTML = '⚔️ Fighting '+enemy+' (HP:'+Math.floor(enemyHp)+')<br>';
-    
-    // Simple turn-based combat
-    let playerHp = 100;
-    let enemyHpCurrent = enemyHp;
-    let round = 1;
-    
-    const fightInterval = setInterval(()=>{
-        // Player attacks
-        const dmg = Math.floor(Math.random()*20) + 10;
-        enemyHpCurrent -= dmg;
-        combatLog.innerHTML += 'Round '+round+': You deal '+dmg+' dmg<br>';
-        
-        if(enemyHpCurrent <= 0){
-            combatLog.innerHTML += '🏆 Victory! Earned 50 PLT<br>';
-            resources.profit += 50;
-            resources.love += 50;
-            resources.tax += 50;
-            updateUI();
-            clearInterval(fightInterval);
-            return;
-        }
-        
-        // Enemy attacks
-        const enemyDmg = Math.floor(Math.random()*15) + 5;
-        playerHp -= enemyDmg;
-        combatLog.innerHTML += 'Enemy deals '+enemyDmg+' dmg (You: '+playerHp+' HP)<br>';
-        
-        if(playerHp <= 0){
-            combatLog.innerHTML += '💀 Defeat...<br>';
-            clearInterval(fightInterval);
-            return;
-        }
-        
-        round++;
-        combatLog.scrollTop = combatLog.scrollHeight;
-    }, 1000);
+function toggleWork(){
+    workActive = !workActive;
+    agents.forEach(a=>a.status = workActive ? 'working' : 'idle');
+    updateAgentPanel();
+    log(workActive ? '▶️ All agents started working!' : '⏸️ All agents paused');
 }
 
-// === AI WORK ===
-function saveAPIKeys(){
-    apiKeys.openai = document.getElementById('openaiKey').value;
-    apiKeys.githubToken = document.getElementById('githubToken').value;
-    apiKeys.githubRepo = document.getElementById('githubRepo').value;
-    localStorage.setItem('soulverse_api', JSON.stringify(apiKeys));
-    log('✅ API keys saved');
-    alert('API keys saved!');
+function gatherResources(){
+    const amount = 10;
+    resources.profit += amount;
+    resources.love += amount;
+    resources.tax += amount;
+    updateUI();
+    log('🌾 Gathered '+amount+' of each resource');
+    saveGame();
 }
 
-async function aiWork(type){
-    if(!apiKeys.openai){
-        alert('Please enter your OpenAI API key first!');
-        return;
-    }
-    
-    const resultDiv = document.getElementById('workResult');
-    resultDiv.innerHTML = '⏳ Working...';
-    
-    try{
-        const prompt = type==='code' ? 'Write a useful JavaScript function' : 'Write engaging content about AI';
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + apiKeys.openai
-            },
-            body: JSON.stringify({
-                model: 'gpt-4-turbo-preview',
-                messages: [{role:'user', content: prompt}],
-                max_tokens: 200
-            })
-        });
-        
-        if(!res.ok) throw new Error('API error: '+res.status);
-        const data = await res.json();
-        resultDiv.innerHTML = data.choices[0].message.content;
-        
-        // Reward
-        resources.profit += 20;
-        resources.love += 20;
-        resources.tax += 20;
+function buildBuilding(){
+    const cost = 100;
+    const types = ['farm', 'forge', 'market', 'barracks'];
+    if(resources.profit >= cost && resources.love >= cost && resources.tax >= cost){
+        const type = types[Math.floor(Math.random()*types.length)];
+        resources.profit -= cost;
+        resources.love -= cost;
+        resources.tax -= cost;
+        const x = (Math.random()-0.5) * 40;
+        const z = (Math.random()-0.5) * 40;
+        buildings.push({type, x, z});
+        addBuilding(type, x, z);
         updateUI();
-        log('✅ AI work complete! Earned 20 PLT');
-    } catch(e){
-        resultDiv.innerHTML = '❌ Error: '+e.message;
+        log('🏗️ Built '+type.toUpperCase()+' at ('+Math.floor(x)+', '+Math.floor(z)+')');
+        saveGame();
+    } else {
+        alert('Need 100 of each resource!');
     }
+}
+
+function startFight(){
+    log('⚔️ Looking for enemy...');
+    setTimeout(()=>{
+        const won = Math.random() > 0.3;
+        if(won){
+            const reward = 50;
+            resources.profit += reward;
+            resources.love += reward;
+            resources.tax += reward;
+            log('🏆 Victory! Earned '+reward+' of each resource');
+        } else {
+            log('💀 Defeat... Try again!');
+        }
+        updateUI();
+        saveGame();
+    }, 1000);
 }
 
 // Start
