@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>💰 MATRIX MONEY RUN | Drippy Trippy Collector</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-user-select:none; }
+        body { background:#000; overflow:hidden; font-family:'Courier New', monospace; touch-action: none; }
+        canvas { display:block; width:100vw; height:100vh; }
+        
+        #ui { position:fixed; inset:0; pointer-events:none; z-index:100; }
+        #ui > * { pointer-events:auto; }
+        
+        /* Mobile Joystick */
+        #joystick { position:fixed; bottom:30px; left:30px; width:150px; height:150px; background:radial-gradient(circle, rgba(0,255,0,0.3) 0%, rgba(0,50,0,0.1) 70%); border:3px solid rgba(0,255,0,0.5); border-radius:50%; pointer-events:auto; z-index:150; display:none; box-shadow: 0 0 30px rgba(0,255,0,0.3); }
+        .joystick-knob { position:absolute; width:60px; height:60px; background:radial-gradient(circle, #00ff00 0%, #008800 100%); border-radius:50%; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; border:3px solid #00ff00; box-shadow: 0 0 20px #00ff00, inset 0 0 20px rgba(0,255,0,0.5); }
+        
+        /* Mobile Buttons */
+        #mobileButtons { position:fixed; bottom:40px; right:30px; display:flex; gap:20px; pointer-events:auto; z-index:150; display:none; }
+        .mobile-btn { width:75px; height:75px; background:radial-gradient(circle, #00ff00 0%, #006600 100%); border:3px solid #00ff00; border-radius:50%; color:#000; font-weight:bold; font-size:28px; cursor:pointer; box-shadow: 0 0 20px rgba(0,255,0,0.5); transition: 0.1s; }
+        .mobile-btn:active { transform:scale(0.85); box-shadow: 0 0 40px rgba(0,255,0,0.8); }
+        
+        @media (max-width: 768px) {
+            #joystick, #mobileButtons { display:flex !important; }
+            #desktopControls { display:none !important; }
+        }
+        
+        /* Score Display */
+        #scoreDisplay { position:absolute; top:10px; left:10px; background:linear-gradient(135deg, rgba(0,20,0,0.95) 0%, rgba(0,50,0,0.85) 100%); backdrop-filter:blur(12px); border-radius:20px; padding:15px 20px; color:#00ff00; font-size:14px; z-index:10; border:2px solid rgba(0,255,0,0.5); min-width:220px; box-shadow: 0 0 30px rgba(0,255,0,0.3), inset 0 0 20px rgba(0,255,0,0.1); }
+        #moneyCount { font-size:32px; font-weight:bold; margin-top:5px; text-shadow: 0 0 10px #00ff00; }
+        
+        /* Timer */
+        #timer { position:absolute; top:10px; right:10px; background:linear-gradient(135deg, rgba(0,20,0,0.95) 0%, rgba(0,50,0,0.85) 100%); backdrop-filter:blur(12px); border-radius:20px; padding:15px 20px; color:#00ff00; font-size:18px; z-index:10; border:2px solid rgba(0,255,0,0.5); text-align:center; box-shadow: 0 0 30px rgba(0,255,0,0.3); }
+        #timeValue { font-size:36px; font-weight:bold; text-shadow: 0 0 10px #00ff00; }
+        
+        /* Multiplier */
+        #multiplier { position:absolute; top:90px; left:10px; background:linear-gradient(135deg, rgba(50,50,0,0.9) 0%, rgba(20,20,0,0.85) 100%); border-radius:16px; padding:12px; color:#ffff00; font-size:14px; z-index:10; border:2px solid rgba(255,255,0,0.5); box-shadow: 0 0 20px rgba(255,255,0,0.3); }
+        #multValue { font-size:24px; font-weight:bold; text-shadow: 0 0 10px #ffff00; }
+        
+        /* Start Screen */
+        #startScreen { position:fixed; inset:0; background:radial-gradient(ellipse at center, rgba(0,30,0,0.95) 0%, rgba(0,0,0,0.98) 100%); z-index:200; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+        #startScreen h1 { color:#00ff00; font-size:42px; margin-bottom:15px; text-align:center; text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00; animation: glow 2s ease-in-out infinite; }
+        @keyframes glow { 0%, 100% { text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00; } 50% { text-shadow: 0 0 30px #00ff00, 0 0 60px #00ff00, 0 0 80px #00ff00; } }
+        #startScreen p { color:#8f8; font-size:13px; margin-bottom:30px; text-align:center; max-width:400px; line-height: 1.6; }
+        .start-btn { background:linear-gradient(135deg, #00ff00 0%, #008800 100%); border:none; color:#000; font-weight:bold; padding:18px 50px; border-radius:40px; cursor:pointer; font-size:20px; margin:10px; box-shadow: 0 0 30px rgba(0,255,0,0.5); transition: 0.2s; }
+        .start-btn:active { transform:scale(0.95); box-shadow: 0 0 50px rgba(0,255,0,0.8); }
+        
+        /* Game Over Screen */
+        #gameOverScreen { position:fixed; inset:0; background:radial-gradient(ellipse at center, rgba(30,0,0,0.95) 0%, rgba(0,0,0,0.98) 100%); z-index:200; display:none; flex-direction:column; justify-content:center; align-items:center; }
+        #gameOverScreen h2 { color:#ff0000; font-size:36px; margin-bottom:20px; text-shadow: 0 0 20px #ff0000; }
+        #finalScore { color:#00ff00; font-size:48px; font-weight:bold; margin:20px; text-shadow: 0 0 20px #00ff00; }
+        
+        /* Instructions */
+        #desktopControls { position:absolute; bottom:10px; left:10px; background:rgba(0,10,0,0.9); border-radius:16px; padding:12px; color:#00ff00; font-size:10px; z-index:10; border:2px solid rgba(0,255,0,0.3); }
+        
+        /* Power-up Display */
+        #powerupDisplay { position:absolute; top:150px; left:10px; background:linear-gradient(135deg, rgba(0,30,30,0.95) 0%, rgba(0,10,10,0.9) 100%); border-radius:16px; padding:12px; color:#00ffff; font-size:14px; z-index:10; border:2px solid rgba(0,255,255,0.5); display:none; box-shadow: 0 0 20px rgba(0,255,255,0.3); }
+        #powerupText { font-size:16px; font-weight:bold; text-shadow: 0 0 10px #00ffff; }
+        
+        /* Level Display */
+        #levelDisplay { position:absolute; top:150px; right:10px; background:linear-gradient(135deg, rgba(30,0,30,0.95) 0%, rgba(10,0,10,0.9) 100%); border-radius:16px; padding:12px; color:#ff00ff; font-size:14px; z-index:10; border:2px solid rgba(255,0,255,0.5); box-shadow: 0 0 20px rgba(255,0,255,0.3); }
+        #levelValue { font-size:24px; font-weight:bold; text-shadow: 0 0 10px #ff00ff; }
+        
+        footer { position:absolute; bottom:5px; left:0; right:0; text-align:center; font-size:8px; color:#444; pointer-events:none; }
+        
+        /* Matrix rain canvas */
+        #matrixRain { position:fixed; inset:0; z-index:1; pointer-events:none; opacity: 0.3; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <canvas id="matrixRain"></canvas>
+    
+    <div id="ui">
+        <!-- Mobile Joystick -->
+        <div id="joystick"><div class="joystick-knob"></div></div>
+        
+        <!-- Mobile Buttons -->
+        <div id="mobileButtons">
+            <button class="mobile-btn" id="dashBtn">⚡</button>
+        </div>
+        
+        <!-- Score -->
+        <div id="scoreDisplay">
+            <div>💰 CREDITS COLLECTED</div>
+            <div id="moneyCount">₿0.0000</div>
+        </div>
+        
+        <!-- Timer -->
+        <div id="timer">
+            <div>TIME REMAINING</div>
+            <div id="timeValue">60</div>
+        </div>
+        
+        <!-- Multiplier -->
+        <div id="multiplier">
+            <div>✨ MULTIPLIER</div>
+            <div id="multValue">x1.0</div>
+        </div>
+        
+        <!-- Level -->
+        <div id="levelDisplay">
+            <div>📊 LEVEL</div>
+            <div id="levelValue">1</div>
+        </div>
+        
+        <!-- Power-up Display -->
+        <div id="powerupDisplay">
+            <div id="powerupText"></div>
+        </div>
+        
+        <!-- Desktop Controls -->
+        <div id="desktopControls">
+            <div><strong>💻 Desktop:</strong> WASD / Arrow Keys</div>
+            <div><strong>📱 Mobile:</strong> Joystick (bottom-left)</div>
+            <div>Collect 💚 Crypto | Avoid 💀 Bugs | Grab ⚡ Power-ups</div>
+        </div>
+    </div>
+    
+    <!-- Start Screen -->
+    <div id="startScreen">
+        <h1>💰 MATRIX MONEY RUN 💰</h1>
+        <p>Jack into the Matrix and collect crypto credits!<br>Avoid agent bugs and red pills!<br>Grab power-ups to hack reality!</p>
+        <button class="start-btn" onclick="startGame()">🔓 JACK IN</button>
+        <p style="margin-top:20px; font-size:12px;">📱 Mobile: Joystick | 💻 Desktop: WASD</p>
+    </div>
+    
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen">
+        <h2>💀 DISCONNECTED</h2>
+        <div>Total Credits:</div>
+        <div id="finalScore">₿0.0000</div>
+        <button class="start-btn" onclick="restartGame()">🔄 RECONNECT</button>
+    </div>
+
+    <script>
+        // --- Game State ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const matrixCanvas = document.getElementById('matrixRain');
+        const matrixCtx = matrixCanvas.getContext('2d');
+        
+        let gameRunning = false;
+        let score = 0;
+        let timeLeft = 60;
+        let multiplier = 1;
+        let level = 1;
+        let player = { x: 0, y: 0, size: 35, speed: 6, dx: 0, dy: 0, trail: [] };
+        let collectibles = [];
+        let enemies = [];
+        let powerups = [];
+        let particles = [];
+        let floatingTexts = [];
+        let lastTime = 0;
+        let touchState = { active: false, x: 0, y: 0 };
+        let powerupActive = null;
+        let powerupTimer = 0;
+        let matrixDrops = [];
+        
+        // Resize canvas
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            matrixCanvas.width = window.innerWidth;
+            matrixCanvas.height = window.innerHeight;
+            player.x = canvas.width / 2;
+            player.y = canvas.height / 2;
+            initMatrixRain();
+        }
+        resize();
+        window.addEventListener('resize', resize);
+        
+        // --- Matrix Rain Effect ---
+        function initMatrixRain() {
+            const cols = Math.floor(matrixCanvas.width / 20);
+            matrixDrops = [];
+            for(let i = 0; i < cols; i++) {
+                matrixDrops[i] = {
+                    x: i * 20,
+                    y: Math.random() * -100,
+                    speed: 2 + Math.random() * 3,
+                    chars: []
+                };
+            }
+        }
+        
+        function drawMatrixRain() {
+            matrixCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+            
+            matrixCtx.fillStyle = '#0f0';
+            matrixCtx.font = '14px monospace';
+            
+            const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン💰₿';
+            
+            matrixDrops.forEach(drop => {
+                for(let i = 0; i < drop.chars.length; i++) {
+                    const char = drop.chars[i];
+                    const alpha = 1 - (i / drop.chars.length);
+                    matrixCtx.fillStyle = `rgba(0, ${Math.floor(255 * alpha)}, 0, ${alpha * 0.8})`;
+                    matrixCtx.fillText(char, drop.x, drop.y - i * 20);
+                }
+                
+                drop.y += drop.speed;
+                
+                if(Math.random() < 0.02 && drop.chars.length < 15) {
+                    drop.chars.push(chars[Math.floor(Math.random() * chars.length)]);
+                }
+                
+                if(drop.y - drop.chars.length * 20 > matrixCanvas.height) {
+                    drop.y = Math.random() * -50;
+                    drop.chars = [];
+                }
+            });
+        }
+        
+        // --- Mobile Controls ---
+        const joystick = document.getElementById('joystick');
+        const knob = joystick.querySelector('.joystick-knob');
+        const maxDist = 55;
+        
+        joystick.addEventListener('touchstart', e => {
+            e.preventDefault();
+            touchState.active = true;
+            updateJoystick(e);
+        }, {passive: false});
+        
+        joystick.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if(touchState.active) updateJoystick(e);
+        }, {passive: false});
+        
+        joystick.addEventListener('touchend', e => {
+            e.preventDefault();
+            touchState.active = false;
+            touchState.x = 0;
+            touchState.y = 0;
+            knob.style.transform = 'translate(-50%, -50%)';
+            player.dx = 0;
+            player.dy = 0;
+        });
+        
+        function updateJoystick(e) {
+            const touch = e.changedTouches[0];
+            const rect = joystick.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const cy = rect.top + rect.height/2;
+            
+            let dx = touch.clientX - cx;
+            let dy = touch.clientY - cy;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            
+            if(dist > maxDist) {
+                dx = (dx/dist) * maxDist;
+                dy = (dy/dist) * maxDist;
+            }
+            
+            knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+            
+            touchState.x = dx / maxDist;
+            touchState.y = dy / maxDist;
+            
+            player.dx = touchState.x * player.speed;
+            player.dy = touchState.y * player.speed;
+        }
+        
+        document.getElementById('dashBtn').addEventListener('touchstart', e => {
+            e.preventDefault();
+            activateDash();
+        });
+        
+        // --- Desktop Controls ---
+        const keys = {};
+        document.addEventListener('keydown', e => { keys[e.code] = true; updatePlayerVelocity(); });
+        document.addEventListener('keyup', e => { keys[e.code] = false; updatePlayerVelocity(); });
+        
+        function updatePlayerVelocity() {
+            if(touchState.active) return;
+            player.dx = 0; player.dy = 0;
+            if(keys['KeyW'] || keys['ArrowUp']) player.dy = -player.speed;
+            if(keys['KeyS'] || keys['ArrowDown']) player.dy = player.speed;
+            if(keys['KeyA'] || keys['ArrowLeft']) player.dx = -player.speed;
+            if(keys['KeyD'] || keys['ArrowRight']) player.dx = player.speed;
+        }
+        
+        function activateDash() {
+            if(powerupActive === 'speed') return;
+            const dashDx = player.dx || 0;
+            const dashDy = player.dy || 0;
+            if(dashDx !== 0 || dashDy !== 0) {
+                player.x += dashDx * 4;
+                player.y += dashDy * 4;
+                createParticles(player.x, player.y, '#00ff00', 15);
+            }
+        }
+        
+        // --- Game Functions ---
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            gameRunning = true;
+            score = 0; timeLeft = 60; multiplier = 1; level = 1;
+            collectibles = []; enemies = []; powerups = []; particles = []; floatingTexts = [];
+            player.x = canvas.width / 2; player.y = canvas.height / 2; player.trail = [];
+            updateUI();
+            gameLoop();
+            
+            setInterval(() => { if(gameRunning) spawnCollectible(); }, 700);
+            setInterval(() => { if(gameRunning) spawnEnemy(); }, 1200);
+            setInterval(() => { if(gameRunning) spawnPowerup(); }, 4000);
+            
+            const timer = setInterval(() => {
+                if(!gameRunning) { clearInterval(timer); return; }
+                timeLeft--;
+                if(timeLeft <= 0) { gameOver(); clearInterval(timer); }
+                updateUI();
+            }, 1000);
+        }
+        
+        function restartGame() {
+            document.getElementById('gameOverScreen').style.display = 'none';
+            startGame();
+        }
+        
+        function spawnCollectible() {
+            const types = [
+                { name: 'bitcoin', value: 0.01, color: '#ffa500', size: 30 },
+                { name: 'ethereum', value: 0.005, color: '#627eea', size: 28 },
+                { name: 'credits', value: 100, color: '#00ff00', size: 25 },
+                { name: 'datachip', value: 50, color: '#00ffff', size: 22 }
+            ];
+            const type = types[Math.floor(Math.random() * types.length)];
+            collectibles.push({
+                x: Math.random() * canvas.width, y: -40, size: type.size,
+                value: type.value * multiplier, color: type.color, type: type.name,
+                speed: 1.5 + level * 0.3, rotation: 0
+            });
+        }
+        
+        function spawnEnemy() {
+            const types = [
+                { name: 'agent', color: '#ff0000', size: 32, speed: 2.5 },
+                { name: 'bug', color: '#8800ff', size: 28, speed: 3 },
+                { name: 'redpill', color: '#ff0066', size: 25, speed: 3.5 }
+            ];
+            const type = types[Math.floor(Math.random() * types.length)];
+            enemies.push({
+                x: Math.random() * canvas.width, y: -40, size: type.size,
+                color: type.color, type: type.name, speed: type.speed + level * 0.2,
+                wobble: Math.random() * Math.PI * 2
+            });
+        }
+        
+        function spawnPowerup() {
+            const types = ['multiplier', 'speed', 'shield', 'time', 'freeze'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            powerups.push({
+                x: Math.random() * canvas.width, y: -35, size: 24,
+                type: type, speed: 2, rotation: 0
+            });
+        }
+        
+        function createParticles(x, y, color, count) {
+            for(let i = 0; i < count; i++) {
+                particles.push({
+                    x, y,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.5) * 12,
+                    life: 1, color, size: 3 + Math.random() * 4
+                });
+            }
+        }
+        
+        function createFloatingText(x, y, text, color) {
+            floatingTexts.push({ x, y, text, color, life: 1.5, vy: -2 });
+        }
+        
+        function updateUI() {
+            document.getElementById('moneyCount').textContent = '₿' + score.toFixed(4);
+            document.getElementById('timeValue').textContent = timeLeft;
+            document.getElementById('multValue').textContent = 'x' + multiplier.toFixed(1);
+            document.getElementById('levelValue').textContent = level;
+        }
+        
+        function activatePowerup(type) {
+            powerupActive = type;
+            powerupTimer = 5000;
+            const display = document.getElementById('powerupDisplay');
+            const text = document.getElementById('powerupText');
+            display.style.display = 'block';
+            
+            const effects = {
+                multiplier: { text: '✨ 3X HACK!', color: '#ffff00' },
+                speed: { text: '⚡ SUPER SPEED!', color: '#00ffff' },
+                shield: { text: '🛡️ INVINCIBLE!', color: '#0088ff' },
+                time: { text: '⏰ +15 SEC!', color: '#ff00ff' },
+                freeze: { text: '❄️ TIME FREEZE!', color: '#ffffff' }
+            };
+            
+            text.textContent = effects[type].text;
+            text.style.color = effects[type].color;
+            
+            switch(type) {
+                case 'multiplier': multiplier = 3; break;
+                case 'speed': player.speed = 12; break;
+                case 'freeze': 
+                    collectibles.forEach(c => c.speed *= 0.3);
+                    enemies.forEach(e => e.speed *= 0.3);
+                    break;
+                case 'time': timeLeft += 15; break;
+            }
+            
+            if(type !== 'time' && type !== 'freeze') {
+                setTimeout(() => {
+                    powerupActive = null;
+                    multiplier = 1;
+                    player.speed = 6;
+                    display.style.display = 'none';
+                }, 5000);
+            } else if(type === 'freeze') {
+                setTimeout(() => {
+                    powerupActive = null;
+                    collectibles.forEach(c => c.speed /= 0.3);
+                    enemies.forEach(e => e.speed /= 0.3);
+                    display.style.display = 'none';
+                }, 4000);
+            } else {
+                setTimeout(() => display.style.display = 'none', 2000);
+            }
+        }
+        
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById('finalScore').textContent = '₿' + score.toFixed(4);
+            document.getElementById('gameOverScreen').style.display = 'flex';
+        }
+        
+        // --- Drawing Functions ---
+        function drawCryptoCoin(x, y, size, color, rotation) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+            
+            // Outer glow
+            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size);
+            gradient.addColorStop(0, color);
+            gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(0, 0, size * 1.3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Coin body
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(0, 0, size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Inner detail
+            ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(0, 0, size * 0.7, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Symbol
+            ctx.fillStyle = '#fff';
+            ctx.font = `bold ${size}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const symbols = { bitcoin: '₿', ethereum: 'Ξ', credits: '$', datachip: '💾' };
+            ctx.fillText(symbols[this.type] || '$', 0, 2);
+            
+            ctx.restore();
+        }
+        
+        function drawEnemy(x, y, size, color, type, wobble) {
+            ctx.save();
+            ctx.translate(x + Math.sin(wobble) * 10, y);
+            
+            // Glow
+            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size);
+            gradient.addColorStop(0, color);
+            gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(0, 0, size * 1.4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Body
+            ctx.fillStyle = color;
+            if(type === 'agent') {
+                // Matrix agent - square with glow
+                ctx.fillRect(-size, -size, size * 2, size * 2);
+                ctx.fillStyle = '#000';
+                ctx.font = `bold ${size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('👤', 0, 0);
+            } else if(type === 'bug') {
+                // Bug - oval with legs
+                ctx.beginPath();
+                ctx.ellipse(0, 0, size, size * 0.7, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#000';
+                ctx.font = `${size}px Arial`;
+                ctx.fillText('🐛', 0, 0);
+            } else {
+                // Red pill - capsule shape
+                ctx.beginPath();
+                ctx.roundRect(-size, -size/2, size * 2, size, size/2);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.font = `bold ${size * 0.6}px Arial`;
+                ctx.fillText('!', 0, 0);
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawPowerup(x, y, size, type, rotation) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+            
+            const colors = {
+                multiplier: '#ffff00', speed: '#00ffff', shield: '#0088ff',
+                time: '#ff00ff', freeze: '#ffffff'
+            };
+            const icons = { multiplier: '3x', speed: '⚡', shield: '🛡️', time: '+15', freeze: '❄️' };
+            
+            // Glow
+            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size);
+            gradient.addColorStop(0, colors[type]);
+            gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(0, 0, size * 1.3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Star shape
+            ctx.fillStyle = colors[type];
+            ctx.beginPath();
+            for(let i = 0; i < 5; i++) {
+                const angle = (i * 4 * Math.PI / 5) - Math.PI / 2;
+                const r = i % 2 === 0 ? size : size * 0.5;
+                ctx.lineTo(Math.cos(angle) * r, Math.sin(angle) * r);
+            }
+            ctx.closePath();
+            ctx.fill();
+            
+            // Icon
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(icons[type], 0, 0);
+            
+            ctx.restore();
+        }
+        
+        function drawPlayer(x, y, size) {
+            // Trail effect
+            player.trail.push({ x, y, alpha: 1 });
+            if(player.trail.length > 10) player.trail.shift();
+            
+            player.trail.forEach((t, i) => {
+                t.alpha -= 0.1;
+                if(t.alpha > 0) {
+                    ctx.fillStyle = `rgba(0, ${Math.floor(255 * t.alpha)}, 0, ${t.alpha * 0.5})`;
+                    ctx.beginPath();
+                    ctx.arc(t.x, t.y, size * (i / 10), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+            
+            // Player glow
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, size * 2);
+            gradient.addColorStop(0, powerupActive === 'shield' ? '#0088ff' : '#00ff00');
+            gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, size * 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Player body
+            ctx.fillStyle = powerupActive === 'shield' ? '#0088ff' : '#00ff00';
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Inner detail
+            ctx.fillStyle = '#000';
+            ctx.font = `bold ${size}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(powerupActive === 'shield' ? '🛡️' : '😎', x, y);
+        }
+        
+        // --- Game Loop ---
+        function gameLoop(timestamp) {
+            if(!gameRunning) return;
+            
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+            
+            // Clear with trail effect
+            ctx.fillStyle = 'rgba(0, 5, 0, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw Matrix rain
+            drawMatrixRain();
+            
+            // Update player
+            player.x += player.dx;
+            player.y += player.dy;
+            
+            // Boundaries
+            if(player.x < player.size) player.x = player.size;
+            if(player.x > canvas.width - player.size) player.x = canvas.width - player.size;
+            if(player.y < player.size) player.y = player.size;
+            if(player.y > canvas.height - player.size) player.y = canvas.height - player.size;
+            
+            // Draw player
+            drawPlayer(player.x, player.y, player.size);
+            
+            // Update and draw collectibles
+            for(let i = collectibles.length - 1; i >= 0; i--) {
+                const c = collectibles[i];
+                c.y += c.speed;
+                c.rotation += 0.05;
+                
+                drawCryptoCoin(c.x, c.y, c.size, c.color, c.rotation);
+                
+                const dist = Math.sqrt((player.x - c.x)**2 + (player.y - c.y)**2);
+                if(dist < player.size + c.size) {
+                    score += c.value;
+                    createParticles(c.x, c.y, c.color, 20);
+                    createFloatingText(c.x, c.y, '+' + c.value.toFixed(3), c.color);
+                    collectibles.splice(i, 1);
+                    
+                    // Level up
+                    if(score > level * 0.1) {
+                        level++;
+                        createFloatingText(player.x, player.y - 30, 'LEVEL UP!', '#ffff00');
+                    }
+                    
+                    updateUI();
+                }
+                
+                if(c.y > canvas.height + c.size) collectibles.splice(i, 1);
+            }
+            
+            // Update and draw enemies
+            for(let i = enemies.length - 1; i >= 0; i--) {
+                const e = enemies[i];
+                e.y += e.speed;
+                e.wobble += 0.1;
+                
+                drawEnemy(e.x, e.y, e.size, e.color, e.type, e.wobble);
+                
+                const dist = Math.sqrt((player.x - e.x)**2 + (player.y - e.y)**2);
+                if(dist < player.size + e.size) {
+                    if(powerupActive === 'shield') {
+                        createParticles(e.x, e.y, '#0088ff', 25);
+                        enemies.splice(i, 1);
+                    } else {
+                        score = Math.max(0, score - 0.05);
+                        createParticles(player.x, player.y, '#ff0000', 25);
+                        createFloatingText(player.x, player.y - 30, '-0.05!', '#ff0000');
+                        enemies.splice(i, 1);
+                        updateUI();
+                        
+                        // Screen shake
+                        canvas.style.transform = `translate(${5*(Math.random()-0.5)}px, ${5*(Math.random()-0.5)}px)`;
+                        setTimeout(() => canvas.style.transform = '', 100);
+                    }
+                }
+                
+                if(e.y > canvas.height + e.size) enemies.splice(i, 1);
+            }
+            
+            // Update and draw powerups
+            for(let i = powerups.length - 1; i >= 0; i--) {
+                const p = powerups[i];
+                p.y += p.speed;
+                p.rotation += 0.08;
+                
+                drawPowerup(p.x, p.y, p.size, p.type, p.rotation);
+                
+                const dist = Math.sqrt((player.x - p.x)**2 + (player.y - p.y)**2);
+                if(dist < player.size + p.size) {
+                    activatePowerup(p.type);
+                    createParticles(p.x, p.y, '#fff', 25);
+                    createFloatingText(p.x, p.y - 30, p.type.toUpperCase() + '!', '#fff');
+                    powerups.splice(i, 1);
+                }
+                
+                if(p.y > canvas.height + p.size) powerups.splice(i, 1);
+            }
+            
+            // Update and draw particles
+            for(let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.3; // Gravity
+                p.life -= 0.02;
+                
+                if(p.life <= 0) { particles.splice(i, 1); continue; }
+                
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+            
+            // Update and draw floating texts
+            for(let i = floatingTexts.length - 1; i >= 0; i--) {
+                const t = floatingTexts[i];
+                t.y += t.vy;
+                t.life -= 0.02;
+                
+                if(t.life <= 0) { floatingTexts.splice(i, 1); continue; }
+                
+                ctx.fillStyle = t.color;
+                ctx.globalAlpha = t.life;
+                ctx.font = 'bold 20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(t.text, t.x, t.y);
+                ctx.globalAlpha = 1;
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Initialize
+        initMatrixRain();
+    </script>
+    
+    <footer>💰 MATRIX MONEY RUN | Hack The System | Collect Crypto | Mobile Ready</footer>
+</body>
+</html>
