@@ -13,6 +13,16 @@
         #ui{position:fixed;inset:0;pointer-events:none;z-index:100}
         #ui>*{pointer-events:auto}
         
+        /* Mobile Joystick Visual */
+        #joystickZone{position:fixed;bottom:80px;left:80px;width:120px;height:120px;background:rgba(255,170,102,0.2);border:3px solid rgba(255,170,102,0.5);border-radius:50%;z-index:1000;pointer-events:none;opacity:0.5}
+        #joystickKnob{position:absolute;width:50px;height:50px;background:linear-gradient(135deg,#ffaa66,#ff8844);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(255,170,102,0.6)}
+        
+        /* Mobile Controls */
+        #mobileControls{position:fixed;bottom:60px;right:60px;display:flex;gap:15px;z-index:1000;pointer-events:auto}
+        .mobileBtn{width:60px;height:60px;border-radius:50%;border:3px solid rgba(255,170,102,0.6);background:rgba(0,0,0,0.6);color:#ffaa66;font-size:20px;font-weight:bold;display:flex;align-items:center;justify-content:center}
+        .mobileBtn:active{transform:scale(0.9);background:rgba(255,170,102,0.3)}
+        .jumpBtn{background:linear-gradient(135deg,#44ff88,#22cc66);color:#000;border-color:#44ff88}
+        
         /* Top Bar */
         #top-bar{position:absolute;top:10px;left:0;right:0;display:flex;justify-content:center;gap:8px;z-index:30;flex-wrap:wrap}
         .top-btn{background:#ffaa66;border:none;color:#000;font-weight:bold;padding:6px 12px;border-radius:20px;cursor:pointer;font-family:monospace;font-size:10px;transition:0.2s}
@@ -82,6 +92,14 @@
 <body>
     <!-- UI OVERLAY -->
     <div id="ui">
+        <!-- Mobile Joystick Visual -->
+        <div id="joystickZone"><div id="joystickKnob"></div></div>
+        
+        <!-- Mobile Controls -->
+        <div id="mobileControls">
+            <button class="mobileBtn jumpBtn" onclick="jump()">⬆️</button>
+        </div>
+        
         <!-- TOP BAR -->
         <div id="top-bar">
             <button class="top-btn" onclick="togglePanel('forgePanel')">⚡ FORGE</button>
@@ -446,12 +464,60 @@
             document.addEventListener('keydown', e => keys[e.code] = true);
             document.addEventListener('keyup', e => keys[e.code] = false);
             
+            // MOBILE JOYSTICK (NEW)
+            let joystickActive = false;
+            let joystickOrigin = { x: 0, y: 0 };
+            let joystickPos = { x: 0, y: 0 };
+            
+            document.addEventListener('touchstart', e => {
+                if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+                    joystickActive = true;
+                    joystickOrigin = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                    joystickPos = { x: 0, y: 0 };
+                }
+            }, { passive: true });
+            
+            document.addEventListener('touchmove', e => {
+                if (joystickActive) {
+                    joystickPos = {
+                        x: e.touches[0].clientX - joystickOrigin.x,
+                        y: e.touches[0].clientY - joystickOrigin.y
+                    };
+                    // Update visual joystick
+                    const knob = document.getElementById('joystickKnob');
+                    if (knob) {
+                        const maxDist = 40;
+                        const dist = Math.min(Math.hypot(joystickPos.x, joystickPos.y), maxDist);
+                        const angle = Math.atan2(joystickPos.y, joystickPos.x);
+                        knob.style.transform = `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px))`;
+                    }
+                }
+            }, { passive: true });
+            
+            document.addEventListener('touchend', () => {
+                joystickActive = false;
+                joystickPos = { x: 0, y: 0 };
+                // Reset visual joystick
+                const knob = document.getElementById('joystickKnob');
+                if (knob) knob.style.transform = 'translate(-50%, -50%)';
+            }, { passive: true });
+            
             setInterval(() => {
                 const speed = 0.15 * (isSprinting ? 2 : 1);
+                
+                // Keyboard controls
                 if (keys['KeyW'] || keys['ArrowUp']) player.position.z -= speed;
                 if (keys['KeyS'] || keys['ArrowDown']) player.position.z += speed;
                 if (keys['KeyA'] || keys['ArrowLeft']) player.position.x -= speed;
                 if (keys['KeyD'] || keys['ArrowRight']) player.position.x += speed;
+                
+                // Mobile joystick controls
+                if (joystickActive) {
+                    if (joystickPos.y < -20) player.position.z -= speed;
+                    if (joystickPos.y > 20) player.position.z += speed;
+                    if (joystickPos.x < -20) player.position.x -= speed;
+                    if (joystickPos.x > 20) player.position.x += speed;
+                }
                 
                 // Jump
                 if (isJumping) {
