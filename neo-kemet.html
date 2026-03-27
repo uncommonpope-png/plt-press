@@ -5,13 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏛️ NEO-KEMET | Ancient Cyberpunk World</title>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
-        body { background:#000; overflow:hidden; font-family:'Courier New', monospace; }
+        * { margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-user-select:none; }
+        body { background:#000; overflow:hidden; font-family:'Courier New', monospace; touch-action: none; }
         canvas { display:block; width:100vw; height:100vh; }
         
         /* UI Overlay */
         #ui { position:fixed; inset:0; pointer-events:none; z-index:100; }
         #ui > * { pointer-events:auto; }
+        
+        /* Mobile Controls */
+        #mobileControls { position:fixed; bottom:20px; left:0; right:0; display:none; pointer-events:none; z-index:150; }
+        .joystick-area { position:absolute; width:120px; height:120px; background:rgba(255,170,102,0.2); border:2px solid #ffaa66; border-radius:50%; pointer-events:auto; }
+        #leftJoystick { left:20px; bottom:20px; }
+        #rightJoystick { right:20px; bottom:20px; }
+        .joystick-knob { position:absolute; width:50px; height:50px; background:rgba(255,170,102,0.8); border-radius:50%; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; }
+        
+        /* Mobile Action Buttons */
+        #mobileActions { position:fixed; right:20px; top:50%; transform:translateY(-50%); display:none; flex-direction:column; gap:10px; pointer-events:auto; z-index:150; }
+        .action-btn { width:60px; height:60px; background:rgba(255,170,102,0.6); border:2px solid #ffaa66; border-radius:50%; color:#000; font-weight:bold; font-size:12px; cursor:pointer; }
+        .action-btn:active { background:#ffaa66; }
+        
+        /* Mobile top buttons */
+        #mobileTopBar { position:fixed; top:10px; left:0; right:0; display:none; justify-content:center; gap:8px; z-index:160; pointer-events:auto; }
+        #mobileTopBar .top-btn { padding:6px 12px; font-size:10px; }
+        
+        @media (max-width: 768px) {
+            #mobileControls, #mobileActions, #mobileTopBar { display:flex; }
+            #controls { display:none !important; }
+            .top-btn { padding:6px 12px; font-size:10px; }
+        }
         
         /* Top Bar */
         #topBar { position:absolute; top:10px; left:0; right:0; display:flex; justify-content:center; gap:8px; z-index:30; flex-wrap:wrap; }
@@ -65,6 +87,25 @@
     <canvas id="gameCanvas"></canvas>
     
     <div id="ui">
+        <!-- Mobile Top Bar -->
+        <div id="mobileTopBar">
+            <button class="top-btn" onclick="toggleLandmarks()">🏛️</button>
+            <button class="top-btn" onclick="toggleMap()">🗺️</button>
+            <button class="top-btn" onclick="teleportToSpawn()">🔄</button>
+        </div>
+        
+        <!-- Mobile Controls -->
+        <div id="mobileControls">
+            <div id="leftJoystick" class="joystick-area"><div class="joystick-knob"></div></div>
+            <div id="rightJoystick" class="joystick-area"><div class="joystick-knob"></div></div>
+        </div>
+        
+        <!-- Mobile Action Buttons -->
+        <div id="mobileActions">
+            <button class="action-btn" id="jumpBtn">JUMP</button>
+            <button class="action-btn" id="flyBtn">FLY</button>
+        </div>
+        
         <!-- Top Bar -->
         <div id="topBar">
             <button class="top-btn" onclick="toggleLandmarks()">🏛️ Landmarks</button>
@@ -277,6 +318,12 @@
         let lastTime = performance.now();
         let moveState = { forward: false, backward: false, left: false, right: false, up: false, down: false, sprint: false };
         
+        // Mobile touch state
+        let touchState = {
+            leftJoystick: { active: false, x: 0, y: 0, originX: 0, originY: 0 },
+            rightJoystick: { active: false, x: 0, y: 0, originX: 0, originY: 0 }
+        };
+        
         // --- Initialize ---
         init();
         animate();
@@ -329,6 +376,135 @@
             
             // Populate landmarks
             populateLandmarks();
+            
+            // Initialize mobile controls
+            initMobileControls();
+        }
+        
+        function initMobileControls() {
+            const leftJoy = document.getElementById('leftJoystick');
+            const rightJoy = document.getElementById('rightJoystick');
+            const leftKnob = leftJoy.querySelector('.joystick-knob');
+            const rightKnob = rightJoy.querySelector('.joystick-knob');
+            const maxDistance = 35;
+            
+            // Left joystick - Movement
+            leftJoy.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.changedTouches[0];
+                touchState.leftJoystick.active = true;
+                touchState.leftJoystick.originX = touch.clientX;
+                touchState.leftJoystick.originY = touch.clientY;
+            }, { passive: false });
+            
+            leftJoy.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!touchState.leftJoystick.active) return;
+                
+                const touch = e.changedTouches[0];
+                const rect = leftJoy.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                let dx = touch.clientX - centerX;
+                let dy = touch.clientY - centerY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance > maxDistance) {
+                    dx = (dx / distance) * maxDistance;
+                    dy = (dy / distance) * maxDistance;
+                }
+                
+                leftKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+                
+                // Update move state
+                touchState.leftJoystick.x = dx / maxDistance;
+                touchState.leftJoystick.y = dy / maxDistance;
+                
+                moveState.forward = touchState.leftJoystick.y < -0.3;
+                moveState.backward = touchState.leftJoystick.y > 0.3;
+                moveState.left = touchState.leftJoystick.x < -0.3;
+                moveState.right = touchState.leftJoystick.x > 0.3;
+            }, { passive: false });
+            
+            leftJoy.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                touchState.leftJoystick.active = false;
+                touchState.leftJoystick.x = 0;
+                touchState.leftJoystick.y = 0;
+                leftKnob.style.transform = 'translate(-50%, -50%)';
+                moveState.forward = false;
+                moveState.backward = false;
+                moveState.left = false;
+                moveState.right = false;
+            }, { passive: false });
+            
+            // Right joystick - Camera look
+            rightJoy.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.changedTouches[0];
+                touchState.rightJoystick.active = true;
+                touchState.rightJoystick.originX = touch.clientX;
+                touchState.rightJoystick.originY = touch.clientY;
+            }, { passive: false });
+            
+            rightJoy.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!touchState.rightJoystick.active) return;
+                
+                const touch = e.changedTouches[0];
+                const rect = rightJoy.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                let dx = touch.clientX - centerX;
+                let dy = touch.clientY - centerY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance > maxDistance) {
+                    dx = (dx / distance) * maxDistance;
+                    dy = (dy / distance) * maxDistance;
+                }
+                
+                rightKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+                
+                touchState.rightJoystick.x = dx / maxDistance;
+                touchState.rightJoystick.y = dy / maxDistance;
+                
+                // Rotate camera
+                camera.rotation.y -= touchState.rightJoystick.x * 0.05;
+                camera.rotation.x -= touchState.rightJoystick.y * 0.05;
+                camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+            }, { passive: false });
+            
+            rightJoy.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                touchState.rightJoystick.active = false;
+                touchState.rightJoystick.x = 0;
+                touchState.rightJoystick.y = 0;
+                rightKnob.style.transform = 'translate(-50%, -50%)';
+            }, { passive: false });
+            
+            // Action buttons
+            document.getElementById('jumpBtn').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                moveState.up = true;
+            });
+            document.getElementById('jumpBtn').addEventListener('touchend', (e) => {
+                e.preventDefault();
+                moveState.up = false;
+            });
+            
+            document.getElementById('flyBtn').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                moveState.down = true;
+                moveState.sprint = true;
+            });
+            document.getElementById('flyBtn').addEventListener('touchend', (e) => {
+                e.preventDefault();
+                moveState.down = false;
+                moveState.sprint = false;
+            });
         }
         
         function generateWorld() {
@@ -609,23 +785,32 @@
             const delta = (time - lastTime) / 1000;
             lastTime = time;
             
-            if (controls.isLocked) {
+            if (controls.isLocked || window.innerWidth <= 768) {
                 // Movement
                 const speed = moveState.sprint ? 100 : 50;
+                
+                // Get camera direction (only horizontal for movement)
                 const direction = new THREE.Vector3();
+                const right = new THREE.Vector3();
                 
-                if (moveState.forward) direction.z -= 1;
-                if (moveState.backward) direction.z += 1;
-                if (moveState.left) direction.x -= 1;
-                if (moveState.right) direction.x += 1;
-                
+                camera.getWorldDirection(direction);
+                direction.y = 0;
                 direction.normalize();
                 
-                if (moveState.forward || moveState.backward) {
-                    camera.translateZ(-direction.z * speed * delta);
+                right.crossVectors(direction, new THREE.Vector3(0, 1, 0));
+                
+                // Apply movement based on state
+                if (moveState.forward) {
+                    camera.position.addScaledVector(direction, speed * delta);
                 }
-                if (moveState.left || moveState.right) {
-                    camera.translateX(direction.x * speed * delta);
+                if (moveState.backward) {
+                    camera.position.addScaledVector(direction, -speed * delta);
+                }
+                if (moveState.left) {
+                    camera.position.addScaledVector(right, -speed * delta);
+                }
+                if (moveState.right) {
+                    camera.position.addScaledVector(right, speed * delta);
                 }
                 
                 // Vertical movement (flying)
@@ -680,6 +865,6 @@
         
     </script>
     
-    <footer>NEO-KEMET v0.1 | Ancient Cyberpunk World | WASD to Move | Click to Lock Mouse</footer>
+    <footer>NEO-KEMET v0.2 | 📱 Mobile: Use joysticks to move/look | Desktop: WASD + Mouse</footer>
 </body>
 </html>
