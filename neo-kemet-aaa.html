@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🏛️ NEO-KEMET | Ancient Cyberpunk World - AAA Edition</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-user-select:none; }
+        body { background:#000; overflow:hidden; font-family:'Courier New', monospace; touch-action: none; }
+        canvas { display:block; width:100vw; height:100vh; }
+        
+        #ui { position:fixed; inset:0; pointer-events:none; z-index:100; }
+        #ui > * { pointer-events:auto; }
+        
+        /* Mobile Joystick */
+        #joystick { position:fixed; bottom:30px; left:30px; width:160px; height:160px; background:radial-gradient(circle, rgba(255,170,102,0.25) 0%, rgba(255,100,50,0.05) 70%); border:4px solid rgba(255,170,102,0.6); border-radius:50%; pointer-events:auto; z-index:150; display:none; box-shadow: 0 0 40px rgba(255,170,102,0.4), inset 0 0 30px rgba(255,170,102,0.1); }
+        .joystick-knob { position:absolute; width:70px; height:70px; background:radial-gradient(circle, #ffaa66 0%, #ff6633 100%); border-radius:50%; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; border:4px solid #ffaa66; box-shadow: 0 0 30px #ffaa66, inset 0 0 25px rgba(255,200,100,0.6); transition: transform 0.05s; }
+        
+        /* Mobile Look Joystick */
+        #lookJoystick { position:fixed; bottom:30px; right:30px; width:140px; height:140px; background:radial-gradient(circle, rgba(100,200,255,0.2) 0%, rgba(50,100,200,0.05) 70%); border:4px solid rgba(100,200,255,0.5); border-radius:50%; pointer-events:auto; z-index:150; display:none; box-shadow: 0 0 30px rgba(100,200,255,0.3); }
+        #lookJoystick .joystick-knob { background:radial-gradient(circle, #64c8ff 0%, #3288cc 100%); border-color: #64c8ff; box-shadow: 0 0 25px #64c8ff, inset 0 0 20px rgba(150,220,255,0.5); }
+        
+        /* Mobile Actions */
+        #mobileActions { position:fixed; right:20px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:15px; pointer-events:auto; z-index:150; display:none; }
+        .action-btn { width:70px; height:70px; background:linear-gradient(135deg, #ffaa66 0%, #ff6633 100%); border:3px solid #ffaa66; border-radius:50%; color:#000; font-weight:bold; font-size:24px; cursor:pointer; box-shadow: 0 0 25px rgba(255,170,102,0.6); transition: 0.1s; }
+        .action-btn:active { transform:scale(0.85); box-shadow: 0 0 40px rgba(255,170,102,0.9); }
+        
+        @media (max-width: 768px) {
+            #joystick, #lookJoystick, #mobileActions { display:flex !important; }
+            #desktopControls, #topBar { display:none !important; }
+        }
+        
+        /* Region Info */
+        #regionInfo { position:absolute; top:10px; left:10px; background:linear-gradient(135deg, rgba(20,10,30,0.95) 0%, rgba(40,20,50,0.85) 100%); backdrop-filter:blur(20px); border-radius:20px; padding:15px 20px; color:#ffaa66; font-size:13px; z-index:10; border:2px solid rgba(255,170,102,0.5); min-width:240px; box-shadow: 0 0 30px rgba(255,170,102,0.3), inset 0 0 20px rgba(255,170,102,0.05); }
+        #regionName { font-size:18px; font-weight:bold; margin-bottom:8px; text-shadow: 0 0 10px #ffaa66; }
+        .stat-row { display:flex; justify-content:space-between; margin:5px 0; font-size:12px; }
+        
+        /* Coordinates */
+        #coords { position:absolute; top:10px; right:10px; background:linear-gradient(135deg, rgba(10,20,30,0.95) 0%, rgba(20,40,60,0.85) 100%); backdrop-filter:blur(20px); border-radius:16px; padding:12px 16px; color:#64c8ff; font-size:11px; z-index:10; border:2px solid rgba(100,200,255,0.4); text-align:right; box-shadow: 0 0 25px rgba(100,200,255,0.2); }
+        #coords div { margin:3px 0; }
+        
+        /* Minimap */
+        #minimap { position:absolute; bottom:200px; right:20px; width:180px; height:180px; background:linear-gradient(135deg, rgba(10,30,20,0.9) 0%, rgba(5,20,15,0.95) 100%); border-radius:50%; border:3px solid rgba(255,170,102,0.5); z-index:10; overflow:hidden; box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 30px rgba(255,170,102,0.1); display:none; }
+        #minimapCanvas { width:100%; height:100%; }
+        
+        /* Desktop Controls */
+        #desktopControls { position:absolute; bottom:10px; left:10px; background:rgba(10,10,20,0.9); backdrop-filter:blur(12px); border-radius:16px; padding:12px; color:#888; font-size:10px; z-index:10; border:2px solid rgba(255,255,255,0.1); }
+        
+        /* Top Bar */
+        #topBar { position:absolute; top:10px; left:0; right:0; display:flex; justify-content:center; gap:10px; z-index:30; flex-wrap:wrap; }
+        .top-btn { background:linear-gradient(135deg, #ffaa66 0%, #ff6633 100%); border:none; color:#000; font-weight:bold; padding:10px 20px; border-radius:25px; cursor:pointer; font-family:monospace; font-size:12px; box-shadow: 0 0 20px rgba(255,170,102,0.4); transition: 0.2s; }
+        .top-btn:active { transform:scale(0.95); box-shadow: 0 0 30px rgba(255,170,102,0.6); }
+        
+        /* Loading */
+        #loading { position:fixed; inset:0; background:radial-gradient(ellipse at center, rgba(30,20,40,0.98) 0%, rgba(5,5,10,0.99) 100%); z-index:1000; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+        #loading h1 { color:#ffaa66; font-size:42px; margin-bottom:30px; text-shadow: 0 0 30px #ffaa66, 0 0 60px #ffaa66; animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { opacity:1; } 50% { opacity:0.7; } }
+        .loader { width:80px; height:80px; border:5px solid rgba(255,170,102,0.2); border-top-color:#ffaa66; border-radius:50%; animation:spin 1s linear infinite; box-shadow: 0 0 30px rgba(255,170,102,0.3); }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        #loading p { color:#666; margin-top:25px; font-size:11px; }
+        
+        /* Modal */
+        .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:linear-gradient(135deg, rgba(20,10,30,0.98) 0%, rgba(40,20,50,0.95) 100%); backdrop-filter:blur(30px); border:3px solid rgba(255,170,102,0.6); border-radius:24px; padding:25px; z-index:200; min-width:320px; max-width:90vw; max-height:75vh; overflow-y:auto; display:none; box-shadow: 0 0 50px rgba(255,170,102,0.3); }
+        .modal.active { display:block; }
+        .modal h3 { color:#ffaa66; margin-bottom:18px; text-align:center; font-size:18px; text-shadow: 0 0 10px #ffaa66; }
+        .close-modal { float:right; background:none; border:none; color:#ffaa66; font-size:24px; cursor:pointer; }
+        .landmark-item { background:rgba(255,170,102,0.1); border:2px solid rgba(255,170,102,0.4); border-radius:14px; padding:12px; margin:10px 0; cursor:pointer; transition:0.2s; }
+        .landmark-item:active { background:rgba(255,170,102,0.25); transform:translateX(5px); }
+        
+        /* Weather */
+        #weatherDisplay { position:absolute; top:130px; left:10px; background:linear-gradient(135deg, rgba(20,20,40,0.9) 0%, rgba(10,10,25,0.85) 100%); border-radius:14px; padding:10px 14px; color:#c8a8ff; font-size:12px; z-index:10; border:2px solid rgba(200,168,255,0.4); box-shadow: 0 0 20px rgba(200,168,255,0.2); }
+        
+        footer { position:absolute; bottom:5px; left:0; right:0; text-align:center; font-size:8px; color:#444; pointer-events:none; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="ui">
+        <!-- Mobile Joysticks -->
+        <div id="joystick"><div class="joystick-knob"></div></div>
+        <div id="lookJoystick"><div class="joystick-knob"></div></div>
+        
+        <!-- Mobile Actions -->
+        <div id="mobileActions">
+            <button class="action-btn" id="flyUpBtn">▲</button>
+            <button class="action-btn" id="flyDownBtn">▼</button>
+        </div>
+        
+        <!-- Top Bar -->
+        <div id="topBar">
+            <button class="top-btn" onclick="toggleLandmarks()">🏛️ Landmarks</button>
+            <button class="top-btn" onclick="toggleMap()">🗺️ Minimap</button>
+            <button class="top-btn" onclick="teleportToSpawn()">🔄 Spawn</button>
+        </div>
+        
+        <!-- Region Info -->
+        <div id="regionInfo">
+            <div id="regionName">🏛️ Delta Sprawl</div>
+            <div class="stat-row"><span>Biome:</span><span id="biomeDisplay">Flooded Urban</span></div>
+            <div class="stat-row"><span>Difficulty:</span><span id="difficultyDisplay">Easy</span></div>
+            <div class="stat-row"><span>Level:</span><span id="levelDisplay">1-10</span></div>
+            <div class="stat-row"><span>Buildings:</span><span id="buildingCount">0</span></div>
+        </div>
+        
+        <!-- Coordinates -->
+        <div id="coords">
+            <div>X: <span id="posX">0</span>m</div>
+            <div>Y: <span id="posY">10</span>m</div>
+            <div>Z: <span id="posZ">0</span>m</div>
+            <div style="margin-top:6px;">Speed: <span id="speedDisplay">0</span> km/h</div>
+        </div>
+        
+        <!-- Weather -->
+        <div id="weatherDisplay">
+            <div><span id="weatherIcon">☀️</span> <span id="weatherName">Clear</span></div>
+            <div style="font-size:10px; margin-top:4px;" id="weatherEffect">Visibility: 100%</div>
+        </div>
+        
+        <!-- Desktop Controls -->
+        <div id="desktopControls">
+            <div><strong>Controls:</strong></div>
+            <div>WASD - Move | Mouse - Look</div>
+            <div>Space - Up | Shift - Down</div>
+            <div>Click - Lock Pointer</div>
+        </div>
+        
+        <!-- Minimap -->
+        <div id="minimap"><canvas id="minimapCanvas"></canvas></div>
+    </div>
+    
+    <!-- Loading Screen -->
+    <div id="loading">
+        <h1>🏛️ NEO-KEMET</h1>
+        <div class="loader"></div>
+        <p>Generating Ancient Cyberpunk World...</p>
+        <p style="margin-top:10px; font-size:10px; color:#888;">Loading terrain, buildings, vegetation...</p>
+    </div>
+    
+    <!-- Landmarks Modal -->
+    <div id="landmarksModal" class="modal">
+        <button class="close-modal" onclick="toggleLandmarks()">×</button>
+        <h3>🏛️ World Landmarks</h3>
+        <div id="landmarkList"></div>
+    </div>
+
+    <script>
+        // --- World Configuration ---
+        const REGIONS = [
+            { id:'delta', name:'🏛️ Delta Sprawl', pos:{x:0, z:0}, size:{w:8000, d:8000}, biome:'Flooded Urban', diff:'Easy', level:'1-10', ground:0x1a2a3a, fog:0x504060, water:0x2a4a6a, buildings:'ancient_cyber' },
+            { id:'core', name:'🌆 Neo-Kemet Core', pos:{x:10000, z:0}, size:{w:12000, d:12000}, biome:'Urban Core', diff:'Medium', level:'20-40', ground:0x2a2a3a, fog:0x403545, neon:0xff00ff, buildings:'pyramid_towers' },
+            { id:'dunes', name:'🏜️ Corporate Dunes', pos:{x:-10000, z:0}, size:{w:10000, d:10000}, biome:'Arid Desert', diff:'Medium', level:'10-25', ground:0x8b7355, fog:0xc4a574, buildings:'solar_facilities' },
+            { id:'exclusion', name:'☢️ Exclusion Zone', pos:{x:0, z:-15000}, size:{w:8000, d:8000}, biome:'Volcanic', diff:'Hard', level:'40-60', ground:0x3a2a2a, fog:0x5a4a3a, buildings:'ruins' },
+            { id:'aether', name:'🌌 The Aether', pos:{x:0, z:15000}, size:{w:10000, d:10000}, biome:'Orbital Void', diff:'Extreme', level:'60-80', ground:0x0a0a1a, fog:0x1a1a3a, buildings:'orbital_stations' }
+        ];
+        
+        const WEATHER = [
+            { name:'Clear', icon:'☀️', fogMult:1, visibility:100 },
+            { name:'Light Rain', icon:'🌦️', fogMult:1.5, visibility:80 },
+            { name:'Heavy Rain', icon:'🌧️', fogMult:2.5, visibility:50 },
+            { name:'Sandstorm', icon:'🌪️', fogMult:4, visibility:30 },
+            { name:'Pink Storm', icon:'💗', fogMult:3, visibility:40 }
+        ];
+        
+        const LANDMARKS = [
+            { name:'Sunken Obelisk', region:'delta', pos:{x:-1800, y:-2, z:-1200}, type:'Temple' },
+            { name:'Temple of Sobek', region:'delta', pos:{x:-1500, y:0, z:-1500}, type:'Dungeon' },
+            { name:'Lotus Pier', region:'delta', pos:{x:-500, y:0, z:-500}, type:'Market' },
+            { name:'Spire of Anubis', region:'core', pos:{x:10000, y:0, z:0}, type:'Corporate HQ' },
+            { name:'Grand Bazaar', region:'core', pos:{x:9500, y:0, z:-500}, type:'Market' },
+            { name:'Pink Quarter', region:'core', pos:{x:11000, y:0, z:1000}, type:'Slum' },
+            { name:'Solar Array Prime', region:'dunes', pos:{x:-14000, y:50, z:0}, type:'Facility' },
+            { name:'Volcano Core', region:'exclusion', pos:{x:0, y:100, z:-17000}, type:'Hazard' },
+            { name:'Orbital Station', region:'aether', pos:{x:0, y:500, z:15000}, type:'Station' }
+        ];
+        
+        // --- Game State ---
+        let canvas, ctx, minimapCanvas, minimapCtx;
+        let gameRunning = false;
+        let currentRegion = REGIONS[0];
+        let currentWeather = WEATHER[0];
+        let camera = { x: 0, y: 10, z: 0, yaw: 0, pitch: 0 };
+        let buildings = [];
+        let vegetation = [];
+        let waterBodies = [];
+        let particles = [];
+        let moveState = { fwd:false, bwd:false, left:false, right:false, up:false, down:false, sprint:false };
+        let touchMove = { x:0, y:0 };
+        let touchLook = { x:0, y:0 };
+        let lastTime = 0;
+        
+        // --- Initialize ---
+        window.addEventListener('load', () => {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            minimapCanvas = document.getElementById('minimapCanvas');
+            minimapCtx = minimapCanvas.getContext('2d');
+            
+            resize();
+            window.addEventListener('resize', resize);
+            
+            setupControls();
+            generateWorld();
+            populateLandmarks();
+            
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                gameRunning = true;
+                gameLoop();
+            }, 3000);
+            
+            // Weather cycle
+            setInterval(() => {
+                if(gameRunning) {
+                    currentWeather = WEATHER[Math.floor(Math.random() * WEATHER.length)];
+                    updateWeatherUI();
+                }
+            }, 60000);
+        });
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            minimapCanvas.width = 180;
+            minimapCanvas.height = 180;
+        }
+        
+        function setupControls() {
+            // Desktop keyboard
+            document.addEventListener('keydown', e => {
+                if(e.code==='KeyW') moveState.fwd=true;
+                if(e.code==='KeyS') moveState.bwd=true;
+                if(e.code==='KeyA') moveState.left=true;
+                if(e.code==='KeyD') moveState.right=true;
+                if(e.code==='Space') moveState.up=true;
+                if(e.code==='ShiftLeft') { moveState.down=true; moveState.sprint=true; }
+            });
+            document.addEventListener('keyup', e => {
+                if(e.code==='KeyW') moveState.fwd=false;
+                if(e.code==='KeyS') moveState.bwd=false;
+                if(e.code==='KeyA') moveState.left=false;
+                if(e.code==='KeyD') moveState.right=false;
+                if(e.code==='Space') moveState.up=false;
+                if(e.code==='ShiftLeft') { moveState.down=false; moveState.sprint=false; }
+            });
+            
+            // Mouse look
+            document.addEventListener('mousemove', e => {
+                if(document.pointerLockElement === canvas) {
+                    camera.yaw -= e.movementX * 0.003;
+                    camera.pitch -= e.movementY * 0.003;
+                    camera.pitch = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.pitch));
+                }
+            });
+            canvas.addEventListener('click', () => {
+                if(window.innerWidth > 768) canvas.requestPointerLock();
+            });
+            
+            // Mobile joysticks
+            setupJoystick('joystick', true);
+            setupJoystick('lookJoystick', false);
+            
+            // Mobile buttons
+            document.getElementById('flyUpBtn').addEventListener('touchstart', e => { e.preventDefault(); moveState.up = true; });
+            document.getElementById('flyUpBtn').addEventListener('touchend', e => { e.preventDefault(); moveState.up = false; });
+            document.getElementById('flyDownBtn').addEventListener('touchstart', e => { e.preventDefault(); moveState.down = true; });
+            document.getElementById('flyDownBtn').addEventListener('touchend', e => { e.preventDefault(); moveState.down = false; });
+        }
+        
+        function setupJoystick(id, isMove) {
+            const joy = document.getElementById(id);
+            const knob = joy.querySelector('.joystick-knob');
+            const maxDist = 55;
+            let active = false;
+            
+            joy.addEventListener('touchstart', e => {
+                e.preventDefault();
+                active = true;
+                handleJoystick(e, joy, knob, maxDist, isMove);
+            }, {passive:false});
+            
+            joy.addEventListener('touchmove', e => {
+                e.preventDefault();
+                if(active) handleJoystick(e, joy, knob, maxDist, isMove);
+            }, {passive:false});
+            
+            joy.addEventListener('touchend', e => {
+                e.preventDefault();
+                active = false;
+                knob.style.transform = 'translate(-50%, -50%)';
+                if(isMove) { touchMove.x = 0; touchMove.y = 0; moveState.fwd = moveState.bwd = moveState.left = moveState.right = false; }
+                else { touchLook.x = 0; touchLook.y = 0; }
+            });
+        }
+        
+        function handleJoystick(e, joy, knob, maxDist, isMove) {
+            const touch = e.changedTouches[0];
+            const rect = joy.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const cy = rect.top + rect.height/2;
+            
+            let dx = touch.clientX - cx;
+            let dy = touch.clientY - cy;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            
+            if(dist > maxDist) { dx = (dx/dist)*maxDist; dy = (dy/dist)*maxDist; }
+            
+            knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+            
+            const nx = dx/maxDist, ny = dy/maxDist;
+            
+            if(isMove) {
+                touchMove.x = nx; touchMove.y = ny;
+                moveState.fwd = ny < -0.25;
+                moveState.bwd = ny > 0.25;
+                moveState.left = nx < -0.25;
+                moveState.right = nx > 0.25;
+            } else {
+                touchLook.x = nx; touchLook.y = ny;
+                camera.yaw -= nx * 0.04;
+                camera.pitch -= ny * 0.04;
+                camera.pitch = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.pitch));
+            }
+        }
+        
+        // --- World Generation ---
+        function generateWorld() {
+            buildings = [];
+            vegetation = [];
+            waterBodies = [];
+            
+            const buildingCount = Math.floor(currentRegion.size.w * currentRegion.size.d / 200000);
+            
+            for(let i = 0; i < buildingCount; i++) {
+                const width = 30 + Math.random() * 50;
+                const depth = 30 + Math.random() * 50;
+                const height = 50 + Math.random() * 150;
+                
+                buildings.push({
+                    x: currentRegion.pos.x + (Math.random()-0.5) * currentRegion.size.w * 0.85,
+                    z: currentRegion.pos.z + (Math.random()-0.5) * currentRegion.size.d * 0.85,
+                    w: width, d: depth, h: height,
+                    type: Math.random() > 0.7 ? 'pyramid' : 'tower',
+                    neonColor: `hsl(${Math.random()*360}, 80%, 60%)`
+                });
+            }
+            
+            // Vegetation
+            const vegCount = Math.floor(currentRegion.size.w * currentRegion.size.d / 100000);
+            for(let i = 0; i < vegCount; i++) {
+                vegetation.push({
+                    x: currentRegion.pos.x + (Math.random()-0.5) * currentRegion.size.w * 0.9,
+                    z: currentRegion.pos.z + (Math.random()-0.5) * currentRegion.size.d * 0.9,
+                    type: Math.random() > 0.5 ? 'palm' : 'crystal',
+                    height: 8 + Math.random() * 12,
+                    color: currentRegion.id === 'exclusion' ? '#555555' : (Math.random() > 0.5 ? '#228822' : '#ff66aa')
+                });
+            }
+            
+            // Water (Delta Sprawl only)
+            if(currentRegion.id === 'delta') {
+                waterBodies.push({
+                    x: currentRegion.pos.x,
+                    z: currentRegion.pos.z,
+                    w: currentRegion.size.w * 0.5,
+                    d: currentRegion.size.d * 0.5,
+                    color: currentRegion.water
+                });
+            }
+            
+            updateRegionUI();
+        }
+        
+        function populateLandmarks() {
+            const list = document.getElementById('landmarkList');
+            list.innerHTML = '';
+            
+            LANDMARKS.forEach(lm => {
+                const item = document.createElement('div');
+                item.className = 'landmark-item';
+                item.innerHTML = `<div style="font-weight:bold; font-size:13px;">${lm.name}</div><div style="font-size:10px; color:#888; margin-top:4px;">${lm.type} | ${REGIONS.find(r=>r.id===lm.region)?.name}</div>`;
+                item.onclick = () => {
+                    camera.x = lm.pos.x;
+                    camera.y = lm.pos.y + 15;
+                    camera.z = lm.pos.z + 30;
+                    toggleLandmarks();
+                };
+                list.appendChild(item);
+            });
+        }
+        
+        // --- 3D Projection ---
+        function project(x, y, z) {
+            const dx = x - camera.x;
+            const dy = y - camera.y;
+            const dz = z - camera.z;
+            
+            // Rotate around Y axis (yaw)
+            const rx = dx * Math.cos(camera.yaw) - dz * Math.sin(camera.yaw);
+            const rz = dx * Math.sin(camera.yaw) + dz * Math.cos(camera.yaw);
+            
+            // Rotate around X axis (pitch)
+            const ry = dy * Math.cos(camera.pitch) - rz * Math.sin(camera.pitch);
+            const rz2 = dy * Math.sin(camera.pitch) + rz * Math.cos(camera.pitch);
+            
+            if(rz2 <= 0.1) return null;
+            
+            const fov = 800;
+            const scale = fov / rz2;
+            
+            return {
+                x: canvas.width/2 + rx * scale,
+                y: canvas.height/2 - ry * scale,
+                scale: scale,
+                z: rz2
+            };
+        }
+        
+        // --- Drawing Functions ---
+        function drawBuilding(building) {
+            const p = project(building.x, building.y, building.z);
+            if(!p || p.scale < 0.01) return;
+            
+            const w = building.w * p.scale;
+            const h = building.h * p.scale;
+            const d = building.d * p.scale;
+            
+            // Building body
+            const gradient = ctx.createLinearGradient(p.x - w/2, p.y - h, p.x + w/2, p.y);
+            gradient.addColorStop(0, '#3a3a4a');
+            gradient.addColorStop(1, '#1a1a2a');
+            ctx.fillStyle = gradient;
+            
+            if(building.type === 'pyramid') {
+                // Pyramid shape
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y - h);
+                ctx.lineTo(p.x - w/2, p.y);
+                ctx.lineTo(p.x + w/2, p.y);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Neon edges
+                ctx.strokeStyle = building.neonColor;
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = building.neonColor;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            } else {
+                // Tower (rectangular)
+                ctx.fillRect(p.x - w/2, p.y - h, w, h);
+                
+                // Windows
+                ctx.fillStyle = 'rgba(255, 200, 100, 0.3)';
+                const windowRows = Math.floor(h / (15 * p.scale));
+                const windowCols = Math.floor(w / (10 * p.scale));
+                for(let wr = 0; wr < windowRows; wr++) {
+                    for(let wc = 0; wc < windowCols; wc++) {
+                        if(Math.random() > 0.3) {
+                            ctx.fillRect(
+                                p.x - w/2 + 5*p.scale + wc * 10*p.scale,
+                                p.y - h + 5*p.scale + wr * 15*p.scale,
+                                6*p.scale, 10*p.scale
+                            );
+                        }
+                    }
+                }
+                
+                // Neon trim
+                ctx.strokeStyle = building.neonColor;
+                ctx.lineWidth = 3;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = building.neonColor;
+                ctx.strokeRect(p.x - w/2, p.y - h, w, h);
+                ctx.shadowBlur = 0;
+            }
+        }
+        
+        function drawVegetation(veg) {
+            const p = project(veg.x, veg.y, veg.z);
+            if(!p || p.scale < 0.01) return;
+            
+            const h = veg.height * p.scale;
+            
+            if(veg.type === 'palm') {
+                // Trunk
+                ctx.fillStyle = '#4a3a2a';
+                ctx.fillRect(p.x - 3*p.scale, p.y - h, 6*p.scale, h);
+                
+                // Fronds
+                ctx.fillStyle = veg.color;
+                for(let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI - Math.PI/2;
+                    const fx = Math.cos(angle) * 20 * p.scale;
+                    const fy = Math.sin(angle) * 15 * p.scale;
+                    ctx.beginPath();
+                    ctx.ellipse(p.x + fx, p.y - h + fy, 15*p.scale, 5*p.scale, angle, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            } else {
+                // Crystal formation
+                ctx.fillStyle = veg.color;
+                ctx.globalAlpha = 0.8;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = veg.color;
+                
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y - h);
+                ctx.lineTo(p.x - 10*p.scale, p.y);
+                ctx.lineTo(p.x + 10*p.scale, p.y);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.globalAlpha = 1;
+                ctx.shadowBlur = 0;
+            }
+        }
+        
+        function drawWater(water) {
+            const p = project(water.x, water.y - 1, water.z);
+            if(!p || p.scale < 0.01) return;
+            
+            const w = water.w * p.scale;
+            const d = water.d * p.scale;
+            
+            ctx.fillStyle = 'rgba(42, 74, 106, 0.6)';
+            ctx.globalAlpha = 0.5;
+            ctx.beginPath();
+            ctx.ellipse(p.x, p.y, w, d * 0.3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+        
+        function drawParticles() {
+            particles.forEach((p, i) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.02;
+                p.vy += 0.2;
+                
+                if(p.life <= 0) { particles.splice(i, 1); return; }
+                
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            });
+        }
+        
+        function createParticles(x, y, z, color, count) {
+            for(let i = 0; i < count; i++) {
+                const p = project(x, y, z);
+                if(p) {
+                    particles.push({
+                        x: p.x + (Math.random()-0.5) * 50,
+                        y: p.y + (Math.random()-0.5) * 50,
+                        vx: (Math.random()-0.5) * 8,
+                        vy: (Math.random()-0.5) * 8,
+                        life: 1,
+                        color: color,
+                        size: 3 + Math.random() * 4
+                    });
+                }
+            }
+        }
+        
+        function drawMinimap() {
+            minimapCtx.fillStyle = 'rgba(10, 20, 15, 0.95)';
+            minimapCtx.fillRect(0, 0, 180, 180);
+            
+            const scale = 0.015;
+            const cx = 90;
+            const cy = 90;
+            
+            // Draw buildings
+            buildings.forEach(b => {
+                const bx = cx + (b.x - camera.x) * scale;
+                const by = cy + (b.z - camera.z) * scale;
+                
+                if(bx > 0 && bx < 180 && by > 0 && by < 180) {
+                    minimapCtx.fillStyle = b.type === 'pyramid' ? '#ff6644' : '#8888aa';
+                    minimapCtx.fillRect(bx - 2, by - 2, 4, 4);
+                }
+            });
+            
+            // Draw player
+            minimapCtx.fillStyle = '#00ff00';
+            minimapCtx.beginPath();
+            minimapCtx.arc(cx, cy, 5, 0, Math.PI * 2);
+            minimapCtx.fill();
+            
+            // Direction indicator
+            minimapCtx.strokeStyle = '#00ff00';
+            minimapCtx.lineWidth = 2;
+            minimapCtx.beginPath();
+            minimapCtx.moveTo(cx, cy);
+            minimapCtx.lineTo(cx + Math.sin(camera.yaw) * 15, cy + Math.cos(camera.yaw) * 15);
+            minimapCtx.stroke();
+        }
+        
+        // --- UI Functions ---
+        function updateRegionUI() {
+            document.getElementById('regionName').textContent = currentRegion.name;
+            document.getElementById('biomeDisplay').textContent = currentRegion.biome;
+            document.getElementById('difficultyDisplay').textContent = currentRegion.diff;
+            document.getElementById('levelDisplay').textContent = currentRegion.level;
+            document.getElementById('buildingCount').textContent = buildings.length;
+        }
+        
+        function updateWeatherUI() {
+            document.getElementById('weatherIcon').textContent = currentWeather.icon;
+            document.getElementById('weatherName').textContent = currentWeather.name;
+            document.getElementById('weatherEffect').textContent = `Visibility: ${currentWeather.visibility}%`;
+        }
+        
+        function updateCoordsUI() {
+            document.getElementById('posX').textContent = Math.round(camera.x);
+            document.getElementById('posY').textContent = Math.round(camera.y);
+            document.getElementById('posZ').textContent = Math.round(camera.z);
+        }
+        
+        function checkRegionChange() {
+            for(const region of REGIONS) {
+                const hw = region.size.w / 2;
+                const hd = region.size.d / 2;
+                
+                if(camera.x >= region.pos.x - hw && camera.x <= region.pos.x + hw &&
+                   camera.z >= region.pos.z - hd && camera.z <= region.pos.z + hd) {
+                    if(currentRegion.id !== region.id) {
+                        currentRegion = region;
+                        generateWorld();
+                        createParticles(camera.x, camera.y, camera.z, '#ffaa66', 50);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // --- UI Toggle Functions ---
+        window.toggleLandmarks = () => document.getElementById('landmarksModal').classList.toggle('active');
+        window.toggleMap = () => {
+            const m = document.getElementById('minimap');
+            m.style.display = m.style.display === 'none' ? 'block' : 'none';
+        };
+        window.teleportToSpawn = () => {
+            camera.x = 0; camera.y = 10; camera.z = 0; camera.yaw = 0; camera.pitch = 0;
+        };
+        
+        // --- Game Loop ---
+        function gameLoop() {
+            if(!gameRunning) return;
+            requestAnimationFrame(gameLoop);
+            
+            // Clear
+            ctx.fillStyle = `rgb(${parseInt(currentRegion.fog >> 16 & 0xFF)}, ${parseInt(currentRegion.fog >> 8 & 0xFF)}, ${parseInt(currentRegion.fog & 0xFF)})`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Sky gradient
+            const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            skyGradient.addColorStop(0, `rgb(${parseInt(currentRegion.fog >> 16 & 0xFF) * 0.5}, ${parseInt(currentRegion.fog >> 8 & 0xFF) * 0.5}, ${parseInt(currentRegion.fog & 0xFF) * 0.5})`);
+            skyGradient.addColorStop(1, `rgb(${parseInt(currentRegion.ground >> 16 & 0xFF) * 0.3}, ${parseInt(currentRegion.ground >> 8 & 0xFF) * 0.3}, ${parseInt(currentRegion.ground & 0xFF) * 0.3})`);
+            ctx.fillStyle = skyGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Movement from keyboard
+            if(!touchMove.x && !touchMove.y) {
+                const speed = moveState.sprint ? 100 : 50;
+                const dir = { x: Math.sin(camera.yaw), z: Math.cos(camera.yaw) };
+                const right = { x: Math.sin(camera.yaw - Math.PI/2), z: Math.cos(camera.yaw - Math.PI/2) };
+                
+                if(moveState.fwd) { camera.x += dir.x * speed * 0.016; camera.z += dir.z * speed * 0.016; }
+                if(moveState.bwd) { camera.x -= dir.x * speed * 0.016; camera.z -= dir.z * speed * 0.016; }
+                if(moveState.left) { camera.x -= right.x * speed * 0.016; camera.z -= right.z * speed * 0.016; }
+                if(moveState.right) { camera.x += right.x * speed * 0.016; camera.z += right.z * speed * 0.016; }
+                if(moveState.up) camera.y += speed * 0.016;
+                if(moveState.down) camera.y -= speed * 0.016;
+            }
+            
+            // Movement from touch
+            if(touchMove.x || touchMove.y) {
+                const speed = 50;
+                const dir = { x: Math.sin(camera.yaw), z: Math.cos(camera.yaw) };
+                const right = { x: Math.sin(camera.yaw - Math.PI/2), z: Math.cos(camera.yaw - Math.PI/2) };
+                
+                camera.x += (dir.x * -touchMove.y + right.x * touchMove.x) * speed * 0.016;
+                camera.z += (dir.z * -touchMove.y + right.z * touchMove.x) * speed * 0.016;
+            }
+            
+            // Check region change
+            checkRegionChange();
+            
+            // Update UI
+            updateCoordsUI();
+            
+            // Draw water (back to front)
+            waterBodies.forEach(w => drawWater(w));
+            
+            // Sort buildings by distance
+            const sortedBuildings = [...buildings].sort((a, b) => {
+                const da = Math.sqrt((a.x-camera.x)**2 + (a.z-camera.z)**2);
+                const db = Math.sqrt((b.x-camera.x)**2 + (b.z-camera.z)**2);
+                return db - da;
+            });
+            
+            // Draw buildings
+            sortedBuildings.forEach(b => drawBuilding(b));
+            
+            // Draw vegetation
+            vegetation.forEach(v => drawVegetation(v));
+            
+            // Draw particles
+            drawParticles();
+            
+            // Draw minimap
+            if(document.getElementById('minimap').style.display !== 'none') {
+                drawMinimap();
+            }
+        }
+    </script>
+    
+    <footer>🏛️ NEO-KEMET v1.0 | Ancient Cyberpunk World | Mobile & Desktop Ready</footer>
+</body>
+</html>
