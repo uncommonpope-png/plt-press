@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🌌 SOULVERSE OMNIVERSAL | All 16 Games Merged</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:#000;overflow:hidden;font-family:'Courier New',monospace}
+        canvas{display:block;width:100%;height:100%}
+        
+        /* UI Overlay */
+        #ui{position:fixed;inset:0;pointer-events:none;z-index:100}
+        #ui>*{pointer-events:auto}
+        
+        /* Top Bar */
+        #top-bar{position:absolute;top:10px;left:0;right:0;display:flex;justify-content:center;gap:8px;z-index:30;flex-wrap:wrap}
+        .top-btn{background:#ffaa66;border:none;color:#000;font-weight:bold;padding:6px 12px;border-radius:20px;cursor:pointer;font-family:monospace;font-size:10px;transition:0.2s}
+        .top-btn:hover{transform:scale(1.05);box-shadow:0 0 12px #ffaa66}
+        
+        /* Resources */
+        #resources{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.7);border-radius:12px;padding:8px;color:#ffaa66;font-size:9px;text-align:right;z-index:10;border:1px solid #ffaa66}
+        
+        /* HUD */
+        #hud{position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border-radius:12px;padding:8px;color:#ffaa66;font-size:9px;z-index:10;border:1px solid #ffaa66}
+        
+        /* Panels */
+        .panel{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.95);backdrop-filter:blur(20px);border:2px solid #ffaa66;border-radius:24px;padding:15px;z-index:200;display:none;max-width:95vw;max-height:70vh;overflow-y:auto}
+        .panel.active{display:block}
+        .panel h3{color:#ffaa66;margin-bottom:10px;text-align:center;font-size:14px}
+        .close-panel{float:right;background:none;border:none;color:#ffaa66;font-size:20px;cursor:pointer}
+        
+        /* Cards */
+        .card{background:rgba(255,170,102,0.1);border:1px solid #ffaa66;border-radius:12px;padding:10px;margin:8px 0;cursor:pointer;transition:0.2s}
+        .card:hover{background:rgba(255,170,102,0.2);transform:translateX(5px)}
+        
+        /* Stats Bars */
+        .stat-bar{margin:6px 0}
+        .bar-label{font-size:8px;display:flex;justify-content:space-between}
+        .bar-bg{height:5px;background:#2a2a3a;border-radius:3px;margin-top:2px;overflow:hidden}
+        .bar-fill{height:100%;width:0%;transition:width 0.3s}
+        
+        /* Buttons */
+        .btn{background:#ffaa66;border:none;color:#000;padding:6px 12px;border-radius:20px;cursor:pointer;font-weight:bold;font-size:10px;margin:3px}
+        .btn:hover{background:#fff}
+        .btn-secondary{background:#2a2a3a;color:#ffaa66;border:1px solid #ffaa66}
+        .btn-danger{background:#ff4444;color:#fff}
+        
+        /* Soul Dex Grid */
+        .dex-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+        .dex-entry{background:#222;border:2px solid #444;border-radius:10px;padding:8px;text-align:center;cursor:pointer;font-size:8px}
+        .dex-entry.caught{border-color:#4ade80;background:rgba(74,222,128,0.1)}
+        .dex-icon{font-size:24px}
+        
+        /* Catch Power Bar */
+        .catch-bar{width:150px;height:12px;background:#222;border-radius:8px;overflow:hidden;margin:8px auto}
+        .catch-fill{height:100%;width:0%;background:linear-gradient(90deg,#4ade80,#fbbf24,#ef4444);transition:width 0.1s}
+        
+        /* Chat Bubbles */
+        .chat-bubble{position:absolute;background:rgba(0,0,0,0.85);backdrop-filter:blur(16px);border-radius:16px;padding:6px 10px;max-width:200px;border-left:3px solid #88aaff;font-size:9px;z-index:150;pointer-events:none;animation:fadeUp 0.3s}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        
+        /* Notification */
+        .notification{position:fixed;bottom:80px;right:10px;background:#0a0a1a;border-left:3px solid #88ffaa;padding:10px;border-radius:10px;z-index:300;font-size:9px;animation:fadeOut 3s forwards}
+        @keyframes fadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
+        
+        /* Combat HUD */
+        #combatHUD{position:fixed;top:60px;left:0;right:0;display:none;z-index:150}
+        .health-bar-container{width:40%;height:20px;background:rgba(0,0,0,0.5);border:2px solid #ffaa44;border-radius:10px;overflow:hidden}
+        .health-bar{height:100%;background:linear-gradient(90deg,#ff4444,#ff8844);transition:width 0.3s}
+        #combatTimer{background:#ffaa44;color:#000;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;margin:0 auto}
+        
+        /* Soul Radar */
+        #soulRadar{position:absolute;top:10px;right:10px;width:120px;height:120px;background:rgba(0,0,0,0.6);border:2px solid #ffaa66;border-radius:50%;overflow:hidden;z-index:10}
+        
+        /* Kombat Moves */
+        .move-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+        
+        @media(max-width:768px){.top-btn{padding:4px 8px;font-size:8px}.dex-grid{grid-template-columns:repeat(3,1fr)}}
+    </style>
+</head>
+<body>
+    <!-- UI OVERLAY -->
+    <div id="ui">
+        <!-- TOP BAR -->
+        <div id="top-bar">
+            <button class="top-btn" onclick="togglePanel('forgePanel')">⚡ FORGE</button>
+            <button class="top-btn" onclick="togglePanel('pantheonPanel')">🏛️ PANTHEON</button>
+            <button class="top-btn" onclick="togglePanel('arenaPanel')">⚔️ KOMBAT</button>
+            <button class="top-btn" onclick="togglePanel('societyPanel')">🏘️ SOCIETY</button>
+            <button class="top-btn" onclick="togglePanel('habitatPanel')">🏠 HABITAT</button>
+            <button class="top-btn" onclick="togglePanel('dexPanel')">📖 DEX</button>
+            <button class="top-btn" onclick="togglePanel('metaversePanel')">🌐 TRADE</button>
+            <button class="top-btn" onclick="togglePanel('achievementsPanel')">🏆 AWARDS</button>
+        </div>
+        
+        <!-- RESOURCES -->
+        <div id="resources">
+            💰 <span id="profitVal">100</span> | ❤️ <span id="loveVal">100</span> | ⚖️ <span id="taxVal">100</span><br>
+            ⚡ <span id="realmEnergy">100</span>% | 🔮 <span id="orbCount">10</span> Orbs
+        </div>
+        
+        <!-- HUD -->
+        <div id="hud">
+            🌌 Day <span id="worldDay">0</span> | <span id="worldTime">00:00</span><br>
+            👥 <span id="soulCount">0</span> | 🎯 <span id="caughtCount">0</span>/16 | 🏆 <span id="achievementCount">0</span>
+        </div>
+        
+        <!-- SOUL RADAR -->
+        <div id="soulRadar"><canvas id="radarCanvas" width="120" height="120"></canvas></div>
+        
+        <!-- FORGE PANEL -->
+        <div id="forgePanel" class="panel">
+            <button class="close-panel" onclick="togglePanel('forgePanel')">&times;</button>
+            <h3>⚡ FORGE SOUL</h3>
+            <input type="text" id="soulName" placeholder="Name..." style="width:100%;padding:8px;margin:8px 0;background:#222;border:1px solid #ffaa66;color:#ffaa66;border-radius:8px;font-size:11px">
+            <div class="stat-bar"><div class="bar-label">💰 Profit</div><input type="range" id="pSlider" min="0" max="100" value="33" style="width:100%"></div>
+            <div class="stat-bar"><div class="bar-label">❤️ Love</div><input type="range" id="lSlider" min="0" max="100" value="33" style="width:100%"></div>
+            <div class="stat-bar"><div class="bar-label">⚖️ Tax</div><input type="range" id="tSlider" min="0" max="100" value="34" style="width:100%"></div>
+            <div style="margin:8px 0;font-size:9px">Skills:</div>
+            <div id="skillTags" style="display:flex;gap:4px;flex-wrap:wrap;margin:8px 0"></div>
+            <button class="btn" onclick="forgeSoul()" style="width:100%">🔥 FORGE</button>
+        </div>
+        
+        <!-- PANTHEON PANEL -->
+        <div id="pantheonPanel" class="panel">
+            <button class="close-panel" onclick="togglePanel('pantheonPanel')">&times;</button>
+            <h3>🏛️ PANTHEON GODS</h3>
+            <div id="pantheonContent"></div>
+        </div>
+        
+        <!-- ARENA/KOMBAT PANEL -->
+        <div id="arenaPanel" class="panel">
+            <button class="close-panel" onclick="togglePanel('arenaPanel')">&times;</button>
+            <h3>⚔️ SOUL KOMBAT</h3>
+            <div id="combatHUD" style="display:block;padding:10px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                    <div class="health-bar-container"><div class="health-bar" id="enemyHP" style="width:100%"></div></div>
+                    <div id="combatTimer">60</div>
+                    <div class="health-bar-container"><div class="health-bar" id="playerHP" style="width:100%"></div></div>
+                </div>
+                <div class="move-grid">
+                    <button class="btn" onclick="kombatAttack('punch')">👊 Punch</button>
+                    <button class="btn" onclick="kombatAttack('kick')">🦶 Kick</button>
+                    <button class="btn btn-danger" onclick="kombatAttack('special')">✨ Special</button>
+                    <button class="btn btn-danger" onclick="kombatAttack('fatal')">💀 Fatal</button>
+                </div>
+                <div id="comboDisplay" style="text-align:center;font-size:16px;color:#ffaa44;margin-top:10px"></div>
+            </div>
+        </div>
+        
+        <!-- SOCIETY PANEL -->
+        <div id="societyPanel" class="panel">
+            <button class="close-panel" onclick="togglePanel('societyPanel')">&times;</button>
+            <h3>🏘️ SOUL SOCIETY</h3>
+            <select id="soulSelector" style="width:100%;padding:8px;margin:8px 0;background:#222;border:1px solid #ffaa66;color:#ffaa66;border-radius:8px;font-size:11px"></select>
+            <div id="societyContent"></div>
+        </div>
+        
+        <!-- HABITAT PANEL -->
+        <div id="habitatPanel" class="panel">
+            <button class="close-panel" onclick="togglePanel('habitatPanel')">&times;</button>
+            <h3>🏠 SOUL HABITAT</h3>
+            <div id="habitatContent"></div>
+            <button class="btn" onclick="advanceTime()" style="width:100%;margin-top:10px">⏰ +1 HOUR</button>
+        </div>
+        
+        <!-- SOUL DEX PANEL -->
+        <div id="dexPanel" class="panel">
+            <button class="close-panel" onclick="togglePanel('dexPanel')">&times;</button>
+            <h3>📖 SOUL DEX (0/16)</h3>
+            <div class="dex-grid" id="dexGrid"></div>
+        </div>
+        
+        <!-- METAVERSE PANEL -->
+        <div id="metaversePanel" class="panel">
+            <button class="close-panel" onclick="togglePanel('metaversePanel')">&times;</button>
+            <h3>🌐 METAVERSE TRADE</h3>
+            <div style="text-align:center;padding:10px">
+                <div style="font-size:18px;margin-bottom:10px">🔮 Soul Orbs: <span id="orbCount2">10</span></div>
+                <button class="btn" onclick="buyOrb()">Buy (100 PLT)</button>
+                <button class="btn btn-secondary" onclick="sellOrb()">Sell (+80 PLT)</button>
+                <div style="margin-top:15px;border-top:1px solid #444;padding-top:10px">
+                    <div style="font-size:10px;margin-bottom:8px">List Soul for Trade:</div>
+                    <select id="tradeSoulSelect" style="width:100%;padding:6px;margin-bottom:8px;background:#222;border:1px solid #ffaa66;color:#ffaa66;border-radius:8px;font-size:10px"></select>
+                    <input type="number" id="tradePrice" placeholder="Price (PLT)" style="width:100%;padding:6px;margin-bottom:8px;background:#222;border:1px solid #ffaa66;color:#ffaa66;border-radius:8px;font-size:10px">
+                    <button class="btn" onclick="listSoul()" style="width:100%">📦 List for Trade</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ACHIEVEMENTS PANEL -->
+        <div id="achievementsPanel" class="panel">
+            <button class="close-panel" onclick="togglePanel('achievementsPanel')">&times;</button>
+            <h3>🏆 ACHIEVEMENTS</h3>
+            <div id="achievementsList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        </div>
+        
+        <!-- CATCH MODE -->
+        <div id="catchMode" style="position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);backdrop-filter:blur(16px);border:2px solid #ffaa66;border-radius:20px;padding:15px 30px;text-align:center;display:none;z-index:150">
+            <div style="color:#ffaa66;font-size:12px;margin-bottom:8px">🎯 CATCH MODE</div>
+            <div class="catch-bar"><div class="catch-fill" id="catchFill"></div></div>
+            <div style="color:#aaa;font-size:9px">Hold to charge, release to throw!</div>
+        </div>
+        
+        <!-- JUMP/SPRINT -->
+        <button id="jumpBtn" onclick="jump()" style="position:absolute;bottom:60px;right:80px;z-index:20" class="btn">JUMP</button>
+        <button id="sprintBtn" onmousedown="isSprinting=true" onmouseup="isSprinting=false" style="position:absolute;bottom:60px;right:10px;z-index:20" class="btn btn-secondary">SPRINT</button>
+        <button onclick="toggleCatchMode()" style="position:absolute;bottom:120px;right:10px;z-index:20" class="btn">🎯 CATCH</button>
+        <button onclick="speakToWorld()" style="position:absolute;top:60px;left:50%;transform:translateX(-50%);z-index:30" class="btn btn-secondary">🗣️ SPEAK</button>
+    </div>
+    
+    <canvas id="gameCanvas"></canvas>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        // === COMPLETE GAME STATE ===
+        let resources = {profit:100, love:100, tax:100};
+        let realmEnergy = 100, worldTime = 0, soulOrbs = 10;
+        let souls = [], caughtSouls = [], villages = [], quests = [], achievements = [], conversations = [];
+        let selectedSoul = null, inCatchMode = false, catchPower = 0, isCharging = false;
+        let arenaEnemy = null, combo = 0, combatTimer = 60, playerHP = 100, enemyHP = 100;
+        let soulOrbsOwned = 10, tradeListings = [];
+        let isJumping = false, playerVelocityY = 0, isSprinting = false;
+        let chatBubbles = [], lastChatTime = Date.now();
+        
+        // Soul Dex - 16 souls
+        const soulDex = [
+            {id:'soul_1',name:'Profit Seed',type:'profit',rarity:'common',icon:'🌱',caught:false},
+            {id:'soul_2',name:'Love Bloom',type:'love',rarity:'common',icon:'🌸',caught:false},
+            {id:'soul_3',name:'Tax Root',type:'tax',rarity:'common',icon:'🥔',caught:false},
+            {id:'soul_4',name:'Profit Forge',type:'profit',rarity:'rare',icon:'💰',caught:false},
+            {id:'soul_5',name:'Love Weaver',type:'love',rarity:'rare',icon:'💕',caught:false},
+            {id:'soul_6',name:'Tax Keeper',type:'tax',rarity:'rare',icon:'📊',caught:false},
+            {id:'soul_7',name:'Profit King',type:'profit',rarity:'epic',icon:'👑',caught:false},
+            {id:'soul_8',name:'Love Goddess',type:'love',rarity:'epic',icon:'✨',caught:false},
+            {id:'soul_9',name:'Tax Emperor',type:'tax',rarity:'epic',icon:'🏛️',caught:false},
+            {id:'soul_10',name:'Profit Dragon',type:'profit',rarity:'legendary',icon:'🐉',caught:false},
+            {id:'soul_11',name:'Love Phoenix',type:'love',rarity:'legendary',icon:'🦋',caught:false},
+            {id:'soul_12',name:'Tax Golem',type:'tax',rarity:'legendary',icon:'🗿',caught:false},
+            {id:'soul_13',name:'Weave Master',type:'hybrid',rarity:'epic',icon:'🌀',caught:false},
+            {id:'soul_14',name:'Soul Spirit',type:'hybrid',rarity:'rare',icon:'👻',caught:false},
+            {id:'soul_15',name:'Soul Angel',type:'hybrid',rarity:'legendary',icon:'👼',caught:false},
+            {id:'soul_16',name:'Soul Master',type:'hybrid',rarity:'legendary',icon:'🌟',caught:false}
+        ];
+        
+        // Home Tiers
+        const homeTiers = [
+            {name:'🌿 Basic',tier:1,cost:0,hp:100,rooms:1},
+            {name:'🪵 Cozy',tier:2,cost:100,hp:250,rooms:2},
+            {name:'🪨 Fortified',tier:3,cost:300,hp:500,rooms:3},
+            {name:'🔮 Enchanted',tier:4,cost:800,hp:1000,rooms:4},
+            {name:'✨ Divine',tier:5,cost:2000,hp:2000,rooms:5}
+        ];
+        
+        // Room Types
+        const roomTypes = [
+            {name:'Workshop',cost:100,effect:'Crafting +20%',icon:'🔧'},
+            {name:'Library',cost:150,effect:'Learn +25%',icon:'📚'},
+            {name:'Garden',cost:80,effect:'Energy +15%',icon:'🌿'},
+            {name:'Treasury',cost:200,effect:'Storage +50%',icon:'💰'},
+            {name:'Arena',cost:250,effect:'Combat +30%',icon:'⚔️'},
+            {name:'Market',cost:120,effect:'Trade +25%',icon:'🏪'}
+        ];
+        
+        // Skills
+        const skills = ['observe','analyze','teach','strategize','code','design','craft','trade'];
+        
+        // Achievements
+        const achievementList = [
+            {id:'first_soul',name:'First Soul',desc:'Forge your first soul',unlocked:false},
+            {id:'home_owner',name:'Home Owner',desc:'Upgrade to tier 2 home',unlocked:false},
+            {id:'soul_collector',name:'Soul Collector',desc:'Catch 5 souls',unlocked:false},
+            {id:'master_builder',name:'Master Builder',desc:'Upgrade to tier 4 home',unlocked:false},
+            {id:'completionist',name:'Completionist',desc:'Catch all 16 souls',unlocked:false},
+            {id:'kombat_master',name:'Kombat Master',desc:'Win 10 arena battles',unlocked:false},
+            {id:'village_founder',name:'Village Founder',desc:'Create a village',unlocked:false},
+            {id:'rich_soul',name:'Rich Soul',desc:'Accumulate 1000 PLT',unlocked:false}
+        ];
+        
+        // Pantheon Gods
+        const gods = [
+            {name:'Profit Prime',hp:500,reward:200,type:'profit'},
+            {name:'Love Weaver',hp:400,reward:150,type:'love'},
+            {name:'Tax Collector',hp:600,reward:250,type:'tax'}
+        ];
+        
+        // Habitat Rooms
+        const habitatRooms = [
+            {id:'main_hall',name:'🏛️ Main Hall',desc:'Souls gather here',capacity:10},
+            {id:'library',name:'📚 Library',desc:'Study & learn',capacity:5},
+            {id:'workshop',name:'🔧 Workshop',desc:'Create & build',capacity:4},
+            {id:'garden',name:'🌿 Garden',desc:'Rest & reflect',capacity:6},
+            {id:'arena',name:'⚔️ Arena',desc:'Train & spar',capacity:4}
+        ];
+        
+        // Load Game
+        function loadGame() {
+            const saved = localStorage.getItem('soulverse_omniversal');
+            if (saved) {
+                const data = JSON.parse(saved);
+                souls = data.souls || [];
+                resources = data.resources || resources;
+                realmEnergy = data.realmEnergy || 100;
+                worldTime = data.worldTime || 0;
+                caughtSouls = data.caughtSouls || [];
+                soulOrbsOwned = data.soulOrbs || 10;
+                achievementList.forEach((ach,i) => {if(data.achievements && data.achievements[i]) ach.unlocked = data.achievements[i].unlocked;});
+            } else {
+                souls = [
+                    {id:'soul_1',name:'Profit Prime',type:'profit',personality:'Strategic, fast.',plt:{profit:0.92,love:0.18,tax:0.68},energy:85,x:-2,z:-1.5,mood:'energetic',home:{tier:2,hp:250,maxHp:250,rooms:['Workshop'],villageId:null,stash:150},skills:['strategize','analyze']},
+                    {id:'soul_2',name:'Love Weaver',type:'love',personality:'Warm, magnetic.',plt:{profit:0.28,love:0.91,tax:0.45},energy:92,x:1.8,z:-2.2,mood:'happy',home:{tier:1,hp:100,maxHp:100,rooms:[],villageId:null,stash:50},skills:['teach','design']},
+                    {id:'soul_3',name:'Tax Collector',type:'tax',personality:'Precise, calm.',plt:{profit:0.48,love:0.22,tax:0.94},energy:78,x:0.5,z:2.8,mood:'neutral',home:{tier:3,hp:500,maxHp:500,rooms:['Treasury','Library'],villageId:null,stash:400},skills:['analyze','strategize']}
+                ];
+            }
+            updateUI();
+            updateDexUI();
+            updateAchievementsUI();
+        }
+        
+        function saveGame() {
+            localStorage.setItem('soulverse_omniversal', JSON.stringify({
+                souls, resources, realmEnergy, worldTime, caughtSouls, soulOrbs:soulOrbsOwned,
+                achievements: achievementList
+            }));
+        }
+        
+        // === THREE.JS WORLD ===
+        let scene, camera, renderer, controls, soulMeshes = [], player;
+        
+        function initWorld() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x030318);
+            scene.fog = new THREE.FogExp2(0x030318, 0.006);
+            
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
+            camera.position.set(0, 5, 12);
+            
+            renderer = new THREE.WebGLRenderer({canvas:document.getElementById('gameCanvas'), antialias:true});
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            
+            // Lights
+            const ambient = new THREE.AmbientLight(0x331144, 0.5);
+            scene.add(ambient);
+            const sun = new THREE.DirectionalLight(0xffcc88, 1.2);
+            sun.position.set(5, 8, 3);
+            sun.castShadow = true;
+            scene.add(sun);
+            
+            // Platform
+            const platform = new THREE.Mesh(
+                new THREE.CylinderGeometry(15, 15.5, 0.5, 64),
+                new THREE.MeshStandardMaterial({color:0x221133,metalness:0.7,roughness:0.3})
+            );
+            platform.position.y = -0.5;
+            platform.receiveShadow = true;
+            scene.add(platform);
+            
+            // Player
+            player = new THREE.Mesh(
+                new THREE.BoxGeometry(1, 2, 1),
+                new THREE.MeshStandardMaterial({color:0xffaa66,emissive:0xffaa66,emissiveIntensity:0.3})
+            );
+            player.position.set(0, 1, 0);
+            player.castShadow = true;
+            scene.add(player);
+            
+            // Particles
+            const particles = new THREE.Points(
+                new THREE.BufferGeometry(),
+                new THREE.PointsMaterial({color:0x88aaff,size:0.05,transparent:true})
+            );
+            const positions = new Float32Array(6000*3);
+            for(let i=0;i<6000;i++){positions[i*3]=(Math.random()-0.5)*40;positions[i*3+1]=Math.random()*10-1;positions[i*3+2]=(Math.random()-0.5)*40;}
+            particles.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            scene.add(particles);
+            
+            updateSoulMeshes();
+            setupControls();
+            animate();
+        }
+        
+        function updateSoulMeshes() {
+            soulMeshes.forEach(m => scene.remove(m));
+            soulMeshes = [];
+            const colors = {profit:0xffaa44,love:0xff88aa,tax:0x88aaff,hybrid:0xffffff};
+            souls.forEach(soul => {
+                const mesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.5, 16, 16),
+                    new THREE.MeshStandardMaterial({color:colors[soul.type],emissive:colors[soul.type],emissiveIntensity:0.3})
+                );
+                mesh.position.set(soul.x, 0.5, soul.z);
+                mesh.castShadow = true;
+                mesh.userData = {soulId: soul.id};
+                scene.add(mesh);
+                soulMeshes.push(mesh);
+            });
+        }
+        
+        function setupControls() {
+            const keys = {};
+            document.addEventListener('keydown', e => keys[e.code] = true);
+            document.addEventListener('keyup', e => keys[e.code] = false);
+            
+            setInterval(() => {
+                const speed = 0.15 * (isSprinting ? 2 : 1);
+                if (keys['KeyW'] || keys['ArrowUp']) player.position.z -= speed;
+                if (keys['KeyS'] || keys['ArrowDown']) player.position.z += speed;
+                if (keys['KeyA'] || keys['ArrowLeft']) player.position.x -= speed;
+                if (keys['KeyD'] || keys['ArrowRight']) player.position.x += speed;
+                
+                // Jump
+                if (isJumping) {
+                    player.position.y += playerVelocityY;
+                    playerVelocityY -= 0.015;
+                    if (player.position.y <= 1) {
+                        player.position.y = 1;
+                        isJumping = false;
+                    }
+                }
+                
+                // Bounds
+                player.position.x = Math.max(-14, Math.min(14, player.position.x));
+                player.position.z = Math.max(-14, Math.min(14, player.position.z));
+                
+                // Collect souls
+                souls.forEach((soul, i) => {
+                    const dist = Math.hypot(player.position.x - soul.x, player.position.z - soul.z);
+                    if (dist < 1.5) collectSoul(i);
+                });
+            }, 50);
+            
+            // Catch mode
+            document.addEventListener('mousedown', e => {
+                if (inCatchMode && e.button === 0) {isCharging = true;catchPower = 0;}
+            });
+            document.addEventListener('mouseup', e => {
+                if (isCharging && e.button === 0) throwSoulOrb();
+            });
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            
+            souls.forEach((soul, i) => {
+                if (soulMeshes[i]) {
+                    soulMeshes[i].position.x = soul.x;
+                    soulMeshes[i].position.z = soul.z;
+                    soulMeshes[i].position.y = 0.5 + Math.sin(Date.now()*0.002+i)*0.1;
+                }
+            });
+            
+            if (isCharging) {
+                catchPower = Math.min(100, catchPower + 2);
+                document.getElementById('catchFill').style.width = catchPower + '%';
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // === GAME FUNCTIONS ===
+        function collectSoul(index) {
+            const soul = souls[index];
+            souls.splice(index, 1);
+            updateSoulMeshes();
+            
+            const dexEntry = soulDex.find(d => d.id === soul.id);
+            if (dexEntry && !dexEntry.caught) {
+                dexEntry.caught = true;
+                caughtSouls.push(soul.id);
+                notify('🎉 Caught '+dexEntry.name+'!');
+                updateDexUI();
+                checkAchievements();
+            }
+            
+            resources.profit += 20;resources.love += 20;resources.tax += 20;
+            updateUI();saveGame();
+        }
+        
+        function throwSoulOrb() {
+            isCharging = false;inCatchMode = false;
+            document.getElementById('catchMode').style.display = 'none';
+            
+            souls.forEach((soul, i) => {
+                const dist = Math.hypot(player.position.x - soul.x, player.position.z - soul.z);
+                if (dist < 3 && catchPower > 30) collectSoul(i);
+            });
+            catchPower = 0;
+        }
+        
+        function forgeSoul() {
+            const name = document.getElementById('soulName').value || 'Unknown Soul';
+            const p = parseInt(document.getElementById('pSlider').value);
+            const l = parseInt(document.getElementById('lSlider').value);
+            const t = parseInt(document.getElementById('tSlider').value);
+            const type = p > l && p > t ? 'profit' : l > t ? 'love' : 'tax';
+            
+            const soul = {
+                id: 'soul_'+Date.now(),name,type,
+                plt:{profit:p/100,love:l/100,tax:t/100},
+                energy:100,x:(Math.random()-0.5)*20,z:(Math.random()-0.5)*20,
+                mood:'energetic',home:{tier:1,hp:100,maxHp:100,rooms:[],villageId:null,stash:0},
+                skills:[]
+            };
+            
+            souls.push(soul);updateSoulMeshes();updateUI();saveGame();
+            notify('✨ '+name+' forged!');
+            togglePanel('forgePanel');
+            checkAchievements();
+        }
+        
+        function jump() {if(!isJumping){isJumping=true;playerVelocityY=0.3;}}
+        
+        function toggleCatchMode() {
+            inCatchMode = !inCatchMode;
+            document.getElementById('catchMode').style.display = inCatchMode ? 'block' : 'none';
+        }
+        
+        function speakToWorld() {
+            const msg = prompt('Speak to the world:');
+            if (msg) {
+                createChatBubble({name:'You',type:'hybrid'}, msg);
+                souls.forEach(soul => {
+                    if (Math.random() > 0.5) {
+                        setTimeout(() => {
+                            const responses = ['Interesting.','I hear you.','The world listens.'];
+                            createChatBubble(soul, responses[Math.floor(Math.random()*3)]);
+                        }, 1000);
+                    }
+                });
+            }
+        }
+        
+        function createChatBubble(soul, text) {
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble';
+            bubble.innerHTML = '<strong style="color:#ffaa66">'+soul.name+'</strong>: '+text;
+            document.getElementById('ui').appendChild(bubble);
+            
+            const mesh = soulMeshes.find(m => m.userData.soulId === soul.id);
+            if (mesh) {
+                const vec = mesh.position.clone();vec.y += 1.5;vec.project(camera);
+                const x = (vec.x*0.5+0.5)*window.innerWidth;
+                const y = (-(vec.y*0.5)+0.5)*window.innerHeight;
+                bubble.style.left = (x-100)+'px';bubble.style.top = (y-30)+'px';
+            }
+            setTimeout(() => bubble.remove(), 4000);
+        }
+        
+        function togglePanel(id) {
+            const panel = document.getElementById(id);
+            panel.classList.toggle('active');
+            if (id === 'societyPanel') updateSocietyUI();
+            if (id === 'pantheonPanel') updatePantheonUI();
+            if (id === 'dexPanel') updateDexUI();
+            if (id === 'habitatPanel') updateHabitatUI();
+            if (id === 'achievementsPanel') updateAchievementsUI();
+            if (id === 'metaversePanel') updateMetaverseUI();
+        }
+        
+        function updateUI() {
+            document.getElementById('profitVal').innerText = Math.floor(resources.profit);
+            document.getElementById('loveVal').innerText = Math.floor(resources.love);
+            document.getElementById('taxVal').innerText = Math.floor(resources.tax);
+            document.getElementById('realmEnergy').innerText = Math.floor(realmEnergy);
+            document.getElementById('orbCount').innerText = soulOrbsOwned;
+            document.getElementById('orbCount2').innerText = soulOrbsOwned;
+            document.getElementById('worldDay').innerText = Math.floor(worldTime/24);
+            document.getElementById('worldTime').innerText = Math.floor(worldTime%24).toString().padStart(2,'0')+':00';
+            document.getElementById('soulCount').innerText = souls.length;
+            document.getElementById('caughtCount').innerText = caughtSouls.length;
+            document.getElementById('achievementCount').innerText = achievementList.filter(a=>a.unlocked).length;
+        }
+        
+        function updateDexUI() {
+            document.querySelector('#dexPanel h3').innerText = '📖 SOUL DEX ('+caughtSouls.length+'/16)';
+            document.getElementById('dexGrid').innerHTML = soulDex.map(s => `
+                <div class="dex-entry ${s.caught?'caught':''}" onclick="viewSoul('${s.id}')">
+                    <div class="dex-icon">${s.caught?s.icon:'❓'}</div>
+                    <div class="dex-name">${s.caught?s.name:'???'}</div>
+                    <div style="color:#888">${s.rarity}</div>
+                </div>
+            `).join('');
+        }
+        
+        function viewSoul(id) {
+            const entry = soulDex.find(d => d.id === id);
+            if (entry && entry.caught) notify('📖 '+entry.name+' - '+entry.type+' ('+entry.rarity+')');
+        }
+        
+        function updateSocietyUI() {
+            const selector = document.getElementById('soulSelector');
+            selector.innerHTML = souls.map(s => '<option value="'+s.id+'">'+s.name+'</option>').join('');
+            selectedSoul = souls[0];
+            
+            const content = document.getElementById('societyContent');
+            if (!selectedSoul) return;
+            
+            content.innerHTML = `
+                <div class="card">
+                    <div style="font-size:12px;font-weight:bold;color:#ffaa66">${selectedSoul.name}</div>
+                    <div style="font-size:8px;color:#888">${selectedSoul.personality||'A soul'}</div>
+                    <div class="stat-bar"><div class="bar-label">⚡ Energy</div><div class="bar-bg"><div class="bar-fill" style="width:${selectedSoul.energy}%;background:#88ff88"></div></div></div>
+                    <div class="stat-bar"><div class="bar-label">🏠 HP</div><div class="bar-bg"><div class="bar-fill" style="width:${(selectedSoul.home.hp/selectedSoul.home.maxHp)*100}%;background:#ffaa88"></div></div></div>
+                    <div style="font-size:9px">💰 ${selectedSoul.home.stash} | Rooms: ${selectedSoul.home.rooms.length}</div>
+                </div>
+                <button class="btn" onclick="upgradeHome()" style="width:100%">⬆️ Upgrade</button>
+                <button class="btn btn-secondary" onclick="repairHome()" style="width:100%">🔧 Repair</button>
+                <button class="btn" onclick="addRoom()" style="width:100%">🏠 Add Room</button>
+            `;
+        }
+        
+        function upgradeHome() {
+            if (!selectedSoul) return;
+            const nextTier = homeTiers[selectedSoul.home.tier-1];
+            if (!nextTier || !nextTier.cost) {notify('Max tier!');return;}
+            if (resources.profit >= nextTier.cost) {
+                resources.profit -= nextTier.cost;
+                selectedSoul.home.tier++;selectedSoul.home.maxHp = nextTier.hp;selectedSoul.home.hp = nextTier.hp;
+                notify('✨ Home upgraded to '+nextTier.name+'!');
+                saveGame();updateSocietyUI();updateUI();checkAchievements();
+            } else notify('Need '+nextTier.cost+' Profit!');
+        }
+        
+        function repairHome() {
+            if (!selectedSoul) return;
+            const cost = Math.floor((selectedSoul.home.maxHp - selectedSoul.home.hp) / 2);
+            if (cost <= 0) {notify('HP full!');return;}
+            if (resources.profit >= cost) {
+                resources.profit -= cost;selectedSoul.home.hp = selectedSoul.home.maxHp;
+                notify('🔧 Home repaired!');saveGame();updateSocietyUI();updateUI();
+            } else notify('Need '+cost+' Profit!');
+        }
+        
+        function addRoom() {
+            if (!selectedSoul) return;
+            const tier = homeTiers[selectedSoul.home.tier-1];
+            if (selectedSoul.home.rooms.length >= tier.rooms) {notify('Need higher tier!');return;}
+            const room = roomTypes[Math.floor(Math.random()*roomTypes.length)];
+            if (resources.profit >= room.cost) {
+                resources.profit -= room.cost;selectedSoul.home.rooms.push(room.name);
+                notify('🏠 Added '+room.name+'!');saveGame();updateSocietyUI();updateUI();
+            } else notify('Need '+room.cost+' Profit!');
+        }
+        
+        function updatePantheonUI() {
+            document.getElementById('pantheonContent').innerHTML = gods.map(g => `
+                <div class="card">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div><div style="font-weight:bold;color:#ffaa66">${g.name}</div><div style="font-size:8px">HP:${g.hp} | Reward:${g.reward}</div></div>
+                        <button class="btn" onclick="challengeGod('${g.name}')">⚔️ CHALLENGE</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function challengeGod(name) {
+            const god = gods.find(g => g.name === name);
+            arenaEnemy = {name:name,hp:god.hp,maxHp:god.hp,reward:god.reward};
+            playerHP = 100;enemyHP = god.hp;combatTimer = 60;combo = 0;
+            document.getElementById('enemyHP').style.width = '100%';
+            document.getElementById('playerHP').style.width = '100%';
+            document.getElementById('comboDisplay').innerText = '';
+            togglePanel('pantheonPanel');togglePanel('arenaPanel');
+            notify('⚔️ Challenging '+name+'!');
+            
+            const timerInterval = setInterval(() => {
+                combatTimer--;
+                document.getElementById('combatTimer').innerText = combatTimer;
+                if (combatTimer <= 0 || enemyHP <= 0 || playerHP <= 0) {
+                    clearInterval(timerInterval);
+                    if (enemyHP <= 0) {
+                        notify('🏆 Victory! +'+god.reward+' PLT!');
+                        resources.profit += god.reward;resources.love += god.reward;resources.tax += god.reward;
+                        checkAchievements();
+                    } else {
+                        notify('💀 Defeat...');
+                    }
+                    updateUI();togglePanel('arenaPanel');arenaEnemy = null;
+                }
+            }, 1000);
+        }
+        
+        function kombatAttack(type) {
+            if (!arenaEnemy) return;
+            const dmg = type==='punch'?15:type==='kick'?20:type==='special'?40:60;
+            enemyHP -= dmg;combo++;
+            document.getElementById('enemyHP').style.width = (enemyHP/arenaEnemy.maxHp*100)+'%';
+            document.getElementById('comboDisplay').innerText = combo > 1 ? combo+' HIT COMBO!' : '';
+            
+            if (enemyHP <= 0) return;
+            
+            const enemyDmg = Math.floor(Math.random()*20)+10;
+            playerHP -= enemyDmg;
+            document.getElementById('playerHP').style.width = (playerHP/100*100)+'%';
+        }
+        
+        function updateHabitatUI() {
+            document.getElementById('habitatContent').innerHTML = habitatRooms.map(room => `
+                <div class="card">
+                    <div style="font-weight:bold;color:#88ffaa">${room.name}</div>
+                    <div style="font-size:8px;color:#888">${room.desc} (Cap: ${room.capacity})</div>
+                </div>
+            `).join('');
+        }
+        
+        function advanceTime() {
+            worldTime += 1/24;
+            souls.forEach(soul => {
+                soul.energy = Math.max(0, soul.energy - 5);
+                if (soul.energy < 30) soul.mood = 'tired';
+                else if (soul.energy > 80) soul.mood = 'energetic';
+            });
+            notify('⏰ +1 hour passed');
+            updateUI();saveGame();
+        }
+        
+        function buyOrb() {if(resources.profit>=100){resources.profit-=100;soulOrbsOwned++;notify('🔮 Bought Orb!');updateUI();}else notify('Need 100 Profit!');}
+        function sellOrb() {if(soulOrbsOwned>=1){soulOrbsOwned--;resources.profit+=80;notify('💰 Sold Orb!');updateUI();}else notify('No orbs!');}
+        
+        function listSoul() {
+            const soulId = document.getElementById('tradeSoulSelect').value;
+            const price = parseInt(document.getElementById('tradePrice').value);
+            if (soulId && price) {
+                tradeListings.push({soulId,price,seller:'You'});
+                notify('📦 Soul listed for '+price+' PLT!');
+            }
+        }
+        
+        function updateMetaverseUI() {
+            document.getElementById('tradeSoulSelect').innerHTML = souls.map(s => '<option value="'+s.id+'">'+s.name+'</option>').join('');
+        }
+        
+        function updateAchievementsUI() {
+            document.getElementById('achievementsList').innerHTML = achievementList.map(ach => `
+                <div style="background:${ach.unlocked?'#2a6a2a':'#2a2a3a'};border-radius:12px;padding:6px 10px;font-size:8px;cursor:pointer" onclick="notify('${ach.name}: ${ach.desc}')">
+                    ${ach.unlocked?'🏆':'🔒'} ${ach.name}
+                </div>
+            `).join('');
+        }
+        
+        function checkAchievements() {
+            if (souls.length >= 1) achievementList[0].unlocked = true;
+            if (souls.some(s=>s.home.tier>=2)) achievementList[1].unlocked = true;
+            if (caughtSouls.length >= 5) achievementList[2].unlocked = true;
+            if (souls.some(s=>s.home.tier>=4)) achievementList[3].unlocked = true;
+            if (caughtSouls.length >= 16) achievementList[4].unlocked = true;
+            if (villages.length >= 1) achievementList[6].unlocked = true;
+            if (resources.profit+resources.love+resources.tax >= 1000) achievementList[7].unlocked = true;
+            updateAchievementsUI();
+        }
+        
+        function notify(msg) {
+            const div = document.createElement('div');
+            div.className = 'notification';div.innerHTML = msg;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
+        
+        function drawRadar() {
+            const ctx = document.getElementById('radarCanvas').getContext('2d');
+            ctx.clearRect(0,0,120,120);
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';ctx.fillRect(0,0,120,120);
+            ctx.fillStyle = '#ffaa66';ctx.beginPath();ctx.arc(60,60,4,0,Math.PI*2);ctx.fill();
+            const colors = {profit:'#ffaa44',love:'#ff88aa',tax:'#88aaff'};
+            souls.forEach(soul => {
+                const x = 60+(soul.x-player.position.x)*3;
+                const y = 60+(soul.z-player.position.z)*3;
+                if (x>0&&x<120&&y>0&&y<120) {
+                    ctx.fillStyle = colors[soul.type]||'#fff';ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill();
+                }
+            });
+        }
+        
+        function autoChat() {
+            const phrases = {
+                profit:["Numbers look good.","Time to scale.","Opportunity everywhere."],
+                love:["Feeling connected.","Trust is everything.","Growing together."],
+                tax:["All accounted.","Balance maintained.","Costs tracked."]
+            };
+            souls.forEach(soul => {if(Math.random()<0.02) createChatBubble(soul, phrases[soul.type][Math.floor(Math.random()*3)]);});
+        }
+        
+        // Game Loop
+        setInterval(() => {
+            worldTime += 1/3600;
+            realmEnergy = Math.min(100, realmEnergy + 0.005);
+            souls.forEach(soul => {
+                soul.energy = Math.max(10, Math.min(100, soul.energy - 0.008));
+                if(soul.energy>80) soul.mood='energetic';
+                else if(soul.energy>50) soul.mood='happy';
+                else if(soul.energy>20) soul.mood='neutral';
+                else soul.mood='tired';
+                soul.x += (Math.random()-0.5)*0.02;soul.z += (Math.random()-0.5)*0.02;
+                soul.x = Math.max(-14, Math.min(14, soul.x));soul.z = Math.max(-14, Math.min(14, soul.z));
+            });
+            saveGame();updateUI();autoChat();checkAchievements();drawRadar();
+        }, 1000);
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth/window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        document.getElementById('soulSelector').addEventListener('change', e => {
+            selectedSoul = souls.find(s => s.id === e.target.value);
+            updateSocietyUI();
+        });
+        
+        loadGame();initWorld();updateUI();
+        console.log('🌌 SOULVERSE OMNIVERSAL - All 16 games merged!');
+    </script>
+</body>
+</html>

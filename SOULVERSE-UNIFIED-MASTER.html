@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🌌 SOULVERSE UNIFIED | Craig's Living World</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-user-select:none; }
+        body { background:#000; overflow:hidden; font-family:'Courier New', monospace; touch-action:pan-x pan-y; }
+        canvas { display:block; width:100%; height:100%; }
+        
+        /* UI ROOT */
+        #ui-root { position:absolute; inset:0; pointer-events:none; z-index:100; }
+        #ui-root > * { pointer-events:auto; }
+
+        /* TOP BAR */
+        .top-bar { position:absolute; top:10px; left:10px; right:10px; display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.7); backdrop-filter:blur(12px); border-radius:20px; padding:8px 16px; border:1px solid rgba(255,170,102,0.3); z-index:110; }
+        .stats-left { display:flex; gap:12px; align-items:center; }
+        .hp-bar { height:14px; background:#2a0a0a; border-radius:10px; overflow:hidden; min-width:120px; position:relative; }
+        .hp-fill { height:100%; background:linear-gradient(90deg,#ff4444,#ff6666); width:100%; transition:width 0.3s; }
+        .hp-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:9px; font-weight:bold; text-shadow:1px 1px 2px #000; }
+        .level-badge { background:rgba(100,170,255,0.2); border:1px solid #64aaff; color:#64aaff; padding:4px 10px; border-radius:12px; font-size:10px; font-weight:bold; }
+        .coins { display:flex; gap:8px; font-size:11px; color:#ffaa66; font-weight:bold; }
+        .coin-icon { background:rgba(255,170,102,0.2); padding:2px 6px; border-radius:8px; }
+
+        /* MINIMAP */
+        #minimap-container { position:absolute; top:10px; right:10px; width:140px; height:140px; background:rgba(0,0,0,0.6); border:2px solid #ffaa66; border-radius:12px; overflow:hidden; z-index:110; }
+        #minimap-canvas { width:100%; height:100%; }
+
+        /* CONTEXT PROMPT */
+        .context-prompt { position:absolute; bottom:140px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.85); backdrop-filter:blur(12px); color:#ffaa66; padding:10px 20px; border-radius:30px; font-size:12px; font-weight:bold; border:2px solid #ffaa66; display:none; gap:8px; align-items:center; z-index:120; animation:pulse 1.5s infinite; }
+        .context-prompt.active { display:flex; }
+        .progress-ring { width:20px; height:20px; border:3px solid rgba(255,170,102,0.3); border-top-color:#ffaa66; border-radius:50%; animation:spin 1s linear infinite; }
+        @keyframes pulse { 0%,100% { transform:translateX(-50%) scale(1); } 50% { transform:translateX(-50%) scale(1.05); } }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        /* ACTION WHEEL */
+        #action-wheel { position:absolute; width:200px; height:200px; background:rgba(0,0,0,0.9); backdrop-filter:blur(16px); border:3px solid #ffaa66; border-radius:50%; display:none; grid-template-columns:repeat(2,1fr); transform:translate(-50%,-50%); z-index:200; padding:15px; gap:10px; }
+        #action-wheel.active { display:grid; }
+        .action-wheel-btn { background:rgba(255,170,102,0.15); border:2px solid #ffaa66; border-radius:16px; color:#ffaa66; font-size:24px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; transition:0.2s; }
+        .action-wheel-btn:active { background:#ffaa66; color:#000; transform:scale(0.9); }
+        .action-wheel-btn .label { font-size:9px; margin-top:2px; }
+
+        /* BOTTOM BAR */
+        .bottom-bar { position:absolute; bottom:15px; left:15px; right:15px; display:flex; justify-content:space-around; align-items:center; background:rgba(0,0,0,0.75); backdrop-filter:blur(12px); border:2px solid rgba(255,170,102,0.5); border-radius:40px; padding:8px 12px; z-index:110; }
+        .action-btn { background:rgba(255,170,102,0.2); border:2px solid #ffaa66; color:#ffaa66; font-size:18px; padding:10px 14px; border-radius:30px; font-weight:bold; cursor:pointer; transition:0.2s; min-width:50px; text-align:center; }
+        .action-btn:active { background:#ffaa66; color:#000; transform:scale(0.9); }
+        .action-btn.primary { background:#ffaa66; color:#000; }
+
+        /* COMBAT OVERLAY */
+        #combat-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.9); display:none; flex-direction:column; justify-content:space-between; padding:20px; z-index:150; }
+        #combat-overlay.active { display:flex; }
+        .opponent-info { display:flex; align-items:center; gap:12px; background:rgba(50,0,0,0.7); padding:12px; border-radius:16px; border:2px solid #ff4444; }
+        .opponent-sprite { width:70px; height:70px; background:#300; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:36px; }
+        .opponent-health-wrap { flex:1; }
+        .opponent-health-bar { height:14px; background:#2a0a0a; border-radius:10px; overflow:hidden; }
+        .opponent-health-fill { height:100%; background:linear-gradient(90deg,#ff4444,#ff6666); width:100%; transition:width 0.3s; }
+        .opponent-name { color:#ffaa66; font-size:12px; margin-top:6px; font-weight:bold; }
+        .player-info { display:flex; flex-direction:column; gap:8px; background:rgba(0,0,50,0.7); padding:12px; border-radius:16px; border:2px solid #64aaff; }
+        .player-sprite { width:50px; height:50px; background:#001a33; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; align-self:center; }
+        .player-health-bar { height:12px; background:#0a0a2a; border-radius:8px; overflow:hidden; }
+        .player-health-fill { height:100%; background:linear-gradient(90deg,#4488ff,#64aaff); width:100%; transition:width 0.3s; }
+        .combo-counter { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:42px; font-weight:bold; color:#ffaa00; text-shadow:0 0 25px #ffaa00; display:none; pointer-events:none; z-index:160; }
+        .combo-counter.active { display:block; animation:comboFlash 0.3s; }
+        @keyframes comboFlash { 0% { transform:translate(-50%,-50%) scale(1.5); opacity:0; } 50% { transform:translate(-50%,-50%) scale(1); opacity:1; } 100% { transform:translate(-50%,-50%) scale(1.2); } }
+        .super-meter-wrap { height:18px; background:#1a1a3a; border-radius:12px; overflow:hidden; position:relative; }
+        .super-meter-fill { height:100%; background:linear-gradient(90deg,#ffaa00,#ffdd44); width:0%; transition:width 0.3s; }
+        .super-meter-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:10px; font-weight:bold; }
+        .move-buttons { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:10px; }
+        .move-btn { background:rgba(255,170,102,0.2); border:2px solid #ffaa66; border-radius:20px; padding:16px; color:#ffaa66; font-size:16px; font-weight:bold; cursor:pointer; transition:0.2s; }
+        .move-btn:active { background:#ffaa66; color:#000; transform:scale(0.95); }
+        .move-btn.special { border-color:#ff4444; color:#ff4444; background:rgba(255,68,68,0.2); }
+        .fatality-prompt { position:absolute; top:40%; left:50%; transform:translate(-50%,-50%); font-size:32px; font-weight:bold; color:#ff0000; text-shadow:0 0 30px #ff0000; display:none; cursor:pointer; animation:fatalityPulse 0.5s infinite; z-index:170; }
+        .fatality-prompt.active { display:block; }
+        @keyframes fatalityPulse { 0%,100% { transform:translate(-50%,-50%) scale(1); } 50% { transform:translate(-50%,-50%) scale(1.1); } }
+
+        /* PARTY MODAL */
+        #party-modal { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.95); backdrop-filter:blur(20px); border:3px solid #64aaff; border-radius:24px; padding:20px; min-width:340px; max-width:90vw; max-height:80vh; overflow-y:auto; z-index:200; display:none; }
+        #party-modal.active { display:block; }
+        .party-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:15px; }
+        .party-card { background:rgba(100,170,255,0.1); border:2px solid #64aaff; border-radius:16px; padding:12px; text-align:center; cursor:pointer; transition:0.2s; }
+        .party-card:active { background:rgba(100,170,255,0.3); transform:scale(0.95); }
+        .party-card .creature-img { width:55px; height:55px; background:rgba(100,170,255,0.2); border-radius:14px; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-size:28px; }
+        .party-card .creature-name { font-size:10px; color:#64aaff; font-weight:bold; }
+        .party-card .creature-hp { font-size:8px; color:#88ccff; margin-top:3px; }
+        .party-card.empty { background:rgba(50,50,50,0.5); border:2px dashed #444; display:flex; align-items:center; justify-content:center; color:#666; font-size:10px; }
+        .modal-close { position:absolute; top:12px; right:12px; background:none; border:none; color:#ffaa66; font-size:26px; cursor:pointer; z-index:210; }
+
+        /* NEEDS PANEL */
+        #needs-container { position:absolute; top:100px; right:10px; background:rgba(0,0,0,0.75); backdrop-filter:blur(12px); border:1px solid rgba(255,170,102,0.3); border-radius:14px; padding:10px; display:none; z-index:110; }
+        #needs-container.active { display:block; }
+        .need { display:flex; align-items:center; gap:8px; margin:6px 0; }
+        .need-label { font-size:10px; color:#ffaa66; width:55px; }
+        .need-bar-wrap { flex:1; height:10px; background:#1a1a1a; border-radius:6px; overflow:hidden; }
+        .need-bar-fill { height:100%; background:linear-gradient(90deg,#44ff44,#88ff88); width:100%; transition:width 0.3s; }
+
+        /* MOODLETS */
+        #moodlets-container { position:absolute; top:10px; left:50%; transform:translateX(-50%); display:flex; gap:8px; background:rgba(0,0,0,0.7); padding:8px 14px; border-radius:24px; display:none; z-index:110; }
+        #moodlets-container.active { display:flex; }
+        .moodlet { font-size:20px; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:12px; }
+
+        /* LIMIT BREAK */
+        .limit-break-wrap { position:absolute; bottom:85px; left:50%; transform:translateX(-50%); width:220px; background:rgba(0,0,0,0.75); border:2px solid #ff00ff; border-radius:24px; padding:8px; display:none; z-index:115; }
+        .limit-break-wrap.active { display:block; }
+        .limit-break-bar { height:14px; background:#2a0a2a; border-radius:10px; overflow:hidden; }
+        .limit-break-fill { height:100%; background:linear-gradient(90deg,#ff00ff,#ff66ff); width:0%; transition:width 0.3s; animation:limitGlow 1s infinite; }
+        @keyframes limitGlow { 0%,100% { filter:brightness(1); } 50% { filter:brightness(1.5); } }
+        .limit-break-btn { position:absolute; top:-18px; left:50%; transform:translateX(-50%); background:#ff00ff; color:#fff; border:2px solid #fff; padding:8px 20px; border-radius:24px; font-size:11px; font-weight:bold; cursor:pointer; display:none; }
+        .limit-break-btn.ready { display:block; animation:pulse 0.5s infinite; }
+
+        /* JOYSTICK */
+        .joystick-area { position:absolute; bottom:100px; left:20px; width:110px; height:110px; background:rgba(255,170,102,0.1); border:2px solid rgba(255,170,102,0.4); border-radius:50%; touch-action:none; z-index:105; }
+        .joystick-knob { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:45px; height:45px; background:rgba(255,170,102,0.6); border-radius:50%; pointer-events:none; }
+
+        /* BRIDGE STATUS */
+        #bridge-status { position:absolute; bottom:10px; left:10px; font-size:9px; color:#64aaff; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:8px; z-index:120; }
+        #bridge-status.connected { color:#88ff88; border:1px solid #88ff88; }
+        #bridge-status.disconnected { color:#ff6666; border:1px solid #ff6666; }
+
+        /* CAPTURE MINIGAME */
+        #capture-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; z-index:180; }
+        #capture-overlay.active { display:flex; }
+        .capture-circle { width:300px; height:300px; border:4px solid #64aaff; border-radius:50%; position:relative; display:flex; align-items:center; justify-content:center; }
+        .capture-ring { position:absolute; border:4px solid #ffaa66; border-radius:50%; transition:width 0.05s, height 0.05s; }
+        .capture-creature { font-size:80px; }
+        .capture-text { position:absolute; bottom:-40px; color:#ffaa66; font-size:14px; font-weight:bold; }
+
+        @media (max-width:768px) {
+            .top-bar { left:5px; right:5px; top:5px; padding:6px 10px; }
+            #minimap-container { width:110px; height:110px; top:5px; right:5px; }
+            .bottom-bar { bottom:10px; left:10px; right:10px; padding:6px 8px; }
+            .action-btn { font-size:16px; padding:8px 10px; min-width:45px; }
+            .party-grid { grid-template-columns:repeat(2,1fr); }
+            .move-buttons { grid-template-columns:repeat(2,1fr); }
+            #party-modal { min-width:90%; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="ui-root">
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <div class="stats-left">
+                <div class="hp-bar"><div class="hp-fill" id="hp-fill"></div><div class="hp-text" id="hp-text">100/100</div></div>
+                <div class="level-badge">Lv.<span id="level-val">1</span></div>
+            </div>
+            <div class="coins">
+                <span class="coin-icon">💰 <span id="profit-val">100</span></span>
+                <span class="coin-icon">❤️ <span id="love-val">100</span></span>
+                <span class="coin-icon">⚖️ <span id="tax-val">100</span></span>
+            </div>
+        </div>
+
+        <!-- MINIMAP -->
+        <div id="minimap-container"><canvas id="minimap-canvas" width="200" height="200"></canvas></div>
+
+        <!-- CONTEXT PROMPT -->
+        <div class="context-prompt" id="context-prompt"><span id="context-text">🔑 Hold to interact</span><div class="progress-ring"></div></div>
+
+        <!-- ACTION WHEEL -->
+        <div id="action-wheel"></div>
+
+        <!-- MOODLETS -->
+        <div id="moodlets-container"></div>
+
+        <!-- NEEDS -->
+        <div id="needs-container"></div>
+
+        <!-- LIMIT BREAK -->
+        <div class="limit-break-wrap" id="limit-break-wrap">
+            <button class="limit-break-btn" id="limit-break-btn">✨ LIMIT BREAK!</button>
+            <div class="limit-break-bar"><div class="limit-break-fill" id="limit-break-fill"></div></div>
+        </div>
+
+        <!-- COMBAT OVERLAY -->
+        <div id="combat-overlay">
+            <div class="opponent-info">
+                <div class="opponent-sprite" id="opponent-sprite">👹</div>
+                <div class="opponent-health-wrap">
+                    <div class="opponent-health-bar"><div class="opponent-health-fill" id="opponent-health-fill"></div></div>
+                    <div class="opponent-name" id="opponent-name">Dark Soul</div>
+                </div>
+            </div>
+            <div class="combo-counter" id="combo-counter">0 HIT COMBO!</div>
+            <div class="fatality-prompt" id="fatality-prompt">💀 FATALITY 💀</div>
+            <div class="player-info">
+                <div class="player-sprite" id="player-sprite">🧙</div>
+                <div class="player-health-bar"><div class="player-health-fill" id="player-health-fill-combat"></div></div>
+                <div class="super-meter-wrap"><div class="super-meter-fill" id="super-meter-fill"></div><div class="super-meter-text">SUPER METER</div></div>
+            </div>
+            <div class="move-buttons" id="move-buttons">
+                <button class="move-btn" onclick="combat.useMove('punch')">👊 Punch</button>
+                <button class="move-btn" onclick="combat.useMove('kick')">🦶 Kick</button>
+                <button class="move-btn special" onclick="combat.useMove('special')">✨ Special</button>
+                <button class="move-btn special" onclick="combat.useMove('ultimate')">💥 Ultimate</button>
+            </div>
+        </div>
+
+        <!-- PARTY MODAL -->
+        <div id="party-modal">
+            <button class="modal-close" onclick="partyUI.close()">&times;</button>
+            <h3 style="color:#64aaff; text-align:center;">🧬 SOUL PARTY</h3>
+            <div class="party-grid" id="party-grid"></div>
+        </div>
+
+        <!-- CAPTURE MINIGAME -->
+        <div id="capture-overlay">
+            <div class="capture-circle">
+                <div class="capture-ring" id="capture-ring"></div>
+                <div class="capture-creature" id="capture-creature">🧬</div>
+                <div class="capture-text">Release to capture!</div>
+            </div>
+        </div>
+
+        <!-- BOTTOM BAR -->
+        <div class="bottom-bar">
+            <button class="action-btn" onclick="app.openParty()">🧬 Party</button>
+            <button class="action-btn" onclick="app.toggleHabitat()">🏠 Habitat</button>
+            <button class="action-btn primary" onclick="app.enterCombat()">⚔️ Battle</button>
+            <button class="action-btn" onclick="app.startCapture()">🔵 Capture</button>
+            <button class="action-btn" onclick="app.openMenu()">☰ Menu</button>
+        </div>
+
+        <!-- JOYSTICK -->
+        <div class="joystick-area" id="joystick-area"><div class="joystick-knob" id="joystick-knob"></div></div>
+
+        <!-- BRIDGE STATUS -->
+        <div id="bridge-status" class="disconnected">🌉 Bridge: Disconnected</div>
+    </div>
+
+    <script>
+        // ============================================================
+        // 🌌 SOULVERSE UNIFIED RUNTIME
+        // Craig's Living World - All Systems Integrated
+        // ============================================================
+
+        // --- Unified State ---
+        const SoulverseState = {
+            version: 2,
+            player: {
+                id: 'craig',
+                name: 'Craig',
+                level: 1,
+                xp: 0, maxXp: 100,
+                hp: 100, maxHp: 100,
+                plt: { profit: 100, love: 100, tax: 100 },
+                position: { x: 0, z: 0 },
+                mood: 'happy',
+                needs: { energy: 100, hunger: 100, social: 100 }
+            },
+            party: [],
+            storage: [],
+            world: { region: 'starter', time: { hour: 12, minute: 0 }, weather: 'clear' },
+            bridge: { connected: false, ws: null }
+        };
+
+        // --- Three.js Setup ---
+        let scene, camera, renderer, terrain, playerMesh;
+        const QUALITY = { 0: { segments:32, shadows:false, grass:200, trees:10 }, 1: { segments:48, shadows:true, grass:400, trees:20 } };
+        const currentQuality = /Mobi|Android|iPhone/i.test(navigator.userAgent) ? 0 : 1;
+
+        function getHeight(x, z) {
+            let h = 0;
+            h += Math.sin(x * 0.12) * Math.cos(z * 0.12);
+            h += Math.sin(x * 0.3) * 0.5 + Math.cos(z * 0.3) * 0.5;
+            h += Math.sin(x * 0.7 + z * 0.5) * 0.3;
+            return Math.max(0.2, h + 1.6);
+        }
+
+        function initWorld() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB);
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 500);
+            camera.position.set(0, 15, 25);
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gameCanvas'), antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = QUALITY[currentQuality].shadows;
+
+            const ambient = new THREE.AmbientLight(0x404060, 0.6);
+            scene.add(ambient);
+            const sun = new THREE.DirectionalLight(0xffdd99, 0.8);
+            sun.position.set(10, 15, 5);
+            if (QUALITY[currentQuality].shadows) sun.castShadow = true;
+            scene.add(sun);
+
+            // Terrain
+            const preset = QUALITY[currentQuality];
+            const geo = new THREE.PlaneGeometry(200, 200, preset.segments, preset.segments);
+            geo.rotateX(-Math.PI/2);
+            const pos = geo.attributes.position.array;
+            for (let i = 0; i < pos.length/3; i++) {
+                pos[i*3+1] = getHeight(pos[i*3], pos[i*3+2]);
+            }
+            geo.computeVertexNormals();
+            terrain = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x7c9c5e, roughness: 0.7 }));
+            scene.add(terrain);
+
+            // Grass
+            const grassMat = new THREE.MeshStandardMaterial({ color: 0x6a994e });
+            for (let i = 0; i < preset.grass; i++) {
+                const x = (Math.random()-0.5)*180, z = (Math.random()-0.5)*180;
+                const y = getHeight(x,z);
+                if (y > 0.5 && y < 4) {
+                    const blade = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.1,0.25,3), grassMat);
+                    blade.position.set(x,y,z);
+                    scene.add(blade);
+                }
+            }
+
+            // Trees
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8B5A2B });
+            const foliageMat = new THREE.MeshStandardMaterial({ color: 0x5a8f4c });
+            for (let i = 0; i < preset.trees; i++) {
+                const x = (Math.random()-0.5)*170, z = (Math.random()-0.5)*170;
+                const y = getHeight(x,z);
+                if (y > 0.8 && y < 3.5) {
+                    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.4,1,4), trunkMat);
+                    trunk.position.set(x,y,z);
+                    scene.add(trunk);
+                    const foliage = new THREE.Mesh(new THREE.ConeGeometry(0.7,1.2,6), foliageMat);
+                    foliage.position.set(x,y+0.8,z);
+                    scene.add(foliage);
+                }
+            }
+
+            // Player
+            playerMesh = new THREE.Mesh(new THREE.SphereGeometry(0.5,16,16), new THREE.MeshStandardMaterial({ color: 0xffaa66, emissive: 0xffaa66, emissiveIntensity: 0.4 }));
+            playerMesh.position.set(0, getHeight(0,0)+0.5, 0);
+            scene.add(playerMesh);
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+
+        // --- GTA Minimap ---
+        class GTAMinimap {
+            constructor() {
+                this.canvas = document.getElementById('minimap-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.blips = [];
+            }
+            addBlip(x, z, icon, color) { this.blips.push({ x, z, icon, color }); }
+            draw(px, pz) {
+                const size = this.canvas.width;
+                const cx = size/2, cy = size/2;
+                this.ctx.clearRect(0,0,size,size);
+                this.ctx.fillStyle = '#111';
+                this.ctx.fillRect(0,0,size,size);
+                // Grid
+                this.ctx.strokeStyle = '#333';
+                for (let i = 0; i < size; i += 20) {
+                    this.ctx.beginPath(); this.ctx.moveTo(i,0); this.ctx.lineTo(i,size); this.ctx.stroke();
+                    this.ctx.beginPath(); this.ctx.moveTo(0,i); this.ctx.lineTo(size,i); this.ctx.stroke();
+                }
+                // Player
+                this.ctx.fillStyle = '#ffaa66';
+                this.ctx.beginPath();
+                this.ctx.arc(cx,cy,6,0,Math.PI*2);
+                this.ctx.fill();
+                // Blips
+                for (let b of this.blips) {
+                    const dx = (b.x - px) * (size/300);
+                    const dy = (b.z - pz) * (size/300);
+                    const x = cx + dx, y = cy + dy;
+                    if (x<0||x>size||y<0||y>size) continue;
+                    this.ctx.fillStyle = b.color;
+                    this.ctx.font = '14px Arial';
+                    this.ctx.fillText(b.icon, x-6, y+4);
+                }
+            }
+        }
+
+        // --- Combat System (MK/KI/FF) ---
+        class CombatUI {
+            constructor() {
+                this.overlay = document.getElementById('combat-overlay');
+                this.combo = 0;
+                this.superMeter = 0;
+                this.opponent = null;
+            }
+            startCombat(opp) {
+                this.opponent = { name: opp.name||'Dark Soul', hp: opp.hp||100, maxHp: 100, sprite: opp.sprite||'👹' };
+                document.getElementById('opponent-name').textContent = this.opponent.name;
+                document.getElementById('opponent-sprite').textContent = this.opponent.sprite;
+                this.overlay.classList.add('active');
+            }
+            useMove(move) {
+                if (!this.opponent) return;
+                const dmg = { punch:10, kick:15, special: this.superMeter>=50?40:0, ultimate: this.superMeter>=100?80:0 };
+                if (move==='special' && this.superMeter>=50) this.superMeter -= 50;
+                else if (move==='ultimate' && this.superMeter>=100) this.superMeter -= 100;
+                this.opponent.hp = Math.max(0, this.opponent.hp - dmg[move]);
+                document.getElementById('opponent-health-fill').style.width = (this.opponent.hp/100*100)+'%';
+                this.combo++;
+                const counter = document.getElementById('combo-counter');
+                counter.textContent = this.combo+' HIT COMBO!';
+                counter.classList.add('active');
+                setTimeout(()=>counter.classList.remove('active'), 500);
+                this.superMeter = Math.min(100, this.superMeter + dmg[move]*2);
+                document.getElementById('super-meter-fill').style.width = this.superMeter+'%';
+                if (this.opponent.hp < 20) document.getElementById('fatality-prompt').classList.add('active');
+                if (this.opponent.hp <= 0) { setTimeout(()=>this.endCombat(true), 1000); }
+            }
+            endCombat(win) {
+                this.overlay.classList.remove('active');
+                this.combo = 0; this.superMeter = 0; this.opponent = null;
+                document.getElementById('fatality-prompt').classList.remove('active');
+                if (win) { SoulverseState.player.plt.profit += 20; SoulverseState.player.plt.love += 20; SoulverseState.player.plt.tax += 20; updateUI(); }
+            }
+        }
+
+        // --- Party UI (Pokémon) ---
+        class PartyUI {
+            constructor() {
+                this.modal = document.getElementById('party-modal');
+                this.grid = document.getElementById('party-grid');
+            }
+            open() {
+                this.grid.innerHTML = '';
+                for (let i=0; i<6; i++) {
+                    const c = SoulverseState.party[i];
+                    const card = document.createElement('div');
+                    card.className = 'party-card'+(c?'':' empty');
+                    card.innerHTML = c ? `<div class="creature-img">${c.icon||'🧬'}</div><div class="creature-name">${c.name}</div><div class="creature-hp">❤️ ${c.hp}/${c.maxHp}</div>` : 'Empty';
+                    this.grid.appendChild(card);
+                }
+                this.modal.classList.add('active');
+            }
+            close() { this.modal.classList.remove('active'); }
+        }
+
+        // --- Capture Minigame ---
+        class CaptureGame {
+            constructor() {
+                this.overlay = document.getElementById('capture-overlay');
+                this.ring = document.getElementById('capture-ring');
+                this.active = false;
+            }
+            start() {
+                this.active = true;
+                this.overlay.classList.add('active');
+                let size = 280, shrinking = true;
+                const interval = setInterval(()=>{
+                    if (!this.active) return clearInterval(interval);
+                    if (shrinking) size -= 6; else size += 6;
+                    if (size <= 60) shrinking = false;
+                    if (size >= 280) shrinking = true;
+                    this.ring.style.width = size+'px';
+                    this.ring.style.height = size+'px';
+                }, 50);
+                const release = ()=>{
+                    if (!this.active) return;
+                    this.active = false;
+                    clearInterval(interval);
+                    this.overlay.classList.remove('active');
+                    const success = Math.abs(size-140) < 30;
+                    if (success) { SoulverseState.party.push({ name: 'Wild Soul', hp: 50, maxHp: 50, icon: '🧬' }); updateUI(); alert('✅ Captured!'); }
+                    else alert('❌ Escaped!');
+                };
+                document.addEventListener('touchend', release, {once:true});
+                setTimeout(release, 5000);
+            }
+        }
+
+        // --- Virtual Joystick ---
+        class Joystick {
+            constructor() {
+                this.area = document.getElementById('joystick-area');
+                this.knob = document.getElementById('joystick-knob');
+                this.active = false;
+                this.center = {x:0,y:0};
+                this.area.addEventListener('touchstart', e=>{
+                    this.active = true;
+                    const r = this.area.getBoundingClientRect();
+                    this.center = {x:r.left+r.width/2, y:r.top+r.height/2};
+                    this.update(e.touches[0]);
+                });
+                this.area.addEventListener('touchmove', e=>{ if(this.active){ e.preventDefault(); this.update(e.touches[0]); } });
+                this.area.addEventListener('touchend', ()=>{
+                    this.active = false;
+                    this.knob.style.transform = 'translate(-50%,-50%)';
+                });
+            }
+            update(touch) {
+                let dx = touch.clientX - this.center.x, dy = touch.clientY - this.center.y;
+                const dist = Math.hypot(dx,dy);
+                if (dist > 35) { const a = Math.atan2(dy,dx); dx = Math.cos(a)*35; dy = Math.sin(a)*35; }
+                this.knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+                SoulverseState.player.position.x += dx/350;
+                SoulverseState.player.position.z += dy/350;
+                minimap.draw(SoulverseState.player.position.x, SoulverseState.player.position.z);
+            }
+        }
+
+        // --- Bridge Client (fix-us sync) ---
+        class BridgeClient {
+            constructor(url) { this.url = url; this.ws = null; }
+            connect() {
+                try {
+                    this.ws = new WebSocket(this.url);
+                    this.ws.onopen = ()=>{ SoulverseState.bridge.connected = true; updateBridgeStatus(); console.log('🌉 Bridge connected'); };
+                    this.ws.onclose = ()=>{ SoulverseState.bridge.connected = false; updateBridgeStatus(); setTimeout(()=>this.connect(), 5000); };
+                    this.ws.onerror = ()=>{ SoulverseState.bridge.connected = false; updateBridgeStatus(); };
+                } catch(e) { SoulverseState.bridge.connected = false; updateBridgeStatus(); }
+            }
+        }
+
+        function updateBridgeStatus() {
+            const el = document.getElementById('bridge-status');
+            el.textContent = '🌉 Bridge: '+(SoulverseState.bridge.connected?'Connected':'Disconnected');
+            el.className = SoulverseState.bridge.connected ? 'connected' : 'disconnected';
+        }
+
+        // --- UI Update ---
+        function updateUI() {
+            const p = SoulverseState.player;
+            document.getElementById('hp-fill').style.width = (p.hp/p.maxHp*100)+'%';
+            document.getElementById('hp-text').textContent = Math.floor(p.hp)+'/'+p.maxHp;
+            document.getElementById('level-val').textContent = p.level;
+            document.getElementById('profit-val').textContent = Math.floor(p.plt.profit);
+            document.getElementById('love-val').textContent = Math.floor(p.plt.love);
+            document.getElementById('tax-val').textContent = Math.floor(p.plt.tax);
+        }
+
+        function updateNeeds() {
+            const n = SoulverseState.player.needs;
+            document.getElementById('needs-container').innerHTML = `
+                <div class="need"><span class="need-label">⚡ Energy</span><div class="need-bar-wrap"><div class="need-bar-fill" style="width:${n.energy}%; background:${n.energy<30?'#ff4444':'#44ff44'}"></div></div></div>
+                <div class="need"><span class="need-label">🍔 Hunger</span><div class="need-bar-wrap"><div class="need-bar-fill" style="width:${n.hunger}%; background:${n.hunger<30?'#ff4444':'#44ff44'}"></div></div></div>
+                <div class="need"><span class="need-label">💬 Social</span><div class="need-bar-wrap"><div class="need-bar-fill" style="width:${n.social}%; background:${n.social<30?'#ff4444':'#44ff44'}"></div></div></div>
+            `;
+            const moodIcons = { happy:'😊', tired:'😴', hungry:'😋', lonely:'😢' };
+            let mood = 'happy';
+            if (n.energy<30) mood='tired'; else if (n.hunger<30) mood='hungry'; else if (n.social<30) mood='lonely';
+            SoulverseState.player.mood = mood;
+            document.getElementById('moodlets-container').innerHTML = `<span class="moodlet">${moodIcons[mood]}</span>`;
+        }
+
+        // --- App Functions ---
+        const app = {
+            openParty: ()=>partyUI.open(),
+            toggleHabitat: ()=>{ document.getElementById('needs-container').classList.toggle('active'); document.getElementById('moodlets-container').classList.toggle('active'); },
+            enterCombat: ()=>{ combat.startCombat({ name: 'Dark Soul', hp: 100, sprite: '👹' }); },
+            startCapture: ()=>captureGame.start(),
+            openMenu: ()=>alert('☰ Menu:\n- Settings\n- Save/Load\n- Bridge Status\n- About')
+        };
+
+        // --- Initialize ---
+        const minimap = new GTAMinimap();
+        const combat = new CombatUI();
+        const partyUI = new PartyUI();
+        const captureGame = new CaptureGame();
+        const joystick = new Joystick();
+        const bridge = new BridgeClient('wss://your-oracle-instance.com/bridge');
+
+        // Add blips
+        minimap.addBlip(20, 30, '🏠', '#64aaff');
+        minimap.addBlip(-40, 20, '⚔️', '#ff4444');
+        minimap.addBlip(10, -50, '🐾', '#64ff64');
+        minimap.addBlip(-30, -40, '💎', '#ffaa00');
+
+        // Start
+        initWorld();
+        updateUI();
+        updateNeeds();
+        updateBridgeStatus();
+        bridge.connect();
+
+        // Game loop (needs decay)
+        setInterval(()=>{
+            SoulverseState.player.needs.energy = Math.max(0, SoulverseState.player.needs.energy - 0.5);
+            SoulverseState.player.needs.hunger = Math.max(0, SoulverseState.player.needs.hunger - 0.8);
+            SoulverseState.player.needs.social = Math.max(0, SoulverseState.player.needs.social - 0.3);
+            updateNeeds();
+        }, 1000);
+
+        // Auto-save
+        setInterval(()=>{ localStorage.setItem('soulverse-state', JSON.stringify(SoulverseState)); console.log('💾 Auto-saved'); }, 60000);
+
+        console.log('🌌 SOULVERSE UNIFIED initialized!');
+        console.log('📱 Touch controls ready');
+        console.log('🌉 Bridge: Connecting...');
+    </script>
+</body>
+</html>
