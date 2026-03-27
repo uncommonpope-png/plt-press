@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏛️ NEO-KEMET | Ancient Cyberpunk World</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+        body { background:#000; overflow:hidden; font-family:'Courier New', monospace; }
+        canvas { display:block; width:100vw; height:100vh; }
+        
+        /* UI Overlay */
+        #ui { position:fixed; inset:0; pointer-events:none; z-index:100; }
+        #ui > * { pointer-events:auto; }
+        
+        /* Top Bar */
+        #topBar { position:absolute; top:10px; left:0; right:0; display:flex; justify-content:center; gap:8px; z-index:30; flex-wrap:wrap; }
+        .top-btn { background:#ffaa66; border:none; color:#000; font-weight:bold; padding:8px 16px; border-radius:20px; cursor:pointer; font-family:monospace; font-size:11px; transition:0.2s; }
+        .top-btn:hover { transform:scale(1.05); box-shadow:0 0 12px #ffaa66; }
+        
+        /* Region Info */
+        #regionInfo { position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.8); backdrop-filter:blur(12px); border-radius:16px; padding:12px; color:#ffaa66; font-size:11px; z-index:10; border:1px solid #ffaa66; min-width:200px; }
+        #regionName { font-size:14px; font-weight:bold; margin-bottom:6px; }
+        .stat-row { display:flex; justify-content:space-between; margin:4px 0; }
+        
+        /* Coordinates */
+        #coords { position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.8); backdrop-filter:blur(12px); border-radius:16px; padding:12px; color:#ffaa66; font-size:10px; z-index:10; border:1px solid #ffaa66; text-align:right; }
+        
+        /* Minimap */
+        #minimap { position:absolute; bottom:10px; right:10px; width:150px; height:150px; background:rgba(0,0,0,0.8); backdrop-filter:blur(12px); border-radius:16px; border:2px solid #ffaa66; z-index:10; overflow:hidden; }
+        #minimapCanvas { width:100%; height:100%; }
+        
+        /* Controls */
+        #controls { position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,0.8); backdrop-filter:blur(12px); border-radius:16px; padding:12px; color:#ffaa66; font-size:9px; z-index:10; border:1px solid #ffaa66; }
+        .control-key { display:inline-block; background:#ffaa66; color:#000; padding:2px 6px; border-radius:4px; margin:1px; font-weight:bold; }
+        
+        /* Weather */
+        #weatherDisplay { position:absolute; top:70px; left:10px; background:rgba(0,0,0,0.8); backdrop-filter:blur(12px); border-radius:16px; padding:10px; color:#ffaa66; font-size:11px; z-index:10; border:1px solid #ffaa66; }
+        #weatherIcon { font-size:16px; }
+        
+        /* Loading */
+        #loading { position:fixed; inset:0; background:#000; z-index:1000; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+        #loading h1 { color:#ffaa66; font-size:24px; margin-bottom:20px; }
+        .loader { width:60px; height:60px; border:4px solid #333; border-top-color:#ffaa66; border-radius:50%; animation:spin 1s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        
+        /* Modal */
+        .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.95); backdrop-filter:blur(20px); border:2px solid #ffaa66; border-radius:24px; padding:24px; z-index:200; min-width:320px; max-width:90vw; max-height:80vh; overflow-y:auto; display:none; }
+        .modal.active { display:block; }
+        .modal h3 { color:#ffaa66; margin-bottom:16px; text-align:center; font-size:16px; }
+        .close-modal { float:right; background:none; border:none; color:#ffaa66; font-size:20px; cursor:pointer; }
+        .modal-btn { background:#ffaa66; border:none; color:#000; padding:10px 20px; border-radius:20px; cursor:pointer; font-weight:bold; font-family:monospace; margin:5px; width:100%; }
+        .modal-btn:hover { background:#fff; }
+        
+        /* Landmark List */
+        #landmarkList { max-height:200px; overflow-y:auto; }
+        .landmark-item { background:rgba(255,170,102,0.1); border:1px solid #ffaa66; border-radius:12px; padding:10px; margin:8px 0; cursor:pointer; transition:0.2s; }
+        .landmark-item:hover { background:rgba(255,170,102,0.2); transform:translateX(5px); }
+        
+        /* Footer */
+        footer { position:absolute; bottom:5px; left:0; right:0; text-align:center; font-size:8px; color:#666; pointer-events:none; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="ui">
+        <!-- Top Bar -->
+        <div id="topBar">
+            <button class="top-btn" onclick="toggleLandmarks()">🏛️ Landmarks</button>
+            <button class="top-btn" onclick="toggleMap()">🗺️ Map</button>
+            <button class="top-btn" onclick="toggleControls()">❓ Controls</button>
+            <button class="top-btn" onclick="teleportToSpawn()">🔄 Spawn</button>
+        </div>
+        
+        <!-- Region Info -->
+        <div id="regionInfo">
+            <div id="regionName">🏛️ Delta Sprawl</div>
+            <div class="stat-row"><span>Biome:</span><span id="biomeDisplay">Flooded Urban</span></div>
+            <div class="stat-row"><span>Difficulty:</span><span id="difficultyDisplay">Easy</span></div>
+            <div class="stat-row"><span>Level:</span><span id="levelDisplay">1-10</span></div>
+            <div class="stat-row"><span>Buildings:</span><span id="buildingCount">0</span></div>
+        </div>
+        
+        <!-- Coordinates -->
+        <div id="coords">
+            <div>X: <span id="posX">0</span>m</div>
+            <div>Y: <span id="posY">0</span>m</div>
+            <div>Z: <span id="posZ">0</span>m</div>
+            <div style="margin-top:8px;">Speed: <span id="speedDisplay">0</span> km/h</div>
+        </div>
+        
+        <!-- Weather -->
+        <div id="weatherDisplay">
+            <div><span id="weatherIcon">☀️</span> <span id="weatherName">Clear</span></div>
+            <div style="font-size:9px; margin-top:4px;" id="weatherEffect">Visibility: 100%</div>
+        </div>
+        
+        <!-- Controls -->
+        <div id="controls" style="display:none;">
+            <div style="margin-bottom:8px;"><strong>Controls:</strong></div>
+            <div><span class="control-key">W</span><span class="control-key">A</span><span class="control-key">S</span><span class="control-key">D</span> Move</div>
+            <div><span class="control-key">Space</span> Jump / Fly Up</div>
+            <div><span class="control-key">Shift</span> Sprint / Fly Down</div>
+            <div><span class="control-key">Mouse</span> Look Around</div>
+            <div><span class="control-key">Click</span> Lock Pointer</div>
+        </div>
+        
+        <!-- Minimap -->
+        <div id="minimap" style="display:none;">
+            <canvas id="minimapCanvas"></canvas>
+        </div>
+    </div>
+    
+    <!-- Loading Screen -->
+    <div id="loading">
+        <h1>🏛️ NEO-KEMET</h1>
+        <div class="loader"></div>
+        <p style="color:#666; margin-top:20px; font-size:11px;">Generating Ancient Cyberpunk World...</p>
+    </div>
+    
+    <!-- Landmarks Modal -->
+    <div id="landmarksModal" class="modal">
+        <button class="close-modal" onclick="toggleLandmarks()">×</button>
+        <h3>🏛️ World Landmarks</h3>
+        <div id="landmarkList"></div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    
+    <script type="module">
+        import * as THREE from 'three';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+        import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
+        
+        // ============================================================
+        // NEO-KEMET WORLD ENGINE
+        // Based on the Master World Code specification
+        // ============================================================
+        
+        // --- World Configuration ---
+        const WORLD_CONFIG = {
+            cellSize: 500,
+            loadRadius: 3,
+            renderDistance: 2000,
+            fogDensity: 0.002,
+            worldSeed: 1337
+        };
+        
+        // --- Region Definitions ---
+        const REGIONS = [
+            {
+                id: 'delta',
+                name: '🏛️ Delta Sprawl',
+                position: new THREE.Vector2(0, 0),
+                size: new THREE.Vector2(8000, 8000),
+                biome: 'Flooded Urban',
+                difficulty: 'Easy',
+                levelRange: '1-10',
+                colors: {
+                    ground: 0x1a2a3a,
+                    fog: 0x504060,
+                    ambient: 0x151020,
+                    water: 0x2a4a6a
+                },
+                landmarks: [
+                    { name: 'Sunken Obelisk', pos: new THREE.Vector3(-1800, -2, -1200), type: 'Temple' },
+                    { name: 'Temple of Sobek', pos: new THREE.Vector3(-1500, 0, -1500), type: 'Dungeon' },
+                    { name: 'Lotus Pier', pos: new THREE.Vector3(-500, 0, -500), type: 'Market' },
+                    { name: 'The Hatchery', pos: new THREE.Vector3(1000, 0, 0), type: 'Creature Zone' }
+                ]
+            },
+            {
+                id: 'core',
+                name: '🌆 Neo-Kemet Core',
+                position: new THREE.Vector2(10000, 0),
+                size: new THREE.Vector2(12000, 12000),
+                biome: 'Urban Core',
+                difficulty: 'Medium-Hard',
+                levelRange: '20-40',
+                colors: {
+                    ground: 0x2a2a3a,
+                    fog: 0x403545,
+                    ambient: 0x201525,
+                    neon: 0xff00ff
+                },
+                landmarks: [
+                    { name: 'Spire of Anubis', pos: new THREE.Vector3(6000, 0, 0), type: 'Corporate HQ' },
+                    { name: 'Grand Bazaar', pos: new THREE.Vector3(5000, 0, -500), type: 'Market' },
+                    { name: 'Pink Quarter', pos: new THREE.Vector3(7000, 0, 500), type: 'Slum' },
+                    { name: 'Osiris Vaults', pos: new THREE.Vector3(4000, -15, 1000), type: 'Tomb' }
+                ]
+            },
+            {
+                id: 'dunes',
+                name: '🏜️ Corporate Dunes',
+                position: new THREE.Vector2(-10000, 0),
+                size: new THREE.Vector2(10000, 10000),
+                biome: 'Arid Desert',
+                difficulty: 'Medium',
+                levelRange: '10-25',
+                colors: {
+                    ground: 0x8b7355,
+                    fog: 0xc4a574,
+                    ambient: 0x4a3a2a
+                },
+                landmarks: [
+                    { name: 'Solar Array Prime', pos: new THREE.Vector3(-5000, 50, 0), type: 'Facility' },
+                    { name: 'Sand Cruiser Depot', pos: new THREE.Vector3(-4000, 0, 2000), type: 'Station' }
+                ]
+            },
+            {
+                id: 'exclusion',
+                name: '☢️ Exclusion Zone',
+                position: new THREE.Vector2(0, -15000),
+                size: new THREE.Vector2(8000, 8000),
+                biome: 'Volcanic Wasteland',
+                difficulty: 'Hard',
+                levelRange: '40-60',
+                colors: {
+                    ground: 0x3a2a2a,
+                    fog: 0x5a4a3a,
+                    ambient: 0x2a1a1a
+                },
+                landmarks: [
+                    { name: 'Volcano Core', pos: new THREE.Vector3(0, 100, -2000), type: 'Hazard' },
+                    { name: 'Ash Wastes', pos: new THREE.Vector3(2000, 0, 0), type: 'Wasteland' }
+                ]
+            },
+            {
+                id: 'aether',
+                name: '🌌 The Aether',
+                position: new THREE.Vector2(0, 15000),
+                size: new THREE.Vector2(10000, 10000),
+                biome: 'Orbital Void',
+                difficulty: 'Extreme',
+                levelRange: '60-80',
+                colors: {
+                    ground: 0x0a0a1a,
+                    fog: 0x1a1a3a,
+                    ambient: 0x0a0a1a
+                },
+                landmarks: [
+                    { name: 'Orbital Station', pos: new THREE.Vector3(0, 500, 0), type: 'Station' },
+                    { name: 'Void Gateway', pos: new THREE.Vector3(3000, 200, 3000), type: 'Portal' }
+                ]
+            }
+        ];
+        
+        // --- Weather System ---
+        const WEATHER_TYPES = [
+            { name: 'Clear', icon: '☀️', fogDensity: 0.001, visibility: 100 },
+            { name: 'Light Rain', icon: '🌦️', fogDensity: 0.003, visibility: 80 },
+            { name: 'Heavy Rain', icon: '🌧️', fogDensity: 0.005, visibility: 50 },
+            { name: 'Sandstorm', icon: '🌪️', fogDensity: 0.01, visibility: 30 },
+            { name: 'Pink Storm', icon: '💗', fogDensity: 0.008, visibility: 40 },
+            { name: 'Smog', icon: '🌫️', fogDensity: 0.006, visibility: 60 }
+        ];
+        
+        // --- Game State ---
+        let scene, camera, renderer, controls;
+        let player = { velocity: new THREE.Vector3(), onGround: false, flying: false };
+        let currentRegion = REGIONS[0];
+        let currentWeather = WEATHER_TYPES[0];
+        let loadedCells = new Map();
+        let buildings = [];
+        let vegetation = [];
+        let waterBodies = [];
+        let simplex = new SimplexNoise();
+        let lastTime = performance.now();
+        let moveState = { forward: false, backward: false, left: false, right: false, up: false, down: false, sprint: false };
+        
+        // --- Initialize ---
+        init();
+        animate();
+        
+        function init() {
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a1a);
+            scene.fog = new THREE.FogExp2(0x504060, 0.002);
+            
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, WORLD_CONFIG.renderDistance);
+            camera.position.set(0, 10, 0);
+            
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gameCanvas'), antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            
+            // Controls
+            controls = new PointerLockControls(camera, document.body);
+            document.addEventListener('click', () => {
+                if (!controls.isLocked) controls.lock();
+            });
+            
+            // Movement listeners
+            document.addEventListener('keydown', onKeyDown);
+            document.addEventListener('keyup', onKeyUp);
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+            
+            const sunLight = new THREE.DirectionalLight(0xffaa66, 1);
+            sunLight.position.set(100, 200, 100);
+            sunLight.castShadow = true;
+            scene.add(sunLight);
+            
+            // Generate initial world
+            generateWorld();
+            
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+            }, 2000);
+            
+            // Window resize
+            window.addEventListener('resize', onWindowResize);
+            
+            // Populate landmarks
+            populateLandmarks();
+        }
+        
+        function generateWorld() {
+            // Generate terrain for current region
+            generateTerrain();
+            
+            // Generate buildings
+            generateBuildings();
+            
+            // Generate vegetation
+            generateVegetation();
+            
+            // Generate water
+            generateWater();
+            
+            // Update UI
+            updateRegionInfo();
+        }
+        
+        function generateTerrain() {
+            // Remove old terrain
+            const oldTerrain = scene.getObjectByName('terrain');
+            if (oldTerrain) scene.remove(oldTerrain);
+            
+            // Create ground plane
+            const geometry = new THREE.PlaneGeometry(
+                currentRegion.size.x,
+                currentRegion.size.y,
+                256, 256
+            );
+            
+            // Apply heightmap using noise
+            const positions = geometry.attributes.position;
+            for (let i = 0; i < positions.count; i++) {
+                const x = positions.getX(i);
+                const y = positions.getY(i);
+                
+                // Multi-octave noise for terrain
+                let height = 0;
+                let amplitude = 1;
+                let frequency = 0.001;
+                
+                for (let o = 0; o < 4; o++) {
+                    height += simplex.noise(x * frequency, y * frequency) * amplitude;
+                    amplitude *= 0.5;
+                    frequency *= 2;
+                }
+                
+                positions.setZ(i, height * 20); // Height multiplier
+            }
+            
+            geometry.computeVertexNormals();
+            
+            const material = new THREE.MeshStandardMaterial({
+                color: currentRegion.colors.ground,
+                roughness: 0.8,
+                metalness: 0.2,
+                wireframe: false
+            });
+            
+            const terrain = new THREE.Mesh(geometry, material);
+            terrain.rotation.x = -Math.PI / 2;
+            terrain.position.set(
+                currentRegion.position.x,
+                currentRegion.position.y,
+                0
+            );
+            terrain.receiveShadow = true;
+            terrain.name = 'terrain';
+            
+            scene.add(terrain);
+        }
+        
+        function generateBuildings() {
+            // Clear old buildings
+            buildings.forEach(b => scene.remove(b));
+            buildings = [];
+            
+            const buildingCount = Math.floor(currentRegion.size.x * currentRegion.size.y / 100000);
+            
+            for (let i = 0; i < buildingCount; i++) {
+                const width = 20 + Math.random() * 30;
+                const depth = 20 + Math.random() * 30;
+                const height = 30 + Math.random() * 100;
+                
+                const geometry = new THREE.BoxGeometry(width, height, depth);
+                const material = new THREE.MeshStandardMaterial({
+                    color: currentRegion.colors.ground,
+                    roughness: 0.5,
+                    metalness: 0.8
+                });
+                
+                const building = new THREE.Mesh(geometry, material);
+                
+                // Random position within region
+                const offsetX = (Math.random() - 0.5) * currentRegion.size.x * 0.8;
+                const offsetZ = (Math.random() - 0.5) * currentRegion.size.y * 0.8;
+                
+                building.position.set(
+                    currentRegion.position.x + offsetX,
+                    currentRegion.position.y + height / 2,
+                    offsetZ
+                );
+                
+                building.castShadow = true;
+                building.receiveShadow = true;
+                
+                // Add neon strips for cyberpunk look
+                if (currentRegion.id === 'core') {
+                    const neonGeometry = new THREE.EdgesGeometry(geometry);
+                    const neonMaterial = new THREE.LineBasicMaterial({ color: 0xff00ff });
+                    const neon = new THREE.LineSegments(neonGeometry, neonMaterial);
+                    building.add(neon);
+                }
+                
+                scene.add(building);
+                buildings.push(building);
+            }
+            
+            document.getElementById('buildingCount').textContent = buildings.length;
+        }
+        
+        function generateVegetation() {
+            // Clear old vegetation
+            vegetation.forEach(v => scene.remove(v));
+            vegetation = [];
+            
+            // Simple tree/plant generation
+            const vegCount = Math.floor(currentRegion.size.x * currentRegion.size.y / 50000);
+            
+            for (let i = 0; i < vegCount; i++) {
+                const height = 5 + Math.random() * 15;
+                const geometry = new THREE.CylinderGeometry(0.5, 1, height, 6);
+                const material = new THREE.MeshStandardMaterial({
+                    color: currentRegion.id === 'exclusion' ? 0x555555 : 0x228822,
+                    roughness: 0.9
+                });
+                
+                const plant = new THREE.Mesh(geometry, material);
+                
+                const offsetX = (Math.random() - 0.5) * currentRegion.size.x * 0.9;
+                const offsetZ = (Math.random() - 0.5) * currentRegion.size.y * 0.9;
+                
+                plant.position.set(
+                    currentRegion.position.x + offsetX,
+                    currentRegion.position.y + height / 2,
+                    offsetZ
+                );
+                
+                scene.add(plant);
+                vegetation.push(plant);
+            }
+        }
+        
+        function generateWater() {
+            // Clear old water
+            waterBodies.forEach(w => scene.remove(w));
+            waterBodies = [];
+            
+            // Only add water to Delta Sprawl
+            if (currentRegion.id !== 'delta') return;
+            
+            const waterGeometry = new THREE.PlaneGeometry(
+                currentRegion.size.x * 0.6,
+                currentRegion.size.y * 0.6,
+                64, 64
+            );
+            
+            const waterMaterial = new THREE.MeshStandardMaterial({
+                color: currentRegion.colors.water,
+                transparent: true,
+                opacity: 0.7,
+                roughness: 0.1,
+                metalness: 0.9
+            });
+            
+            const water = new THREE.Mesh(waterGeometry, waterMaterial);
+            water.rotation.x = -Math.PI / 2;
+            water.position.set(
+                currentRegion.position.x,
+                currentRegion.position.y - 2,
+                0
+            );
+            
+            scene.add(water);
+            waterBodies.push(water);
+        }
+        
+        function updateRegionInfo() {
+            document.getElementById('regionName').textContent = currentRegion.name;
+            document.getElementById('biomeDisplay').textContent = currentRegion.biome;
+            document.getElementById('difficultyDisplay').textContent = currentRegion.difficulty;
+            document.getElementById('levelDisplay').textContent = currentRegion.levelRange;
+            
+            // Update fog
+            scene.fog.color.setHex(currentRegion.colors.fog);
+            scene.background.setHex(currentRegion.colors.fog);
+        }
+        
+        function populateLandmarks() {
+            const list = document.getElementById('landmarkList');
+            list.innerHTML = '';
+            
+            REGIONS.forEach(region => {
+                region.landmarks.forEach(landmark => {
+                    const item = document.createElement('div');
+                    item.className = 'landmark-item';
+                    item.innerHTML = `
+                        <div style="font-weight:bold;">${landmark.name}</div>
+                        <div style="font-size:9px; color:#888;">${landmark.type} - ${region.name}</div>
+                    `;
+                    item.onclick = () => teleportToLandmark(landmark.pos);
+                    list.appendChild(item);
+                });
+            });
+        }
+        
+        function teleportToLandmark(pos) {
+            camera.position.set(pos.x, pos.y + 10, pos.z + 20);
+            toggleLandmarks();
+        }
+        
+        // --- Input Handling ---
+        function onKeyDown(e) {
+            switch(e.code) {
+                case 'KeyW': moveState.forward = true; break;
+                case 'KeyS': moveState.backward = true; break;
+                case 'KeyA': moveState.left = true; break;
+                case 'KeyD': moveState.right = true; break;
+                case 'Space': moveState.up = true; break;
+                case 'ShiftLeft': moveState.down = true; moveState.sprint = true; break;
+            }
+        }
+        
+        function onKeyUp(e) {
+            switch(e.code) {
+                case 'KeyW': moveState.forward = false; break;
+                case 'KeyS': moveState.backward = false; break;
+                case 'KeyA': moveState.left = false; break;
+                case 'KeyD': moveState.right = false; break;
+                case 'Space': moveState.up = false; break;
+                case 'ShiftLeft': moveState.down = false; moveState.sprint = false; break;
+            }
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // --- UI Functions ---
+        window.toggleLandmarks = () => {
+            const modal = document.getElementById('landmarksModal');
+            modal.classList.toggle('active');
+        };
+        
+        window.toggleMap = () => {
+            const minimap = document.getElementById('minimap');
+            minimap.style.display = minimap.style.display === 'none' ? 'block' : 'none';
+        };
+        
+        window.toggleControls = () => {
+            const controls = document.getElementById('controls');
+            controls.style.display = controls.style.display === 'none' ? 'block' : 'none';
+        };
+        
+        window.teleportToSpawn = () => {
+            camera.position.set(0, 10, 0);
+            camera.rotation.set(0, 0, 0);
+        };
+        
+        // --- Game Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const time = performance.now();
+            const delta = (time - lastTime) / 1000;
+            lastTime = time;
+            
+            if (controls.isLocked) {
+                // Movement
+                const speed = moveState.sprint ? 100 : 50;
+                const direction = new THREE.Vector3();
+                
+                if (moveState.forward) direction.z -= 1;
+                if (moveState.backward) direction.z += 1;
+                if (moveState.left) direction.x -= 1;
+                if (moveState.right) direction.x += 1;
+                
+                direction.normalize();
+                
+                if (moveState.forward || moveState.backward) {
+                    camera.translateZ(-direction.z * speed * delta);
+                }
+                if (moveState.left || moveState.right) {
+                    camera.translateX(direction.x * speed * delta);
+                }
+                
+                // Vertical movement (flying)
+                if (moveState.up) camera.position.y += speed * delta;
+                if (moveState.down) camera.position.y -= speed * delta;
+                
+                // Update coordinates display
+                document.getElementById('posX').textContent = Math.round(camera.position.x);
+                document.getElementById('posY').textContent = Math.round(camera.position.y);
+                document.getElementById('posZ').textContent = Math.round(camera.position.z);
+                document.getElementById('speedDisplay').textContent = moveState.sprint ? '50' : '25';
+                
+                // Check region change
+                checkRegionChange();
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        function checkRegionChange() {
+            const playerPos = camera.position;
+            
+            for (const region of REGIONS) {
+                const halfWidth = region.size.x / 2;
+                const halfDepth = region.size.y / 2;
+                
+                if (playerPos.x >= region.position.x - halfWidth &&
+                    playerPos.x <= region.position.x + halfWidth &&
+                    playerPos.z >= region.position.y - halfDepth &&
+                    playerPos.z <= region.position.y + halfDepth) {
+                    
+                    if (currentRegion.id !== region.id) {
+                        currentRegion = region;
+                        generateWorld();
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Weather cycle
+        setInterval(() => {
+            const randomWeather = WEATHER_TYPES[Math.floor(Math.random() * WEATHER_TYPES.length)];
+            currentWeather = randomWeather;
+            
+            document.getElementById('weatherIcon').textContent = randomWeather.icon;
+            document.getElementById('weatherName').textContent = randomWeather.name;
+            document.getElementById('weatherEffect').textContent = `Visibility: ${randomWeather.visibility}%`;
+            
+            scene.fog.density = randomWeather.fogDensity;
+        }, 60000); // Change weather every minute
+        
+    </script>
+    
+    <footer>NEO-KEMET v0.1 | Ancient Cyberpunk World | WASD to Move | Click to Lock Mouse</footer>
+</body>
+</html>
