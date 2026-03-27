@@ -515,9 +515,241 @@
             particles.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             scene.add(particles);
             
+            // POPULATE THE WORLD with characters, buildings, props!
+            populateWorld();
+            
             updateSoulMeshes();
             setupControls();
             animate();
+        }
+        
+        function populateWorld() {
+            // Materials
+            const grassMat = new THREE.MeshStandardMaterial({color:0x2d5a27,roughness:0.9});
+            const treeTrunkMat = new THREE.MeshStandardMaterial({color:0x4a3728,roughness:0.8});
+            const treeLeafMat = new THREE.MeshStandardMaterial({color:0x1a4a1a,roughness:0.9});
+            const buildingMat = new THREE.MeshStandardMaterial({color:0x8b7355,roughness:0.7});
+            const roofMat = new THREE.MeshStandardMaterial({color:0x8b0000,roughness:0.6});
+            const roadMat = new THREE.MeshStandardMaterial({color:0x333333,roughness:0.9});
+            
+            // Ground plane (grass)
+            const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), grassMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -0.1;
+            ground.receiveShadow = true;
+            scene.add(ground);
+            
+            // Road
+            const road = new THREE.Mesh(new THREE.PlaneGeometry(8, 60), roadMat);
+            road.rotation.x = -Math.PI / 2;
+            road.position.set(0, -0.05, 0);
+            road.receiveShadow = true;
+            scene.add(road);
+            
+            // TREES (scattered around)
+            for (let i = 0; i < 20; i++) {
+                const x = (Math.random() - 0.5) * 50;
+                const z = (Math.random() - 0.5) * 50;
+                // Don't place on road
+                if (Math.abs(x) < 6) continue;
+                
+                const treeGroup = new THREE.Group();
+                
+                // Trunk
+                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 2, 8), treeTrunkMat);
+                trunk.position.y = 1;
+                trunk.castShadow = true;
+                treeGroup.add(trunk);
+                
+                // Leaves (3 layers)
+                const leaves1 = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2, 8), treeLeafMat);
+                leaves1.position.y = 2.5;
+                leaves1.castShadow = true;
+                treeGroup.add(leaves1);
+                
+                const leaves2 = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.5, 8), treeLeafMat);
+                leaves2.position.y = 3.5;
+                leaves2.castShadow = true;
+                treeGroup.add(leaves2);
+                
+                const leaves3 = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1, 8), treeLeafMat);
+                leaves3.position.y = 4.3;
+                leaves3.castShadow = true;
+                treeGroup.add(leaves3);
+                
+                treeGroup.position.set(x, 0, z);
+                scene.add(treeGroup);
+            }
+            
+            // BUILDINGS (houses/shops around the world)
+            const buildingPositions = [
+                {x: -15, z: -15, w: 6, d: 6, h: 5},
+                {x: 15, z: -15, w: 5, d: 5, h: 4},
+                {x: -15, z: 15, w: 7, d: 5, h: 6},
+                {x: 15, z: 15, w: 6, d: 6, h: 5},
+                {x: -20, z: 0, w: 5, d: 4, h: 4},
+                {x: 20, z: 0, w: 5, d: 4, h: 4}
+            ];
+            
+            buildingPositions.forEach((b, i) => {
+                const buildingGroup = new THREE.Group();
+                
+                // Main building
+                const building = new THREE.Mesh(new THREE.BoxGeometry(b.w, b.h, b.d), buildingMat);
+                building.position.y = b.h / 2;
+                building.castShadow = true;
+                building.receiveShadow = true;
+                buildingGroup.add(building);
+                
+                // Roof
+                const roof = new THREE.Mesh(new THREE.ConeGeometry(Math.max(b.w, b.d) * 0.7, 2, 4), roofMat);
+                roof.position.y = b.h + 1;
+                roof.rotation.y = Math.PI / 4;
+                roof.castShadow = true;
+                buildingGroup.add(roof);
+                
+                // Door
+                const door = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.5, 0.2), new THREE.MeshStandardMaterial({color:0x3d2817}));
+                door.position.set(0, 1.25, b.d/2 + 0.1);
+                buildingGroup.add(door);
+                
+                // Windows
+                const windowMat = new THREE.MeshStandardMaterial({color:0xffffaa,emissive:0xffffaa,emissiveIntensity:0.5});
+                const leftWin = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.2), windowMat);
+                leftWin.position.set(-b.w/3, b.h/2 + 0.5, b.d/2 + 0.1);
+                buildingGroup.add(leftWin);
+                
+                const rightWin = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.2), windowMat);
+                rightWin.position.set(b.w/3, b.h/2 + 0.5, b.d/2 + 0.1);
+                buildingGroup.add(rightWin);
+                
+                buildingGroup.position.set(b.x, 0, b.z);
+                scene.add(buildingGroup);
+            });
+            
+            // MORE CHARACTERS walking around (not just NPCs list - actual 3D characters!)
+            const charTypes = [
+                {name:'Riley',type:'love',color:0xff6600,afro:0.5,hoodie:0xff6600},
+                {name:'Grandad',type:'tax',color:0x5c4033,afro:0.3,hoodie:0x4a90d9},
+                {name:'Tom',type:'profit',color:0x8b6f47,afro:0.35,hoodie:0x228b22},
+                {name:'Sarah',type:'love',color:0x6b4423,afro:0.45,hoodie:0xff69b4},
+                {name:'Jazmine',type:'love',color:0x5c4033,afro:0.5,hoodie:0xffb6c1},
+                {name:'Ed Wuncler',type:'profit',color:0xf5deb3,afro:0,hoodie:0xffffff},
+                {name:'Gin Rummy',type:'tax',color:0x4a3728,afro:0.3,hoodie:0x8b0000},
+                {name:'Lamilton Taeshawn',type:'love',color:0x3d2817,afro:0.35,hoodie:0x4169e1}
+            ];
+            
+            charTypes.forEach((char, i) => {
+                const charGroup = new THREE.Group();
+                
+                // Skin
+                const skinMat = new THREE.MeshStandardMaterial({color:char.color});
+                
+                // Head
+                const head = new THREE.Mesh(new THREE.SphereGeometry(0.35,16,16), skinMat);
+                head.position.y = 1.5;
+                charGroup.add(head);
+                
+                // Afro (if they have one)
+                if (char.afro > 0) {
+                    const afro = new THREE.Mesh(new THREE.SphereGeometry(char.afro,24,24), new THREE.MeshStandardMaterial({color:0x1a0a00}));
+                    afro.position.y = 1.65;
+                    charGroup.add(afro);
+                }
+                
+                // Hoodie body
+                const hoodieMat = new THREE.MeshStandardMaterial({color:char.hoodie});
+                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.4,1.0,12), hoodieMat);
+                body.position.y = 0.7;
+                charGroup.add(body);
+                
+                // Legs (jeans)
+                const jeansMat = new THREE.MeshStandardMaterial({color:0x4a5d8a});
+                const leftLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.14,0.7,10), jeansMat);
+                leftLeg.position.set(-0.2, 0.25, 0);
+                charGroup.add(leftLeg);
+                
+                const rightLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.14,0.7,10), jeansMat);
+                rightLeg.position.set(0.2, 0.25, 0);
+                charGroup.add(rightLeg);
+                
+                // Position characters around the world
+                const angle = (i / charTypes.length) * Math.PI * 2;
+                const radius = 8 + Math.random() * 4;
+                charGroup.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+                
+                // Store for animation
+                charGroup.userData = {
+                    name: char.name,
+                    walkCycle: Math.random() * Math.PI * 2,
+                    walkSpeed: 0.5 + Math.random() * 0.5,
+                    angle: angle,
+                    radius: radius
+                };
+                
+                scene.add(charGroup);
+                worldCharacters.push(charGroup);
+            });
+            
+            // Street lights
+            for (let i = 0; i < 4; i++) {
+                const lightGroup = new THREE.Group();
+                const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 4, 8), new THREE.MeshStandardMaterial({color:0x333333}));
+                pole.position.y = 2;
+                lightGroup.add(pole);
+                
+                const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), new THREE.MeshStandardMaterial({color:0xffffaa,emissive:0xffffaa,emissiveIntensity:0.8}));
+                lamp.position.y = 4;
+                lightGroup.add(lamp);
+                
+                const light = new THREE.PointLight(0xffffaa, 1, 15);
+                light.position.y = 4;
+                lightGroup.add(light);
+                
+                lightGroup.position.set(i % 2 === 0 ? -8 : 8, 0, (i - 1.5) * 10);
+                scene.add(lightGroup);
+            }
+            
+            // Benches
+            const benchPositions = [{x: -10, z: -5}, {x: 10, z: 5}, {x: -5, z: 10}, {x: 5, z: -10}];
+            benchPositions.forEach(pos => {
+                const benchGroup = new THREE.Group();
+                const seat = new THREE.Mesh(new THREE.BoxGeometry(3, 0.3, 1), new THREE.MeshStandardMaterial({color:0x654321}));
+                seat.position.y = 0.5;
+                benchGroup.add(seat);
+                
+                const leg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.5, 6), new THREE.MeshStandardMaterial({color:0x333333}));
+                leg1.position.set(-1.2, 0.25, 0);
+                benchGroup.add(leg1);
+                
+                const leg2 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.5, 6), new THREE.MeshStandardMaterial({color:0x333333}));
+                leg2.position.set(1.2, 0.25, 0);
+                benchGroup.add(leg2);
+                
+                benchGroup.position.set(pos.x, 0, pos.z);
+                scene.add(benchGroup);
+            });
+        }
+        
+        let worldCharacters = [];
+        
+        function animateWorldCharacters(deltaTime) {
+            worldCharacters.forEach((char, i) => {
+                const data = char.userData;
+                data.walkCycle += deltaTime * data.walkSpeed;
+                
+                // Walking animation
+                if (char.children.length > 3) {
+                    char.children[3].rotation.x = Math.sin(data.walkCycle) * 0.4; // left leg
+                    char.children[4].rotation.x = Math.sin(data.walkCycle + Math.PI) * 0.4; // right leg
+                }
+                
+                // Slowly rotate and move in circle
+                data.angle += deltaTime * 0.1;
+                char.position.x = Math.cos(data.angle) * data.radius;
+                char.position.z = Math.sin(data.angle) * data.radius;
+                char.rotation.y = -data.angle;
+            });
         }
         
         function updateSoulMeshes() {
@@ -641,7 +873,11 @@
         
         function animate() {
             requestAnimationFrame(animate);
+            const deltaTime = 0.016;
             controls.update();
+            
+            // Animate world characters (walking around)
+            animateWorldCharacters(deltaTime);
             
             souls.forEach((soul, i) => {
                 if (soulMeshes[i]) {
