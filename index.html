@@ -6,8 +6,8 @@
     <title>🌌 SOULVERSE OMNIVERSAL | All 16 Games Merged</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{background:#000;overflow:hidden;font-family:'Courier New',monospace}
-        canvas{display:block;width:100%;height:100%}
+        body{background:#000;overflow:hidden;font-family:'Courier New',monospace;touch-action:none;overscroll-behavior:none}
+        canvas{display:block;width:100%;height:100%;touch-action:none}
         
         /* UI Overlay */
         #ui{position:fixed;inset:0;pointer-events:none;z-index:100}
@@ -418,13 +418,57 @@
             platform.receiveShadow = true;
             scene.add(platform);
             
-            // Player
-            player = new THREE.Mesh(
-                new THREE.BoxGeometry(1, 2, 1),
-                new THREE.MeshStandardMaterial({color:0xffaa66,emissive:0xffaa66,emissiveIntensity:0.3})
-            );
-            player.position.set(0, 1, 0);
-            player.castShadow = true;
+            // Player - HUMANOID CHARACTER (not a blob!)
+            const playerGroup = new THREE.Group();
+            const playerMat = new THREE.MeshStandardMaterial({color:0xffaa66,emissive:0xffaa66,emissiveIntensity:0.3});
+            
+            // Body
+            const body = new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.4,1.2,12), playerMat);
+            body.position.y = 0.6;
+            body.castShadow = true;
+            playerGroup.add(body);
+            
+            // Head
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.35,16,16), playerMat);
+            head.position.y = 1.5;
+            head.castShadow = true;
+            playerGroup.add(head);
+            
+            // Eyes
+            const eyeMat = new THREE.MeshBasicMaterial({color:0xffffff});
+            const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.08,8,8), eyeMat);
+            leftEye.position.set(-0.12, 1.55, 0.28);
+            playerGroup.add(leftEye);
+            const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.08,8,8), eyeMat);
+            rightEye.position.set(0.12, 1.55, 0.28);
+            playerGroup.add(rightEye);
+            
+            // Arms
+            const leftArm = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.12,0.8,8), playerMat);
+            leftArm.position.set(-0.55, 0.8, 0);
+            leftArm.rotation.z = 0.2;
+            leftArm.castShadow = true;
+            playerGroup.add(leftArm);
+            
+            const rightArm = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.12,0.8,8), playerMat);
+            rightArm.position.set(0.55, 0.8, 0);
+            rightArm.rotation.z = -0.2;
+            rightArm.castShadow = true;
+            playerGroup.add(rightArm);
+            
+            // Legs
+            const leftLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.14,0.9,10), playerMat);
+            leftLeg.position.set(-0.2, 0.2, 0);
+            leftLeg.castShadow = true;
+            playerGroup.add(leftLeg);
+            
+            const rightLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.14,0.9,10), playerMat);
+            rightLeg.position.set(0.2, 0.2, 0);
+            rightLeg.castShadow = true;
+            playerGroup.add(rightLeg);
+            
+            player = playerGroup;
+            player.position.set(0, 0, 0);
             scene.add(player);
             
             // Particles
@@ -504,6 +548,7 @@
             
             setInterval(() => {
                 const speed = 0.15 * (isSprinting ? 2 : 1);
+                const isMoving = joystickActive || keys['KeyW'] || keys['KeyS'] || keys['KeyA'] || keys['KeyD'];
                 
                 // Keyboard controls
                 if (keys['KeyW'] || keys['ArrowUp']) player.position.z -= speed;
@@ -517,14 +562,25 @@
                     if (joystickPos.y > 20) player.position.z += speed;
                     if (joystickPos.x < -20) player.position.x -= speed;
                     if (joystickPos.x > 20) player.position.x += speed;
+                    // Rotate player to face movement direction
+                    player.rotation.y = Math.atan2(joystickPos.x, joystickPos.y);
+                }
+                
+                // Walking animation
+                if (isMoving || joystickActive) {
+                    const walkCycle = Date.now() * 0.01;
+                    if (player.children[3]) player.children[3].rotation.x = Math.sin(walkCycle) * 0.5; // left arm
+                    if (player.children[4]) player.children[4].rotation.x = Math.sin(walkCycle + Math.PI) * 0.5; // right arm
+                    if (player.children[5]) player.children[5].rotation.x = Math.sin(walkCycle + Math.PI) * 0.4; // left leg
+                    if (player.children[6]) player.children[6].rotation.x = Math.sin(walkCycle) * 0.4; // right leg
                 }
                 
                 // Jump
                 if (isJumping) {
                     player.position.y += playerVelocityY;
                     playerVelocityY -= 0.015;
-                    if (player.position.y <= 1) {
-                        player.position.y = 1;
+                    if (player.position.y <= 0) {
+                        player.position.y = 0;
                         isJumping = false;
                     }
                 }
