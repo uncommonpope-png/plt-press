@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>💰 MONEY BAG RUN | Collect & Get Rich</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-user-select:none; }
+        body { background:#000; overflow:hidden; font-family:'Courier New', monospace; touch-action: none; }
+        canvas { display:block; width:100vw; height:100vh; }
+        
+        #ui { position:fixed; inset:0; pointer-events:none; z-index:100; }
+        #ui > * { pointer-events:auto; }
+        
+        /* Mobile Joystick */
+        #joystick { position:fixed; bottom:30px; left:30px; width:140px; height:140px; background:rgba(0,255,0,0.2); border:4px solid #00ff00; border-radius:50%; pointer-events:auto; z-index:150; display:none; }
+        .joystick-knob { position:absolute; width:60px; height:60px; background:rgba(0,255,0,0.6); border-radius:50%; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; border:3px solid #00ff00; }
+        
+        /* Mobile Buttons */
+        #mobileButtons { position:fixed; bottom:40px; right:30px; display:flex; gap:20px; pointer-events:auto; z-index:150; display:none; }
+        .mobile-btn { width:70px; height:70px; background:rgba(0,255,0,0.5); border:4px solid #00ff00; border-radius:50%; color:#000; font-weight:bold; font-size:24px; cursor:pointer; }
+        .mobile-btn:active { background:#00ff00; transform:scale(0.9); }
+        
+        @media (max-width: 768px) {
+            #joystick, #mobileButtons { display:flex !important; }
+            #desktopControls { display:none !important; }
+        }
+        
+        /* Score Display */
+        #scoreDisplay { position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.8); backdrop-filter:blur(12px); border-radius:16px; padding:15px; color:#00ff00; font-size:16px; z-index:10; border:3px solid #00ff00; min-width:200px; }
+        #moneyCount { font-size:28px; font-weight:bold; margin-top:5px; }
+        
+        /* Timer */
+        #timer { position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.8); backdrop-filter:blur(12px); border-radius:16px; padding:15px; color:#00ff00; font-size:20px; z-index:10; border:3px solid #00ff00; text-align:center; }
+        #timeValue { font-size:32px; font-weight:bold; }
+        
+        /* Multiplier */
+        #multiplier { position:absolute; top:80px; left:10px; background:rgba(0,0,0,0.8); backdrop-filter:blur(12px); border-radius:12px; padding:10px; color:#ffff00; font-size:14px; z-index:10; border:2px solid #ffff00; }
+        
+        /* Start Screen */
+        #startScreen { position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:200; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+        #startScreen h1 { color:#00ff00; font-size:36px; margin-bottom:20px; text-align:center; }
+        #startScreen p { color:#888; font-size:14px; margin-bottom:30px; text-align:center; max-width:400px; }
+        .start-btn { background:#00ff00; border:none; color:#000; font-weight:bold; padding:15px 40px; border-radius:30px; cursor:pointer; font-size:18px; margin:10px; }
+        .start-btn:active { transform:scale(0.95); }
+        
+        /* Game Over Screen */
+        #gameOverScreen { position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:200; display:none; flex-direction:column; justify-content:center; align-items:center; }
+        #gameOverScreen h2 { color:#ff0000; font-size:32px; margin-bottom:20px; }
+        #finalScore { color:#00ff00; font-size:40px; font-weight:bold; margin:20px; }
+        
+        /* Instructions */
+        #desktopControls { position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,0.8); backdrop-filter:blur(12px); border-radius:12px; padding:10px; color:#00ff00; font-size:10px; z-index:10; border:2px solid #00ff00; }
+        
+        /* Power-ups */
+        #powerupDisplay { position:absolute; top:140px; left:10px; background:rgba(0,0,0,0.8); border-radius:12px; padding:10px; color:#00ffff; font-size:12px; z-index:10; border:2px solid #00ffff; display:none; }
+        
+        footer { position:absolute; bottom:5px; left:0; right:0; text-align:center; font-size:8px; color:#444; pointer-events:none; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="ui">
+        <!-- Mobile Joystick -->
+        <div id="joystick"><div class="joystick-knob"></div></div>
+        
+        <!-- Mobile Buttons -->
+        <div id="mobileButtons">
+            <button class="mobile-btn" id="dashBtn">⚡</button>
+        </div>
+        
+        <!-- Score -->
+        <div id="scoreDisplay">
+            <div>💰 MONEY COLLECTED</div>
+            <div id="moneyCount">$0</div>
+        </div>
+        
+        <!-- Timer -->
+        <div id="timer">
+            <div>TIME</div>
+            <div id="timeValue">60</div>
+        </div>
+        
+        <!-- Multiplier -->
+        <div id="multiplier">
+            <div>✨ MULTIPLIER: <span id="multValue">x1</span></div>
+        </div>
+        
+        <!-- Power-up Display -->
+        <div id="powerupDisplay">
+            <div id="powerupText"></div>
+        </div>
+        
+        <!-- Desktop Controls -->
+        <div id="desktopControls">
+            <div><strong>Desktop:</strong> WASD or Arrow Keys to move</div>
+            <div><strong>Mobile:</strong> Use joystick (bottom-left)</div>
+            <div>Collect 💰 bags! Avoid 🔴 red bags!</div>
+        </div>
+    </div>
+    
+    <!-- Start Screen -->
+    <div id="startScreen">
+        <h1>💰 MONEY BAG RUN 💰</h1>
+        <p>Collect green money bags to get rich! Avoid red explosive bags! Grab power-ups for bonus multipliers!</p>
+        <button class="start-btn" onclick="startGame()">🎮 START GAME</button>
+        <p style="margin-top:20px; font-size:12px;">📱 Mobile: Use joystick | 💻 Desktop: WASD/Arrows</p>
+    </div>
+    
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen">
+        <h2>GAME OVER</h2>
+        <div>Total Money Collected:</div>
+        <div id="finalScore">$0</div>
+        <button class="start-btn" onclick="restartGame()">🔄 PLAY AGAIN</button>
+    </div>
+
+    <script>
+        // --- Game State ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let gameRunning = false;
+        let score = 0;
+        let timeLeft = 60;
+        let multiplier = 1;
+        let player = { x: 0, y: 0, size: 30, speed: 5, dx: 0, dy: 0 };
+        let moneyBags = [];
+        let badBags = [];
+        let powerups = [];
+        let particles = [];
+        let lastTime = 0;
+        let touchState = { active: false, x: 0, y: 0 };
+        let powerupActive = null;
+        let powerupTimer = 0;
+        
+        // Resize canvas
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            player.x = canvas.width / 2;
+            player.y = canvas.height / 2;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+        
+        // --- Mobile Controls ---
+        const joystick = document.getElementById('joystick');
+        const knob = joystick.querySelector('.joystick-knob');
+        const maxDist = 50;
+        
+        joystick.addEventListener('touchstart', e => {
+            e.preventDefault();
+            touchState.active = true;
+            updateJoystick(e);
+        }, {passive: false});
+        
+        joystick.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if(touchState.active) updateJoystick(e);
+        }, {passive: false});
+        
+        joystick.addEventListener('touchend', e => {
+            e.preventDefault();
+            touchState.active = false;
+            touchState.x = 0;
+            touchState.y = 0;
+            knob.style.transform = 'translate(-50%, -50%)';
+            player.dx = 0;
+            player.dy = 0;
+        });
+        
+        function updateJoystick(e) {
+            const touch = e.changedTouches[0];
+            const rect = joystick.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const cy = rect.top + rect.height/2;
+            
+            let dx = touch.clientX - cx;
+            let dy = touch.clientY - cy;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            
+            if(dist > maxDist) {
+                dx = (dx/dist) * maxDist;
+                dy = (dy/dist) * maxDist;
+            }
+            
+            knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+            
+            touchState.x = dx / maxDist;
+            touchState.y = dy / maxDist;
+            
+            player.dx = touchState.x * player.speed;
+            player.dy = touchState.y * player.speed;
+        }
+        
+        // Dash button
+        document.getElementById('dashBtn').addEventListener('touchstart', e => {
+            e.preventDefault();
+            activateDash();
+        });
+        
+        // --- Desktop Controls ---
+        const keys = {};
+        document.addEventListener('keydown', e => {
+            keys[e.code] = true;
+            updatePlayerVelocity();
+        });
+        document.addEventListener('keyup', e => {
+            keys[e.code] = false;
+            updatePlayerVelocity();
+        });
+        
+        function updatePlayerVelocity() {
+            if(touchState.active) return;
+            
+            player.dx = 0;
+            player.dy = 0;
+            
+            if(keys['KeyW'] || keys['ArrowUp']) player.dy = -player.speed;
+            if(keys['KeyS'] || keys['ArrowDown']) player.dy = player.speed;
+            if(keys['KeyA'] || keys['ArrowLeft']) player.dx = -player.speed;
+            if(keys['KeyD'] || keys['ArrowRight']) player.dx = player.speed;
+        }
+        
+        function activateDash() {
+            if(powerupActive === 'speed') return;
+            
+            const dashSpeed = player.speed * 2;
+            const dashTime = 200;
+            
+            const dashDx = player.dx || 0;
+            const dashDy = player.dy || 0;
+            
+            if(dashDx !== 0 || dashDy !== 0) {
+                player.x += dashDx * 3;
+                player.y += dashDy * 3;
+                createParticles(player.x, player.y, '#00ff00', 10);
+            }
+        }
+        
+        // --- Game Functions ---
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            gameRunning = true;
+            score = 0;
+            timeLeft = 60;
+            multiplier = 1;
+            moneyBags = [];
+            badBags = [];
+            powerups = [];
+            particles = [];
+            player.x = canvas.width / 2;
+            player.y = canvas.height / 2;
+            
+            updateUI();
+            gameLoop();
+            
+            // Spawn timer
+            setInterval(() => {
+                if(gameRunning) spawnMoneyBag();
+            }, 800);
+            
+            setInterval(() => {
+                if(gameRunning) spawnBadBag();
+            }, 1500);
+            
+            setInterval(() => {
+                if(gameRunning) spawnPowerup();
+            }, 5000);
+            
+            // Countdown timer
+            const timer = setInterval(() => {
+                if(!gameRunning) {
+                    clearInterval(timer);
+                    return;
+                }
+                timeLeft--;
+                if(timeLeft <= 0) {
+                    gameOver();
+                    clearInterval(timer);
+                }
+                updateUI();
+            }, 1000);
+        }
+        
+        function restartGame() {
+            document.getElementById('gameOverScreen').style.display = 'none';
+            startGame();
+        }
+        
+        function spawnMoneyBag() {
+            const size = 25 + Math.random() * 20;
+            const value = Math.floor(size * 10);
+            moneyBags.push({
+                x: Math.random() * canvas.width,
+                y: -size,
+                size: size,
+                value: value,
+                speed: 1 + Math.random() * 2
+            });
+        }
+        
+        function spawnBadBag() {
+            badBags.push({
+                x: Math.random() * canvas.width,
+                y: -30,
+                size: 25 + Math.random() * 15,
+                speed: 2 + Math.random() * 3
+            });
+        }
+        
+        function spawnPowerup() {
+            const types = ['multiplier', 'speed', 'shield', 'time'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            powerups.push({
+                x: Math.random() * canvas.width,
+                y: -30,
+                size: 20,
+                type: type,
+                speed: 1.5
+            });
+        }
+        
+        function createParticles(x, y, color, count) {
+            for(let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10,
+                    life: 1,
+                    color: color
+                });
+            }
+        }
+        
+        function updateUI() {
+            document.getElementById('moneyCount').textContent = '$' + score.toLocaleString();
+            document.getElementById('timeValue').textContent = timeLeft;
+            document.getElementById('multValue').textContent = 'x' + multiplier.toFixed(1);
+        }
+        
+        function activatePowerup(type) {
+            powerupActive = type;
+            powerupTimer = 5000;
+            
+            const display = document.getElementById('powerupDisplay');
+            const text = document.getElementById('powerupText');
+            display.style.display = 'block';
+            
+            switch(type) {
+                case 'multiplier':
+                    multiplier = 3;
+                    text.textContent = '✨ 3x MULTIPLIER!';
+                    text.style.color = '#ffff00';
+                    break;
+                case 'speed':
+                    player.speed = 10;
+                    text.textContent = '⚡ SUPER SPEED!';
+                    text.style.color = '#00ffff';
+                    break;
+                case 'shield':
+                    text.textContent = '🛡️ INVINCIBLE!';
+                    text.style.color = '#0088ff';
+                    break;
+                case 'time':
+                    timeLeft += 15;
+                    text.textContent = '⏰ +15 SECONDS!';
+                    text.style.color = '#ff00ff';
+                    setTimeout(() => display.style.display = 'none', 2000);
+                    powerupActive = null;
+                    break;
+            }
+            
+            if(type !== 'time') {
+                setTimeout(() => {
+                    powerupActive = null;
+                    multiplier = 1;
+                    player.speed = 5;
+                    display.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById('finalScore').textContent = '$' + score.toLocaleString();
+            document.getElementById('gameOverScreen').style.display = 'flex';
+        }
+        
+        // --- Game Loop ---
+        function gameLoop(timestamp) {
+            if(!gameRunning) return;
+            
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+            
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Update player
+            player.x += player.dx;
+            player.y += player.dy;
+            
+            // Boundaries
+            if(player.x < player.size) player.x = player.size;
+            if(player.x > canvas.width - player.size) player.x = canvas.width - player.size;
+            if(player.y < player.size) player.y = player.size;
+            if(player.y > canvas.height - player.size) player.y = canvas.height - player.size;
+            
+            // Draw player
+            ctx.fillStyle = powerupActive === 'shield' ? '#0088ff' : '#00ff00';
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Player glow
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = powerupActive === 'shield' ? '#0088ff' : '#00ff00';
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // Update and draw money bags
+            for(let i = moneyBags.length - 1; i >= 0; i--) {
+                const bag = moneyBags[i];
+                bag.y += bag.speed;
+                
+                // Draw money bag
+                ctx.fillStyle = '#00ff00';
+                ctx.beginPath();
+                ctx.arc(bag.x, bag.y, bag.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Dollar sign
+                ctx.fillStyle = '#000';
+                ctx.font = `bold ${bag.size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('$', bag.x, bag.y);
+                
+                // Collision with player
+                const dist = Math.sqrt((player.x - bag.x)**2 + (player.y - bag.y)**2);
+                if(dist < player.size + bag.size) {
+                    score += bag.value * multiplier;
+                    createParticles(bag.x, bag.y, '#00ff00', 15);
+                    moneyBags.splice(i, 1);
+                    updateUI();
+                }
+                
+                // Remove off-screen
+                if(bag.y > canvas.height + bag.size) {
+                    moneyBags.splice(i, 1);
+                }
+            }
+            
+            // Update and draw bad bags
+            for(let i = badBags.length - 1; i >= 0; i--) {
+                const bag = badBags[i];
+                bag.y += bag.speed;
+                
+                // Draw bad bag
+                ctx.fillStyle = '#ff0000';
+                ctx.beginPath();
+                ctx.arc(bag.x, bag.y, bag.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // X mark
+                ctx.fillStyle = '#000';
+                ctx.font = `bold ${bag.size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('X', bag.x, bag.y);
+                
+                // Collision
+                const dist = Math.sqrt((player.x - bag.x)**2 + (player.y - bag.y)**2);
+                if(dist < player.size + bag.size) {
+                    if(powerupActive === 'shield') {
+                        createParticles(bag.x, bag.y, '#0088ff', 20);
+                        badBags.splice(i, 1);
+                    } else {
+                        score = Math.max(0, score - 500);
+                        createParticles(player.x, player.y, '#ff0000', 20);
+                        badBags.splice(i, 1);
+                        updateUI();
+                        
+                        // Screen shake
+                        canvas.style.transform = 'translate(5px, 5px)';
+                        setTimeout(() => canvas.style.transform = '', 100);
+                    }
+                }
+                
+                if(bag.y > canvas.height + bag.size) {
+                    badBags.splice(i, 1);
+                }
+            }
+            
+            // Update and draw powerups
+            for(let i = powerups.length - 1; i >= 0; i--) {
+                const p = powerups[i];
+                p.y += p.speed;
+                
+                // Draw powerup
+                const colors = {
+                    multiplier: '#ffff00',
+                    speed: '#00ffff',
+                    shield: '#0088ff',
+                    time: '#ff00ff'
+                };
+                const icons = {
+                    multiplier: '3x',
+                    speed: '⚡',
+                    shield: '🛡️',
+                    time: '+15'
+                };
+                
+                ctx.fillStyle = colors[p.type];
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(icons[p.type], p.x, p.y);
+                
+                // Collision
+                const dist = Math.sqrt((player.x - p.x)**2 + (player.y - p.y)**2);
+                if(dist < player.size + p.size) {
+                    activatePowerup(p.type);
+                    createParticles(p.x, p.y, colors[p.type], 15);
+                    powerups.splice(i, 1);
+                }
+                
+                if(p.y > canvas.height + p.size) {
+                    powerups.splice(i, 1);
+                }
+            }
+            
+            // Update and draw particles
+            for(let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.02;
+                
+                if(p.life <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+                
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
+    
+    <footer>💰 MONEY BAG RUN | Collect Green, Avoid Red | Mobile & Desktop Ready</footer>
+</body>
+</html>
