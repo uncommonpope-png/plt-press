@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🏛️ NEO-KEMET | Creature Collection</title>
+    <title>🏛️ NEO-KEMET | Buildings + NPCs</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-user-select:none; }
         body { background:#000; overflow:hidden; font-family:'Courier New', monospace; touch-action: none; }
@@ -30,14 +30,9 @@
         .loader { width:60px; height:60px; border:4px solid rgba(255,170,102,0.2); border-top-color:#ffaa66; border-radius:50%; animation:spin 1s linear infinite; }
         @keyframes spin { to { transform:rotate(360deg); } }
         #loading p { color:#666; margin-top:15px; font-size:11px; }
-        .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.95); border:2px solid rgba(255,170,102,0.6); border-radius:20px; padding:20px; z-index:200; min-width:320px; max-width:85vw; display:none; max-height:70vh; overflow-y:auto; }
-        .modal.active { display:block; }
-        .modal h3 { color:#ffaa66; margin-bottom:15px; text-align:center; }
-        .close-modal { float:right; background:none; border:none; color:#ffaa66; font-size:20px; cursor:pointer; }
-        .creature-entry { background:rgba(255,170,102,0.1); border:1px solid rgba(255,170,102,0.4); border-radius:10px; padding:10px; margin:8px 0; font-size:11px; }
         #desktopControls { position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,0.85); border-radius:12px; padding:10px; color:#888; font-size:9px; z-index:10; border:2px solid rgba(255,255,255,0.1); }
         #fpsDisplay { position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.85); border-radius:10px; padding:8px; color:#00ff00; font-size:10px; z-index:10; }
-        #creatureDex { position:absolute; bottom:60px; right:10px; background:rgba(0,0,0,0.85); border-radius:12px; padding:10px; color:#ff8844; font-size:10px; z-index:10; border:2px solid rgba(255,136,68,0.4); display:none; }
+        #npcDisplay { position:absolute; bottom:60px; left:10px; background:rgba(0,0,0,0.85); border-radius:12px; padding:10px; color:#ffaa66; font-size:10px; z-index:10; border:2px solid rgba(255,170,102,0.4); display:none; }
         footer { position:absolute; bottom:5px; left:0; right:0; text-align:center; font-size:8px; color:#444; pointer-events:none; }
     </style>
 </head>
@@ -51,14 +46,15 @@
             <button class="action-btn" id="flyDownBtn">▼</button>
         </div>
         <div id="topBar">
-            <button class="top-btn" onclick="toggleCreatureDex()">🦎 Dex</button>
+            <button class="top-btn" onclick="toggleNPCList()">👥 NPCs</button>
             <button class="top-btn" onclick="teleportToSpawn()">🔄 Spawn</button>
         </div>
         <div id="regionInfo">
             <div id="regionName">🏛️ Delta Sprawl</div>
             <div class="stat-row"><span>Biome:</span><span id="biomeDisplay">Flooded Urban</span></div>
+            <div class="stat-row"><span>Buildings:</span><span id="buildingCount">0</span></div>
+            <div class="stat-row"><span>NPCs:</span><span id="npcCount">0</span></div>
             <div class="stat-row"><span>Creatures:</span><span id="creatureCount">0</span></div>
-            <div class="stat-row"><span>Seen:</span><span id="seenCount">0</span>/20</div>
         </div>
         <div id="coords">
             <div>X: <span id="posX">0</span></div>
@@ -67,52 +63,52 @@
         </div>
         <div id="desktopControls"><div>WASD: Move | Mouse: Look (click) | Space: Up | Shift: Down</div></div>
         <div id="fpsDisplay">FPS: <span id="fpsValue">60</span></div>
-        <div id="creatureDex"><div id="dexList"></div></div>
+        <div id="npcDisplay"><div id="npcList"></div></div>
     </div>
     <div id="loading">
         <h1>🏛️ NEO-KEMET</h1>
         <div class="loader"></div>
-        <p>Loading Creatures...</p>
+        <p>Loading Buildings & NPCs...</p>
     </div>
 
     <script>
-        // === CREATURE DATABASE (Pokemon/Digimon Inspired) ===
-        const CREATURE_DATABASE = [
-            // Fire Types
-            { id:1, name:"Pyrodrake", type:"fire", hp:80, attack:65, defense:50, speed:70, color:"#ff6644", secondary:"#ffcc00", description:"Dragon-like creature with flaming tail", size:35, habitat:["core", "exclusion"] },
-            { id:2, name:"Infernox", type:"fire", hp:90, attack:75, defense:60, speed:55, color:"#ff3300", secondary:"#ff9900", description:"Bipedal beast with fire mane", size:40, habitat:["exclusion"] },
-            { id:3, name:"Flameowl", type:"fire", hp:60, attack:55, defense:40, speed:85, color:"#ff8844", secondary:"#ffff66", description:"Owl with fiery feathers", size:25, habitat:["core", "dunes"] },
-            
-            // Water Types
-            { id:4, name:"Aquatort", type:"water", hp:100, attack:50, defense:90, speed:40, color:"#4488ff", secondary:"#66ccff", description:"Turtle with water shell", size:38, habitat:["delta"] },
-            { id:5, name:"Tidalon", type:"water", hp:75, attack:70, defense:55, speed:75, color:"#0066cc", secondary:"#00ccff", description:"Dolphin-like sky swimmer", size:30, habitat:["delta", "aether"] },
-            { id:6, name:"Krakken", type:"water", hp:85, attack:80, defense:65, speed:50, color:"#004488", secondary:"#0088cc", description:"Octopus creature with tentacles", size:45, habitat:["delta"] },
-            
-            // Grass Types
-            { id:7, name:"Verdantaur", type:"grass", hp:95, attack:60, defense:80, speed:45, color:"#22cc44", secondary:"#66ff88", description:"Bull with plant horns", size:42, habitat:["delta", "dunes"] },
-            { id:8, name:"Leafwing", type:"grass", hp:65, attack:55, defense:45, speed:90, color:"#44dd66", secondary:"#88ffaa", description:"Butterfly with leaf patterns", size:28, habitat:["delta"] },
-            { id:9, name:"Treantle", type:"grass", hp:110, attack:65, defense:85, speed:35, color:"#338844", secondary:"#66aa77", description:"Walking tree creature", size:50, habitat:["delta"] },
-            
-            // Electric Types
-            { id:10, name:"Voltiger", type:"electric", hp:70, attack:75, defense:50, speed:95, color:"#ffdd00", secondary:"#ff8800", description:"Tiger with electric stripes", size:38, habitat:["core"] },
-            { id:11, name:"Sparkit", type:"electric", hp:55, attack:60, defense:40, speed:100, color:"#ffff44", secondary:"#ffcc00", description:"Small cat with charged fur", size:22, habitat:["core", "aether"] },
-            { id:12, name:"Thunderoc", type:"electric", hp:80, attack:85, defense:60, speed:70, color:"#ffaa00", secondary:"#ffff00", description:"Bird that rides lightning", size:35, habitat:["aether"] },
-            
-            // Psychic Types
-            { id:13, name:"Mindrake", type:"psychic", hp:65, attack:90, defense:45, speed:80, color:"#cc66ff", secondary:"#ff66cc", description:"Dragon with psychic powers", size:40, habitat:["aether"] },
-            { id:14, name:"Nebulox", type:"psychic", hp:75, attack:70, defense:55, speed:75, color:"#9966ff", secondary:"#cc99ff", description:"Fox with cosmic aura", size:32, habitat:["aether", "core"] },
-            { id:15, name:"Oracleye", type:"psychic", hp:60, attack:65, defense:50, speed:70, color:"#aa88ff", secondary:"#ddaaff", description:"Floating eye that sees future", size:25, habitat:["aether"] },
-            
-            // Dark Types
-            { id:16, name:"Shadowfang", type:"dark", hp:75, attack:85, defense:55, speed:80, color:"#442266", secondary:"#8844aa", description:"Wolf with shadow cloak", size:38, habitat:["exclusion", "core"] },
-            { id:17, name:"Grimmaw", type:"dark", hp:85, attack:80, defense:65, speed:60, color:"#331144", secondary:"#663377", description:"Crow-like predator", size:30, habitat:["exclusion"] },
-            { id:18, name:"Phantomime", type:"dark", hp:70, attack:75, defense:50, speed:85, color:"#552266", secondary:"#9955aa", description:"Mimic creature of shadows", size:35, habitat:["core", "exclusion"] },
-            
-            // Dragon Types
-            { id:19, name:"Apexwyrm", type:"dragon", hp:120, attack:95, defense:85, speed:65, color:"#ff6688", secondary:"#ffccdd", description:"Ancient dragon king", size:55, habitat:["aether"] },
-            { id:20, name:"Seraphyne", type:"dragon", hp:90, attack:80, defense:70, speed:85, color:"#ffffff", secondary:"#ffaaaa", description:"Angel dragon hybrid", size:45, habitat:["aether", "core"] }
+        // === BUILDING DATABASE ===
+        const BUILDING_TYPES = [
+            { name:'Pyramid Tower', width:60, depth:60, height:180, style:'pyramid', windows:'grid' },
+            { name:'Corporate Spire', width:50, depth:50, height:220, style:'tower', windows:'vertical' },
+            { name:'Temple Complex', width:80, depth:70, height:100, style:'temple', windows:'arched' },
+            { name:'Neon Plaza', width:70, depth:60, height:140, style:'plaza', windows:'neon' },
+            { name:'Data Fortress', width:55, depth:55, height:160, style:'fortress', windows:'digital' },
+            { name:'Market District', width:90, depth:80, height:80, style:'market', windows:'stalls' },
+            { name:'Residential Block', width:45, depth:45, height:120, style:'residential', windows:'uniform' },
+            { name:'Industrial Hub', width:75, depth:65, height:100, style:'industrial', windows:'minimal' }
         ];
-        
+
+        // === NPC DATABASE ===
+        const NPC_TYPES = [
+            { name:'Dealer', role:'Trader', color:'#ff6644', speed:15, talk:'Looking for rare souls?' },
+            { name:'Guard', role:'Security', color:'#4488ff', speed:12, talk:'Move along, citizen.' },
+            { name:'Merchant', role:'Vendor', color:'#44ff66', speed:10, talk:'Fresh goods today!' },
+            { name:'Hacker', role:'Tech', color:'#ff44ff', speed:18, talk:'Got the latest data chips.' },
+            { name:'Priest', role:'Temple', color:'#ffdd44', speed:8, talk:'The ancients watch us.' },
+            { name:'Racer', role:'Driver', color:'#ff8844', speed:22, talk:'Need a ride?' },
+            { name:'Spy', role:'Intel', color:'#6644ff', speed:20, talk:'I see everything...' },
+            { name:'Doctor', role:'Healer', color:'#44ffff', speed:10, talk:'Need healing?' },
+            { name:'Bounty Hunter', role:'Hunter', color:'#ff4466', speed:16, talk:'Got any bounties?' },
+            { name:'Archaeologist', role:'Researcher', color:'#ddaa66', speed:9, talk:'Ancient secrets await!' }
+        ];
+
+        // === CREATURE DATABASE ===
+        const CREATURE_DATABASE = [
+            { id:1, name:"Pyrodrake", type:"fire", color:"#ff6644", secondary:"#ffcc00", size:35, habitat:["core", "exclusion"] },
+            { id:2, name:"Aquatort", type:"water", color:"#4488ff", secondary:"#66ccff", size:38, habitat:["delta"] },
+            { id:3, name:"Verdantaur", type:"grass", color:"#22cc44", secondary:"#66ff88", size:42, habitat:["delta", "dunes"] },
+            { id:4, name:"Voltiger", type:"electric", color:"#ffdd00", secondary:"#ff8800", size:38, habitat:["core"] },
+            { id:5, name:"Mindrake", type:"psychic", color:"#cc66ff", secondary:"#ff66cc", size:40, habitat:["aether"] },
+            { id:6, name:"Shadowfang", type:"dark", color:"#442266", secondary:"#8844aa", size:38, habitat:["exclusion", "core"] },
+            { id:7, name:"Apexwyrm", type:"dragon", color:"#ff6688", secondary:"#ffccdd", size:55, habitat:["aether"] }
+        ];
+
         // === WORLD DATA ===
         const REGIONS = [
             { id:'delta', name:'🏛️ Delta Sprawl', cx:0, cz:0, w:8000, d:8000, biome:'Flooded Urban', ground:'#1a2a3a', fog:'#504060' },
@@ -121,33 +117,26 @@
             { id:'exclusion', name:'☢️ Exclusion Zone', cx:0, cz:-15000, w:8000, d:8000, biome:'Volcanic', ground:'#3a2a2a', fog:'#5a4a3a' },
             { id:'aether', name:'🌌 The Aether', cx:0, cz:15000, w:10000, d:10000, biome:'Orbital Void', ground:'#0a0a1a', fog:'#1a1a3a' }
         ];
-        
+
         // === GAME STATE ===
         let canvas, ctx;
         let camera = { x: 0, y: 30, z: 0, yaw: 0, pitch: -0.15 };
+        let buildings = [];
+        let npcs = [];
         let creatures = [];
         let currentRegion = REGIONS[0];
         let moveState = { fwd:false, bwd:false, left:false, right:false, up:false, down:false };
         let touchMove = { x:0, y:0 };
         let lastTime = 0;
-        let audioContext = null;
-        let bgmGain = null;
-        
-        function initAudio() {
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                bgmGain = audioContext.createGain();
-                bgmGain.gain.value = 0.3;
-                bgmGain.connect(audioContext.destination);
-            } catch(e) { console.log("Audio not supported"); }
-        }
         let fps = 60, frameCount = 0, lastFpsTime = 0;
         let gameRunning = false;
-        let renderDistance = 600;
-        let maxCreatures = 20;
-        let seenCreatures = new Set();
-        let creatureImages = {};
-        
+        let renderDistance = 500;
+        let maxBuildings = 80;
+        let maxNPCs = 25;
+        let maxCreatures = 15;
+        let buildingSprites = {};
+        let npcSprites = {};
+
         // === INIT ===
         window.addEventListener('load', () => {
             canvas = document.getElementById('gameCanvas');
@@ -155,27 +144,34 @@
             resize();
             window.addEventListener('resize', resize);
             setupControls();
+            createBuildingSprites();
+            createNPCSprites();
             createCreatureSprites();
-            
+
             setTimeout(() => {
                 document.getElementById('loading').style.display = 'none';
                 gameRunning = true;
                 lastTime = performance.now();
                 lastFpsTime = lastTime;
                 requestAnimationFrame(gameLoop);
-                
+
+                // Spawn NPCs
+                setInterval(() => {
+                    if(gameRunning && npcs.length < maxNPCs) spawnNPC();
+                }, 3000);
+
                 // Spawn creatures
                 setInterval(() => {
                     if(gameRunning && creatures.length < maxCreatures) spawnCreature();
-                }, 2500);
-            }, 2000);
+                }, 4000);
+            }, 2500);
         });
-        
+
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
-        
+
         function setupControls() {
             document.addEventListener('keydown', e => {
                 if(e.code==='KeyW' || e.code==='ArrowUp') moveState.fwd=true;
@@ -193,7 +189,7 @@
                 if(e.code==='Space') moveState.up=false;
                 if(e.code==='ShiftLeft') moveState.down=false;
             });
-            
+
             document.addEventListener('mousemove', e => {
                 if(document.pointerLockElement === canvas) {
                     camera.yaw -= e.movementX * 0.002;
@@ -204,33 +200,33 @@
             canvas.addEventListener('click', () => {
                 if(window.innerWidth > 768) canvas.requestPointerLock();
             });
-            
+
             setupJoystick('joystick', true);
             setupJoystick('lookJoystick', false);
-            
+
             document.getElementById('flyUpBtn').addEventListener('touchstart', e => { e.preventDefault(); moveState.up=true; });
             document.getElementById('flyUpBtn').addEventListener('touchend', e => { e.preventDefault(); moveState.up=false; });
             document.getElementById('flyDownBtn').addEventListener('touchstart', e => { e.preventDefault(); moveState.down=true; });
             document.getElementById('flyDownBtn').addEventListener('touchend', e => { e.preventDefault(); moveState.down=false; });
         }
-        
+
         function setupJoystick(id, isMove) {
             const joy = document.getElementById(id);
             const knob = joy.querySelector('.joystick-knob');
             const maxDist = 50;
             let active = false;
-            
+
             joy.addEventListener('touchstart', e => {
                 e.preventDefault();
                 active = true;
                 handleJoystick(e, joy, knob, maxDist, isMove);
             }, {passive:false});
-            
+
             joy.addEventListener('touchmove', e => {
                 e.preventDefault();
                 if(active) handleJoystick(e, joy, knob, maxDist, isMove);
             }, {passive:false});
-            
+
             joy.addEventListener('touchend', e => {
                 e.preventDefault();
                 active = false;
@@ -238,23 +234,23 @@
                 if(isMove) { touchMove.x = 0; touchMove.y = 0; moveState.fwd = moveState.bwd = moveState.left = moveState.right = false; }
             });
         }
-        
+
         function handleJoystick(e, joy, knob, maxDist, isMove) {
             const touch = e.changedTouches[0];
             const rect = joy.getBoundingClientRect();
             const cx = rect.left + rect.width/2;
             const cy = rect.top + rect.height/2;
-            
+
             let dx = touch.clientX - cx;
             let dy = touch.clientY - cy;
             const dist = Math.sqrt(dx*dx + dy*dy);
-            
+
             if(dist > maxDist) { dx = (dx/dist) * maxDist; dy = (dy/dist) * maxDist; }
-            
+
             knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-            
+
             const nx = dx/maxDist, ny = dy/maxDist;
-            
+
             if(isMove) {
                 touchMove.x = nx; touchMove.y = ny;
                 moveState.fwd = ny < -0.3; moveState.bwd = ny > 0.3;
@@ -265,7 +261,196 @@
                 camera.pitch = Math.max(-0.4, Math.min(0.3, camera.pitch));
             }
         }
-        
+
+        // === CREATE BUILDING SPRITES ===
+        function createBuildingSprites() {
+            BUILDING_TYPES.forEach(type => {
+                const spriteCanvas = document.createElement('canvas');
+                spriteCanvas.width = 256;
+                spriteCanvas.height = 256;
+                const sctx = spriteCanvas.getContext('2d');
+
+                drawBuildingSprite(sctx, type);
+                buildingSprites[type.name] = spriteCanvas;
+            });
+        }
+
+        function drawBuildingSprite(ctx, type) {
+            const cx = 128, cy = 128;
+            const w = type.width * 0.8;
+            const h = type.height * 0.8;
+
+            ctx.save();
+            ctx.translate(cx, cy + h/2);
+
+            // Main building body
+            const gradient = ctx.createLinearGradient(0, -h, 0, h);
+            gradient.addColorStop(0, '#5a5a6a');
+            gradient.addColorStop(1, '#2a2a3a');
+            ctx.fillStyle = gradient;
+
+            if(type.style === 'pyramid') {
+                // Pyramid shape with steps
+                const steps = 8;
+                for(let i = 0; i < steps; i++) {
+                    const stepH = h / steps;
+                    const stepW = w * (1 - i/steps);
+                    ctx.fillStyle = i % 2 === 0 ? '#4a4a5a' : '#3a3a4a';
+                    ctx.fillRect(-stepW/2, -h + i*stepH, stepW, stepH);
+                }
+                // Neon cap
+                ctx.fillStyle = '#ff6644';
+                ctx.beginPath();
+                ctx.moveTo(-w*0.1, -h);
+                ctx.lineTo(w*0.1, -h);
+                ctx.lineTo(0, -h - h*0.1);
+                ctx.fill();
+            } else if(type.style === 'tower') {
+                // Sleek tower
+                ctx.fillStyle = gradient;
+                ctx.fillRect(-w/2, -h, w, h);
+                // Vertical windows
+                ctx.fillStyle = '#66ccff';
+                for(let i = 0; i < 6; i++) {
+                    const wx = -w/2 + w*0.15 + (i * w*0.14);
+                    ctx.fillRect(wx, -h*0.9, w*0.08, h*0.85);
+                }
+                // Antenna
+                ctx.strokeStyle = '#ff4444';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(0, -h);
+                ctx.lineTo(0, -h - h*0.2);
+                ctx.stroke();
+            } else if(type.style === 'temple') {
+                // Egyptian temple
+                ctx.fillStyle = '#ddaa66';
+                ctx.fillRect(-w/2, -h*0.6, w, h*0.6);
+                // Columns
+                ctx.fillStyle = '#cc9955';
+                for(let i = 0; i < 5; i++) {
+                    const cx_ = -w/2 + w*0.1 + i * w*0.2;
+                    ctx.fillRect(cx_ - w*0.08, -h*0.6, w*0.16, h*0.6);
+                }
+                // Hieroglyphics band
+                ctx.fillStyle = '#ff6644';
+                ctx.fillRect(-w/2, -h*0.4, w, h*0.1);
+            } else if(type.style === 'plaza') {
+                // Neon plaza
+                ctx.fillStyle = '#3a3a4a';
+                ctx.fillRect(-w/2, -h, w, h);
+                // Neon signs
+                const colors = ['#ff00ff', '#00ffff', '#ffff00', '#ff6600'];
+                for(let i = 0; i < 8; i++) {
+                    ctx.fillStyle = colors[i % colors.length];
+                    ctx.fillRect(-w/2 + i * w*0.12, -h*0.8, w*0.1, h*0.15);
+                }
+            } else {
+                // Generic building
+                ctx.fillRect(-w/2, -h, w, h);
+                // Windows
+                ctx.fillStyle = '#ffdd66';
+                const rows = 8, cols = 6;
+                for(let r = 0; r < rows; r++) {
+                    for(let c = 0; c < cols; c++) {
+                        if(Math.random() > 0.3) {
+                            ctx.fillRect(-w/2 + w*0.1 + c*w*0.13, -h*0.9 + r*h*0.11, w*0.1, h*0.08);
+                        }
+                    }
+                }
+            }
+
+            ctx.restore();
+        }
+
+        // === CREATE NPC SPRITES ===
+        function createNPCSprites() {
+            NPC_TYPES.forEach(type => {
+                const spriteCanvas = document.createElement('canvas');
+                spriteCanvas.width = 128;
+                spriteCanvas.height = 128;
+                const sctx = spriteCanvas.getContext('2d');
+
+                drawNPCSprite(sctx, type);
+                npcSprites[type.name] = spriteCanvas;
+            });
+        }
+
+        function drawNPCSprite(ctx, type) {
+            const cx = 64, cy = 64;
+            const size = 30;
+
+            ctx.save();
+            ctx.translate(cx, cy);
+
+            // Glow
+            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 1.5);
+            gradient.addColorStop(0, type.color + '66');
+            gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(0, 0, size * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Body (humanoid)
+            ctx.fillStyle = type.color;
+
+            // Head
+            ctx.beginPath();
+            ctx.arc(0, -size*0.3, size*0.35, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Eyes
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(-size*0.12, -size*0.35, size*0.08, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(size*0.12, -size*0.35, size*0.08, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Body/Torso
+            ctx.fillStyle = type.color;
+            ctx.beginPath();
+            ctx.ellipse(0, size*0.4, size*0.4, size*0.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Role-specific details
+            if(type.role === 'Trader' || type.role === 'Merchant') {
+                // Backpack/satchel
+                ctx.fillStyle = '#886644';
+                ctx.fillRect(-size*0.3, size*0.2, size*0.6, size*0.3);
+            } else if(type.role === 'Guard' || type.role === 'Hunter') {
+                // Armor plating
+                ctx.fillStyle = '#666677';
+                ctx.beginPath();
+                ctx.arc(0, size*0.3, size*0.35, Math.PI, 0);
+                ctx.fill();
+            } else if(type.role === 'Hacker' || type.role === 'Tech') {
+                // Tech gear
+                ctx.fillStyle = '#44ff66';
+                ctx.fillRect(-size*0.2, size*0.5, size*0.4, size*0.2);
+            } else if(type.role === 'Priest') {
+                // Robes
+                ctx.fillStyle = '#ffdd44';
+                ctx.beginPath();
+                ctx.moveTo(-size*0.3, size*0.2);
+                ctx.quadraticCurveTo(0, size*0.8, size*0.3, size*0.2);
+                ctx.fill();
+            }
+
+            // Name tag
+            ctx.fillStyle = '#fff';
+            ctx.font = '10px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(type.name, 0, -size*0.6);
+            ctx.fillStyle = '#aaa';
+            ctx.font = '8px monospace';
+            ctx.fillText(type.role, 0, -size*0.45);
+
+            ctx.restore();
+        }
+
         // === CREATE CREATURE SPRITES ===
         function createCreatureSprites() {
             CREATURE_DATABASE.forEach(creature => {
@@ -273,212 +458,61 @@
                 spriteCanvas.width = 128;
                 spriteCanvas.height = 128;
                 const sctx = spriteCanvas.getContext('2d');
-                
-                // Draw creature based on type
                 drawCreatureSprite(sctx, creature);
-                
-                creatureImages[creature.id] = spriteCanvas;
+                creatureSprites[creature.id] = spriteCanvas;
             });
         }
-        
+
+        let creatureSprites = {};
         function drawCreatureSprite(ctx, creature) {
             const cx = 64, cy = 64;
-            const size = creature.size;
-            
+            const size = creature.size * 0.8;
+
             ctx.save();
             ctx.translate(cx, cy);
-            
-            // Glow effect
+
+            // Glow
             const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 1.5);
             gradient.addColorStop(0, creature.color + '88');
             gradient.addColorStop(1, 'transparent');
-            ctx.globalAlpha = 1.0; ctx.fillStyle = gradient;
+            ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.arc(0, 0, size * 1.5, 0, Math.PI * 2);
             ctx.fill();
-            
-            // Body
-            ctx.globalAlpha = 1.0; ctx.fillStyle = creature.color;
-            
-            if(creature.type === 'fire') {
-                // Dragon-like body
-                ctx.beginPath();
-                ctx.ellipse(0, 10, size * 0.6, size * 0.8, 0, 0, Math.PI * 2);
-                ctx.fill();
-                // Head
-                ctx.beginPath();
-                ctx.arc(0, -size * 0.5, size * 0.4, 0, Math.PI * 2);
-                ctx.fill();
-                // Wings
-                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary;
-                ctx.beginPath();
-                ctx.moveTo(-size * 0.3, 0);
-                ctx.lineTo(-size * 0.8, -size * 0.3);
-                ctx.lineTo(-size * 0.5, size * 0.3);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.moveTo(size * 0.3, 0);
-                ctx.lineTo(size * 0.8, -size * 0.3);
-                ctx.lineTo(size * 0.5, size * 0.3);
-                ctx.fill();
-                // Flame tail
-                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary;
-                ctx.beginPath();
-                ctx.moveTo(0, size * 0.7);
-                ctx.quadraticCurveTo(-size * 0.3, size * 1.2, -size * 0.2, size * 1.5);
-                ctx.quadraticCurveTo(0, size * 1.3, size * 0.2, size * 1.5);
-                ctx.quadraticCurveTo(size * 0.3, size * 1.2, 0, size * 0.7);
-                ctx.fill();
-            } else if(creature.type === 'water') {
-                // Aquatic body
-                ctx.beginPath();
-                ctx.ellipse(0, 0, size * 0.7, size * 0.5, 0, 0, Math.PI * 2);
-                ctx.fill();
-                // Shell/fin
-                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary;
-                ctx.beginPath();
-                ctx.arc(0, -size * 0.2, size * 0.5, Math.PI, 0);
-                ctx.fill();
-                // Flippers
-                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.color;
-                ctx.beginPath();
-                ctx.ellipse(-size * 0.6, 0, size * 0.3, size * 0.2, -0.3, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.ellipse(size * 0.6, 0, size * 0.3, size * 0.2, 0.3, 0, Math.PI * 2);
-                ctx.fill();
-            } else if(creature.type === 'grass') {
-                // Plant-like body
-                ctx.beginPath();
-                ctx.ellipse(0, 15, size * 0.5, size * 0.6, 0, 0, Math.PI * 2);
-                ctx.fill();
-                // Leaves
-                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary;
-                for(let i = 0; i < 5; i++) {
-                    const angle = (i / 5) * Math.PI - Math.PI / 2;
-                    ctx.save();
-                    ctx.rotate(angle);
-                    ctx.beginPath();
-                    ctx.ellipse(0, -size * 0.6, size * 0.2, size * 0.5, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
-                }
-            } else if(creature.type === 'electric') {
-                // Feline body
-                ctx.beginPath();
-                ctx.ellipse(0, 10, size * 0.6, size * 0.5, 0, 0, Math.PI * 2);
-                ctx.fill();
-                // Head
-                ctx.beginPath();
-                ctx.arc(0, -size * 0.3, size * 0.35, 0, Math.PI * 2);
-                ctx.fill();
-                // Ears
-                ctx.beginPath();
-                ctx.moveTo(-size * 0.2, -size * 0.5);
-                ctx.lineTo(-size * 0.3, -size * 0.8);
-                ctx.lineTo(-size * 0.1, -size * 0.6);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.moveTo(size * 0.2, -size * 0.5);
-                ctx.lineTo(size * 0.3, -size * 0.8);
-                ctx.lineTo(size * 0.1, -size * 0.6);
-                ctx.fill();
-                // Lightning tail
-                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary;
-                ctx.beginPath();
-                ctx.moveTo(0, size * 0.4);
-                ctx.lineTo(-size * 0.2, size * 0.8);
-                ctx.lineTo(size * 0.1, size * 0.7);
-                ctx.lineTo(-size * 0.1, size * 1.1);
-                ctx.lineTo(size * 0.2, size * 0.9);
-                ctx.lineTo(size * 0.1, size * 0.5);
-                ctx.closePath();
-                ctx.fill();
-            } else if(creature.type === 'psychic') {
-                // Floating body
-                ctx.beginPath();
-                ctx.arc(0, 0, size * 0.5, 0, Math.PI * 2);
-                ctx.fill();
-                // Psychic ring
-                ctx.strokeStyle = creature.secondary;
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.ellipse(0, 0, size * 0.8, size * 0.3, 0, 0, Math.PI * 2);
-                ctx.stroke();
-                // Orbiting orbs
-                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary;
-                for(let i = 0; i < 3; i++) {
-                    const angle = (Date.now() * 0.002 + (i / 3) * Math.PI * 2);
-                    const ox = Math.cos(angle) * size * 0.8;
-                    const oy = Math.sin(angle) * size * 0.3;
-                    ctx.beginPath();
-                    ctx.arc(ox, oy, size * 0.15, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            } else if(creature.type === 'dark') {
-                // Shadowy body
-                ctx.beginPath();
-                ctx.ellipse(0, 10, size * 0.5, size * 0.7, 0, 0, Math.PI * 2);
-                ctx.fill();
-                // Cloak
-                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary + 'cc';
-                ctx.beginPath();
-                ctx.moveTo(-size * 0.4, -size * 0.3);
-                ctx.quadraticCurveTo(-size * 0.6, size * 0.5, -size * 0.5, size * 0.8);
-                ctx.quadraticCurveTo(0, size * 0.6, size * 0.5, size * 0.8);
-                ctx.quadraticCurveTo(size * 0.6, size * 0.5, size * 0.4, -size * 0.3);
-                ctx.quadraticCurveTo(0, -size * 0.5, -size * 0.4, -size * 0.3);
-                ctx.fill();
-                // Glowing eyes
-                ctx.globalAlpha = 1.0; ctx.fillStyle = '#ff0000';
-                ctx.beginPath();
-                ctx.arc(-size * 0.15, -size * 0.2, size * 0.1, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(size * 0.15, -size * 0.2, size * 0.1, 0, Math.PI * 2);
-                ctx.fill();
-            } else if(creature.type === 'dragon') {
-                // Majestic dragon body
-                ctx.beginPath();
-                ctx.ellipse(0, 15, size * 0.7, size * 0.9, 0, 0, Math.PI * 2);
-                ctx.fill();
-                // Head
-                ctx.beginPath();
-                ctx.arc(0, -size * 0.6, size * 0.45, 0, Math.PI * 2);
-                ctx.fill();
-                // Horns
-                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary;
-                ctx.beginPath();
-                ctx.moveTo(-size * 0.2, -size * 0.8);
-                ctx.lineTo(-size * 0.4, -size * 1.2);
-                ctx.lineTo(-size * 0.15, -size * 0.9);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.moveTo(size * 0.2, -size * 0.8);
-                ctx.lineTo(size * 0.4, -size * 1.2);
-                ctx.lineTo(size * 0.15, -size * 0.9);
-                ctx.fill();
-                // Large wings
-                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.color + 'aa';
-                ctx.beginPath();
-                ctx.moveTo(-size * 0.4, 0);
-                ctx.quadraticCurveTo(-size * 1.2, -size * 0.5, -size * 1.0, size * 0.5);
-                ctx.lineTo(-size * 0.3, size * 0.3);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.moveTo(size * 0.4, 0);
-                ctx.quadraticCurveTo(size * 1.2, -size * 0.5, size * 1.0, size * 0.5);
-                ctx.lineTo(size * 0.3, size * 0.3);
-                ctx.fill();
-            }
-            
+
+            // Body based on type
+            ctx.fillStyle = creature.color;
+            ctx.beginPath();
+            ctx.ellipse(0, 10, size * 0.5, size * 0.6, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Head
+            ctx.beginPath();
+            ctx.arc(0, -size * 0.4, size * 0.35, 0, Math.PI * 2);
+            ctx.fill();
+
             ctx.restore();
         }
-        
+
+        function spawnNPC() {
+            const template = NPC_TYPES[Math.floor(Math.random() * NPC_TYPES.length)];
+            npcs.push({
+                ...template,
+                x: camera.x + (Math.random() - 0.5) * 200,
+                z: camera.z + (Math.random() - 0.5) * 200,
+                vx: (Math.random() - 0.5) * template.speed,
+                vz: (Math.random() - 0.5) * template.speed,
+                age: 0,
+                rotation: Math.random() * Math.PI * 2,
+                animPhase: Math.random() * Math.PI * 2
+            });
+            document.getElementById('npcCount').textContent = npcs.length;
+        }
+
         function spawnCreature() {
             const available = CREATURE_DATABASE.filter(c => c.habitat.includes(currentRegion.id));
             if(available.length === 0) return;
-            
+
             const template = available[Math.floor(Math.random() * available.length)];
             creatures.push({
                 ...template,
@@ -494,82 +528,106 @@
             });
             document.getElementById('creatureCount').textContent = creatures.length;
         }
-        
+
         function project(x, y, z) {
             const dx = x - camera.x;
             const dy = y - camera.y;
             const dz = z - camera.z;
-            
+
             const rx = dx * Math.cos(camera.yaw) - dz * Math.sin(camera.yaw);
             const rz = dx * Math.sin(camera.yaw) + dz * Math.cos(camera.yaw);
             const ry = dy * Math.cos(camera.pitch) - rz * Math.sin(camera.pitch);
             const rz2 = dy * Math.sin(camera.pitch) + rz * Math.cos(camera.pitch);
-            
+
             if(rz2 <= 2) return null;
-            
+
             const fov = 500;
             const scale = fov / rz2;
-            
+
             return { x: canvas.width/2 + rx * scale, y: canvas.height/2 - ry * scale, scale: scale, z: rz2 };
         }
-        
-        function drawCreature(c) {
-            const p = project(c.x, c.y, c.z);
+
+        function drawBuilding(b) {
+            const p = project(b.x, b.y + b.height/2, b.z);
             if(!p || p.scale < 0.008 || p.z > renderDistance) return;
-            
-            // Mark as seen
-            if(!seenCreatures.has(c.id)) {
-                seenCreatures.add(c.id);
-                document.getElementById('seenCount').textContent = seenCreatures.size;
-            }
-            
-            const s = c.size * p.scale * 0.35;
-            const sprite = creatureImages[c.id];
-            
+
+            const s = Math.min(p.scale * 80, 300);
+            const sprite = buildingSprites[b.type];
+
             if(sprite) {
-                // Draw animated sprite
-                c.animPhase += 0.05;
-                const bounce = Math.sin(c.animPhase) * 5;
-                
+                ctx.drawImage(sprite, p.x - s/2, p.y - s, s, s);
+            }
+
+            // Building name (if close)
+            if(p.z < 150) {
+                ctx.fillStyle = '#fff';
+                ctx.font = '10px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(b.name, p.x, p.y - s - 5);
+            }
+        }
+
+        function drawNPC(n) {
+            const p = project(n.x, n.y, n.z);
+            if(!p || p.scale < 0.008 || p.z > renderDistance) return;
+
+            const s = 40 * p.scale * 0.5;
+            const sprite = npcSprites[n.name];
+
+            if(sprite) {
                 ctx.save();
-                ctx.translate(p.x, p.y + bounce);
-                
-                // Face camera
-                const flip = Math.sin(camera.yaw - Math.atan2(c.z - camera.z, c.x - camera.x)) > 0;
+                ctx.translate(p.x, p.y);
+                const flip = Math.sin(camera.yaw - Math.atan2(n.z - camera.z, n.x - camera.x)) > 0;
                 ctx.scale(flip ? -1 : 1, 1);
-                
                 ctx.drawImage(sprite, -s, -s, s * 2, s * 2);
                 ctx.restore();
             }
-            
-            // Name tag
+        }
+
+        function drawCreature(c) {
+            const p = project(c.x, c.y, c.z);
+            if(!p || p.scale < 0.008 || p.z > renderDistance) return;
+
+            const s = c.size * p.scale * 0.35;
+            const sprite = creatureSprites[c.id];
+
+            if(sprite) {
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                c.animPhase += 0.05;
+                const bounce = Math.sin(c.animPhase) * 5;
+                const flip = Math.sin(camera.yaw - Math.atan2(c.z - camera.z, c.x - camera.x)) > 0;
+                ctx.scale(flip ? -1 : 1, 1);
+                ctx.drawImage(sprite, -s, -s + bounce, s * 2, s * 2);
+                ctx.restore();
+            }
+
             if(p.z < 200) {
-                ctx.globalAlpha = 1.0; ctx.fillStyle = '#fff';
+                ctx.fillStyle = '#fff';
                 ctx.font = '10px monospace';
                 ctx.textAlign = 'center';
-                ctx.fillText(c.name, p.x, p.y - s - 5);
+                ctx.fillText(c.name, p.x, p.y - s - 10);
             }
         }
-        
+
         function drawGround() {
             const horizon = canvas.height / 2 - camera.pitch * 150;
             const gradient = ctx.createLinearGradient(0, horizon, 0, canvas.height);
             gradient.addColorStop(0, currentRegion.fog);
             gradient.addColorStop(1, currentRegion.ground);
-            ctx.globalAlpha = 1.0; ctx.fillStyle = gradient;
+            ctx.fillStyle = gradient;
             ctx.fillRect(0, horizon, canvas.width, canvas.height - horizon);
         }
-        
+
         function drawSky() {
             const horizon = canvas.height / 2 - camera.pitch * 150;
             const gradient = ctx.createLinearGradient(0, 0, 0, horizon);
             gradient.addColorStop(0, '#050510');
             gradient.addColorStop(1, currentRegion.fog);
-            ctx.globalAlpha = 1.0; ctx.fillStyle = gradient;
+            ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, horizon);
-            
-            // Stars
-            ctx.globalAlpha = 1.0; ctx.fillStyle = '#fff';
+
+            ctx.fillStyle = '#fff';
             ctx.globalAlpha = 0.6;
             for(let i = 0; i < 30; i++) {
                 const sx = ((i * 137.5) % canvas.width);
@@ -580,17 +638,7 @@
             }
             ctx.globalAlpha = 1;
         }
-        
-        // Performance: Occlusion Culling
-        function occlusionCulling(objects) {
-            return objects.filter(obj => {
-                const dx = obj.x - camera.x;
-                const dz = obj.z - camera.z;
-                const dist = Math.sqrt(dx*dx + dz*dz);
-                return dist < 1000; // Only render within 1km
-            });
-        }
-        
+
         function checkRegionChange() {
             for(const region of REGIONS) {
                 const hw = region.w / 2, hd = region.d / 2;
@@ -600,42 +648,41 @@
                         currentRegion = region;
                         document.getElementById('regionName').textContent = region.name;
                         document.getElementById('biomeDisplay').textContent = region.biome;
+                        npcs = [];
                         creatures = [];
                         break;
                     }
                 }
             }
         }
-        
-        window.toggleCreatureDex = () => {
-            const dex = document.getElementById('creatureDex');
-            const list = document.getElementById('dexList');
-            
-            if(dex.style.display === 'block') {
-                dex.style.display = 'none';
+
+        window.toggleNPCList = () => {
+            const display = document.getElementById('npcDisplay');
+            const list = document.getElementById('npcList');
+
+            if(display.style.display === 'block') {
+                display.style.display = 'none';
             } else {
-                let html = '<b style="color:#ffaa66">CREATURE DEX</b><br><br>';
-                CREATURE_DATABASE.forEach(c => {
-                    const seen = seenCreatures.has(c.id);
-                    html += `<div class="creature-entry" style="${seen ? '' : 'opacity:0.5'}">
-                        <b style="color:${c.color}">${c.name}</b> ${seen ? '✓' : '🔒'}<br>
-                        <span style="color:#888">${c.type} | HP:${c.hp} ATK:${c.attack}</span><br>
-                        <span style="color:#666; font-size:9px">${seen ? c.description : '???'}</span>
+                let html = '<b style="color:#ffaa66">NPC ROSTER</b><br><br>';
+                NPC_TYPES.forEach(n => {
+                    html += `<div style="background:rgba(255,170,102,0.1); border:1px solid rgba(255,170,102,0.3); border-radius:8px; padding:8px; margin:6px 0;">
+                        <b style="color:${n.color}">${n.name}</b> - ${n.role}<br>
+                        <span style="color:#888; font-size:9px">"${n.talk}"</span>
                     </div>`;
                 });
                 list.innerHTML = html;
-                dex.style.display = 'block';
+                display.style.display = 'block';
             }
         };
-        
+
         window.teleportToSpawn = () => {
             camera.x = 0; camera.y = 30; camera.z = 0; camera.yaw = 0; camera.pitch = -0.15;
         };
-        
+
         function gameLoop(timestamp) {
             if(!gameRunning) return;
             requestAnimationFrame(gameLoop);
-            
+
             frameCount++;
             if(timestamp - lastFpsTime >= 500) {
                 fps = Math.round(frameCount * 1000 / (timestamp - lastFpsTime));
@@ -643,19 +690,19 @@
                 lastFpsTime = timestamp;
                 document.getElementById('fpsValue').textContent = fps;
             }
-            
+
             const dt = Math.min((timestamp - lastTime) / 1000, 0.1);
             lastTime = timestamp;
-            
-            ctx.globalAlpha = 1.0; ctx.fillStyle = '#000';
+
+            ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+
             drawSky();
-            
+
             const speed = 60;
             const dirX = Math.sin(camera.yaw), dirZ = Math.cos(camera.yaw);
             const rightX = Math.sin(camera.yaw - Math.PI/2), rightZ = Math.cos(camera.yaw - Math.PI/2);
-            
+
             let dx = 0, dz = 0, dy = 0;
             if(moveState.fwd) { dx += dirX; dz += dirZ; }
             if(moveState.bwd) { dx -= dirX; dz -= dirZ; }
@@ -663,21 +710,38 @@
             if(moveState.right) { dx -= rightX; dz -= rightZ; }
             if(moveState.up) dy += speed * dt;
             if(moveState.down) dy -= speed * dt;
-            
+
             if(touchMove.x || touchMove.y) {
                 dx += dirX * -touchMove.y + rightX * touchMove.x;
                 dz += dirZ * -touchMove.y + rightZ * touchMove.x;
             }
-            
+
             camera.x += dx * speed * dt;
             camera.z += dz * speed * dt;
             camera.y += dy;
-            
+
             if(camera.y < 5) camera.y = 5;
             if(camera.y > 400) camera.y = 400;
-            
+
             checkRegionChange();
-            
+
+            // Update NPCs
+            npcs.forEach((n, i) => {
+                n.x += n.vx * dt;
+                n.z += n.vz * dt;
+                n.age++;
+                // Change direction randomly
+                if(n.age % 200 === 0) {
+                    n.vx = (Math.random() - 0.5) * n.speed;
+                    n.vz = (Math.random() - 0.5) * n.speed;
+                }
+                if(n.age > 5000 || Math.sqrt((n.x-camera.x)**2 + (n.z-camera.z)**2) > 400) {
+                    npcs.splice(i, 1);
+                }
+            });
+            document.getElementById('npcCount').textContent = npcs.length;
+
+            // Update creatures
             creatures.forEach((c, i) => {
                 c.x += c.vx * dt;
                 c.z += c.vz * dt;
@@ -688,41 +752,28 @@
                 }
             });
             document.getElementById('creatureCount').textContent = creatures.length;
-            
+
             document.getElementById('posX').textContent = Math.round(camera.x);
             document.getElementById('posY').textContent = Math.round(camera.y);
             document.getElementById('posZ').textContent = Math.round(camera.z);
-            
+
             drawGround();
-            
-            const visible = creatures.filter(c => Math.sqrt((c.x-camera.x)**2 + (c.z-camera.z)**2) < renderDistance);
-            visible.sort((a, b) => {
-                const da = Math.sqrt((a.x-camera.x)**2 + (a.z-camera.z)**2);
-                const db = Math.sqrt((b.x-camera.x)**2 + (b.z-camera.z)**2);
-                return db - da;
+
+            // Sort all objects by distance
+            const allObjects = [
+                ...buildings.map(b => ({ type:'building', obj:b, dist:Math.sqrt((b.x-camera.x)**2 + (b.z-camera.z)**2) })),
+                ...npcs.map(n => ({ type:'npc', obj:n, dist:Math.sqrt((n.x-camera.x)**2 + (n.z-camera.z)**2) })),
+                ...creatures.map(c => ({ type:'creature', obj:c, dist:Math.sqrt((c.x-camera.x)**2 + (c.z-camera.z)**2) }))
+            ];
+            allObjects.sort((a, b) => b.dist - a.dist);
+
+            allObjects.forEach(item => {
+                if(item.type === 'building') drawBuilding(item.obj);
+                else if(item.type === 'npc') drawNPC(item.obj);
+                else if(item.type === 'creature') drawCreature(item.obj);
             });
-            visible.forEach(c => drawCreature(c));
         }
     </script>
-    <footer>🏛️ NEO-KEMET | 20 Unique Creatures | Collect Them All!</footer>
+    <footer>🏛️ NEO-KEMET | Buildings + NPCs + Creatures | Explore the Ancient Cyberpunk World</footer>
 </body>
 </html>
-        
-        // Advanced Terrain Generation
-        function generateHeightmap(width, height, resolution) {
-            const heights = [];
-            for(let z = 0; z < resolution; z++) {
-                heights[z] = [];
-                for(let x = 0; x < resolution; x++) {
-                    let h = 0;
-                    // Multi-octave Perlin noise
-                    for(let o = 0; o < 4; o++) {
-                        const freq = Math.pow(2, o);
-                        const amp = Math.pow(0.5, o);
-                        h += Math.sin(x * 0.01 * freq) * Math.cos(z * 0.01 * freq) * amp;
-                    }
-                    heights[z][x] = h * 100;
-                }
-            }
-            return heights;
-        }
