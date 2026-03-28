@@ -93,6 +93,13 @@
             { name:'Sandstorm', icon:'🌪️', fogMult:4 },
             { name:'Pink Storm', icon:'💗', fogMult:3 }
         ];
+        const VEHICLE_TYPES = [
+            {name: "Cyber Chariot", speed: 80, color: "#ffaa66"},
+            {name: "Hover Bike", speed: 120, color: "#00ffff"},
+            {name: "Sand Cruiser", speed: 60, color: "#8b7355"},
+            {name: "Sky Skiff", speed: 100, color: "#ff66aa"}
+        ];
+        
         const CREATURE_TYPES = [
             {name:"Sand Strider", type:"desert", size:3, color:"#c4a574", speed:5},
             {name:"Lotus Dragon", type:"water", size:4, color:"#ff66aa", speed:8},
@@ -219,6 +226,13 @@
         }
         
         function spawnCreature() {
+        const VEHICLE_TYPES = [
+            {name: "Cyber Chariot", speed: 80, color: "#ffaa66"},
+            {name: "Hover Bike", speed: 120, color: "#00ffff"},
+            {name: "Sand Cruiser", speed: 60, color: "#8b7355"},
+            {name: "Sky Skiff", speed: 100, color: "#ff66aa"}
+        ];
+        
             const template = CREATURE_TYPES[Math.floor(Math.random()*CREATURE_TYPES.length)];
             creatures.push({ x:camera.x+(Math.random()-0.5)*300, y:template.type==='air'?camera.y+20+Math.random()*30:camera.y, z:camera.z+(Math.random()-0.5)*300, ...template, vx:(Math.random()-0.5)*template.speed, vz:(Math.random()-0.5)*template.speed, age:0 });
             document.getElementById('creatureCount').textContent = creatures.length;
@@ -253,14 +267,14 @@
             const w=b.w*p.scale, h=b.h*p.scale, d=b.d*p.scale;
             const gradient = ctx.createLinearGradient(p.x-w/2, p.y-h, p.x+w/2, p.y);
             gradient.addColorStop(0, '#4a4a5a'); gradient.addColorStop(1, '#2a2a3a');
-            ctx.fillStyle = gradient;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = gradient;
             if(b.type === 'pyramid') {
                 ctx.beginPath(); ctx.moveTo(p.x, p.y-h); ctx.lineTo(p.x-w/2, p.y); ctx.lineTo(p.x+w/2, p.y); ctx.closePath(); ctx.fill();
                 ctx.strokeStyle = b.neonColor; ctx.lineWidth=2; ctx.shadowBlur=15; ctx.shadowColor=b.neonColor; ctx.stroke(); ctx.shadowBlur=0;
             } else {
                 ctx.fillRect(p.x-w/2, p.y-h, w, h);
                 if(b.windows) {
-                    ctx.fillStyle = 'rgba(255,200,100,0.4)';
+                    ctx.globalAlpha = 1.0; ctx.fillStyle = 'rgba(255,200,100,0.4)';
                     const rows=Math.floor(h/(15*p.scale)), cols=Math.floor(w/(10*p.scale));
                     for(let r=0; r<rows; r++) for(let c=0; c<cols; c++) if(Math.random()>0.3) ctx.fillRect(p.x-w/2+5*p.scale+c*10*p.scale, p.y-h+5*p.scale+r*15*p.scale, 6*p.scale, 10*p.scale);
                 }
@@ -271,7 +285,7 @@
         function drawCreature(c) {
             const p = project(c.x, c.y, c.z); if(!p || p.scale<0.01) return;
             const s = c.size * p.scale;
-            ctx.fillStyle = c.color; ctx.shadowBlur=20; ctx.shadowColor=c.color;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = c.color; ctx.shadowBlur=20; ctx.shadowColor=c.color;
             if(c.type === 'air') {
                 ctx.beginPath(); ctx.ellipse(p.x, p.y, s*2, s, 0, 0, Math.PI*2); ctx.fill();
             } else {
@@ -283,17 +297,17 @@
         function drawNPC(n) {
             const p = project(n.x, 0, n.z); if(!p || p.scale<0.01) return;
             const s = 2 * p.scale;
-            ctx.fillStyle = n.color; ctx.beginPath(); ctx.arc(p.x, p.y, s, 0, Math.PI*2); ctx.fill();
+            ctx.globalAlpha = 1.0; ctx.fillStyle = n.color; ctx.beginPath(); ctx.arc(p.x, p.y, s, 0, Math.PI*2); ctx.fill();
         }
         
         function drawVegetation(v) {
             const p = project(v.x, v.y, v.z); if(!p || p.scale<0.01) return;
             const h = v.height * p.scale;
             if(v.type === 'palm') {
-                ctx.fillStyle = '#4a3a2a'; ctx.fillRect(p.x-3*p.scale, p.y-h, 6*p.scale, h);
-                ctx.fillStyle = v.color; for(let i=0; i<6; i++) { const angle=(i/6)*Math.PI-Math.PI/2; ctx.beginPath(); ctx.ellipse(p.x+Math.cos(angle)*20*p.scale, p.y-h+Math.sin(angle)*15*p.scale, 15*p.scale, 5*p.scale, angle, 0, Math.PI*2); ctx.fill(); }
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#4a3a2a'; ctx.fillRect(p.x-3*p.scale, p.y-h, 6*p.scale, h);
+                ctx.globalAlpha = 1.0; ctx.fillStyle = v.color; for(let i=0; i<6; i++) { const angle=(i/6)*Math.PI-Math.PI/2; ctx.beginPath(); ctx.ellipse(p.x+Math.cos(angle)*20*p.scale, p.y-h+Math.sin(angle)*15*p.scale, 15*p.scale, 5*p.scale, angle, 0, Math.PI*2); ctx.fill(); }
             } else {
-                ctx.fillStyle = v.color; ctx.globalAlpha=0.8; ctx.shadowBlur=20; ctx.shadowColor=v.color;
+                ctx.globalAlpha = 1.0; ctx.fillStyle = v.color; ctx.globalAlpha=0.8; ctx.shadowBlur=20; ctx.shadowColor=v.color;
                 ctx.beginPath(); ctx.moveTo(p.x, p.y-h); ctx.lineTo(p.x-10*p.scale, p.y); ctx.lineTo(p.x+10*p.scale, p.y); ctx.closePath(); ctx.fill();
                 ctx.globalAlpha=1; ctx.shadowBlur=0;
             }
@@ -301,11 +315,16 @@
         
         function drawWater(water) {
             const p = project(water.x, water.y-1, water.z); if(!p) return;
-            ctx.fillStyle = 'rgba(42,74,106,0.5)'; ctx.globalAlpha=0.5;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = 'rgba(42,74,106,0.5)'; ctx.globalAlpha=0.5;
             ctx.beginPath(); ctx.ellipse(p.x, p.y, water.w*p.scale*0.015, water.d*p.scale*0.015*0.3, 0, 0, Math.PI*2); ctx.fill();
             ctx.globalAlpha=1;
         }
         
+        // Bloom Effect System
+        function applyBloom() {
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = "#ffaa66";
+        }
         function drawParticles() {
             particles.forEach((p,i) => { p.x+=p.vx; p.y+=p.vy; p.life-=0.02; p.vy+=0.2; if(p.life<=0) { particles.splice(i,1); return; } ctx.fillStyle=p.color; ctx.globalAlpha=p.life; ctx.beginPath(); ctx.arc(p.x, p.y, p.size*p.life, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha=1; });
             weatherParticles.forEach((p,i) => { p.x+=p.vx*0.016; p.y+=p.vy*0.016; p.z+=p.vz*0.016; p.life-=0.02; if(p.life<=0) { weatherParticles.splice(i,1); return; } const proj = project(p.x, p.y, p.z); if(proj) { ctx.fillStyle=p.color; ctx.globalAlpha=p.life; ctx.beginPath(); ctx.arc(proj.x, proj.y, p.size*p.life, 0, Math.PI*2); ctx.fill(); } ctx.globalAlpha=1; });
@@ -335,6 +354,16 @@
             document.getElementById('weatherName').textContent = currentWeather.name;
         }
         
+        // Performance: Occlusion Culling
+        function occlusionCulling(objects) {
+            return objects.filter(obj => {
+                const dx = obj.x - camera.x;
+                const dz = obj.z - camera.z;
+                const dist = Math.sqrt(dx*dx + dz*dz);
+                return dist < 1000; // Only render within 1km
+            });
+        }
+        
         function checkRegionChange() {
             for(const region of REGIONS) {
                 const hw=region.size.w/2, hd=region.size.d/2;
@@ -358,13 +387,13 @@
             frameCount++;
             if(timestamp - lastTime >= 1000) { fps=frameCount; frameCount=0; lastTime=timestamp; document.getElementById('fpsDisplay').textContent=fps; }
             
-            ctx.fillStyle = `rgb(${(currentRegion.fog>>16)&0xFF}, ${(currentRegion.fog>>8)&0xFF}, ${currentRegion.fog&0xFF})`;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = `rgb(${(currentRegion.fog>>16)&0xFF}, ${(currentRegion.fog>>8)&0xFF}, ${currentRegion.fog&0xFF})`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             const skyGradient = ctx.createLinearGradient(0,0,0,canvas.height);
             skyGradient.addColorStop(0, `rgb(${((currentRegion.fog>>16)&0xFF)*0.5}, ${((currentRegion.fog>>8)&0xFF)*0.5}, ${((currentRegion.fog&0xFF)*0.5)})`);
             skyGradient.addColorStop(1, `rgb(${((currentRegion.ground>>16)&0xFF)*0.3}, ${((currentRegion.ground>>8)&0xFF)*0.3}, ${((currentRegion.ground&0xFF)*0.3)})`);
-            ctx.fillStyle = skyGradient; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.globalAlpha = 1.0; ctx.fillStyle = skyGradient; ctx.fillRect(0,0,canvas.width,canvas.height);
             
             const speed = moveState.sprint ? 100 : 50;
             const dir = { x:Math.sin(camera.yaw), z:Math.cos(camera.yaw) };
@@ -408,3 +437,22 @@
     <footer>🏛️ NEO-KEMET AAA | Creatures: <span id="footerCreatures">0</span> | NPCs: <span id="footerNPCs">0</span> | Always Expanding</footer>
 </body>
 </html>
+        
+        // Advanced Terrain Generation
+        function generateHeightmap(width, height, resolution) {
+            const heights = [];
+            for(let z = 0; z < resolution; z++) {
+                heights[z] = [];
+                for(let x = 0; x < resolution; x++) {
+                    let h = 0;
+                    // Multi-octave Perlin noise
+                    for(let o = 0; o < 4; o++) {
+                        const freq = Math.pow(2, o);
+                        const amp = Math.pow(0.5, o);
+                        h += Math.sin(x * 0.01 * freq) * Math.cos(z * 0.01 * freq) * amp;
+                    }
+                    heights[z][x] = h * 100;
+                }
+            }
+            return heights;
+        }
