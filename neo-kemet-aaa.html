@@ -128,6 +128,17 @@
         let moveState = { fwd:false, bwd:false, left:false, right:false, up:false, down:false };
         let touchMove = { x:0, y:0 };
         let lastTime = 0;
+        let audioContext = null;
+        let bgmGain = null;
+        
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                bgmGain = audioContext.createGain();
+                bgmGain.gain.value = 0.3;
+                bgmGain.connect(audioContext.destination);
+            } catch(e) { console.log("Audio not supported"); }
+        }
         let fps = 60, frameCount = 0, lastFpsTime = 0;
         let gameRunning = false;
         let renderDistance = 500;
@@ -287,7 +298,7 @@
             const gradient = ctx.createLinearGradient(0, -h, 0, h);
             gradient.addColorStop(0, '#5a5a6a');
             gradient.addColorStop(1, '#2a2a3a');
-            ctx.fillStyle = gradient;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = gradient;
 
             if(type.style === 'pyramid') {
                 // Pyramid shape with steps
@@ -295,11 +306,11 @@
                 for(let i = 0; i < steps; i++) {
                     const stepH = h / steps;
                     const stepW = w * (1 - i/steps);
-                    ctx.fillStyle = i % 2 === 0 ? '#4a4a5a' : '#3a3a4a';
+                    ctx.globalAlpha = 1.0; ctx.fillStyle = i % 2 === 0 ? '#4a4a5a' : '#3a3a4a';
                     ctx.fillRect(-stepW/2, -h + i*stepH, stepW, stepH);
                 }
                 // Neon cap
-                ctx.fillStyle = '#ff6644';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#ff6644';
                 ctx.beginPath();
                 ctx.moveTo(-w*0.1, -h);
                 ctx.lineTo(w*0.1, -h);
@@ -307,10 +318,10 @@
                 ctx.fill();
             } else if(type.style === 'tower') {
                 // Sleek tower
-                ctx.fillStyle = gradient;
+                ctx.globalAlpha = 1.0; ctx.fillStyle = gradient;
                 ctx.fillRect(-w/2, -h, w, h);
                 // Vertical windows
-                ctx.fillStyle = '#66ccff';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#66ccff';
                 for(let i = 0; i < 6; i++) {
                     const wx = -w/2 + w*0.15 + (i * w*0.14);
                     ctx.fillRect(wx, -h*0.9, w*0.08, h*0.85);
@@ -324,32 +335,32 @@
                 ctx.stroke();
             } else if(type.style === 'temple') {
                 // Egyptian temple
-                ctx.fillStyle = '#ddaa66';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#ddaa66';
                 ctx.fillRect(-w/2, -h*0.6, w, h*0.6);
                 // Columns
-                ctx.fillStyle = '#cc9955';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#cc9955';
                 for(let i = 0; i < 5; i++) {
                     const cx_ = -w/2 + w*0.1 + i * w*0.2;
                     ctx.fillRect(cx_ - w*0.08, -h*0.6, w*0.16, h*0.6);
                 }
                 // Hieroglyphics band
-                ctx.fillStyle = '#ff6644';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#ff6644';
                 ctx.fillRect(-w/2, -h*0.4, w, h*0.1);
             } else if(type.style === 'plaza') {
                 // Neon plaza
-                ctx.fillStyle = '#3a3a4a';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#3a3a4a';
                 ctx.fillRect(-w/2, -h, w, h);
                 // Neon signs
                 const colors = ['#ff00ff', '#00ffff', '#ffff00', '#ff6600'];
                 for(let i = 0; i < 8; i++) {
-                    ctx.fillStyle = colors[i % colors.length];
+                    ctx.globalAlpha = 1.0; ctx.fillStyle = colors[i % colors.length];
                     ctx.fillRect(-w/2 + i * w*0.12, -h*0.8, w*0.1, h*0.15);
                 }
             } else {
                 // Generic building
                 ctx.fillRect(-w/2, -h, w, h);
                 // Windows
-                ctx.fillStyle = '#ffdd66';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#ffdd66';
                 const rows = 8, cols = 6;
                 for(let r = 0; r < rows; r++) {
                     for(let c = 0; c < cols; c++) {
@@ -387,13 +398,13 @@
             const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 1.5);
             gradient.addColorStop(0, type.color + '66');
             gradient.addColorStop(1, 'transparent');
-            ctx.fillStyle = gradient;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.arc(0, 0, size * 1.5, 0, Math.PI * 2);
             ctx.fill();
 
             // Body (humanoid)
-            ctx.fillStyle = type.color;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = type.color;
 
             // Head
             ctx.beginPath();
@@ -401,7 +412,7 @@
             ctx.fill();
 
             // Eyes
-            ctx.fillStyle = '#fff';
+            ctx.globalAlpha = 1.0; ctx.fillStyle = '#fff';
             ctx.beginPath();
             ctx.arc(-size*0.12, -size*0.35, size*0.08, 0, Math.PI * 2);
             ctx.fill();
@@ -410,7 +421,7 @@
             ctx.fill();
 
             // Body/Torso
-            ctx.fillStyle = type.color;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = type.color;
             ctx.beginPath();
             ctx.ellipse(0, size*0.4, size*0.4, size*0.5, 0, 0, Math.PI * 2);
             ctx.fill();
@@ -418,21 +429,21 @@
             // Role-specific details
             if(type.role === 'Trader' || type.role === 'Merchant') {
                 // Backpack/satchel
-                ctx.fillStyle = '#886644';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#886644';
                 ctx.fillRect(-size*0.3, size*0.2, size*0.6, size*0.3);
             } else if(type.role === 'Guard' || type.role === 'Hunter') {
                 // Armor plating
-                ctx.fillStyle = '#666677';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#666677';
                 ctx.beginPath();
                 ctx.arc(0, size*0.3, size*0.35, Math.PI, 0);
                 ctx.fill();
             } else if(type.role === 'Hacker' || type.role === 'Tech') {
                 // Tech gear
-                ctx.fillStyle = '#44ff66';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#44ff66';
                 ctx.fillRect(-size*0.2, size*0.5, size*0.4, size*0.2);
             } else if(type.role === 'Priest') {
                 // Robes
-                ctx.fillStyle = '#ffdd44';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#ffdd44';
                 ctx.beginPath();
                 ctx.moveTo(-size*0.3, size*0.2);
                 ctx.quadraticCurveTo(0, size*0.8, size*0.3, size*0.2);
@@ -440,11 +451,11 @@
             }
 
             // Name tag
-            ctx.fillStyle = '#fff';
+            ctx.globalAlpha = 1.0; ctx.fillStyle = '#fff';
             ctx.font = '10px monospace';
             ctx.textAlign = 'center';
             ctx.fillText(type.name, 0, -size*0.6);
-            ctx.fillStyle = '#aaa';
+            ctx.globalAlpha = 1.0; ctx.fillStyle = '#aaa';
             ctx.font = '8px monospace';
             ctx.fillText(type.role, 0, -size*0.45);
 
@@ -475,13 +486,13 @@
             const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 1.5);
             gradient.addColorStop(0, creature.color + '88');
             gradient.addColorStop(1, 'transparent');
-            ctx.fillStyle = gradient;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.arc(0, 0, size * 1.5, 0, Math.PI * 2);
             ctx.fill();
 
             // Body based on type
-            ctx.fillStyle = creature.color;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = creature.color;
             ctx.beginPath();
             ctx.ellipse(0, 10, size * 0.5, size * 0.6, 0, 0, Math.PI * 2);
             ctx.fill();
@@ -560,7 +571,7 @@
 
             // Building name (if close)
             if(p.z < 150) {
-                ctx.fillStyle = '#fff';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#fff';
                 ctx.font = '10px monospace';
                 ctx.textAlign = 'center';
                 ctx.fillText(b.name, p.x, p.y - s - 5);
@@ -603,7 +614,7 @@
             }
 
             if(p.z < 200) {
-                ctx.fillStyle = '#fff';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#fff';
                 ctx.font = '10px monospace';
                 ctx.textAlign = 'center';
                 ctx.fillText(c.name, p.x, p.y - s - 10);
@@ -615,7 +626,7 @@
             const gradient = ctx.createLinearGradient(0, horizon, 0, canvas.height);
             gradient.addColorStop(0, currentRegion.fog);
             gradient.addColorStop(1, currentRegion.ground);
-            ctx.fillStyle = gradient;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = gradient;
             ctx.fillRect(0, horizon, canvas.width, canvas.height - horizon);
         }
 
@@ -624,10 +635,10 @@
             const gradient = ctx.createLinearGradient(0, 0, 0, horizon);
             gradient.addColorStop(0, '#050510');
             gradient.addColorStop(1, currentRegion.fog);
-            ctx.fillStyle = gradient;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, horizon);
 
-            ctx.fillStyle = '#fff';
+            ctx.globalAlpha = 1.0; ctx.fillStyle = '#fff';
             ctx.globalAlpha = 0.6;
             for(let i = 0; i < 30; i++) {
                 const sx = ((i * 137.5) % canvas.width);
@@ -639,6 +650,16 @@
             ctx.globalAlpha = 1;
         }
 
+        // Performance: Occlusion Culling
+        function occlusionCulling(objects) {
+            return objects.filter(obj => {
+                const dx = obj.x - camera.x;
+                const dz = obj.z - camera.z;
+                const dist = Math.sqrt(dx*dx + dz*dz);
+                return dist < 1000; // Only render within 1km
+            });
+        }
+        
         function checkRegionChange() {
             for(const region of REGIONS) {
                 const hw = region.w / 2, hd = region.d / 2;
@@ -694,7 +715,7 @@
             const dt = Math.min((timestamp - lastTime) / 1000, 0.1);
             lastTime = timestamp;
 
-            ctx.fillStyle = '#000';
+            ctx.globalAlpha = 1.0; ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             drawSky();
@@ -777,3 +798,22 @@
     <footer>🏛️ NEO-KEMET | Buildings + NPCs + Creatures | Explore the Ancient Cyberpunk World</footer>
 </body>
 </html>
+        
+        // Advanced Terrain Generation
+        function generateHeightmap(width, height, resolution) {
+            const heights = [];
+            for(let z = 0; z < resolution; z++) {
+                heights[z] = [];
+                for(let x = 0; x < resolution; x++) {
+                    let h = 0;
+                    // Multi-octave Perlin noise
+                    for(let o = 0; o < 4; o++) {
+                        const freq = Math.pow(2, o);
+                        const amp = Math.pow(0.5, o);
+                        h += Math.sin(x * 0.01 * freq) * Math.cos(z * 0.01 * freq) * amp;
+                    }
+                    heights[z][x] = h * 100;
+                }
+            }
+            return heights;
+        }
