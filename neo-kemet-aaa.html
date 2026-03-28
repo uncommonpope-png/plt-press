@@ -130,6 +130,17 @@
         let moveState = { fwd:false, bwd:false, left:false, right:false, up:false, down:false };
         let touchMove = { x:0, y:0 };
         let lastTime = 0;
+        let audioContext = null;
+        let bgmGain = null;
+        
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                bgmGain = audioContext.createGain();
+                bgmGain.gain.value = 0.3;
+                bgmGain.connect(audioContext.destination);
+            } catch(e) { console.log("Audio not supported"); }
+        }
         let fps = 60, frameCount = 0, lastFpsTime = 0;
         let gameRunning = false;
         let renderDistance = 600;
@@ -281,13 +292,13 @@
             const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 1.5);
             gradient.addColorStop(0, creature.color + '88');
             gradient.addColorStop(1, 'transparent');
-            ctx.fillStyle = gradient;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.arc(0, 0, size * 1.5, 0, Math.PI * 2);
             ctx.fill();
             
             // Body
-            ctx.fillStyle = creature.color;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = creature.color;
             
             if(creature.type === 'fire') {
                 // Dragon-like body
@@ -299,7 +310,7 @@
                 ctx.arc(0, -size * 0.5, size * 0.4, 0, Math.PI * 2);
                 ctx.fill();
                 // Wings
-                ctx.fillStyle = creature.secondary;
+                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary;
                 ctx.beginPath();
                 ctx.moveTo(-size * 0.3, 0);
                 ctx.lineTo(-size * 0.8, -size * 0.3);
@@ -311,7 +322,7 @@
                 ctx.lineTo(size * 0.5, size * 0.3);
                 ctx.fill();
                 // Flame tail
-                ctx.fillStyle = creature.secondary;
+                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary;
                 ctx.beginPath();
                 ctx.moveTo(0, size * 0.7);
                 ctx.quadraticCurveTo(-size * 0.3, size * 1.2, -size * 0.2, size * 1.5);
@@ -324,12 +335,12 @@
                 ctx.ellipse(0, 0, size * 0.7, size * 0.5, 0, 0, Math.PI * 2);
                 ctx.fill();
                 // Shell/fin
-                ctx.fillStyle = creature.secondary;
+                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary;
                 ctx.beginPath();
                 ctx.arc(0, -size * 0.2, size * 0.5, Math.PI, 0);
                 ctx.fill();
                 // Flippers
-                ctx.fillStyle = creature.color;
+                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.color;
                 ctx.beginPath();
                 ctx.ellipse(-size * 0.6, 0, size * 0.3, size * 0.2, -0.3, 0, Math.PI * 2);
                 ctx.fill();
@@ -342,7 +353,7 @@
                 ctx.ellipse(0, 15, size * 0.5, size * 0.6, 0, 0, Math.PI * 2);
                 ctx.fill();
                 // Leaves
-                ctx.fillStyle = creature.secondary;
+                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary;
                 for(let i = 0; i < 5; i++) {
                     const angle = (i / 5) * Math.PI - Math.PI / 2;
                     ctx.save();
@@ -373,7 +384,7 @@
                 ctx.lineTo(size * 0.1, -size * 0.6);
                 ctx.fill();
                 // Lightning tail
-                ctx.fillStyle = creature.secondary;
+                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary;
                 ctx.beginPath();
                 ctx.moveTo(0, size * 0.4);
                 ctx.lineTo(-size * 0.2, size * 0.8);
@@ -395,7 +406,7 @@
                 ctx.ellipse(0, 0, size * 0.8, size * 0.3, 0, 0, Math.PI * 2);
                 ctx.stroke();
                 // Orbiting orbs
-                ctx.fillStyle = creature.secondary;
+                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary;
                 for(let i = 0; i < 3; i++) {
                     const angle = (Date.now() * 0.002 + (i / 3) * Math.PI * 2);
                     const ox = Math.cos(angle) * size * 0.8;
@@ -410,7 +421,7 @@
                 ctx.ellipse(0, 10, size * 0.5, size * 0.7, 0, 0, Math.PI * 2);
                 ctx.fill();
                 // Cloak
-                ctx.fillStyle = creature.secondary + 'cc';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary + 'cc';
                 ctx.beginPath();
                 ctx.moveTo(-size * 0.4, -size * 0.3);
                 ctx.quadraticCurveTo(-size * 0.6, size * 0.5, -size * 0.5, size * 0.8);
@@ -419,7 +430,7 @@
                 ctx.quadraticCurveTo(0, -size * 0.5, -size * 0.4, -size * 0.3);
                 ctx.fill();
                 // Glowing eyes
-                ctx.fillStyle = '#ff0000';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#ff0000';
                 ctx.beginPath();
                 ctx.arc(-size * 0.15, -size * 0.2, size * 0.1, 0, Math.PI * 2);
                 ctx.fill();
@@ -436,7 +447,7 @@
                 ctx.arc(0, -size * 0.6, size * 0.45, 0, Math.PI * 2);
                 ctx.fill();
                 // Horns
-                ctx.fillStyle = creature.secondary;
+                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.secondary;
                 ctx.beginPath();
                 ctx.moveTo(-size * 0.2, -size * 0.8);
                 ctx.lineTo(-size * 0.4, -size * 1.2);
@@ -448,7 +459,7 @@
                 ctx.lineTo(size * 0.15, -size * 0.9);
                 ctx.fill();
                 // Large wings
-                ctx.fillStyle = creature.color + 'aa';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = creature.color + 'aa';
                 ctx.beginPath();
                 ctx.moveTo(-size * 0.4, 0);
                 ctx.quadraticCurveTo(-size * 1.2, -size * 0.5, -size * 1.0, size * 0.5);
@@ -533,7 +544,7 @@
             
             // Name tag
             if(p.z < 200) {
-                ctx.fillStyle = '#fff';
+                ctx.globalAlpha = 1.0; ctx.fillStyle = '#fff';
                 ctx.font = '10px monospace';
                 ctx.textAlign = 'center';
                 ctx.fillText(c.name, p.x, p.y - s - 5);
@@ -545,7 +556,7 @@
             const gradient = ctx.createLinearGradient(0, horizon, 0, canvas.height);
             gradient.addColorStop(0, currentRegion.fog);
             gradient.addColorStop(1, currentRegion.ground);
-            ctx.fillStyle = gradient;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = gradient;
             ctx.fillRect(0, horizon, canvas.width, canvas.height - horizon);
         }
         
@@ -554,11 +565,11 @@
             const gradient = ctx.createLinearGradient(0, 0, 0, horizon);
             gradient.addColorStop(0, '#050510');
             gradient.addColorStop(1, currentRegion.fog);
-            ctx.fillStyle = gradient;
+            ctx.globalAlpha = 1.0; ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, horizon);
             
             // Stars
-            ctx.fillStyle = '#fff';
+            ctx.globalAlpha = 1.0; ctx.fillStyle = '#fff';
             ctx.globalAlpha = 0.6;
             for(let i = 0; i < 30; i++) {
                 const sx = ((i * 137.5) % canvas.width);
@@ -568,6 +579,16 @@
                 ctx.fill();
             }
             ctx.globalAlpha = 1;
+        }
+        
+        // Performance: Occlusion Culling
+        function occlusionCulling(objects) {
+            return objects.filter(obj => {
+                const dx = obj.x - camera.x;
+                const dz = obj.z - camera.z;
+                const dist = Math.sqrt(dx*dx + dz*dz);
+                return dist < 1000; // Only render within 1km
+            });
         }
         
         function checkRegionChange() {
@@ -626,7 +647,7 @@
             const dt = Math.min((timestamp - lastTime) / 1000, 0.1);
             lastTime = timestamp;
             
-            ctx.fillStyle = '#000';
+            ctx.globalAlpha = 1.0; ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             drawSky();
@@ -686,3 +707,22 @@
     <footer>🏛️ NEO-KEMET | 20 Unique Creatures | Collect Them All!</footer>
 </body>
 </html>
+        
+        // Advanced Terrain Generation
+        function generateHeightmap(width, height, resolution) {
+            const heights = [];
+            for(let z = 0; z < resolution; z++) {
+                heights[z] = [];
+                for(let x = 0; x < resolution; x++) {
+                    let h = 0;
+                    // Multi-octave Perlin noise
+                    for(let o = 0; o < 4; o++) {
+                        const freq = Math.pow(2, o);
+                        const amp = Math.pow(0.5, o);
+                        h += Math.sin(x * 0.01 * freq) * Math.cos(z * 0.01 * freq) * amp;
+                    }
+                    heights[z][x] = h * 100;
+                }
+            }
+            return heights;
+        }
