@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🏛️ NEO-KEMET AAA | Ancient Cyberpunk World</title>
+    <title>🏛️ NEO-KEMET AAA | Optimized</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-user-select:none; }
         body { background:#000; overflow:hidden; font-family:'Courier New', monospace; touch-action: none; }
@@ -63,17 +63,17 @@
         </div>
         <div id="coords">
             <div>X: <span id="posX">0</span></div>
-            <div>Y: <span id="posY">10</span></div>
+            <div>Y: <span id="posY">30</span></div>
             <div>Z: <span id="posZ">0</span></div>
         </div>
         <div id="weatherDisplay"><span id="weatherIcon">☀️</span> <span id="weatherName">Clear</span></div>
-        <div id="desktopControls"><div>WASD: Move | Mouse: Look | Space: Up | Shift: Down</div></div>
+        <div id="desktopControls"><div>WASD: Move | Mouse: Look (click) | Space: Up | Shift: Down</div></div>
         <div id="fpsDisplay">FPS: <span id="fpsValue">60</span></div>
     </div>
     <div id="loading">
         <h1>🏛️ NEO-KEMET</h1>
         <div class="loader"></div>
-        <p>Loading Ancient Cyberpunk World...</p>
+        <p>Optimizing World...</p>
     </div>
     <div id="landmarksModal" class="modal">
         <button class="close-modal" onclick="toggleLandmarks()">×</button>
@@ -115,16 +115,20 @@
         
         // === GAME STATE ===
         let canvas, ctx;
-        let camera = { x: 0, y: 30, z: 0, yaw: 0, pitch: -0.2 };
+        let camera = { x: 0, y: 30, z: 0, yaw: 0, pitch: -0.15 };
         let buildings = [];
+        let visibleBuildings = [];
         let creatures = [];
         let currentRegion = REGIONS[0];
         let currentWeather = WEATHER[0];
         let moveState = { fwd:false, bwd:false, left:false, right:false, up:false, down:false };
         let touchMove = { x:0, y:0 };
         let lastTime = 0;
-        let fps = 60, frameCount = 0;
+        let fps = 60, frameCount = 0, lastFpsTime = 0;
         let gameRunning = false;
+        let renderDistance = 800;
+        let maxBuildings = 100;
+        let maxCreatures = 15;
         
         // === INIT ===
         window.addEventListener('load', () => {
@@ -139,7 +143,9 @@
             setTimeout(() => {
                 document.getElementById('loading').style.display = 'none';
                 gameRunning = true;
-                gameLoop(0);
+                lastTime = performance.now();
+                lastFpsTime = lastTime;
+                requestAnimationFrame(gameLoop);
                 
                 // Weather cycle
                 setInterval(() => {
@@ -148,11 +154,16 @@
                     document.getElementById('weatherName').textContent = currentWeather.name;
                 }, 60000);
                 
-                // Spawn creatures
+                // Spawn creatures (limited)
                 setInterval(() => {
-                    if(gameRunning && creatures.length < 30) spawnCreature();
-                }, 2000);
-            }, 2500);
+                    if(gameRunning && creatures.length < maxCreatures) spawnCreature();
+                }, 3000);
+                
+                // Cleanup old creatures
+                setInterval(() => {
+                    if(creatures.length > maxCreatures) creatures.splice(maxCreatures);
+                }, 5000);
+            }, 2000);
         });
         
         function resize() {
@@ -184,7 +195,7 @@
                 if(document.pointerLockElement === canvas) {
                     camera.yaw -= e.movementX * 0.002;
                     camera.pitch -= e.movementY * 0.002;
-                    camera.pitch = Math.max(-0.5, Math.min(0.3, camera.pitch));
+                    camera.pitch = Math.max(-0.4, Math.min(0.3, camera.pitch));
                 }
             });
             canvas.addEventListener('click', () => {
@@ -256,21 +267,21 @@
             } else {
                 camera.yaw -= nx * 0.03;
                 camera.pitch -= ny * 0.03;
-                camera.pitch = Math.max(-0.5, Math.min(0.3, camera.pitch));
+                camera.pitch = Math.max(-0.4, Math.min(0.3, camera.pitch));
             }
         }
         
         // === WORLD GENERATION ===
         function generateWorld() {
             buildings = [];
-            const count = 200;
+            const count = maxBuildings;
             
             for(let i = 0; i < count; i++) {
                 const w = 40 + Math.random() * 60;
                 const d = 40 + Math.random() * 60;
-                const h = 80 + Math.random() * 200;
-                const x = (Math.random() - 0.5) * currentRegion.w * 0.8;
-                const z = (Math.random() - 0.5) * currentRegion.d * 0.8;
+                const h = 80 + Math.random() * 150;
+                const x = (Math.random() - 0.5) * currentRegion.w * 0.6;
+                const z = (Math.random() - 0.5) * currentRegion.d * 0.6;
                 
                 buildings.push({
                     x: currentRegion.cx + x,
@@ -279,7 +290,8 @@
                     w: w, d: d, h: h,
                     type: Math.random() > 0.7 ? 'pyramid' : 'tower',
                     color: currentRegion.ground,
-                    neonColor: `hsl(${Math.random()*360}, 80%, 60%)`
+                    neonColor: `hsl(${Math.random()*360}, 80%, 60%)`,
+                    seed: Math.random()
                 });
             }
             
@@ -289,14 +301,15 @@
         function spawnCreature() {
             const template = CREATURES[Math.floor(Math.random() * CREATURES.length)];
             creatures.push({
-                x: camera.x + (Math.random() - 0.5) * 400,
-                y: 2,
-                z: camera.z + (Math.random() - 0.5) * 400,
+                x: camera.x + (Math.random() - 0.5) * 300,
+                y: 5 + Math.random() * 20,
+                z: camera.z + (Math.random() - 0.5) * 300,
                 color: template.color,
                 size: template.size,
-                vx: (Math.random() - 0.5) * 20,
-                vz: (Math.random() - 0.5) * 20,
-                age: 0
+                vx: (Math.random() - 0.5) * 15,
+                vz: (Math.random() - 0.5) * 15,
+                age: 0,
+                phase: Math.random() * Math.PI * 2
             });
             document.getElementById('creatureCount').textContent = creatures.length;
         }
@@ -332,9 +345,9 @@
             const ry = dy * Math.cos(camera.pitch) - rz * Math.sin(camera.pitch);
             const rz2 = dy * Math.sin(camera.pitch) + rz * Math.cos(camera.pitch);
             
-            if(rz2 <= 1) return null;
+            if(rz2 <= 2) return null;
             
-            const fov = 600;
+            const fov = 500;
             const scale = fov / rz2;
             
             return {
@@ -345,59 +358,60 @@
             };
         }
         
-        // === DRAWING ===
+        // === DRAWING (OPTIMIZED) ===
         function drawBuilding(b) {
             const p = project(b.x, b.y + b.h/2, b.z);
-            if(!p || p.scale < 0.005) return;
+            if(!p || p.scale < 0.008 || p.z > renderDistance) return;
             
-            const w = b.w * p.scale * 0.5;
-            const h = b.h * p.scale * 0.5;
+            const w = b.w * p.scale * 0.4;
+            const h = b.h * p.scale * 0.4;
             
-            // Building body
-            const gradient = ctx.createLinearGradient(p.x - w, p.y - h, p.x + w, p.y + h);
-            gradient.addColorStop(0, '#4a4a5a');
-            gradient.addColorStop(1, '#2a2a3a');
-            ctx.fillStyle = gradient;
+            // Simple building
+            ctx.fillStyle = b.color;
             
             if(b.type === 'pyramid') {
                 ctx.beginPath();
                 ctx.moveTo(p.x, p.y - h);
-                ctx.lineTo(p.x - w, p.y + h * 0.5);
-                ctx.lineTo(p.x + w, p.y + h * 0.5);
+                ctx.lineTo(p.x - w, p.y + h * 0.3);
+                ctx.lineTo(p.x + w, p.y + h * 0.3);
                 ctx.closePath();
                 ctx.fill();
                 
-                // Neon edge
-                ctx.strokeStyle = b.neonColor;
-                ctx.lineWidth = 2;
-                ctx.stroke();
+                // Neon edge (only if close)
+                if(p.z < 300) {
+                    ctx.strokeStyle = b.neonColor;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
             } else {
                 ctx.fillRect(p.x - w, p.y - h, w * 2, h * 2);
                 
-                // Windows
-                ctx.fillStyle = 'rgba(255, 200, 100, 0.5)';
-                const rows = Math.floor(h / 8);
-                const cols = Math.floor(w / 6);
-                for(let r = 0; r < rows; r++) {
-                    for(let c = 0; c < cols; c++) {
-                        if(Math.random() > 0.4) {
-                            ctx.fillRect(p.x - w + 4 + c * 12, p.y - h + 4 + r * 12, 8, 10);
+                // Windows (only if close)
+                if(p.z < 250 && b.seed > 0.3) {
+                    ctx.fillStyle = 'rgba(255, 200, 100, 0.6)';
+                    const rows = 4;
+                    const cols = 3;
+                    for(let r = 0; r < rows; r++) {
+                        for(let c = 0; c < cols; c++) {
+                            ctx.fillRect(p.x - w + 5 + c * 15, p.y - h + 5 + r * 20, 10, 15);
                         }
                     }
                 }
                 
-                // Neon trim
-                ctx.strokeStyle = b.neonColor;
-                ctx.lineWidth = 3;
-                ctx.strokeRect(p.x - w, p.y - h, w * 2, h * 2);
+                // Neon trim (only if close)
+                if(p.z < 300) {
+                    ctx.strokeStyle = b.neonColor;
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(p.x - w, p.y - h, w * 2, h * 2);
+                }
             }
         }
         
         function drawCreature(c) {
             const p = project(c.x, c.y, c.z);
-            if(!p || p.scale < 0.005) return;
+            if(!p || p.scale < 0.008 || p.z > renderDistance) return;
             
-            const s = c.size * p.scale * 0.3;
+            const s = c.size * p.scale * 0.25;
             ctx.fillStyle = c.color;
             ctx.beginPath();
             ctx.arc(p.x, p.y, s, 0, Math.PI * 2);
@@ -405,8 +419,7 @@
         }
         
         function drawGround() {
-            // Simple ground plane
-            const horizon = canvas.height / 2 - camera.pitch * 200;
+            const horizon = canvas.height / 2 - camera.pitch * 150;
             
             const gradient = ctx.createLinearGradient(0, horizon, 0, canvas.height);
             gradient.addColorStop(0, currentRegion.fog);
@@ -416,25 +429,22 @@
         }
         
         function drawSky() {
-            const horizon = canvas.height / 2 - camera.pitch * 200;
+            const horizon = canvas.height / 2 - camera.pitch * 150;
             
             const gradient = ctx.createLinearGradient(0, 0, 0, horizon);
-            gradient.addColorStop(0, '#0a0a1a');
+            gradient.addColorStop(0, '#050510');
             gradient.addColorStop(1, currentRegion.fog);
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, horizon);
-        }
-        
-        function drawParticles() {
-            // Simple star field
-            ctx.fillStyle = '#ffffff';
-            for(let i = 0; i < 50; i++) {
-                const x = (Math.sin(i * 567 + camera.yaw * 10) * 0.5 + 0.5) * canvas.width;
-                const y = (Math.cos(i * 789) * 0.3 + 0.3) * (canvas.height / 2 - camera.pitch * 200);
-                const size = Math.random() * 2;
-                ctx.globalAlpha = Math.random() * 0.5 + 0.5;
+            
+            // Simple stars (fixed positions)
+            ctx.fillStyle = '#fff';
+            ctx.globalAlpha = 0.6;
+            for(let i = 0; i < 30; i++) {
+                const sx = ((i * 137.5) % canvas.width);
+                const sy = ((i * 97.3) % (horizon * 0.8));
                 ctx.beginPath();
-                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.arc(sx, sy, 1, 0, Math.PI * 2);
                 ctx.fill();
             }
             ctx.globalAlpha = 1;
@@ -463,28 +473,44 @@
             }
         }
         
+        function cullBuildings() {
+            visibleBuildings = buildings.filter(b => {
+                const dist = Math.sqrt((b.x - camera.x)**2 + (b.z - camera.z)**2);
+                return dist < renderDistance;
+            });
+            visibleBuildings.sort((a, b) => {
+                const da = Math.sqrt((a.x-camera.x)**2 + (a.z-camera.z)**2);
+                const db = Math.sqrt((b.x-camera.x)**2 + (b.z-camera.z)**2);
+                return db - da;
+            });
+        }
+        
         window.toggleLandmarks = () => document.getElementById('landmarksModal').classList.toggle('active');
         window.teleportToSpawn = () => {
             camera.x = 0;
             camera.y = 30;
             camera.z = 0;
             camera.yaw = 0;
-            camera.pitch = -0.2;
+            camera.pitch = -0.15;
         };
         
-        // === GAME LOOP ===
+        // === GAME LOOP (OPTIMIZED) ===
         function gameLoop(timestamp) {
             if(!gameRunning) return;
             requestAnimationFrame(gameLoop);
             
-            // FPS counter
+            // FPS counter (every 500ms)
             frameCount++;
-            if(timestamp - lastTime >= 1000) {
-                fps = frameCount;
+            if(timestamp - lastFpsTime >= 500) {
+                fps = Math.round(frameCount * 1000 / (timestamp - lastFpsTime));
                 frameCount = 0;
-                lastTime = timestamp;
+                lastFpsTime = timestamp;
                 document.getElementById('fpsValue').textContent = fps;
             }
+            
+            // Delta time
+            const dt = Math.min((timestamp - lastTime) / 1000, 0.1);
+            lastTime = timestamp;
             
             // Clear
             ctx.fillStyle = '#000';
@@ -493,11 +519,8 @@
             // Draw sky
             drawSky();
             
-            // Draw stars
-            drawParticles();
-            
             // Movement
-            const speed = 80;
+            const speed = 60;
             const dirX = Math.sin(camera.yaw);
             const dirZ = Math.cos(camera.yaw);
             const rightX = Math.sin(camera.yaw - Math.PI/2);
@@ -505,37 +528,36 @@
             
             let dx = 0, dz = 0, dy = 0;
             
-            // Keyboard movement
             if(moveState.fwd) { dx += dirX; dz += dirZ; }
             if(moveState.bwd) { dx -= dirX; dz -= dirZ; }
             if(moveState.left) { dx += rightX; dz += rightZ; }
             if(moveState.right) { dx -= rightX; dz -= rightZ; }
-            if(moveState.up) dy += speed * 0.016;
-            if(moveState.down) dy -= speed * 0.016;
+            if(moveState.up) dy += speed * dt;
+            if(moveState.down) dy -= speed * dt;
             
-            // Touch movement
             if(touchMove.x || touchMove.y) {
                 dx += dirX * -touchMove.y + rightX * touchMove.x;
                 dz += dirZ * -touchMove.y + rightZ * touchMove.x;
             }
             
-            camera.x += dx * speed * 0.016;
-            camera.z += dz * speed * 0.016;
+            camera.x += dx * speed * dt;
+            camera.z += dz * speed * dt;
             camera.y += dy;
             
             // Clamp height
             if(camera.y < 5) camera.y = 5;
-            if(camera.y > 500) camera.y = 500;
+            if(camera.y > 400) camera.y = 400;
             
             // Check region
             checkRegionChange();
             
             // Update creatures
             creatures.forEach((c, i) => {
-                c.x += c.vx * 0.016;
-                c.z += c.vz * 0.016;
+                c.x += c.vx * dt;
+                c.z += c.vz * dt;
+                c.y += Math.sin(c.phase + timestamp * 0.002) * 0.5;
                 c.age++;
-                if(c.age > 2000 || Math.sqrt((c.x-camera.x)**2 + (c.z-camera.z)**2) > 600) {
+                if(c.age > 3000 || Math.sqrt((c.x-camera.x)**2 + (c.z-camera.z)**2) > 500) {
                     creatures.splice(i, 1);
                 }
             });
@@ -546,21 +568,13 @@
             document.getElementById('posY').textContent = Math.round(camera.y);
             document.getElementById('posZ').textContent = Math.round(camera.z);
             
-            // Draw ground
+            // Cull and draw buildings
+            cullBuildings();
             drawGround();
-            
-            // Sort and draw buildings (back to front)
-            const sorted = [...buildings].sort((a, b) => {
-                const da = Math.sqrt((a.x-camera.x)**2 + (a.z-camera.z)**2);
-                const db = Math.sqrt((b.x-camera.x)**2 + (b.z-camera.z)**2);
-                return db - da;
-            });
-            sorted.forEach(b => drawBuilding(b));
-            
-            // Draw creatures
+            visibleBuildings.forEach(b => drawBuilding(b));
             creatures.forEach(c => drawCreature(c));
         }
     </script>
-    <footer>🏛️ NEO-KEMET AAA | Mobile: Joysticks | Desktop: WASD+Mouse</footer>
+    <footer>🏛️ NEO-KEMET AAA | Optimized | Mobile: Joysticks | Desktop: WASD+Mouse</footer>
 </body>
 </html>
