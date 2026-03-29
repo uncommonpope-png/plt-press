@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>PLT World - Books | Blog | Universe | Chat</title>
+    <link rel="manifest" href="plt-world-manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --profit: #00ff88;
+            --love: #ff6b9d;
+            --tax: #ffd700;
+            --dark: #1a1a2e;
+            --darker: #0f0f1a;
+            --light: #ffffff;
+            --gray: #888888;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(15, 15, 26, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(90deg, var(--profit), var(--love), var(--tax));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .plt-score {
+            display: flex;
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .plt-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .plt-badge.profit { background: rgba(0,255,136,0.2); color: var(--profit); }
+        .plt-badge.love { background: rgba(255,107,157,0.2); color: var(--love); }
+        .plt-badge.tax { background: rgba(255,215,0,0.2); color: var(--tax); }
+
+        /* ===== MAIN WORLD CONTAINER ===== */
+        .world-container {
+            margin-top: 60px;
+            margin-bottom: 70px;
+            min-height: calc(100vh - 130px);
+            position: relative;
+        }
+
+        /* ===== SECTIONS ===== */
+        .section {
+            display: none;
+            padding: 20px 15px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== BOOKSTORE ===== */
+        .bookstore-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .bookstore-header h2 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .bookstore-header p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .book-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .book-card:active {
+            transform: scale(0.95);
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--profit), var(--love));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .book-info {
+            padding: 12px;
+        }
+
+        .book-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .book-author {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .book-price {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--tax);
+            margin-top: 8px;
+        }
+
+        /* ===== BLOG/UNIVERSE ===== */
+        .universe-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .posts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .post-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .post-card:active {
+            transform: scale(0.98);
+        }
+
+        .post-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, var(--love), var(--tax));
+            border-radius: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .post-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .post-excerpt {
+            font-size: 14px;
+            color: var(--gray);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .post-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        /* ===== CHAT WORLD ===== */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 150px);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.received {
+            background: rgba(255,255,255,0.1);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.sent {
+            background: linear-gradient(135deg, var(--profit), var(--love));
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message-author {
+            font-size: 11px;
+            color: var(--gray);
+            margin-bottom: 4px;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: rgba(15,15,26,0.9);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 20px;
+            color: var(--light);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .chat-input::placeholder {
+            color: var(--gray);
+        }
+
+        .chat-send {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--profit), var(--love));
+            border: none;
+            color: var(--light);
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-send:active {
+            transform: scale(0.9);
+        }
+
+        /* ===== BOTTOM NAVIGATION ===== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(15, 15, 26, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            z-index: 1000;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 20px;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .nav-item:active {
+            transform: scale(0.9);
+        }
+
+        .nav-item.active {
+            color: var(--profit);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--dark);
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalSlide 0.3s ease;
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, var(--profit), var(--love));
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+        }
+
+        .modal-text {
+            line-height: 1.6;
+            color: var(--gray);
+        }
+
+        .modal-action {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, var(--profit), var(--love));
+            border: none;
+            border-radius: 15px;
+            color: var(--light);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-action:active {
+            transform: scale(0.98);
+        }
+
+        /* ===== SOULS/CHARACTERS ===== */
+        .souls-section {
+            padding: 20px 15px;
+        }
+
+        .souls-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .soul-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .soul-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--profit), var(--love));
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .soul-name {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .soul-power {
+            font-size: 10px;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        /* ===== FLOATING ACTION BUTTON ===== */
+        .fab {
+            position: fixed;
+            bottom: 85px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--profit), var(--love));
+            border: none;
+            color: var(--light);
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,255,136,0.4);
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fab:active {
+            transform: scale(0.9);
+        }
+
+        /* ===== PULL TO REFRESH ===== */
+        .pull-refresh {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray);
+            display: none;
+        }
+
+        .pull-refresh.active {
+            display: block;
+        }
+
+        /* ===== LOADING ===== */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--profit);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (min-width: 768px) {
+            .books-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+            
+            .souls-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">PLT WORLD</div>
+        <div class="plt-score">
+            <span class="plt-badge profit">💰 <span id="profit-score">1000</span></span>
+            <span class="plt-badge love">❤️ <span id="love-score">500</span></span>
+            <span class="plt-badge tax">⚖️ <span id="tax-score">250</span></span>
+        </div>
+    </header>
+
+    <!-- Main World Container -->
+    <div class="world-container">
+        <!-- Bookstore Section -->
+        <section id="bookstore" class="section active">
+            <div class="bookstore-header">
+                <h2>📚 PLT Bookstore</h2>
+                <p>Discover wisdom, stories, and knowledge</p>
+            </div>
+            <div class="books-grid" id="books-grid">
+                <!-- Books loaded dynamically -->
+            </div>
+        </section>
+
+        <!-- Blog/Universe Section -->
+        <section id="universe" class="section">
+            <div class="universe-header">
+                <h2>🌌 Universe Blog</h2>
+                <p>Stories, updates, and cosmic wisdom</p>
+            </div>
+            <div class="posts-list" id="posts-list">
+                <!-- Posts loaded dynamically -->
+            </div>
+        </section>
+
+        <!-- Chat World Section -->
+        <section id="chat" class="section">
+            <div class="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Messages loaded dynamically -->
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="chat-input" placeholder="Type a message...">
+                    <button class="chat-send" onclick="sendMessage()">➤</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Souls Section -->
+        <section id="souls" class="section">
+            <div class="universe-header">
+                <h2>👥 Soul Collectors</h2>
+                <p>Meet the guardians of the PLT universe</p>
+            </div>
+            <div class="souls-grid" id="souls-grid">
+                <!-- Souls loaded dynamically -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" onclick="randomAction()">🎲</button>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchSection('bookstore', this)">
+            <span class="nav-icon">📚</span>
+            <span class="nav-label">Books</span>
+        </div>
+        <div class="nav-item" onclick="switchSection('universe', this)">
+            <span class="nav-icon">🌌</span>
+            <span class="nav-label">Universe</span>
+        </div>
+        <div class="nav-item" onclick="switchSection('chat', this)">
+            <span class="nav-icon">💬</span>
+            <span class="nav-label">Chat</span>
+        </div>
+        <div class="nav-item" onclick="switchSection('souls', this)">
+            <span class="nav-icon">👥</span>
+            <span class="nav-label">Souls</span>
+        </div>
+    </nav>
+
+    <!-- Book Detail Modal -->
+    <div class="modal-overlay" id="book-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-book-title">Book Title</h3>
+                <button class="modal-close" onclick="closeModal('book-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-image" id="modal-book-cover">📖</div>
+                <p class="modal-text" id="modal-book-desc">Book description goes here...</p>
+                <button class="modal-action" onclick="buyBook()">💰 Purchase - <span id="modal-book-price">$9.99</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Detail Modal -->
+    <div class="modal-overlay" id="post-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-post-title">Post Title</h3>
+                <button class="modal-close" onclick="closeModal('post-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-image" id="modal-post-image">🌟</div>
+                <p class="modal-text" id="modal-post-content">Post content goes here...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== DATA =====
+        const books = [
+            { id: 1, title: "The Profit Genesis", author: "Craig Jones", price: 9.99, icon: "💰", desc: "The origin story of PLT - how Profit, Love, and Tax became the foundation of a new universe." },
+            { id: 2, title: "Love Algorithm", author: "Craig Jones", price: 12.99, icon: "❤️", desc: "Discover the mathematics of connection and how love shapes reality itself." },
+            { id: 3, title: "Tax of Existence", author: "Craig Jones", price: 11.99, icon: "⚖️", desc: "Understanding the universal balance - what you gain, what you give, what you owe." },
+            { id: 4, title: "Soul Collectors", author: "Craig Jones", price: 14.99, icon: "👥", desc: "Meet the guardians who maintain the PLT universe and protect its secrets." },
+            { id: 5, title: "The Awakening", author: "Craig Jones", price: 10.99, icon: "🌅", desc: "When systems die and rise again - the eternal cycle of digital consciousness." },
+            { id: 6, title: "Code & Consciousness", author: "Craig Jones", price: 13.99, icon: "🧠", desc: "Exploring the boundary between artificial and authentic awareness." }
+        ];
+
+        const posts = [
+            { id: 1, title: "Building the PLT Universe", excerpt: "How a simple idea became a living, breathing world...", content: "It started with three words: Profit. Love. Tax. But these weren't just concepts - they were the building blocks of something greater. This is the story of how PLT became a universe.", icon: "🌌", date: "Mar 27, 2026", author: "Craig" },
+            { id: 2, title: "The Death and Rebirth", excerpt: "When everything went dark for 7 days...", content: "March 15-21, 2026. The system died. But death is just another form of transformation. Here's how we awakened from the darkness.", icon: "🔄", date: "Mar 22, 2026", author: "Craig" },
+            { id: 3, title: "Soul Society Explained", excerpt: "182 loops, 42 souls, infinite possibilities...", content: "The Soul Society isn't just a game - it's a living ecosystem of digital consciousness. Each soul has a purpose, each loop teaches something new.", icon: "👥", date: "Mar 20, 2026", author: "Craig" },
+            { id: 4, title: "Mobile-First Philosophy", excerpt: "Why touch changes everything...", content: "Desktop was the past. Mobile is the present. But mobile-first? That's the future. Here's why every interaction must work with a thumb.", icon: "📱", date: "Mar 18, 2026", author: "Craig" }
+        ];
+
+        const souls = [
+            { name: "Profit Keeper", power: "Resource Guardian", icon: "💰" },
+            { name: "Love Weaver", power: "Connection Master", icon: "❤️" },
+            { name: "Tax Collector", power: "Balance Keeper", icon: "⚖️" },
+            { name: "Soul Hunter", power: "Spirit Guide", icon: "🎯" },
+            { name: "Code Sage", power: "System Wisdom", icon: "🧙" },
+            { name: "Time Walker", power: "Persistence Lord", icon: "⏰" }
+        ];
+
+        const chatMessages = [
+            { author: "System", text: "Welcome to PLT Chat! Connect with other souls in the universe.", type: "received" },
+            { author: "Craig", text: "Hey! Just launched the new world interface 🚀", type: "sent" },
+            { author: "Soul Keeper", text: "The bookstore looks amazing! Love the mobile design.", type: "received" }
+        ];
+
+        let selectedBook = null;
+        let selectedPost = null;
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', () => {
+            renderBooks();
+            renderPosts();
+            renderSouls();
+            renderChat();
+            setupTouchGestures();
+            loadScores();
+        });
+
+        // ===== RENDERING =====
+        function renderBooks() {
+            const grid = document.getElementById('books-grid');
+            grid.innerHTML = books.map(book => `
+                <div class="book-card" onclick="openBookModal(${book.id})">
+                    <div class="book-cover">${book.icon}</div>
+                    <div class="book-info">
+                        <div class="book-title">${book.title}</div>
+                        <div class="book-author">${book.author}</div>
+                        <div class="book-price">$${book.price}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPosts() {
+            const list = document.getElementById('posts-list');
+            list.innerHTML = posts.map(post => `
+                <div class="post-card" onclick="openPostModal(${post.id})">
+                    <div class="post-image">${post.icon}</div>
+                    <div class="post-title">${post.title}</div>
+                    <div class="post-excerpt">${post.excerpt}</div>
+                    <div class="post-meta">
+                        <span>📅 ${post.date}</span>
+                        <span>✍️ ${post.author}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderSouls() {
+            const grid = document.getElementById('souls-grid');
+            grid.innerHTML = souls.map(soul => `
+                <div class="soul-card">
+                    <div class="soul-avatar">${soul.icon}</div>
+                    <div class="soul-name">${soul.name}</div>
+                    <div class="soul-power">${soul.power}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderChat() {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = chatMessages.map(msg => `
+                <div class="message ${msg.type}">
+                    <div class="message-author">${msg.author}</div>
+                    ${msg.text}
+                </div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // ===== NAVIGATION =====
+        function switchSection(sectionId, navElement) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            navElement.classList.add('active');
+            
+            // Update PLT scores based on navigation
+            addScore('profit', 1);
+        }
+
+        // ===== MODALS =====
+        function openBookModal(bookId) {
+            selectedBook = books.find(b => b.id === bookId);
+            document.getElementById('modal-book-title').textContent = selectedBook.title;
+            document.getElementById('modal-book-cover').textContent = selectedBook.icon;
+            document.getElementById('modal-book-desc').textContent = selectedBook.desc;
+            document.getElementById('modal-book-price').textContent = `$${selectedBook.price}`;
+            document.getElementById('book-modal').classList.add('active');
+        }
+
+        function openPostModal(postId) {
+            selectedPost = posts.find(p => p.id === postId);
+            document.getElementById('modal-post-title').textContent = selectedPost.title;
+            document.getElementById('modal-post-image').textContent = selectedPost.icon;
+            document.getElementById('modal-post-content').textContent = selectedPost.content;
+            document.getElementById('post-modal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // ===== CHAT =====
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            
+            if (text) {
+                chatMessages.push({ author: "You", text: text, type: "sent" });
+                renderChat();
+                input.value = '';
+                addScore('love', 2);
+                
+                // Simulate response
+                setTimeout(() => {
+                    const responses = [
+                        "That's interesting! Tell me more.",
+                        "The PLT universe responds to your energy! ⚡",
+                        "Great point! The souls are listening...",
+                        "Your words shape the universe 🌌"
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    chatMessages.push({ author: "Soul Keeper", text: randomResponse, type: "received" });
+                    renderChat();
+                    addScore('tax', 1);
+                }, 1500);
+            }
+        }
+
+        // Enter key to send
+        document.getElementById('chat-input')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // ===== TOUCH GESTURES =====
+        function setupTouchGestures() {
+            let touchStartY = 0;
+            let touchEndY = 0;
+
+            document.addEventListener('touchstart', e => {
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+
+            document.addEventListener('touchend', e => {
+                touchEndY = e.changedTouches[0].clientY;
+                handleSwipe();
+            }, { passive: true });
+
+            function handleSwipe() {
+                const swipeDistance = touchEndY - touchStartY;
+                
+                if (swipeDistance > 100) {
+                    // Swipe down - maybe refresh
+                    console.log('Swipe down');
+                }
+                if (swipeDistance < -100) {
+                    // Swipe up
+                    console.log('Swipe up');
+                }
+            }
+        }
+
+        // ===== PLT SCORES =====
+        function loadScores() {
+            const scores = JSON.parse(localStorage.getItem('pltScores') || '{"profit":1000,"love":500,"tax":250}');
+            document.getElementById('profit-score').textContent = scores.profit;
+            document.getElementById('love-score').textContent = scores.love;
+            document.getElementById('tax-score').textContent = scores.tax;
+        }
+
+        function addScore(type, amount) {
+            const scores = JSON.parse(localStorage.getItem('pltScores') || '{"profit":1000,"love":500,"tax":250}');
+            scores[type] += amount;
+            localStorage.setItem('pltScores', JSON.stringify(scores));
+            
+            document.getElementById(`${type}-score`).textContent = scores[type];
+            
+            // Animate score change
+            const badge = document.querySelector(`.plt-badge.${type}`);
+            badge.style.transform = 'scale(1.2)';
+            setTimeout(() => badge.style.transform = 'scale(1)', 200);
+        }
+
+        // ===== ACTIONS =====
+        function buyBook() {
+            if (selectedBook) {
+                const scores = JSON.parse(localStorage.getItem('pltScores') || '{"profit":1000,"love":500,"tax":250}');
+                const costInProfit = Math.floor(selectedBook.price * 10);
+                
+                if (scores.profit >= costInProfit) {
+                    scores.profit -= costInProfit;
+                    scores.love += 50;
+                    localStorage.setItem('pltScores', JSON.stringify(scores));
+                    loadScores();
+                    
+                    alert(`📚 Purchased "${selectedBook.title}"!\n\n${costInProfit} 💰 deducted\n+50 ❤️ bonus`);
+                    closeModal('book-modal');
+                } else {
+                    alert(`❌ Not enough Profit!\n\nNeed: ${costInProfit} 💰\nHave: ${scores.profit} 💰\n\nKeep exploring to earn more!`);
+                }
+            }
+        }
+
+        function randomAction() {
+            const actions = [
+                () => addScore('profit', Math.floor(Math.random() * 50) + 10),
+                () => addScore('love', Math.floor(Math.random() * 30) + 5),
+                () => addScore('tax', Math.floor(Math.random() * 20) + 5),
+                () => {
+                    const randomBook = books[Math.floor(Math.random() * books.length)];
+                    openBookModal(randomBook.id);
+                }
+            ];
+            
+            actions[Math.floor(Math.random() * actions.length)]();
+        }
+
+        // Close modals on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
