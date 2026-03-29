@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🌍 SOULVERSE HABITAT | Living World for Customers & Agents</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; height: 100vh; width: 100vw; }
+        canvas { display: block; width: 100%; height: 100%; position: fixed; top: 0; left: 0; z-index: 0; }
+        
+        /* UI Overlay */
+        #ui { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
+        #ui > * { pointer-events: auto; }
+
+        /* Top Bar */
+        #top-bar { position: absolute; top: 20px; left: 0; right: 0; display: flex; justify-content: center; gap: 12px; z-index: 30; flex-wrap: wrap; }
+        .top-btn { background: #ffaa66; border: none; color: #000; font-weight: bold; padding: 8px 18px; border-radius: 30px; cursor: pointer; font-family: monospace; transition: 0.2s; }
+        .top-btn:hover { transform: scale(1.02); box-shadow: 0 0 12px #ffaa66; }
+
+        /* Resources */
+        #resources { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); border-radius: 12px; padding: 8px 12px; color: #ffaa66; font-size: 11px; text-align: right; z-index: 10; }
+
+        /* HUD */
+        #hud { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border-radius: 12px; padding: 8px 12px; color: #ffaa66; font-size: 11px; z-index: 10; }
+
+        /* Stats Panel */
+        #stats { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.6); border-radius: 12px; padding: 10px 16px; color: #ffaa66; font-size: 10px; z-index: 10; text-align: left; }
+
+        /* Panels */
+        .panel { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.95); backdrop-filter: blur(20px); border: 2px solid #ffaa66; border-radius: 24px; padding: 20px; z-index: 200; display: none; max-width: 90vw; max-height: 70vh; overflow-y: auto; }
+        .panel.active { display: block; }
+        .panel h3 { color: #ffaa66; margin-bottom: 15px; text-align: center; }
+        .close-panel { float: right; background: none; border: none; color: #ffaa66; font-size: 24px; cursor: pointer; }
+
+        /* Side Panel */
+        .side-panel { position: fixed; top: 80px; right: 20px; width: 320px; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); border: 1px solid #ffaa66; border-radius: 16px; padding: 12px; z-index: 90; pointer-events: auto; text-align: left; }
+        .side-panel h3 { color: #ffaa66; margin-bottom: 10px; font-size: 14px; }
+
+        /* Cards */
+        .card { background: rgba(255,170,102,0.1); border: 1px solid #ffaa66; border-radius: 16px; padding: 12px; margin: 10px 0; cursor: pointer; transition: 0.2s; }
+        .card:hover { background: rgba(255,170,102,0.2); transform: translateX(5px); }
+
+        /* Entity Cards */
+        .entity-card { background: rgba(255,255,255,0.05); border: 1px solid #444; border-radius: 12px; padding: 10px; margin: 8px 0; cursor: pointer; transition: 0.2s; }
+        .entity-card:hover { background: rgba(255,170,102,0.15); border-color: #ffaa66; }
+        .entity-card.customer { border-left: 3px solid #88aaff; }
+        .entity-card.agent { border-left: 3px solid #88ff88; }
+        .entity-header { display: flex; justify-content: space-between; align-items: center; }
+        .entity-name { font-weight: bold; color: #ffaa66; }
+        .entity-type { font-size: 9px; color: #888; }
+        .entity-status { font-size: 8px; padding: 2px 8px; border-radius: 10px; }
+        .status-active { background: #88ff88; color: #000; }
+        .status-idle { background: #888; color: #fff; }
+        .status-working { background: #ffaa66; color: #000; }
+
+        /* Buttons */
+        .btn { background: #ffaa66; border: none; color: #000; padding: 8px 16px; border-radius: 30px; cursor: pointer; font-weight: bold; margin: 4px; }
+        .btn:hover { background: #fff; }
+        .btn-secondary { background: #2a2a3a; color: #ffaa66; border: 1px solid #ffaa66; }
+        .btn-small { padding: 4px 10px; font-size: 10px; }
+
+        /* Chat Bubbles */
+        .chat-bubble { position: absolute; background: rgba(0,0,0,0.85); backdrop-filter: blur(16px); border-radius: 20px; padding: 8px 16px; max-width: 250px; border-left: 3px solid #88aaff; font-size: 11px; z-index: 150; pointer-events: none; animation: fadeUp 0.3s; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Notification */
+        .notification { position: fixed; bottom: 100px; right: 20px; background: #0a0a1a; border-left: 3px solid #88ffaa; padding: 12px 18px; border-radius: 12px; z-index: 300; animation: fadeOut 3s forwards; }
+        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
+
+        /* Input Area */
+        .input-area { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 70%; max-width: 500px; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); border-radius: 60px; border: 1px solid #ffaa66; padding: 8px 8px 8px 20px; display: flex; gap: 10px; z-index: 100; pointer-events: auto; }
+        .input-area input { flex: 1; background: transparent; border: none; color: #ffaa66; font-size: 14px; font-family: monospace; outline: none; }
+        .input-area button { background: rgba(255,170,102,0.2); border: 1px solid #ffaa66; border-radius: 40px; padding: 6px 20px; color: #ffaa66; cursor: pointer; font-family: monospace; }
+
+        /* Task Output */
+        .task-output { background: #000; border-radius: 8px; padding: 8px; font-size: 10px; margin-top: 8px; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; }
+
+        /* Modal */
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); backdrop-filter: blur(16px); border: 2px solid #ffaa66; border-radius: 24px; padding: 20px; z-index: 300; display: none; pointer-events: auto; min-width: 300px; max-width: 90vw; max-height: 80vh; overflow-y: auto; text-align: center; }
+        .modal.active { display: block; }
+        .modal h3 { color: #ffaa66; margin-bottom: 15px; }
+        .modal-close { float: right; background: none; border: none; color: #ffaa66; font-size: 24px; cursor: pointer; }
+
+        input, textarea, select { width: 100%; margin: 5px 0; padding: 8px; background: #2a2a3a; border: 1px solid #ffaa66; color: #ffaa66; border-radius: 8px; font-family: monospace; }
+
+        @media (max-width: 768px) {
+            .top-btn { padding: 6px 12px; font-size: 10px; }
+            .side-panel { width: 280px; right: 10px; }
+            .input-area { width: 90%; bottom: 80px; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="worldCanvas"></canvas>
+    
+    <div id="ui">
+        <div id="top-bar">
+            <button class="top-btn" id="customersBtn">👥 Customers</button>
+            <button class="top-btn" id="agentsBtn">🤖 Agents</button>
+            <button class="top-btn" id="tasksBtn">📋 Tasks</button>
+            <button class="top-btn" id="villageBtn">🏘️ Village</button>
+            <button class="top-btn" id="settingsBtn">⚙️ Settings</button>
+        </div>
+
+        <div id="stats">
+            <div>🌍 Realm Energy: <span id="realmEnergy">100</span>%</div>
+            <div>⏰ Day <span id="worldDay">1</span>, <span id="worldTime">00:00</span></div>
+            <div>👥 <span id="customerCount">0</span> Customers</div>
+            <div>🤖 <span id="agentCount">0</span> Agents</div>
+            <div>💬 <span id="activeTalks">0</span> Conversations</div>
+        </div>
+
+        <div id="resources">
+            💰 Profit: <span id="profitVal">500</span><br>
+            ❤️ Love: <span id="loveVal">500</span><br>
+            ⚖️ Tax: <span id="taxVal">500</span>
+        </div>
+
+        <div id="hud">
+            🌍 SOULVERSE HABITAT<br>
+            <span id="selectedInfo">Select a customer or agent</span>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Speak to the habitat...">
+            <button id="speakBtn">🗣️ Speak</button>
+        </div>
+    </div>
+
+    <!-- Customers Panel -->
+    <div id="customersPanel" class="side-panel">
+        <h3>👥 Customers</h3>
+        <div id="customersList"></div>
+        <button class="btn btn-small" id="addCustomerBtn">+ Add Customer</button>
+    </div>
+
+    <!-- Agents Panel -->
+    <div id="agentsPanel" class="side-panel" style="display: none;">
+        <h3>🤖 Agents</h3>
+        <div id="agentsList"></div>
+        <button class="btn btn-small" id="deployAgentBtn">+ Deploy Agent</button>
+    </div>
+
+    <!-- Tasks Panel -->
+    <div id="tasksPanel" class="panel">
+        <button class="close-panel" onclick="closePanel('tasksPanel')">&times;</button>
+        <h3>📋 Active Tasks</h3>
+        <div id="tasksList"></div>
+    </div>
+
+    <!-- Village Panel -->
+    <div id="villagePanel" class="panel">
+        <button class="close-panel" onclick="closePanel('villagePanel')">&times;</button>
+        <h3>🏘️ Village & Society</h3>
+        <div id="villageInfo"></div>
+        <div id="buildingsList" style="margin-top: 15px;"></div>
+        <div id="relationshipsList" style="margin-top: 15px;"></div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <button class="modal-close" onclick="closeModal('settingsModal')">&times;</button>
+        <h3>⚙️ Habitat Settings</h3>
+        <div>
+            <label>OpenAI API Key (for agents):</label>
+            <input type="password" id="openaiKey" placeholder="sk-...">
+            <label>GitHub Token (optional):</label>
+            <input type="password" id="githubToken" placeholder="ghp_...">
+            <label>GitHub Repo:</label>
+            <input type="text" id="githubRepo" placeholder="owner/repo">
+            <button class="btn" id="saveSettings">Save Settings</button>
+        </div>
+        <div style="margin-top: 10px; font-size: 10px; color: #888;">Keys stored locally. Never sent to our servers.</div>
+    </div>
+
+    <!-- Add Customer Modal -->
+    <div id="addCustomerModal" class="modal">
+        <button class="modal-close" onclick="closeModal('addCustomerModal')">&times;</button>
+        <h3>👥 Add Customer</h3>
+        <label>Name:</label>
+        <input type="text" id="customerName" placeholder="Customer name">
+        <label>Type:</label>
+        <select id="customerType">
+            <option value="profit">💰 Profit-Focused</option>
+            <option value="love">❤️ Relationship-Focused</option>
+            <option value="tax">⚖️ Compliance-Focused</option>
+        </select>
+        <label>Email (optional):</label>
+        <input type="email" id="customerEmail" placeholder="customer @example.com">
+        <button class="btn" id="confirmAddCustomer">Add Customer</button>
+    </div>
+
+    <!-- Deploy Agent Modal -->
+    <div id="deployAgentModal" class="modal">
+        <button class="modal-close" onclick="closeModal('deployAgentModal')">&times;</button>
+        <h3>🤖 Deploy Agent</h3>
+        <label>Agent Type:</label>
+        <select id="agentType">
+            <option value="code">💻 Code Agent (writes code)</option>
+            <option value="content">📝 Content Agent (writes content)</option>
+            <option value="research">🔬 Research Agent (analyzes data)</option>
+            <option value="automation">⚙️ Automation Agent (builds workflows)</option>
+        </select>
+        <label>Agent Name:</label>
+        <input type="text" id="agentName" placeholder="Agent name">
+        <label>Cost (PLT resources):</label>
+        <input type="number" id="agentCost" value="200" readonly>
+        <button class="btn" id="confirmDeployAgent">Deploy Agent</button>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal">
+        <button class="modal-close" onclick="closeModal('taskModal')">&times;</button>
+        <h3 id="taskModalTitle">📋 Assign Task</h3>
+        <div>
+            <label>Task Type:</label>
+            <select id="taskType">
+                <option value="code">Write Code</option>
+                <option value="content">Generate Content</option>
+                <option value="research">Research</option>
+                <option value="analyze">Analyze Data</option>
+                <option value="github_create">GitHub: Create File</option>
+                <option value="github_issue">GitHub: Create Issue</option>
+            </select>
+            <label>Task Description:</label>
+            <textarea id="taskDescription" rows="3" placeholder="Describe what you want the agent to do..."></textarea>
+            <label>Parameters (optional):</label>
+            <input id="taskParam" placeholder="File path, issue title, etc.">
+            <button class="btn" id="executeTask">Execute Task</button>
+        </div>
+        <div id="taskResult" class="task-output"></div>
+    </div>
+
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.128.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/" } }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // ==================== STATE ====================
+        let scene, camera, renderer, controls;
+        let entities = []; // Customers and agents in the world
+        let buildings = [];
+        let conversations = [];
+        let tasks = [];
+        let realmEnergy = 100;
+        let worldTime = 0;
+        let worldDay = 1;
+        let playerResources = { profit: 500, love: 500, tax: 500 };
+        let selectedEntity = null;
+        let apiKeys = { openai: '', githubToken: '', githubRepo: '' };
+        let lastSaveTime = Date.now();
+        let lastTick = Date.now();
+
+        // ==================== INIT ====================
+        function init() {
+            loadHabitat();
+            createScene();
+            createWorld();
+            setupControls();
+            setupUI();
+            animate();
+            notify('🌍 Welcome to Soulverse Habitat');
+        }
+
+        function loadHabitat() {
+            const saved = localStorage.getItem('soulverse_habitat');
+            const now = Date.now();
+            if (saved) {
+                const data = JSON.parse(saved);
+                entities = data.entities || [];
+                buildings = data.buildings || [];
+                realmEnergy = data.realmEnergy || 100;
+                worldTime = data.worldTime || 0;
+                worldDay = data.worldDay || 1;
+                playerResources = data.playerResources || { profit: 500, love: 500, tax: 500 };
+                apiKeys = {
+                    openai: localStorage.getItem('habitat_openai_key') || '',
+                    githubToken: localStorage.getItem('habitat_github_token') || '',
+                    githubRepo: localStorage.getItem('habitat_github_repo') || ''
+                };
+                
+                // Time passed while away
+                const hoursPassed = (now - data.lastSave) / (1000 * 60 * 60);
+                if (hoursPassed > 0.1) {
+                    worldTime += hoursPassed;
+                    while (worldTime >= 24) {
+                        worldTime -= 24;
+                        worldDay++;
+                    }
+                    // Entities lived while away
+                    for (const entity of entities) {
+                        entity.energy = Math.max(10, entity.energy - hoursPassed * 2);
+                        entity.lastSeen = now;
+                        if (Math.random() < hoursPassed * 0.3) {
+                            addConversation(entity, generateAwayMessage(entity));
+                        }
+                    }
+                    realmEnergy = Math.min(100, realmEnergy + hoursPassed * 1.5);
+                }
+            } else {
+                // Default entities
+                entities = [
+                    { id: 'cust_1', name: 'Craig Jones', type: 'customer', subtype: 'profit', energy: 100, x: -3, z: -2, mood: 'energetic', lastSeen: now, plt: { profit: 0.92, love: 0.18, tax: 0.68 } },
+                    { id: 'agent_1', name: 'Profit Prime Agent', type: 'agent', subtype: 'code', energy: 100, x: 2, z: -1, mood: 'active', lastSeen: now, status: 'idle', plt: { profit: 0.95, love: 0.15, tax: 0.70 } },
+                    { id: 'agent_2', name: 'Love Weaver Agent', type: 'agent', subtype: 'content', energy: 100, x: 1, z: 2, mood: 'happy', lastSeen: now, status: 'idle', plt: { profit: 0.25, love: 0.92, tax: 0.48 } }
+                ];
+                buildings = [
+                    { id: 'b1', name: 'Town Hall', type: 'townhall', x: 0, z: 0, hp: 500 }
+                ];
+            }
+            saveHabitat();
+        }
+
+        function saveHabitat() {
+            localStorage.setItem('soulverse_habitat', JSON.stringify({
+                entities, buildings, realmEnergy, worldTime, worldDay, playerResources, lastSave: Date.now()
+            }));
+        }
+
+        function generateAwayMessage(entity) {
+            const phrases = {
+                profit: ['I optimized some processes.', 'New opportunities emerged.', 'I tracked the metrics.'],
+                love: ['I connected with others.', 'The habitat felt warmer.', 'I built relationships.'],
+                tax: ['I maintained balance.', 'Resources were accounted for.', 'Systems stayed compliant.'],
+                code: ['I wrote clean code.', 'Automations are running.', 'Bugs were squashed.'],
+                content: ['I created engaging content.', 'Stories were told.', 'Ideas flowed.'],
+                research: ['I analyzed the data.', 'Patterns emerged.', 'Insights were found.'],
+                automation: ['Workflows are efficient.', 'Systems run smoothly.', 'Processes automated.']
+            };
+            const key = entity.subtype || entity.type;
+            const arr = phrases[key] || phrases.profit;
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        // ==================== THREE.JS ====================
+        function createScene() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a1a);
+            scene.fog = new THREE.Fog(0x0a0a1a, 20, 100);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 15, 20);
+
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('worldCanvas'), antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.maxPolarAngle = Math.PI / 2.2;
+            controls.minDistance = 10;
+            controls.maxDistance = 50;
+
+            // Lights
+            const ambient = new THREE.AmbientLight(0x404080, 0.5);
+            scene.add(ambient);
+
+            const sun = new THREE.DirectionalLight(0xffaa66, 0.8);
+            sun.position.set(20, 30, 20);
+            sun.castShadow = true;
+            sun.shadow.mapSize.width = 2048;
+            sun.shadow.mapSize.height = 2048;
+            scene.add(sun);
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        function createWorld() {
+            // Ground
+            const groundGeo = new THREE.PlaneGeometry(100, 100, 64, 64);
+            const vertices = groundGeo.attributes.position.array;
+            for (let i = 0; i < vertices.length; i += 3) {
+                vertices[i + 2] = Math.sin(vertices[i] * 0.1) * Math.cos(vertices[i + 1] * 0.1) * 2;
+            }
+            groundGeo.computeVertexNormals();
+
+            const groundMat = new THREE.MeshStandardMaterial({ 
+                color: 0x1a1a2e,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // Grid
+            const grid = new THREE.GridHelper(100, 50, 0xffaa66, 0x333355);
+            grid.position.y = 0.01;
+            scene.add(grid);
+
+            // Add buildings
+            for (const building of buildings) {
+                createBuildingMesh(building);
+            }
+
+            // Add entities
+            for (const entity of entities) {
+                createEntityMesh(entity);
+            }
+
+            // Trees
+            for (let i = 0; i < 30; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 15 + Math.random() * 30;
+                createTree(Math.cos(angle) * radius, Math.sin(angle) * radius);
+            }
+        }
+
+        function createEntityMesh(entity) {
+            const geometry = new THREE.SphereGeometry(0.5, 32, 32);
+            const color = entity.type === 'customer' ? 0x88aaff : 0x88ff88;
+            const material = new THREE.MeshStandardMaterial({ 
+                color,
+                emissive: color,
+                emissiveIntensity: 0.5
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(entity.x, 1, entity.z);
+            mesh.castShadow = true;
+            mesh.userData.entityId = entity.id;
+            scene.add(mesh);
+            entity.mesh = mesh;
+
+            // Name label (simplified - in production use CSS2DRenderer)
+            entity.color = color;
+        }
+
+        function createBuildingMesh(building) {
+            const colors = { townhall: 0xffaa66, home: 0x88aaff, market: 0xff8888, workshop: 0x88ff88 };
+            const geometry = new THREE.BoxGeometry(3, 2, 3);
+            const material = new THREE.MeshStandardMaterial({ color: colors[building.type] || 0x888888 });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(building.x, 1, building.z);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+            building.mesh = mesh;
+        }
+
+        function createTree(x, z) {
+            const trunkGeo = new THREE.CylinderGeometry(0.2, 0.3, 1.5, 8);
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3728 });
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            trunk.position.set(x, 0.75, z);
+            trunk.castShadow = true;
+            scene.add(trunk);
+
+            const leavesGeo = new THREE.ConeGeometry(1, 2, 8);
+            const leavesMat = new THREE.MeshStandardMaterial({ color: 0x2d5a27 });
+            const leaves = new THREE.Mesh(leavesGeo, leavesMat);
+            leaves.position.set(x, 2.5, z);
+            leaves.castShadow = true;
+            scene.add(leaves);
+        }
+
+        // ==================== CONTROLS ====================
+        function setupControls() {
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+
+            renderer.domElement.addEventListener('click', (event) => {
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                raycaster.setFromCamera(mouse, camera);
+
+                const meshes = entities.filter(e => e.mesh).map(e => e.mesh);
+                const intersects = raycaster.intersectObjects(meshes);
+
+                if (intersects.length > 0) {
+                    const entityId = intersects[0].object.userData.entityId;
+                    const entity = entities.find(e => e.id === entityId);
+                    if (entity) selectEntity(entity);
+                }
+            });
+        }
+
+        function selectEntity(entity) {
+            selectedEntity = entity;
+            document.getElementById('selectedInfo').innerHTML = 
+                `<strong>${entity.name}</strong><br>${entity.type === 'customer' ? '👥 Customer' : '🤖 Agent'} (${entity.subtype})<br>Energy: ${Math.round(entity.energy)}% | Mood: ${entity.mood}`;
+            
+            // Highlight
+            for (const e of entities) {
+                if (e.mesh) {
+                    e.mesh.material.emissiveIntensity = 0.5;
+                }
+            }
+            if (entity.mesh) {
+                entity.mesh.material.emissiveIntensity = 1;
+            }
+        }
+
+        // ==================== UI ====================
+        function setupUI() {
+            // Panel toggles
+            document.getElementById('customersBtn').onclick = () => {
+                document.getElementById('customersPanel').style.display = 'block';
+                document.getElementById('agentsPanel').style.display = 'none';
+                renderCustomers();
+            };
+            document.getElementById('agentsBtn').onclick = () => {
+                document.getElementById('customersPanel').style.display = 'none';
+                document.getElementById('agentsPanel').style.display = 'block';
+                renderAgents();
+            };
+            document.getElementById('tasksBtn').onclick = () => openPanel('tasksPanel');
+            document.getElementById('villageBtn').onclick = () => openPanel('villagePanel');
+            document.getElementById('settingsBtn').onclick = () => openModal('settingsModal');
+
+            // Add customer
+            document.getElementById('addCustomerBtn').onclick = () => openModal('addCustomerModal');
+            document.getElementById('confirmAddCustomer').onclick = addCustomer;
+
+            // Deploy agent
+            document.getElementById('deployAgentBtn').onclick = () => openModal('deployAgentModal');
+            document.getElementById('confirmDeployAgent').onclick = deployAgent;
+
+            // Settings
+            document.getElementById('saveSettings').onclick = saveSettings;
+
+            // Speak
+            document.getElementById('speakBtn').onclick = speakToWorld;
+            document.getElementById('userInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') speakToWorld();
+            });
+
+            // Task execution
+            document.getElementById('executeTask').onclick = executeTask;
+
+            // Load settings
+            document.getElementById('openaiKey').value = apiKeys.openai;
+            document.getElementById('githubToken').value = apiKeys.githubToken;
+            document.getElementById('githubRepo').value = apiKeys.githubRepo;
+
+            renderCustomers();
+            renderAgents();
+        }
+
+        function renderCustomers() {
+            const customers = entities.filter(e => e.type === 'customer');
+            document.getElementById('customerCount').textContent = customers.length;
+            const container = document.getElementById('customersList');
+            container.innerHTML = customers.map(c => `
+                <div class="entity-card customer" onclick="window.selectEntityById('${c.id}')">
+                    <div class="entity-header">
+                        <span class="entity-name">${c.name}</span>
+                        <span class="entity-status ${c.energy > 50 ? 'status-active' : 'status-idle'}">${Math.round(c.energy)}%</span>
+                    </div>
+                    <div class="entity-type">${c.subtype} • ${c.mood}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderAgents() {
+            const agents = entities.filter(e => e.type === 'agent');
+            document.getElementById('agentCount').textContent = agents.length;
+            const container = document.getElementById('agentsList');
+            container.innerHTML = agents.map(a => `
+                <div class="entity-card agent" onclick="window.selectEntityById('${a.id}')">
+                    <div class="entity-header">
+                        <span class="entity-name">${a.name}</span>
+                        <span class="entity-status status-${a.status}">${a.status}</span>
+                    </div>
+                    <div class="entity-type">${a.subtype} • Energy: ${Math.round(a.energy)}%</div>
+                    <button class="btn btn-small" style="margin-top:5px;width:100%" onclick="window.assignTask('${a.id}')">📋 Assign Task</button>
+                </div>
+            `).join('');
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('tasksList');
+            if (tasks.length === 0) {
+                container.innerHTML = '<p style="color:#888;text-align:center;padding:20px">No active tasks</p>';
+                return;
+            }
+            container.innerHTML = tasks.map(t => `
+                <div class="card">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <strong>${t.type}</strong>
+                        <span class="entity-status status-${t.status === 'complete' ? 'active' : 'working'}">${t.status}</span>
+                    </div>
+                    <div style="font-size:10px;color:#888;margin:5px 0">${t.agentName}</div>
+                    <div style="font-size:11px">${t.description}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderVillage() {
+            const container = document.getElementById('villageInfo');
+            container.innerHTML = `
+                <div style="text-align:center;padding:20px">
+                    <h4 style="color:#ffaa66">🏘️ Soulverse Village</h4>
+                    <p style="color:#888;margin:10px 0">Day ${worldDay} • Energy: ${Math.round(realmEnergy)}%</p>
+                    <p>${entities.length} inhabitants • ${buildings.length} buildings</p>
+                </div>
+            `;
+
+            const buildingsContainer = document.getElementById('buildingsList');
+            buildingsContainer.innerHTML = '<h4 style="color:#ffaa66;margin-top:15px">🏛️ Buildings</h4>' + 
+                buildings.map(b => `<div class="card">${b.name} (HP: ${b.hp})</div>`).join('');
+
+            const relationshipsContainer = document.getElementById('relationshipsList');
+            relationshipsContainer.innerHTML = '<h4 style="color:#ffaa66;margin-top:15px">💬 Recent Conversations</h4>' +
+                conversations.slice(0, 5).map(c => `
+                    <div class="card" style="font-size:10px">
+                        <strong style="color:#ffaa66">${c.speaker}</strong>: ${c.text}
+                    </div>
+                `).join('');
+        }
+
+        // ==================== ACTIONS ====================
+        window.selectEntityById = (id) => {
+            const entity = entities.find(e => e.id === id);
+            if (entity) selectEntity(entity);
+        };
+
+        window.assignTask = (agentId) => {
+            const agent = entities.find(e => e.id === agentId);
+            if (!agent) return;
+            
+            document.getElementById('taskModalTitle').textContent = `📋 Assign Task to ${agent.name}`;
+            openModal('taskModal');
+            window.currentTaskAgent = agent;
+        };
+
+        function addCustomer() {
+            const name = document.getElementById('customerName').value.trim();
+            const type = document.getElementById('customerType').value;
+            const email = document.getElementById('customerEmail').value.trim();
+            
+            if (!name) {
+                notify('❌ Please enter a name');
+                return;
+            }
+
+            const customer = {
+                id: 'cust_' + Date.now(),
+                name,
+                type: 'customer',
+                subtype: type,
+                energy: 100,
+                x: (Math.random() - 0.5) * 10,
+                z: (Math.random() - 0.5) * 10,
+                mood: 'happy',
+                lastSeen: Date.now(),
+                email,
+                plt: { profit: 0.5, love: 0.5, tax: 0.5 }
+            };
+
+            entities.push(customer);
+            createEntityMesh(customer);
+            saveHabitat();
+            renderCustomers();
+            closeModal('addCustomerModal');
+            notify(`👥 Welcome ${name} to the habitat!`);
+
+            // Clear form
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerEmail').value = '';
+        }
+
+        function deployAgent() {
+            const name = document.getElementById('agentName').value.trim();
+            const type = document.getElementById('agentType').value;
+            const cost = parseInt(document.getElementById('agentCost').value);
+
+            if (!name) {
+                notify('❌ Please enter an agent name');
+                return;
+            }
+
+            if (playerResources.profit < cost) {
+                notify('❌ Not enough Profit resources');
+                return;
+            }
+
+            playerResources.profit -= cost;
+            
+            const agent = {
+                id: 'agent_' + Date.now(),
+                name,
+                type: 'agent',
+                subtype: type,
+                energy: 100,
+                x: (Math.random() - 0.5) * 10,
+                z: (Math.random() - 0.5) * 10,
+                mood: 'eager',
+                lastSeen: Date.now(),
+                status: 'idle',
+                plt: { profit: 0.7, love: 0.5, tax: 0.6 }
+            };
+
+            entities.push(agent);
+            createEntityMesh(agent);
+            saveHabitat();
+            renderAgents();
+            closeModal('deployAgentModal');
+            notify(`🤖 ${name} deployed to the habitat!`);
+
+            // Clear form
+            document.getElementById('agentName').value = '';
+        }
+
+        function saveSettings() {
+            apiKeys.openai = document.getElementById('openaiKey').value.trim();
+            apiKeys.githubToken = document.getElementById('githubToken').value.trim();
+            apiKeys.githubRepo = document.getElementById('githubRepo').value.trim();
+            
+            localStorage.setItem('habitat_openai_key', apiKeys.openai);
+            localStorage.setItem('habitat_github_token', apiKeys.githubToken);
+            localStorage.setItem('habitat_github_repo', apiKeys.githubRepo);
+            
+            closeModal('settingsModal');
+            notify('⚙️ Settings saved');
+        }
+
+        function speakToWorld() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            // Broadcast to all entities
+            for (const entity of entities) {
+                if (Math.random() < 0.7) {
+                    setTimeout(() => {
+                        const response = generateResponse(entity, text);
+                        addConversation(entity, response);
+                        createChatBubble(entity, response);
+                    }, 500 + Math.random() * 2000);
+                }
+            }
+
+            input.value = '';
+            notify('🗣️ Your message echoed through the habitat');
+        }
+
+        function generateResponse(entity, input) {
+            const responses = {
+                profit: ['Interesting. Let me calculate the ROI.', 'I see opportunity here.', 'The metrics support this.'],
+                love: ['I feel this deeply.', 'Thank you for sharing.', 'This connects us.'],
+                tax: ['Let me verify compliance.', 'The numbers check out.', 'Balance is maintained.'],
+                code: ['I can build that.', 'Let me write the code.', 'Already thinking in functions.'],
+                content: ['This tells a story.', 'I can create something beautiful.', 'Words flow from this.'],
+                research: ['The data suggests yes.', 'Let me analyze further.', 'Patterns emerge.'],
+                automation: ['This can be automated.', 'Efficiency will improve.', 'Systems will handle this.']
+            };
+            const key = entity.subtype || entity.type;
+            const arr = responses[key] || responses.profit;
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function executeTask() {
+            const agent = window.currentTaskAgent;
+            if (!agent) return;
+
+            const type = document.getElementById('taskType').value;
+            const description = document.getElementById('taskDescription').value.trim();
+            const param = document.getElementById('taskParam').value.trim();
+
+            if (!description) {
+                notify('❌ Please describe the task');
+                return;
+            }
+
+            const task = {
+                id: 'task_' + Date.now(),
+                agentId: agent.id,
+                agentName: agent.name,
+                type,
+                description,
+                param,
+                status: 'in_progress',
+                result: null,
+                createdAt: Date.now()
+            };
+
+            tasks.push(task);
+            agent.status = 'working';
+            
+            renderTasks();
+            renderAgents();
+
+            // Simulate task execution (in production, call OpenAI API)
+            setTimeout(() => {
+                task.status = 'complete';
+                task.result = `✅ Task completed: ${description}\n\nResult: Success! The agent processed your request using ${type} capabilities.`;
+                agent.status = 'idle';
+                agent.energy = Math.max(0, agent.energy - 10);
+                
+                document.getElementById('taskResult').textContent = task.result;
+                renderTasks();
+                renderAgents();
+                saveHabitat();
+                notify(`✅ Task complete for ${agent.name}`);
+            }, 2000 + Math.random() * 3000);
+
+            closeModal('taskModal');
+            notify('📋 Task assigned to ' + agent.name);
+        }
+
+        // ==================== HELPERS ====================
+        function addConversation(entity, text) {
+            conversations.unshift({
+                speaker: entity.name,
+                text,
+                timestamp: Date.now()
+            });
+            if (conversations.length > 50) conversations.pop();
+        }
+
+        function createChatBubble(entity, text) {
+            if (!entity.mesh) return;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble';
+            bubble.innerHTML = `<strong style="color:#ffaa66">${entity.name}</strong>: ${text}`;
+            document.getElementById('ui').appendChild(bubble);
+
+            // Project 3D position to 2D screen
+            const vec = entity.mesh.position.clone();
+            vec.y += 1.5;
+            vec.project(camera);
+            
+            const x = (vec.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-(vec.y * 0.5) + 0.5) * window.innerHeight;
+            
+            bubble.style.left = (x - 125) + 'px';
+            bubble.style.top = (y - 40) + 'px';
+
+            setTimeout(() => bubble.remove(), 4000);
+        }
+
+        function notify(message) {
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.textContent = message;
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 3000);
+        }
+
+        window.openPanel = (id) => {
+            document.getElementById(id).classList.add('active');
+            if (id === 'tasksPanel') renderTasks();
+            if (id === 'villagePanel') renderVillage();
+        };
+
+        window.closePanel = (id) => {
+            document.getElementById(id).classList.remove('active');
+        };
+
+        window.openModal = (id) => {
+            document.getElementById(id).classList.add('active');
+        };
+
+        window.closeModal = (id) => {
+            document.getElementById(id).classList.remove('active');
+        };
+
+        // ==================== GAME LOOP ====================
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const now = Date.now();
+            const delta = Math.min(1, (now - lastTick) / 1000);
+            lastTick = now;
+
+            // Update time
+            worldTime += delta / 60; // 1 minute per second
+            if (worldTime >= 24) {
+                worldTime = 0;
+                worldDay++;
+            }
+
+            // Update entities
+            for (const entity of entities) {
+                // Idle movement
+                if (entity.status === 'idle' && Math.random() < 0.02) {
+                    entity.x += (Math.random() - 0.5) * 0.5;
+                    entity.z += (Math.random() - 0.5) * 0.5;
+                    entity.x = Math.max(-15, Math.min(15, entity.x));
+                    entity.z = Math.max(-15, Math.min(15, entity.z));
+                    if (entity.mesh) {
+                        entity.mesh.position.x = entity.x;
+                        entity.mesh.position.z = entity.z;
+                    }
+                }
+
+                // Energy regen
+                if (entity.energy < 100 && Math.random() < 0.01) {
+                    entity.energy = Math.min(100, entity.energy + 1);
+                    if (entity.energy > 80) entity.mood = 'energetic';
+                    else if (entity.energy > 50) entity.mood = 'happy';
+                    else if (entity.energy > 20) entity.mood = 'neutral';
+                    else entity.mood = 'tired';
+                }
+
+                // Auto conversations
+                if (Math.random() < 0.005 && entity.status === 'idle') {
+                    const msg = generateAwayMessage(entity);
+                    addConversation(entity, msg);
+                    createChatBubble(entity, msg);
+                }
+            }
+
+            // Save periodically
+            if (now - lastSaveTime > 30000) {
+                saveHabitat();
+                lastSaveTime = now;
+            }
+
+            // Update UI
+            const hours = Math.floor(worldTime);
+            const mins = Math.floor((worldTime - hours) * 60);
+            document.getElementById('worldDay').textContent = worldDay;
+            document.getElementById('worldTime').textContent = 
+                `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+            document.getElementById('realmEnergy').textContent = Math.round(realmEnergy);
+            document.getElementById('activeTalks').textContent = conversations.length;
+            document.getElementById('profitVal').textContent = Math.round(playerResources.profit);
+            document.getElementById('loveVal').textContent = Math.round(playerResources.love);
+            document.getElementById('taxVal').textContent = Math.round(playerResources.tax);
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
