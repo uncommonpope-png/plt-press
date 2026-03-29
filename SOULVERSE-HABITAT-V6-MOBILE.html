@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1, minimum-scale=1">
+    <title>🌆 SOULVERSE HABITAT V6 | Mobile Optimized</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; touch-action: none; }
+        body { background: #0a0010; overflow: hidden; font-family: 'Courier New', monospace; height: 100vh; width: 100vw; }
+        canvas { display: block; width: 100%; height: 100%; position: fixed; top: 0; left: 0; z-index: 0; }
+        
+        /* UI Overlay */
+        #ui { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
+        #ui > * { pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+
+        /* NEON THEME - Optimized for mobile visibility */
+        .neon-text { color: #ff2a9f; text-shadow: 0 0 8px #ff2a9f; }
+        .cyan-text { color: #00ffff; text-shadow: 0 0 8px #00ffff; }
+
+        /* Top Bar - Minimal, thin */
+        #top-bar { position: absolute; top: 5px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 30; flex-wrap: wrap; justify-content: center; padding: 5px; }
+        .top-btn { 
+            background: linear-gradient(135deg, #ff006e, #8338ec); 
+            border: 2px solid #ff006e; 
+            color: #fff; 
+            font-weight: bold; 
+            padding: 8px 14px; 
+            border-radius: 20px; 
+            font-size: 11px; 
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 15px rgba(255,0,110,0.5);
+        }
+        .top-btn:active { background: #fff; color: #ff006e; transform: scale(0.95); }
+
+        /* Stats - Compact */
+        #cityStats { position: absolute; top: 5px; left: 5px; background: rgba(20,0,30,0.9); backdrop-filter: blur(15px); border-radius: 15px; padding: 8px 12px; color: #ff2a9f; font-size: 9px; z-index: 10; border: 2px solid #ff006e; min-width: 140px; }
+        #cityStats h4 { color: #00ffff; margin-bottom: 6px; font-size: 11px; }
+        .stat-row { display: flex; justify-content: space-between; margin: 3px 0; }
+
+        /* Resources - Compact */
+        #resources { position: absolute; top: 5px; right: 5px; background: rgba(0,20,40,0.9); backdrop-filter: blur(15px); border-radius: 15px; padding: 8px 12px; color: #00ffff; font-size: 9px; z-index: 10; border: 2px solid #00ffff; }
+        .res-row { display: flex; align-items: center; gap: 6px; margin: 3px 0; }
+
+        /* City Time - Compact */
+        #cityTime { position: absolute; top: 50px; left: 50%; transform: translateX(-50%); background: rgba(20,0,40,0.9); backdrop-filter: blur(15px); border-radius: 15px; padding: 6px 15px; color: #ff2a9f; font-size: 10px; z-index: 10; border: 2px solid #ff006e; text-align: center; }
+
+        /* Agent Info - Bottom Left, thumb accessible */
+        #agentInfo { position: absolute; bottom: 140px; left: 5px; background: rgba(30,0,40,0.95); backdrop-filter: blur(20px); border-radius: 15px; padding: 10px; color: #ff2a9f; font-size: 9px; z-index: 10; max-width: 180px; border: 2px solid #ff006e; display: none; }
+        #agentInfo.visible { display: block; }
+        #agentInfo h4 { color: #00ffff; margin-bottom: 8px; font-size: 11px; }
+        .need-bar { margin: 5px 0; }
+        .need-label { display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 8px; }
+        .need-bg { height: 6px; background: #1a0a2a; border-radius: 3px; overflow: hidden; border: 1px solid #ff006e; }
+        .need-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+        .need-energy { background: linear-gradient(90deg, #ff006e, #ff69b4); }
+        .need-social { background: linear-gradient(90deg, #8338ec, #ff006e); }
+        .need-skill { background: linear-gradient(90deg, #00ffff, #0099ff); }
+        .need-purpose { background: linear-gradient(90deg, #ffea00, #ff9900); }
+
+        /* Task Feed - Right side, scrollable */
+        #taskFeed { position: absolute; top: 100px; right: 5px; width: 160px; max-height: 200px; overflow-y: auto; z-index: 10; }
+        .task-card { background: rgba(30,0,50,0.95); border: 2px solid #ff006e; border-radius: 10px; padding: 8px; margin-bottom: 6px; font-size: 8px; }
+        .task-status { font-size: 7px; padding: 2px 6px; border-radius: 8px; display: inline-block; }
+        .status-working { background: #ff006e; color: #fff; }
+        .status-complete { background: #00ff88; color: #000; }
+        .status-pending { background: #666; color: #fff; }
+
+        /* BOTTOM CONTROL BAR - THUMB ZONE OPTIMIZED */
+        #control-bar { position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 50; padding: 8px; background: rgba(20,0,40,0.95); backdrop-filter: blur(15px); border-radius: 30px; border: 3px solid #ff006e; flex-wrap: wrap; justify-content: center; max-width: 95%; }
+        .control-btn { 
+            width: 44px; height: 44px; 
+            border-radius: 50%; 
+            border: 2px solid #ff006e; 
+            background: linear-gradient(135deg, rgba(255,0,110,0.4), rgba(131,56,236,0.3)); 
+            color: #ff2a9f; 
+            font-size: 18px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(255,0,110,0.5);
+        }
+        .control-btn:active { background: #ff006e; color: #fff; transform: scale(0.9); }
+        .control-btn.active { background: #ff006e; color: #fff; box-shadow: 0 0 30px #ff006e; }
+        .control-btn.small { width: 36px; height: 36px; font-size: 14px; }
+
+        /* Side Panels */
+        .side-panel { position: fixed; top: 0; right: -100%; width: 85%; max-width: 320px; height: 100%; background: linear-gradient(135deg, rgba(20,0,40,0.98), rgba(50,0,70,0.95)); backdrop-filter: blur(20px); z-index: 90; pointer-events: auto; transition: 0.3s; overflow-y: auto; border-left: 3px solid #ff006e; }
+        .side-panel.open { right: 0; }
+        .side-panel h3 { color: #00ffff; padding: 50px 20px 15px; font-size: 16px; position: sticky; top: 0; background: rgba(20,0,40,0.98); margin: 0; border-bottom: 2px solid #ff006e; }
+        .side-panel-content { padding: 15px; }
+
+        /* District Cards - Mobile optimized */
+        .district-card { background: rgba(30,0,50,0.9); border: 2px solid #ff006e; border-radius: 12px; padding: 12px; margin: 10px 0; cursor: pointer; }
+        .district-card:active { background: rgba(255,0,110,0.3); }
+        .district-card.work { border-left: 4px solid #00ffff; }
+        .district-card.home { border-left: 4px solid #ff006e; }
+        .district-card.social { border-left: 4px solid #ffea00; }
+        .district-card.learn { border-left: 4px solid #00ff88; }
+        .district-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .district-name { font-weight: bold; color: #00ffff; font-size: 12px; }
+        .district-count { font-size: 9px; color: #ff2a9f; background: rgba(255,42,159,0.3); padding: 2px 8px; border-radius: 8px; }
+        .district-desc { font-size: 9px; color: #bf00ff; line-height: 1.4; }
+
+        /* Panels */
+        .panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20,0,40,0.98); backdrop-filter: blur(20px); border: 3px solid #ff006e; border-radius: 20px; padding: 20px; z-index: 200; display: none; pointer-events: auto; min-width: 280px; max-width: 90vw; max-height: 70vh; overflow-y: auto; }
+        .panel.active { display: block; }
+        .panel h3 { color: #00ffff; margin-bottom: 15px; text-align: center; font-size: 16px; }
+        .panel-close-btn { position: absolute; top: 10px; right: 10px; background: #ff006e; border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 18px; }
+
+        /* Buttons */
+        .btn { background: linear-gradient(135deg, #ff006e, #8338ec); border: 2px solid #ff006e; color: #fff; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; margin: 5px; font-size: 12px; width: 100%; }
+        .btn:active { transform: scale(0.95); }
+        .btn-secondary { background: rgba(40,0,60,0.6); color: #ff2a9f; }
+
+        /* Modal */
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20,0,40,0.98); backdrop-filter: blur(20px); border: 3px solid #ff006e; border-radius: 20px; padding: 20px; z-index: 300; display: none; pointer-events: auto; min-width: 280px; max-width: 90vw; max-height: 80vh; overflow-y: auto; }
+        .modal.active { display: block; }
+        .modal h3 { color: #00ffff; margin-bottom: 15px; text-align: center; }
+        .modal-close { float: right; background: none; border: none; color: #ff006e; font-size: 24px; cursor: pointer; }
+
+        input, textarea, select { width: 100%; margin: 8px 0; padding: 10px; background: rgba(40,0,60,0.6); border: 2px solid #ff006e; color: #00ffff; border-radius: 12px; font-size: 12px; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #00ffff; }
+
+        .task-output { background: rgba(0,0,0,0.7); border-radius: 12px; padding: 10px; font-size: 10px; margin-top: 10px; white-space: pre-wrap; word-break: break-all; max-height: 120px; overflow-y: auto; border: 1px solid #333; color: #00ff88; }
+
+        /* Loading */
+        .loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0010; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ff2a9f; }
+        .loading.hidden { display: none; }
+        .loading-spinner { width: 50px; height: 50px; border: 4px solid rgba(255,0,110,0.3); border-top-color: #ff006e; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { margin-top: 20px; font-size: 12px; color: #00ffff; }
+
+        /* Chat Bubbles */
+        .chat-bubble { position: absolute; background: rgba(255,0,110,0.95); backdrop-filter: blur(15px); border-radius: 15px; padding: 8px 12px; max-width: 180px; border: 2px solid #ff006e; font-size: 10px; z-index: 150; pointer-events: none; color: #fff; }
+        .chat-bubble strong { color: #00ffff; }
+
+        /* Notification */
+        .notification { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #ff006e, #8338ec); border-left: 4px solid #00ff88; padding: 12px 25px; border-radius: 25px; z-index: 300; color: #fff; font-weight: bold; font-size: 12px; box-shadow: 0 0 20px rgba(255,0,110,0.6); animation: fadeOut 3s forwards; }
+        @keyframes fadeOut { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
+
+        /* Minimap - Small, bottom right */
+        #minimap { position: absolute; bottom: 140px; right: 5px; width: 100px; height: 100px; background: rgba(20,0,40,0.9); border: 2px solid #ff006e; border-radius: 50%; overflow: hidden; z-index: 10; }
+        #minimapCanvas { width: 100%; height: 100%; }
+
+        /* Activity Log */
+        #activityLog { position: absolute; bottom: 140px; left: 190px; width: 140px; max-height: 150px; overflow-y: auto; z-index: 9; pointer-events: none; }
+        .log-entry { background: rgba(30,0,50,0.9); border: 1px solid #ff006e; border-radius: 8px; padding: 5px 8px; margin-bottom: 4px; font-size: 8px; color: #00ffff; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(30,0,50,0.5); }
+        ::-webkit-scrollbar-thumb { background: #ff006e; border-radius: 3px; }
+
+        /* Mobile first */
+        @media (min-width: 480px) {
+            .control-btn { width: 50px; height: 50px; font-size: 20px; }
+            .control-btn.small { width: 40px; height: 40px; font-size: 16px; }
+            #agentInfo { max-width: 220px; }
+            #taskFeed { width: 200px; max-height: 250px; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="worldCanvas"></canvas>
+    
+    <div id="ui">
+        <!-- Top Menu -->
+        <div id="top-bar">
+            <button class="top-btn" id="districtsBtn">Districts</button>
+            <button class="top-btn" id="agentsBtn">Agents</button>
+            <button class="top-btn" id="tasksBtn">Tasks</button>
+            <button class="top-btn" id="deployBtn">+ Deploy</button>
+        </div>
+
+        <!-- City Stats -->
+        <div id="cityStats">
+            <h4>🌆 CITY</h4>
+            <div class="stat-row"><span>👥 Pop:</span><span id="popCount">0</span></div>
+            <div class="stat-row"><span>💼 Work:</span><span id="workCount">0</span></div>
+            <div class="stat-row"><span>🎉 Social:</span><span id="socialCount">0</span></div>
+            <div class="stat-row"><span>✅ Done:</span><span id="tasksDone">0</span></div>
+        </div>
+
+        <!-- Resources -->
+        <div id="resources">
+            <div class="res-row"><span>💰</span><span id="profitVal">500</span></div>
+            <div class="res-row"><span>❤️</span><span id="loveVal">500</span></div>
+            <div class="res-row"><span>⚖️</span><span id="taxVal">500</span></div>
+        </div>
+
+        <!-- City Time -->
+        <div id="cityTime">
+            <div>📅 Day <span id="dayNum">1</span> • <span id="timeDisplay">20:00</span></div>
+            <div id="timePhase">🌆 Night</div>
+        </div>
+
+        <!-- Agent Info -->
+        <div id="agentInfo">
+            <h4 id="agentName">Agent</h4>
+            <div><span id="agentType">Code</span> • <span id="agentStatus">Work</span></div>
+            <div class="need-bar">
+                <div class="need-label"><span>⚡ Energy</span><span id="energyVal">80%</span></div>
+                <div class="need-bg"><div class="need-fill need-energy" id="energyBar" style="width:80%"></div></div>
+            </div>
+            <div class="need-bar">
+                <div class="need-label"><span>💬 Social</span><span id="socialVal">60%</span></div>
+                <div class="need-bg"><div class="need-fill need-social" id="socialBar" style="width:60%"></div></div>
+            </div>
+            <div class="need-bar">
+                <div class="need-label"><span>📚 Skill</span><span id="skillVal">40%</span></div>
+                <div class="need-bg"><div class="need-fill need-skill" id="skillBar" style="width:40%"></div></div>
+            </div>
+            <div class="need-bar">
+                <div class="need-label"><span>🎯 Purpose</span><span id="purposeVal">90%</span></div>
+                <div class="need-bg"><div class="need-fill need-purpose" id="purposeBar" style="width:90%"></div></div>
+            </div>
+        </div>
+
+        <!-- Task Feed -->
+        <div id="taskFeed"></div>
+
+        <!-- Activity Log -->
+        <div id="activityLog"></div>
+
+        <!-- Minimap -->
+        <div id="minimap"><canvas id="minimapCanvas" width="100" height="100"></canvas></div>
+
+        <!-- BOTTOM CONTROL BAR - THUMB ZONE -->
+        <div id="control-bar">
+            <button class="control-btn" id="workBtn" title="Work">💼</button>
+            <button class="control-btn" id="socialBtn" title="Social">🎉</button>
+            <button class="control-btn" id="learnBtn" title="Learn">📖</button>
+            <button class="control-btn" id="restBtn" title="Rest">😴</button>
+            <button class="control-btn" id="taskBtn" title="Task">📋</button>
+            <button class="control-btn small" id="talkBtn" title="Talk">💬</button>
+            <button class="control-btn small" id="followBtn" title="Follow">📷</button>
+            <button class="control-btn small" id="mapBtn" title="Map">🗺️</button>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading City...</div>
+    </div>
+
+    <!-- Districts Panel -->
+    <div id="districtsPanel" class="side-panel">
+        <button class="panel-close-btn" onclick="closeSidePanel('districtsPanel')">×</button>
+        <h3>🏙️ DISTRICTS</h3>
+        <div class="side-panel-content">
+            <div class="district-card work" onclick="window.focusDistrict('work')">
+                <div class="district-header">
+                    <span class="district-name">💼 Downtown</span>
+                    <span class="district-count" id="workDistrictCount">0</span>
+                </div>
+                <div class="district-desc">Skyscrapers & offices</div>
+            </div>
+            <div class="district-card home" onclick="window.focusDistrict('home')">
+                <div class="district-header">
+                    <span class="district-name">🏠 Ocean Drive</span>
+                    <span class="district-count" id="homeDistrictCount">0</span>
+                </div>
+                <div class="district-desc">Apartments & condos</div>
+            </div>
+            <div class="district-card social" onclick="window.focusDistrict('social')">
+                <div class="district-header">
+                    <span class="district-name">🎉 Neon Blvd</span>
+                    <span class="district-count" id="socialDistrictCount">0</span>
+                </div>
+                <div class="district-desc">Clubs & cafes</div>
+            </div>
+            <div class="district-card learn" onclick="window.focusDistrict('learn')">
+                <div class="district-header">
+                    <span class="district-name">📚 Tech District</span>
+                    <span class="district-count" id="learnDistrictCount">0</span>
+                </div>
+                <div class="district-desc">Labs & academy</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agents Panel -->
+    <div id="agentsPanel" class="side-panel">
+        <button class="panel-close-btn" onclick="closeSidePanel('agentsPanel')">×</button>
+        <h3>👥 AGENTS</h3>
+        <div class="side-panel-content" id="agentsList"></div>
+    </div>
+
+    <!-- Tasks Panel -->
+    <div id="tasksPanel" class="panel">
+        <button class="panel-close-btn" onclick="closePanel('tasksPanel')">×</button>
+        <h3>📋 TASKS</h3>
+        <div id="tasksList"></div>
+        <button class="btn" id="newTaskBtn" style="margin-top:10px">+ New Task</button>
+    </div>
+
+    <!-- Deploy Modal -->
+    <div id="deployModal" class="modal">
+        <button class="modal-close" onclick="closeModal('deployModal')">×</button>
+        <h3>➕ Deploy Agent</h3>
+        <label>Type:</label>
+        <select id="deployType">
+            <option value="code">💻 Code</option>
+            <option value="content">📝 Content</option>
+            <option value="research">🔬 Research</option>
+            <option value="automation">⚙️ Automation</option>
+            <option value="design">🎨 Design</option>
+        </select>
+        <label>Name:</label>
+        <input type="text" id="deployName" placeholder="Name">
+        <label>Cost: 200 💰</label>
+        <button class="btn" id="confirmDeploy">Deploy</button>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal">
+        <button class="modal-close" onclick="closeModal('taskModal')">×</button>
+        <h3>📋 New Task</h3>
+        <label>Assign to:</label>
+        <select id="taskAgent"></select>
+        <label>Type:</label>
+        <select id="taskType">
+            <option value="code">Write Code</option>
+            <option value="content">Content</option>
+            <option value="research">Research</option>
+        </select>
+        <label>Description:</label>
+        <textarea id="taskDesc" rows="3" placeholder="What to do?"></textarea>
+        <button class="btn" id="executeTask">Assign</button>
+        <div id="taskResult" class="task-output"></div>
+    </div>
+
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // ==================== STATE ====================
+        let scene, camera, renderer, controls, minimapScene, minimapCamera;
+        let agents = [], buildings = [], tasks = [], cityLogs = [];
+        let cityTime = 20 * 60, cityDay = 1;
+        let playerResources = { profit: 500, love: 500, tax: 500 };
+        let selectedAgent = null, followMode = false;
+        let lastSaveTime = Date.now(), lastTick = Date.now();
+        let showMinimap = true;
+
+        const districts = {
+            work: { x: -30, z: -30, color: 0x00ffff, name: 'Downtown' },
+            home: { x: 30, z: -30, color: 0xff006e, name: 'Ocean Drive' },
+            social: { x: -30, z: 30, color: 0xffea00, name: 'Neon Blvd' },
+            learn: { x: 30, z: 30, color: 0x00ff88, name: 'Tech District' }
+        };
+
+        const activities = { WORK: 'work', SOCIAL: 'social', LEARN: 'learn', REST: 'rest', COMMUTE: 'commute', TASK: 'task', TALK: 'talk' };
+
+        const convos = [
+            ["City never sleeps!", "Love the energy!"],
+            ["Just closed a deal!", "Amazing!"],
+            ["Neon lights beautiful", "So vibrant!"],
+            ["Working on something big", "Let's collaborate!"],
+            ["Grab coffee?", "Sure!"]
+        ];
+
+        // ==================== INIT ====================
+        function init() {
+            loadCity();
+            createScene();
+            generateCity();
+            setupUI();
+            
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+                notify('🌆 Welcome!');
+            }, 1500);
+            
+            animate();
+        }
+
+        function loadCity() {
+            const saved = localStorage.getItem('soulverse_city_v6');
+            if (saved) {
+                const data = JSON.parse(saved);
+                agents = data.agents || [];
+                buildings = data.buildings || [];
+                tasks = data.tasks || [];
+                cityTime = data.cityTime || 20 * 60;
+                cityDay = data.cityDay || 1;
+                playerResources = data.playerResources || { profit: 500, love: 500, tax: 500 };
+            } else {
+                agents = [
+                    createAgent('Neon', 'code', 'penthouse'),
+                    createAgent('Vice', 'content', 'artdeco'),
+                    createAgent('Wave', 'research', 'beachfront'),
+                    createAgent('Flow', 'automation', 'penthouse')
+                ];
+                generateBuildings();
+            }
+            saveCity();
+        }
+
+        function createAgent(name, type, home) {
+            const pos = { penthouse: { x: 28, z: -28 }, artdeco: { x: 32, z: -25 }, beachfront: { x: 35, z: -30 } }[home];
+            return {
+                id: 'a_' + Date.now(), name, type, home,
+                x: pos.x + (Math.random() - 0.5) * 6,
+                z: pos.z + (Math.random() - 0.5) * 6,
+                targetX: null, targetZ: null,
+                activity: activities.REST,
+                needs: { energy: 80 + Math.random() * 20, social: 50 + Math.random() * 30, skill: 40 + Math.random() * 40, purpose: 70 + Math.random() * 30 },
+                currentTask: null, mood: 'happy',
+                animFrame: Math.random() * Math.PI * 2,
+                lastChange: Date.now(), lastConvo: Date.now()
+            };
+        }
+
+        function saveCity() {
+            localStorage.setItem('soulverse_city_v6', JSON.stringify({
+                agents, buildings, tasks, cityTime, cityDay, playerResources, lastSave: Date.now()
+            }));
+        }
+
+        // ==================== SCENE - MOBILE OPTIMIZED ====================
+        function createScene() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0015);
+            scene.fog = new THREE.Fog(0x0a0015, 40, 100);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 300);
+            camera.position.set(0, 50, 70);
+
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('worldCanvas'), antialias: false, powerPreference: 'high-performance' });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Cap for performance
+            renderer.shadowMap.enabled = false; // Disable for mobile performance
+
+            // OrbitControls - PROPER mobile touch support
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 20;
+            controls.maxDistance = 100;
+            controls.maxPolarAngle = Math.PI / 2.1; // Don't go below ground
+            controls.touches = {
+                ONE: THREE.TOUCH.ROTATE,
+                TWO: THREE.TOUCH.DOLLY
+            };
+
+            // Lights - simplified for mobile
+            const ambient = new THREE.AmbientLight(0x400060, 0.5);
+            scene.add(ambient);
+
+            const moon = new THREE.DirectionalLight(0x6666ff, 0.4);
+            moon.position.set(30, 50, 30);
+            scene.add(moon);
+
+            // District neon lights
+            [[-30, 20, -30, 0xff006e], [30, 20, -30, 0x00ffff], [-30, 20, 30, 0xffea00], [30, 20, 30, 0x00ff88]].forEach(([x, y, z, c]) => {
+                const light = new THREE.PointLight(c, 0.8, 60);
+                light.position.set(x, y, z);
+                scene.add(light);
+            });
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        function generateCity() {
+            // Ground - simple
+            const ground = new THREE.Mesh(
+                new THREE.PlaneGeometry(200, 200),
+                new THREE.MeshStandardMaterial({ color: 0x0a0015, roughness: 0.9, metalness: 0.3 })
+            );
+            ground.rotation.x = -Math.PI / 2;
+            ground.name = 'ground';
+            scene.add(ground);
+
+            // Grid - simple lines
+            const grid = new THREE.GridHelper(200, 40, 0xff006e, 0x220044);
+            grid.position.y = 0.1;
+            scene.add(grid);
+
+            // District zones
+            Object.entries(districts).forEach(([key, d]) => {
+                const zone = new THREE.Mesh(
+                    new THREE.PlaneGeometry(35, 35),
+                    new THREE.MeshBasicMaterial({ color: d.color, transparent: true, opacity: 0.08, side: THREE.DoubleSide })
+                );
+                zone.rotation.x = -Math.PI / 2;
+                zone.position.set(d.x, 0.2, d.z);
+                scene.add(zone);
+            });
+
+            // Roads - simple
+            [[0, -25, 0, 80], [0, 25, 0, 80], [-25, 0, Math.PI/2, 80], [25, 0, Math.PI/2, 80]].forEach(([x, z, r, l]) => {
+                const road = new THREE.Mesh(
+                    new THREE.PlaneGeometry(10, l),
+                    new THREE.MeshStandardMaterial({ color: 0x1a0a2a })
+                );
+                road.rotation.x = -Math.PI / 2;
+                road.rotation.z = r;
+                road.position.set(x, 0.2, z);
+                scene.add(road);
+            });
+
+            generateBuildings();
+
+            agents.forEach(createAgentMesh);
+
+            // Simple decorations
+            for (let i = 0; i < 20; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 40 + Math.random() * 30;
+                createSimpleTree(Math.cos(angle) * radius, Math.sin(angle) * radius);
+            }
+
+            // Simple fountains
+            createFountain(0, 0);
+        }
+
+        function generateBuildings() {
+            // Work district - skyscrapers
+            for (let i = 0; i < 8; i++) {
+                const x = -35 + Math.random() * 20;
+                const z = -35 + Math.random() * 20;
+                const h = 15 + Math.random() * 25;
+                createBuilding(x, z, 'office', h, 0x00ffff);
+            }
+            // Home - apartments
+            for (let i = 0; i < 6; i++) {
+                const x = 25 + Math.random() * 15;
+                const z = -35 + Math.random() * 15;
+                const h = 10 + Math.random() * 15;
+                createBuilding(x, z, 'apartment', h, 0xff69b4);
+            }
+            // Social - clubs
+            for (let i = 0; i < 5; i++) {
+                const x = -35 + Math.random() * 20;
+                const z = 25 + Math.random() * 15;
+                const h = 6 + Math.random() * 10;
+                createBuilding(x, z, 'neon', h, 0xffea00);
+            }
+            // Learn - tech
+            for (let i = 0; i < 6; i++) {
+                const x = 25 + Math.random() * 15;
+                const z = 25 + Math.random() * 15;
+                const h = 10 + Math.random() * 18;
+                createBuilding(x, z, 'tech', h, 0x00ff88);
+            }
+        }
+
+        function createBuilding(x, z, type, height, color) {
+            const w = 5 + Math.random() * 4;
+            const d = 5 + Math.random() * 4;
+            const group = new THREE.Group();
+
+            const body = new THREE.Mesh(
+                new THREE.BoxGeometry(w, height, d),
+                new THREE.MeshStandardMaterial({ color, metalness: 0.5, roughness: 0.4, emissive: color, emissiveIntensity: 0.2 })
+            );
+            body.position.y = height / 2;
+            group.add(body);
+
+            // Simple windows
+            const winMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 });
+            const floors = Math.floor(height / 4);
+            for (let f = 0; f < floors; f++) {
+                if (Math.random() > 0.4) {
+                    const win = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.8), winMat);
+                    win.position.set(-w/3, 1 + f * 4, d/2 + 0.01);
+                    group.add(win);
+                }
+            }
+
+            group.position.set(x, 0, z);
+            scene.add(group);
+            buildings.push({ id: 'b_' + buildings.length, type, x, z, height, mesh: group });
+        }
+
+        function createSimpleTree(x, z) {
+            const group = new THREE.Group();
+            const trunk = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.3, 0.4, 5, 6),
+                new THREE.MeshStandardMaterial({ color: 0x4a3728 })
+            );
+            trunk.position.y = 2.5;
+            group.add(trunk);
+
+            const colors = [0xff006e, 0x00ffff, 0xffea00, 0x00ff88];
+            const frond = new THREE.Mesh(
+                new THREE.ConeGeometry(1.5, 3, 6),
+                new THREE.MeshBasicMaterial({ color: colors[Math.floor(Math.random() * 4)] })
+            );
+            frond.position.y = 5.5;
+            group.add(frond);
+
+            group.position.set(x, 0, z);
+            scene.add(group);
+        }
+
+        function createFountain(x, z) {
+            const group = new THREE.Group();
+            const base = new THREE.Mesh(
+                new THREE.CylinderGeometry(3, 4, 0.8, 16),
+                new THREE.MeshStandardMaterial({ color: 0x1a1a2a })
+            );
+            base.position.y = 0.4;
+            group.add(base);
+
+            const colors = [0xff006e, 0x00ffff, 0xffea00, 0x00ff88];
+            const water = new THREE.Mesh(
+                new THREE.CircleGeometry(2.5, 16),
+                new THREE.MeshBasicMaterial({ color: colors[Math.floor(Math.random() * 4)], transparent: true, opacity: 0.5 })
+            );
+            water.rotation.x = -Math.PI / 2;
+            water.position.y = 0.8;
+            group.add(water);
+
+            group.position.set(x, 0, z);
+            scene.add(group);
+        }
+
+        function createAgentMesh(agent) {
+            const colors = {
+                code: 0x00ffff, content: 0xff006e, research: 0x00ff88,
+                automation: 0xffea00, design: 0xbf00ff
+            };
+            const color = colors[agent.type] || 0xffffff;
+
+            const group = new THREE.Group();
+
+            // Aura
+            const aura = new THREE.Mesh(
+                new THREE.SphereGeometry(1.2, 12, 12),
+                new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.15 })
+            );
+            aura.position.y = 1.2;
+            group.add(aura);
+
+            // Body
+            const body = new THREE.Mesh(
+                new THREE.CapsuleGeometry(0.4, 1.2, 4, 8),
+                new THREE.MeshStandardMaterial({ color, metalness: 0.4, roughness: 0.4, emissive: color, emissiveIntensity: 0.2 })
+            );
+            body.position.y = 1.2;
+            group.add(body);
+
+            // Visor
+            const visor = new THREE.Mesh(
+                new THREE.TorusGeometry(0.25, 0.06, 4, 16, Math.PI),
+                new THREE.MeshBasicMaterial({ color })
+            );
+            visor.position.set(0, 1.9, 0.2);
+            visor.rotation.x = -Math.PI / 6;
+            group.add(visor);
+
+            // Halo
+            const halo = new THREE.Mesh(
+                new THREE.TorusGeometry(0.5, 0.04, 8, 24),
+                new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.6 })
+            );
+            halo.rotation.x = Math.PI / 2;
+            halo.position.y = 2.5;
+            group.add(halo);
+
+            // Arms
+            const armGeo = new THREE.CapsuleGeometry(0.08, 0.5, 4, 4);
+            const armMat = new THREE.MeshStandardMaterial({ color, metalness: 0.3 });
+            const leftArm = new THREE.Mesh(armGeo, armMat);
+            leftArm.position.set(-0.5, 1.4, 0);
+            leftArm.rotation.z = 0.2;
+            group.add(leftArm);
+            const rightArm = new THREE.Mesh(armGeo, armMat);
+            rightArm.position.set(0.5, 1.4, 0);
+            rightArm.rotation.z = -0.2;
+            group.add(rightArm);
+
+            // Legs
+            const legGeo = new THREE.CapsuleGeometry(0.1, 0.6, 4, 4);
+            const legMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2a });
+            const leftLeg = new THREE.Mesh(legGeo, legMat);
+            leftLeg.position.set(-0.2, 0.3, 0);
+            group.add(leftLeg);
+            const rightLeg = new THREE.Mesh(legGeo, legMat);
+            rightLeg.position.set(0.2, 0.3, 0);
+            group.add(rightLeg);
+
+            // Shadow
+            const shadow = new THREE.Mesh(
+                new THREE.CircleGeometry(0.6, 16),
+                new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.2 })
+            );
+            shadow.rotation.x = -Math.PI / 2;
+            shadow.position.y = 0.02;
+            group.add(shadow);
+
+            group.position.set(agent.x, 0, agent.z);
+            scene.add(group);
+            agent.mesh = group;
+            agent.parts = { body, leftArm, rightArm, leftLeg, rightLeg, aura };
+            agent.selectRing = new THREE.Mesh(
+                new THREE.RingGeometry(0.8, 1, 24),
+                new THREE.MeshBasicMaterial({ color: 0xff006e, transparent: true, opacity: 0, side: THREE.DoubleSide })
+            );
+            agent.selectRing.rotation.x = -Math.PI / 2;
+            agent.selectRing.position.y = 0.05;
+            group.add(agent.selectRing);
+        }
+
+        // ==================== UI ====================
+        function setupUI() {
+            document.getElementById('districtsBtn').onclick = () => {
+                document.getElementById('districtsPanel').classList.add('open');
+                updateDistrictCounts();
+            };
+            document.getElementById('agentsBtn').onclick = () => {
+                document.getElementById('agentsPanel').classList.add('open');
+                renderAgents();
+            };
+            document.getElementById('tasksBtn').onclick = () => openPanel('tasksPanel');
+            document.getElementById('deployBtn').onclick = () => openModal('deployModal');
+
+            document.getElementById('workBtn').onclick = () => sendAgentTo('work');
+            document.getElementById('socialBtn').onclick = () => sendAgentTo('social');
+            document.getElementById('learnBtn').onclick = () => sendAgentTo('learn');
+            document.getElementById('restBtn').onclick = () => sendAgentTo('rest');
+            document.getElementById('taskBtn').onclick = () => openTaskModal();
+            document.getElementById('talkBtn').onclick = () => makeAgentTalk();
+            document.getElementById('followBtn').onclick = () => toggleFollow();
+            document.getElementById('mapBtn').onclick = () => toggleMinimap();
+
+            document.getElementById('confirmDeploy').onclick = deployAgent;
+            document.getElementById('executeTask').onclick = executeTask;
+            document.getElementById('newTaskBtn').onclick = openTaskModal;
+
+            window.focusDistrict = (d) => {
+                const pos = districts[d];
+                controls.target.set(pos.x, 0, pos.z);
+                camera.position.set(pos.x, 40, pos.z + 25);
+                notify(`📍 ${pos.name}`);
+                closeSidePanel('districtsPanel');
+            };
+
+            renderAgents();
+        }
+
+        window.closeSidePanel = (id) => document.getElementById(id).classList.remove('open');
+        window.closePanel = (id) => document.getElementById(id).classList.remove('active');
+        window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+        window.openPanel = (id) => {
+            document.getElementById(id).classList.add('active');
+            if (id === 'tasksPanel') renderTasks();
+        };
+        window.openModal = (id) => document.getElementById(id).classList.add('active');
+
+        function selectAgent(agent) {
+            agents.forEach(a => { if (a.selectRing) a.selectRing.material.opacity = 0; });
+            selectedAgent = agent;
+            if (agent.selectRing) agent.selectRing.material.opacity = 1;
+            document.getElementById('agentInfo').classList.add('visible');
+            updateAgentPanel(agent);
+            renderAgents();
+            if (followMode) {
+                controls.target.copy(agent.mesh.position);
+            }
+        }
+
+        window.selectAgentById = (id) => {
+            const a = agents.find(x => x.id === id);
+            if (a) { selectAgent(a); closeSidePanel('agentsPanel'); }
+        };
+
+        function updateAgentPanel(a) {
+            document.getElementById('agentName').textContent = a.name;
+            document.getElementById('agentType').textContent = a.type;
+            document.getElementById('agentStatus').textContent = a.activity;
+            document.getElementById('energyVal').textContent = Math.round(a.needs.energy) + '%';
+            document.getElementById('energyBar').style.width = a.needs.energy + '%';
+            document.getElementById('socialVal').textContent = Math.round(a.needs.social) + '%';
+            document.getElementById('socialBar').style.width = a.needs.social + '%';
+            document.getElementById('skillVal').textContent = Math.round(a.needs.skill) + '%';
+            document.getElementById('skillBar').style.width = a.needs.skill + '%';
+            document.getElementById('purposeVal').textContent = Math.round(a.needs.purpose) + '%';
+            document.getElementById('purposeBar').style.width = a.needs.purpose + '%';
+        }
+
+        function sendAgentTo(d) {
+            if (!selectedAgent) { notify('👆 Select agent'); return; }
+            const pos = districts[d];
+            selectedAgent.targetX = pos.x + (Math.random() - 0.5) * 10;
+            selectedAgent.targetZ = pos.z + (Math.random() - 0.5) * 10;
+            selectedAgent.activity = activities.COMMUTE;
+            notify(`Going to ${d}`);
+        }
+
+        function makeAgentTalk() {
+            if (!selectedAgent) { notify('👆 Select agent'); return; }
+            const c = convos[Math.floor(Math.random() * convos.length)];
+            createChatBubble(selectedAgent, c[0]);
+            const nearby = agents.find(a => a !== selectedAgent && Math.abs(a.x - selectedAgent.x) < 12 && Math.abs(a.z - selectedAgent.z) < 12);
+            if (nearby) setTimeout(() => { createChatBubble(nearby, c[1]); }, 1000);
+            notify('💬 Talking...');
+        }
+
+        function toggleFollow() {
+            if (!selectedAgent) { notify('👆 Select agent'); return; }
+            followMode = !followMode;
+            document.getElementById('followBtn').classList.toggle('active', followMode);
+            notify(followMode ? '📷 Following' : 'Follow off');
+        }
+
+        function toggleMinimap() {
+            showMinimap = !showMinimap;
+            document.getElementById('minimap').style.display = showMinimap ? 'block' : 'none';
+        }
+
+        function deployAgent() {
+            const name = document.getElementById('deployName').value.trim();
+            const type = document.getElementById('deployType').value;
+            if (!name) { notify('❌ Enter name'); return; }
+            if (playerResources.profit < 200) { notify('❌ Need 200 💰'); return; }
+            playerResources.profit -= 200;
+            const agent = createAgent(name, type, 'penthouse');
+            agents.push(agent);
+            createAgentMesh(agent);
+            saveCity();
+            renderAgents();
+            closeModal('deployModal');
+            notify(`👋 ${name} deployed!`);
+            document.getElementById('deployName').value = '';
+        }
+
+        function openTaskModal() {
+            document.getElementById('taskAgent').innerHTML = agents.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+            openModal('taskModal');
+        }
+
+        function executeTask() {
+            const agentId = document.getElementById('taskAgent').value;
+            const agent = agents.find(a => a.id === agentId);
+            const type = document.getElementById('taskType').value;
+            const desc = document.getElementById('taskDesc').value.trim();
+            if (!desc) { notify('❌ Describe task'); return; }
+            const task = { id: 't_' + Date.now(), agentId, agentName: agent.name, type, desc, status: 'working', result: null, step: 0 };
+            tasks.push(task);
+            agent.currentTask = task;
+            agent.activity = activities.TASK;
+            renderTasks();
+            closeModal('taskModal');
+            notify(`📋 Task assigned`);
+            setTimeout(() => {
+                task.status = 'complete';
+                task.result = '✅ Done!';
+                agent.needs.purpose = Math.min(100, agent.needs.purpose + 20);
+                playerResources.profit += 50;
+                renderTasks();
+                saveCity();
+            }, 3000 + Math.random() * 3000);
+            document.getElementById('taskDesc').value = '';
+        }
+
+        function renderAgents() {
+            document.getElementById('agentsList').innerHTML = agents.map(a => `
+                <div class="district-card" onclick="window.selectAgentById('${a.id}')" style="border-left-color:${a.type==='code'?'#00ffff':a.type==='content'?'#ff006e':'#00ff88'}">
+                    <div class="district-header">
+                        <span class="district-name">${a.name}</span>
+                        <span class="district-count">${a.activity}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderTasks() {
+            const c = document.getElementById('tasksList');
+            if (tasks.length === 0) { c.innerHTML = '<p style="text-align:center;color:#666;padding:20px">No tasks</p>'; return; }
+            c.innerHTML = tasks.map(t => `<div class="task-card"><div style="display:flex;justify-content:space-between"><strong>${t.agentName}</strong><span class="task-status status-${t.status==='complete'?'complete':'working'}">${t.status}</span></div><div style="margin-top:5px">${t.desc}</div></div>`).join('');
+        }
+
+        function updateDistrictCounts() {
+            const c = { work: 0, home: 0, social: 0, learn: 0 };
+            agents.forEach(a => {
+                if (a.activity === activities.WORK || a.activity === activities.TASK) c.work++;
+                else if (a.activity === activities.REST) c.home++;
+                else if (a.activity === activities.SOCIAL || a.activity === activities.TALK) c.social++;
+                else if (a.activity === activities.LEARN) c.learn++;
+            });
+            document.getElementById('workDistrictCount').textContent = c.work;
+            document.getElementById('homeDistrictCount').textContent = c.home;
+            document.getElementById('socialDistrictCount').textContent = c.social;
+            document.getElementById('learnDistrictCount').textContent = c.learn;
+        }
+
+        function updateCityStats() {
+            const c = { work: 0, social: 0, learn: 0, rest: 0 };
+            agents.forEach(a => {
+                if (a.activity === activities.WORK || a.activity === activities.TASK) c.work++;
+                else if (a.activity === activities.SOCIAL || a.activity === activities.TALK) c.social++;
+                else if (a.activity === activities.LEARN) c.learn++;
+                else c.rest++;
+            });
+            document.getElementById('popCount').textContent = agents.length;
+            document.getElementById('workCount').textContent = c.work;
+            document.getElementById('socialCount').textContent = c.social;
+            document.getElementById('tasksDone').textContent = tasks.filter(t => t.status === 'complete').length;
+            document.getElementById('profitVal').textContent = Math.round(playerResources.profit);
+            document.getElementById('loveVal').textContent = Math.round(playerResources.love);
+            document.getElementById('taxVal').textContent = Math.round(playerResources.tax);
+        }
+
+        function createChatBubble(agent, text) {
+            if (!agent.mesh) return;
+            const b = document.createElement('div');
+            b.className = 'chat-bubble';
+            b.innerHTML = `<strong>${agent.name}</strong>: ${text}`;
+            document.getElementById('ui').appendChild(b);
+            const v = agent.mesh.position.clone();
+            v.y += 3;
+            v.project(camera);
+            b.style.left = Math.max(5, Math.min(window.innerWidth - 185, (v.x * 0.5 + 0.5) * window.innerWidth - 90)) + 'px';
+            b.style.top = ((-(v.y * 0.5) + 0.5) * window.innerHeight - 50) + 'px';
+            setTimeout(() => b.remove(), 4000);
+        }
+
+        function notify(msg) {
+            document.querySelectorAll('.notification').forEach(n => n.remove());
+            const n = document.createElement('div');
+            n.className = 'notification';
+            n.textContent = msg;
+            document.body.appendChild(n);
+            setTimeout(() => n.remove(), 3000);
+        }
+
+        function updateMinimap() {
+            if (!showMinimap) return;
+            const ctx = document.getElementById('minimapCanvas').getContext('2d');
+            ctx.fillStyle = 'rgba(20,0,40,0.9)';
+            ctx.fillRect(0, 0, 100, 100);
+            Object.entries(districts).forEach(([k, d]) => {
+                ctx.fillStyle = `rgba(${d.color.toString(16).padStart(6,'0')}, 0.3)`;
+                ctx.fillRect(50 + d.x * 0.6 - 10, 50 + d.z * 0.6 - 10, 20, 20);
+            });
+            agents.forEach(a => {
+                ctx.fillStyle = a.type === 'code' ? '#00ffff' : a.type === 'content' ? '#ff006e' : '#00ff88';
+                ctx.beginPath();
+                ctx.arc(50 + a.x * 0.6, 50 + a.z * 0.6, 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        // ==================== GAME LOOP ====================
+        function animate() {
+            requestAnimationFrame(animate);
+            const now = Date.now();
+            const delta = Math.min(1, (now - lastTick) / 1000);
+            lastTick = now;
+
+            cityTime += delta * 0.3;
+            if (cityTime >= 24 * 60) { cityTime = 0; cityDay++; }
+
+            agents.forEach(a => {
+                // AI
+                a.needs.energy = Math.max(0, a.needs.energy - delta * 0.2);
+                a.needs.social = Math.max(0, a.needs.social - delta * 0.3);
+                a.needs.skill = Math.max(0, a.needs.skill - delta * 0.1);
+                if (a.activity === activities.REST) a.needs.energy = Math.min(100, a.needs.energy + delta);
+                else if (a.activity === activities.SOCIAL) a.needs.social = Math.min(100, a.needs.social + delta * 0.8);
+                else if (a.activity === activities.LEARN) a.needs.skill = Math.min(100, a.needs.skill + delta * 0.5);
+
+                if (!a.currentTask && now - a.lastChange > 12000 + Math.random() * 12000) {
+                    if (a.needs.energy < 25) { a.activity = activities.REST; a.targetX = districts.home.x; a.targetZ = districts.home.z; a.mood = 'tired'; }
+                    else if (a.needs.social < 25) { a.activity = activities.SOCIAL; a.targetX = districts.social.x; a.targetZ = districts.social.z; a.mood = 'lonely'; }
+                    else if (a.needs.skill < 30) { a.activity = activities.LEARN; a.targetX = districts.learn.x; a.targetZ = districts.learn.z; a.mood = 'curious'; }
+                    else { a.activity = activities.WORK; a.targetX = districts.work.x; a.targetZ = districts.work.z; a.mood = 'productive'; }
+                    a.lastChange = now;
+                }
+
+                // Task
+                if (a.currentTask && a.activity === activities.TASK) {
+                    if (Math.random() < 0.015) { a.currentTask.status = 'complete'; a.currentTask.result = '✅ Done'; a.needs.purpose = Math.min(100, a.needs.purpose + 25); a.currentTask = null; a.activity = activities.WORK; renderTasks(); saveCity(); }
+                }
+
+                // Move
+                if (a.targetX !== null) {
+                    const dx = a.targetX - a.x, dz = a.targetZ - a.z;
+                    const dist = Math.sqrt(dx*dx + dz*dz);
+                    if (dist < 0.5) { a.targetX = null; a.targetZ = null; }
+                    else {
+                        a.x += (dx / dist) * delta * 3;
+                        a.z += (dz / dist) * delta * 3;
+                        if (a.mesh) { a.mesh.position.x = a.x; a.mesh.position.z = a.z; a.mesh.lookAt(a.targetX, a.mesh.position.y, a.targetZ); }
+                    }
+                }
+
+                // Animation
+                a.animFrame += delta * 8;
+                if (a.mesh && a.parts) {
+                    a.mesh.position.y = a.targetX ? Math.abs(Math.sin(a.animFrame)) * 0.08 : 0;
+                    if (a.targetX) {
+                        a.parts.leftLeg.rotation.x = Math.sin(a.animFrame) * 0.5;
+                        a.parts.rightLeg.rotation.x = Math.sin(a.animFrame + Math.PI) * 0.5;
+                    }
+                    a.parts.aura.scale.setScalar(1 + Math.sin(a.animFrame) * 0.1);
+                }
+
+                // Convo
+                if (a.activity === activities.SOCIAL && now - a.lastConvo > 20000) {
+                    const nearby = agents.find(x => x !== a && Math.abs(x.x - a.x) < 12 && Math.abs(x.z - a.z) < 12 && x.activity === activities.SOCIAL);
+                    if (nearby) {
+                        const c = convos[Math.floor(Math.random() * convos.length)];
+                        createChatBubble(a, c[0]);
+                        setTimeout(() => createChatBubble(nearby, c[1]), 1000);
+                        a.lastConvo = now;
+                    }
+                }
+
+                if (followMode && a === selectedAgent) {
+                    controls.target.lerp(a.mesh.position, 0.1);
+                }
+            });
+
+            controls.update();
+
+            if (now - lastSaveTime > 20000) { saveCity(); lastSaveTime = now; }
+
+            const h = Math.floor(cityTime / 60), m = Math.floor(cityTime % 60);
+            document.getElementById('dayNum').textContent = cityDay;
+            document.getElementById('timeDisplay').textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+
+            updateCityStats();
+            if (selectedAgent) updateAgentPanel(selectedAgent);
+            updateMinimap();
+
+            renderer.render(scene, camera);
+        }
+
+        init();
+    </script>
+</body>
+</html>
