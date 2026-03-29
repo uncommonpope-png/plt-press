@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1">
+    <title>🏙️ SOULVERSE HABITAT V4 | Living Agent City</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        body { background: #0a0a1a; overflow: hidden; font-family: 'Courier New', monospace; height: 100vh; width: 100vw; touch-action: none; }
+        canvas { display: block; width: 100%; height: 100%; position: fixed; top: 0; left: 0; z-index: 0; }
+        
+        /* UI Overlay */
+        #ui { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
+        #ui > * { pointer-events: auto; }
+
+        /* PINK TEXT THEME */
+        .pink-text { color: #ff69b4 !important; }
+        .pink-border { border-color: #ff69b4 !important; }
+        .pink-bg { background: #ff69b4 !important; }
+        .pink-glow { box-shadow: 0 0 10px #ff69b4 !important; }
+
+        /* Top Bar */
+        #top-bar { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 30; flex-wrap: wrap; justify-content: center; }
+        .top-btn { 
+            background: linear-gradient(135deg, #ff69b4, #ff1493); 
+            border: 2px solid #ff69b4; 
+            color: #fff; 
+            font-weight: bold; 
+            padding: 12px 20px; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            font-family: monospace; 
+            font-size: 13px; 
+            transition: 0.3s; 
+            backdrop-filter: blur(8px);
+            text-shadow: 0 0 5px #fff;
+            box-shadow: 0 0 15px rgba(255,105,180,0.5);
+        }
+        .top-btn:active { transform: scale(0.95); box-shadow: 0 0 25px rgba(255,105,180,0.8); }
+        .top-btn.active { background: #fff; color: #ff69b4; box-shadow: 0 0 30px #ff69b4; }
+
+        /* City Stats */
+        #cityStats { position: absolute; top: 70px; left: 10px; background: rgba(20,0,20,0.9); backdrop-filter: blur(16px); border-radius: 20px; padding: 15px 18px; color: #ff69b4; font-size: 11px; z-index: 10; border: 2px solid #ff69b4; min-width: 200px; box-shadow: 0 0 20px rgba(255,105,180,0.3); }
+        #cityStats h4 { color: #ffb6c1; margin-bottom: 10px; font-size: 13px; text-shadow: 0 0 10px #ff69b4; }
+        .stat-row { display: flex; justify-content: space-between; margin: 5px 0; padding: 3px 0; border-bottom: 1px solid rgba(255,105,180,0.2); }
+        .stat-label { color: #ffb6c1; }
+        .stat-value { color: #ff69b4; font-weight: bold; text-shadow: 0 0 8px #ff69b4; }
+
+        /* Resources */
+        #resources { position: absolute; top: 70px; right: 10px; background: rgba(20,0,20,0.9); backdrop-filter: blur(16px); border-radius: 20px; padding: 15px 18px; color: #ff69b4; font-size: 11px; z-index: 10; border: 2px solid #ff69b4; box-shadow: 0 0 20px rgba(255,105,180,0.3); }
+        .res-row { display: flex; align-items: center; gap: 8px; margin: 5px 0; }
+        .res-icon { font-size: 14px; }
+        .res-label { color: #ffb6c1; }
+        .res-value { color: #ff69b4; font-weight: bold; text-shadow: 0 0 8px #ff69b4; }
+
+        /* Agent Info Panel */
+        #agentInfo { position: absolute; bottom: 120px; left: 10px; background: rgba(20,0,20,0.95); backdrop-filter: blur(20px); border-radius: 20px; padding: 15px; color: #ff69b4; font-size: 11px; z-index: 10; max-width: 260px; border: 2px solid #ff69b4; box-shadow: 0 0 25px rgba(255,105,180,0.4); display: none; }
+        #agentInfo.visible { display: block; animation: slideInLeft 0.3s; }
+        @keyframes slideInLeft { from { transform: translateX(-100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        #agentInfo h4 { color: #ffb6c1; margin-bottom: 10px; font-size: 14px; text-shadow: 0 0 10px #ff69b4; }
+        .need-bar { margin: 8px 0; }
+        .need-label { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 10px; color: #ffb6c1; }
+        .need-bg { height: 8px; background: #2a0a2a; border-radius: 4px; overflow: hidden; border: 1px solid #ff69b4; }
+        .need-fill { height: 100%; border-radius: 4px; transition: width 0.5s; box-shadow: 0 0 10px currentColor; }
+        .need-energy { background: linear-gradient(90deg, #ff1493, #ff69b4, #ffb6c1); }
+        .need-social { background: linear-gradient(90deg, #da70d6, #ee82ee, #ffb6c1); }
+        .need-skill { background: linear-gradient(90deg, #ba55d3, #da70d6, #ee82ee); }
+        .need-purpose { background: linear-gradient(90deg, #ff1493, #da70d6, #ba55d3); }
+
+        /* Task Feed */
+        #taskFeed { position: absolute; top: 200px; right: 10px; width: 300px; max-height: 350px; overflow-y: auto; z-index: 10; pointer-events: auto; }
+        .task-card { 
+            background: linear-gradient(135deg, rgba(255,105,180,0.2), rgba(20,0,20,0.9)); 
+            backdrop-filter: blur(12px); 
+            border-radius: 15px; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            border: 2px solid #ff69b4; 
+            border-left: 4px solid #ff69b4;
+            animation: slideInRight 0.3s; 
+            box-shadow: 0 0 15px rgba(255,105,180,0.3);
+        }
+        @keyframes slideInRight { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .task-agent { font-weight: bold; color: #ffb6c1; font-size: 12px; text-shadow: 0 0 8px #ff69b4; }
+        .task-status { font-size: 9px; padding: 3px 8px; border-radius: 10px; font-weight: bold; }
+        .status-working { background: linear-gradient(135deg, #ff69b4, #ff1493); color: #fff; box-shadow: 0 0 10px #ff69b4; }
+        .status-complete { background: linear-gradient(135deg, #00ff88, #00cc6a); color: #000; box-shadow: 0 0 10px #00ff88; }
+        .status-pending { background: linear-gradient(135deg, #888, #666); color: #fff; }
+        .task-desc { font-size: 10px; color: #ffb6c1; margin-bottom: 6px; line-height: 1.4; }
+        .task-result { font-size: 10px; color: #00ff88; background: rgba(0,255,136,0.1); padding: 6px; border-radius: 8px; border: 1px solid rgba(0,255,136,0.3); }
+
+        /* Bottom Control Bar - EXPANDED */
+        #control-bar { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 50; padding: 12px; background: rgba(20,0,20,0.9); backdrop-filter: blur(16px); border-radius: 35px; border: 2px solid #ff69b4; box-shadow: 0 0 30px rgba(255,105,180,0.5); flex-wrap: wrap; justify-content: center; max-width: 90%; }
+        .control-btn { 
+            width: 52px; height: 52px; 
+            border-radius: 50%; 
+            border: 2px solid #ff69b4; 
+            background: linear-gradient(135deg, rgba(255,105,180,0.3), rgba(255,20,147,0.2)); 
+            color: #ff69b4; 
+            font-size: 20px; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(255,105,180,0.4);
+            text-shadow: 0 0 5px #ff69b4;
+        }
+        .control-btn:active { transform: scale(0.85); background: #ff69b4; color: #fff; box-shadow: 0 0 30px #ff69b4; }
+        .control-btn.active { background: #ff69b4; color: #fff; box-shadow: 0 0 30px #ff69b4, 0 0 60px #ff69b4; }
+        .control-btn.small { width: 42px; height: 42px; font-size: 16px; }
+
+        /* Side Panels */
+        .side-panel { position: fixed; top: 0; right: -400px; width: 400px; height: 100%; background: linear-gradient(135deg, rgba(20,0,20,0.98), rgba(40,0,40,0.95)); backdrop-filter: blur(20px); z-index: 90; pointer-events: auto; transition: 0.4s; overflow-y: auto; border-left: 3px solid #ff69b4; box-shadow: -10px 0 50px rgba(255,105,180,0.3); }
+        .side-panel.open { right: 0; }
+        .side-panel h3 { color: #ffb6c1; padding: 70px 25px 20px; font-size: 18px; position: sticky; top: 0; background: rgba(20,0,20,0.95); margin: 0; border-bottom: 2px solid #ff69b4; text-shadow: 0 0 15px #ff69b4; }
+        .side-panel-content { padding: 20px; }
+
+        /* District Cards */
+        .district-card { 
+            background: linear-gradient(135deg, rgba(255,105,180,0.15), rgba(20,0,20,0.8)); 
+            border: 2px solid #ff69b4; 
+            border-radius: 15px; 
+            padding: 15px; 
+            margin: 12px 0; 
+            cursor: pointer; 
+            transition: 0.3s;
+            box-shadow: 0 0 15px rgba(255,105,180,0.2);
+        }
+        .district-card:active { transform: scale(0.98); box-shadow: 0 0 30px rgba(255,105,180,0.5); }
+        .district-card.work { border-left: 5px solid #00ffff; background: linear-gradient(135deg, rgba(0,255,255,0.15), rgba(20,0,20,0.8)); }
+        .district-card.home { border-left: 5px solid #ff69b4; }
+        .district-card.social { border-left: 5px solid #ffd700; background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(20,0,20,0.8)); }
+        .district-card.learn { border-left: 5px solid #00ff88; background: linear-gradient(135deg, rgba(0,255,136,0.15), rgba(20,0,20,0.8)); }
+        .district-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .district-name { font-weight: bold; color: #ffb6c1; font-size: 14px; text-shadow: 0 0 8px #ff69b4; }
+        .district-count { font-size: 10px; color: #ff69b4; background: rgba(255,105,180,0.2); padding: 3px 10px; border-radius: 10px; }
+        .district-desc { font-size: 10px; color: #da70d6; line-height: 1.5; }
+
+        /* Panels */
+        .panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); background: linear-gradient(135deg, rgba(20,0,20,0.98), rgba(40,0,40,0.95)); backdrop-filter: blur(25px); border: 3px solid #ff69b4; border-radius: 30px; padding: 25px; z-index: 200; display: none; pointer-events: auto; min-width: 350px; max-width: 90vw; max-height: 80vh; overflow-y: auto; opacity: 0; transition: 0.4s; box-shadow: 0 0 50px rgba(255,105,180,0.5); }
+        .panel.active { display: block; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .panel h3 { color: #ffb6c1; margin-bottom: 20px; text-align: center; font-size: 20px; text-shadow: 0 0 15px #ff69b4; }
+        .panel-close-btn { position: absolute; top: 15px; right: 15px; background: linear-gradient(135deg, #ff69b4, #ff1493); border: 2px solid #ff69b4; color: #fff; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px #ff69b4; transition: 0.3s; }
+        .panel-close-btn:active { transform: scale(0.9) rotate(90deg); }
+
+        /* Buttons */
+        .btn { 
+            background: linear-gradient(135deg, #ff69b4, #ff1493); 
+            border: 2px solid #ff69b4; 
+            color: #fff; 
+            padding: 12px 25px; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            margin: 8px; 
+            font-size: 13px; 
+            transition: 0.3s;
+            box-shadow: 0 0 20px rgba(255,105,180,0.5);
+            text-shadow: 0 0 5px #fff;
+        }
+        .btn:active { transform: scale(0.95); box-shadow: 0 0 35px #ff69b4; }
+        .btn-secondary { background: linear-gradient(135deg, #2a0a2a, #4a0a4a); color: #ff69b4; border: 2px solid #ff69b4; }
+        .btn-small { padding: 8px 16px; font-size: 11px; }
+        .btn-full { width: 100%; margin: 10px 0; }
+
+        /* Chat Bubbles */
+        .chat-bubble { 
+            position: absolute; 
+            background: linear-gradient(135deg, rgba(255,105,180,0.95), rgba(255,20,147,0.9)); 
+            backdrop-filter: blur(20px); 
+            border-radius: 20px; 
+            padding: 10px 15px; 
+            max-width: 220px; 
+            border: 2px solid #ff69b4; 
+            font-size: 11px; 
+            z-index: 150; 
+            pointer-events: none; 
+            animation: floatUp 0.4s; 
+            box-shadow: 0 0 25px rgba(255,105,180,0.6);
+            color: #fff;
+        }
+        @keyframes floatUp { from { opacity: 0; transform: translateY(15px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .chat-bubble strong { color: #fff; text-shadow: 0 0 8px #000; }
+
+        /* Notification */
+        .notification { 
+            position: fixed; 
+            bottom: 100px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: linear-gradient(135deg, rgba(255,105,180,0.95), rgba(255,20,147,0.9)); 
+            border-left: 4px solid #00ff88; 
+            padding: 15px 30px; 
+            border-radius: 30px; 
+            z-index: 300; 
+            animation: fadeOut 3s forwards, bounce 0.5s; 
+            backdrop-filter: blur(16px); 
+            white-space: nowrap;
+            color: #fff;
+            font-weight: bold;
+            box-shadow: 0 0 30px rgba(255,105,180,0.6);
+            border: 2px solid #ff69b4;
+        }
+        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
+        @keyframes bounce { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.05); } }
+
+        /* Modal */
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); background: linear-gradient(135deg, rgba(20,0,20,0.98), rgba(40,0,40,0.95)); backdrop-filter: blur(25px); border: 3px solid #ff69b4; border-radius: 30px; padding: 25px; z-index: 300; display: none; pointer-events: auto; min-width: 320px; max-width: 90vw; max-height: 80vh; overflow-y: auto; opacity: 0; transition: 0.4s; box-shadow: 0 0 50px rgba(255,105,180,0.5); }
+        .modal.active { display: block; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .modal h3 { color: #ffb6c1; margin-bottom: 20px; text-align: center; font-size: 18px; text-shadow: 0 0 15px #ff69b4; }
+        .modal-close { float: right; background: none; border: none; color: #ff69b4; font-size: 28px; cursor: pointer; text-shadow: 0 0 10px #ff69b4; }
+
+        input, textarea, select { 
+            width: 100%; 
+            margin: 10px 0; 
+            padding: 12px; 
+            background: rgba(40,0,40,0.6); 
+            border: 2px solid #ff69b4; 
+            color: #ffb6c1; 
+            border-radius: 15px; 
+            font-family: monospace; 
+            font-size: 12px;
+            box-shadow: 0 0 10px rgba(255,105,180,0.2);
+        }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #ff1493; box-shadow: 0 0 20px rgba(255,105,180,0.4); }
+
+        /* Task Output */
+        .task-output { 
+            background: rgba(0,0,0,0.6); 
+            border-radius: 15px; 
+            padding: 15px; 
+            font-size: 11px; 
+            margin-top: 15px; 
+            white-space: pre-wrap; 
+            word-break: break-all; 
+            max-height: 180px; 
+            overflow-y: auto; 
+            border: 2px solid #333;
+            color: #00ff88;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* Loading */
+        .loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0a0a1a, #1a0a1a); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ff69b4; transition: opacity 0.5s; }
+        .loading.hidden { opacity: 0; pointer-events: none; }
+        .loading-spinner { width: 60px; height: 60px; border: 5px solid rgba(255,105,180,0.3); border-top-color: #ff69b4; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 25px; box-shadow: 0 0 30px rgba(255,105,180,0.5); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-city { font-size: 15px; color: #ffb6c1; margin-top: 15px; text-shadow: 0 0 10px #ff69b4; }
+        .loading-title { font-size: 20px; font-weight: bold; text-shadow: 0 0 15px #ff69b4; }
+
+        /* City Time Display */
+        #cityTime { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, rgba(255,105,180,0.3), rgba(20,0,20,0.9)); backdrop-filter: blur(16px); border-radius: 25px; padding: 10px 25px; color: #ff69b4; font-size: 13px; z-index: 10; border: 2px solid #ff69b4; text-align: center; box-shadow: 0 0 25px rgba(255,105,180,0.4); }
+        #cityTime .day { color: #ffb6c1; font-weight: bold; font-size: 15px; text-shadow: 0 0 10px #ff69b4; }
+        #cityTime .phase { color: #ff69b4; font-size: 11px; margin-top: 4px; }
+
+        /* Activity Log */
+        #activityLog { position: absolute; bottom: 120px; right: 10px; width: 280px; max-height: 250px; overflow-y: auto; z-index: 10; pointer-events: none; }
+        .log-entry { 
+            background: linear-gradient(135deg, rgba(255,105,180,0.2), rgba(20,0,20,0.9)); 
+            backdrop-filter: blur(8px); 
+            border-radius: 12px; 
+            padding: 8px 12px; 
+            margin-bottom: 6px; 
+            font-size: 10px; 
+            color: #ffb6c1; 
+            border-left: 3px solid #ff69b4; 
+            animation: slideInLeft 0.3s;
+            box-shadow: 0 0 10px rgba(255,105,180,0.2);
+            border: 1px solid rgba(255,105,180,0.3);
+        }
+
+        /* Conversation Log */
+        #conversationLog { position: absolute; bottom: 120px; left: 280px; width: 300px; max-height: 200px; overflow-y: auto; z-index: 9; pointer-events: none; }
+        .conv-entry {
+            background: linear-gradient(135deg, rgba(255,182,193,0.15), rgba(20,0,20,0.9));
+            border: 1px solid #ff69b4;
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            font-size: 10px;
+            color: #ffb6c1;
+            box-shadow: 0 0 10px rgba(255,105,180,0.2);
+        }
+        .conv-entry strong { color: #ff69b4; }
+
+        /* Minimap */
+        #minimap { position: absolute; bottom: 120px; right: 300px; width: 180px; height: 180px; background: rgba(20,0,20,0.9); border: 3px solid #ff69b4; border-radius: 50%; overflow: hidden; z-index: 10; box-shadow: 0 0 25px rgba(255,105,180,0.4); }
+        #minimapCanvas { width: 100%; height: 100%; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(20,0,20,0.5); }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #ff69b4, #ff1493); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ff1493; }
+
+        @media (max-width: 480px) {
+            .top-btn { padding: 10px 14px; font-size: 11px; }
+            .control-btn { width: 46px; height: 46px; font-size: 17px; }
+            .control-btn.small { width: 38px; height: 38px; font-size: 14px; }
+            .side-panel { width: 100%; right: -100%; }
+            #taskFeed { width: 260px; max-height: 280px; }
+            #cityStats { min-width: 170px; font-size: 10px; }
+            #minimap { width: 120px; height: 120px; bottom: 120px; right: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="worldCanvas"></canvas>
+    
+    <div id="ui">
+        <!-- Top Menu -->
+        <div id="top-bar">
+            <button class="top-btn" id="districtsBtn">🏙️ Districts</button>
+            <button class="top-btn" id="agentsBtn">👥 Agents</button>
+            <button class="top-btn" id="tasksBtn">📋 Tasks</button>
+            <button class="top-btn" id="cityBtn">🏛️ City</button>
+            <button class="top-btn" id="deployBtn">➕ Deploy</button>
+        </div>
+
+        <!-- City Time -->
+        <div id="cityTime">
+            <div class="day">📅 Day <span id="dayNum">1</span> • <span id="timeDisplay">08:00</span></div>
+            <div class="phase" id="timePhase">🌅 Morning Rush</div>
+        </div>
+
+        <!-- City Stats -->
+        <div id="cityStats">
+            <h4>🏙️ CITY STATUS</h4>
+            <div class="stat-row"><span class="stat-label">👥 Population</span><span class="stat-value" id="popCount">0</span></div>
+            <div class="stat-row"><span class="stat-label">💼 Working</span><span class="stat-value" id="workCount">0</span></div>
+            <div class="stat-row"><span class="stat-label">🎉 Socializing</span><span class="stat-value" id="socialCount">0</span></div>
+            <div class="stat-row"><span class="stat-label">📚 Learning</span><span class="stat-value" id="learnCount">0</span></div>
+            <div class="stat-row"><span class="stat-label">😴 Resting</span><span class="stat-value" id="restCount">0</span></div>
+            <div class="stat-row"><span class="stat-label">✅ Tasks Done</span><span class="stat-value" id="tasksDone">0</span></div>
+            <div class="stat-row"><span class="stat-label">💬 Conversations</span><span class="stat-value" id="convCount">0</span></div>
+        </div>
+
+        <!-- Resources -->
+        <div id="resources">
+            <div class="res-row"><span class="res-icon">💰</span><span class="res-label">Profit:</span><span class="res-value" id="profitVal">500</span></div>
+            <div class="res-row"><span class="res-icon">❤️</span><span class="res-label">Love:</span><span class="res-value" id="loveVal">500</span></div>
+            <div class="res-row"><span class="res-icon">⚖️</span><span class="res-label">Tax:</span><span class="res-value" id="taxVal">500</span></div>
+        </div>
+
+        <!-- Agent Info -->
+        <div id="agentInfo">
+            <h4 id="agentName">Agent Name</h4>
+            <div style="margin-bottom:10px"><span id="agentType">Code Agent</span> • <span id="agentStatus">Working</span></div>
+            <div class="need-bar">
+                <div class="need-label"><span>⚡ Energy</span><span id="energyVal">80%</span></div>
+                <div class="need-bg"><div class="need-fill need-energy" id="energyBar" style="width:80%"></div></div>
+            </div>
+            <div class="need-bar">
+                <div class="need-label"><span>💬 Social</span><span id="socialVal">60%</span></div>
+                <div class="need-bg"><div class="need-fill need-social" id="socialBar" style="width:60%"></div></div>
+            </div>
+            <div class="need-bar">
+                <div class="need-label"><span>📚 Skill</span><span id="skillVal">40%</span></div>
+                <div class="need-bg"><div class="need-fill need-skill" id="skillBar" style="width:40%"></div></div>
+            </div>
+            <div class="need-bar">
+                <div class="need-label"><span>🎯 Purpose</span><span id="purposeVal">90%</span></div>
+                <div class="need-bg"><div class="need-fill need-purpose" id="purposeBar" style="width:90%"></div></div>
+            </div>
+            <div style="margin-top:12px;font-size:10px;color:#ffb6c1">Current: <span id="agentActivity" style="color:#ff69b4;font-weight:bold">Coding at workspace</span></div>
+            <div style="margin-top:10px;font-size:10px;color:#ffb6c1">Mood: <span id="agentMood" style="color:#ff69b4;font-weight:bold">Happy</span></div>
+        </div>
+
+        <!-- Task Feed -->
+        <div id="taskFeed"></div>
+
+        <!-- Activity Log -->
+        <div id="activityLog"></div>
+
+        <!-- Conversation Log -->
+        <div id="conversationLog"></div>
+
+        <!-- Minimap -->
+        <div id="minimap"><canvas id="minimapCanvas" width="200" height="200"></canvas></div>
+
+        <!-- Bottom Control Bar - EXPANDED -->
+        <div id="control-bar">
+            <button class="control-btn" id="workBtn" title="Send to Work">💼</button>
+            <button class="control-btn" id="socialBtn" title="Socialize">🎉</button>
+            <button class="control-btn" id="learnBtn" title="Learn Skill">📖</button>
+            <button class="control-btn" id="restBtn" title="Rest">😴</button>
+            <button class="control-btn" id="taskBtn" title="Assign Task">📋</button>
+            <button class="control-btn small" id="talkBtn" title="Make Agent Talk">💬</button>
+            <button class="control-btn small" id="inspectBtn" title="Inspect Agent">🔍</button>
+            <button class="control-btn small" id="followBtn" title="Follow Camera">📷</button>
+            <button class="control-btn small" id="statsBtn" title="Detailed Stats">📊</button>
+            <button class="control-btn small" id="mapBtn" title="Toggle Map">🗺️</button>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-title">Building Soulverse City...</div>
+        <div class="loading-city">Generating districts • Placing buildings • Spawning agents • Initializing AI</div>
+    </div>
+
+    <!-- Districts Panel -->
+    <div id="districtsPanel" class="side-panel">
+        <button class="panel-close-btn" onclick="closeSidePanel('districtsPanel')">×</button>
+        <h3>🏙️ CITY DISTRICTS</h3>
+        <div class="side-panel-content">
+            <div class="district-card work" onclick="window.focusDistrict('work')">
+                <div class="district-header">
+                    <span class="district-name">💼 Work District</span>
+                    <span class="district-count" id="workDistrictCount">0 agents</span>
+                </div>
+                <div class="district-desc">🏢 Office towers, co-working spaces, meeting rooms. Agents execute tasks and build projects here.</div>
+            </div>
+            <div class="district-card home" onclick="window.focusDistrict('home')">
+                <div class="district-header">
+                    <span class="district-name">🏠 Home District</span>
+                    <span class="district-count" id="homeDistrictCount">0 agents</span>
+                </div>
+                <div class="district-desc">🏘️ Apartments, houses, dormitories. Agents rest, recharge energy, and recover here.</div>
+            </div>
+            <div class="district-card social" onclick="window.focusDistrict('social')">
+                <div class="district-header">
+                    <span class="district-name">🎉 Social District</span>
+                    <span class="district-count" id="socialDistrictCount">0 agents</span>
+                </div>
+                <div class="district-desc">☕ Cafes, 🌳 parks, 🎭 plazas. Agents socialize, build relationships, and recover social energy.</div>
+            </div>
+            <div class="district-card learn" onclick="window.focusDistrict('learn')">
+                <div class="district-header">
+                    <span class="district-name">📚 Learning District</span>
+                    <span class="district-count" id="learnDistrictCount">0 agents</span>
+                </div>
+                <div class="district-desc">📖 Library, 🎓 training center, 🔬 lab. Agents learn new skills and upgrade capabilities.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agents Panel -->
+    <div id="agentsPanel" class="side-panel">
+        <button class="panel-close-btn" onclick="closeSidePanel('agentsPanel')">×</button>
+        <h3>👥 AGENT POPULATION</h3>
+        <div class="side-panel-content">
+            <div id="agentsList"></div>
+        </div>
+    </div>
+
+    <!-- Tasks Panel -->
+    <div id="tasksPanel" class="panel">
+        <button class="panel-close-btn" onclick="closePanel('tasksPanel')">×</button>
+        <h3>📋 TASK QUEUE</h3>
+        <div id="tasksList"></div>
+        <button class="btn btn-full" id="newTaskBtn" style="margin-top:15px">+ New Task</button>
+    </div>
+
+    <!-- City Panel -->
+    <div id="cityPanel" class="panel">
+        <button class="panel-close-btn" onclick="closePanel('cityPanel')">×</button>
+        <h3>🏛️ CITY HALL</h3>
+        <div id="cityInfo"></div>
+        <div id="cityBuildings" style="margin-top:15px"></div>
+        <div id="cityStats2" style="margin-top:15px"></div>
+    </div>
+
+    <!-- Deploy Modal -->
+    <div id="deployModal" class="modal">
+        <button class="modal-close" onclick="closeModal('deployModal')">×</button>
+        <h3>➕ Deploy New Agent</h3>
+        <label>Type:</label>
+        <select id="deployType">
+            <option value="code">💻 Code Agent - Writes software</option>
+            <option value="content">📝 Content Agent - Creates content</option>
+            <option value="research">🔬 Research Agent - Analyzes data</option>
+            <option value="automation">⚙️ Automation Agent - Builds workflows</option>
+            <option value="design">🎨 Design Agent - Creates visuals</option>
+        </select>
+        <label>Name:</label>
+        <input type="text" id="deployName" placeholder="Agent name">
+        <label>Personality:</label>
+        <select id="deployPersonality">
+            <option value="energetic">⚡ Energetic - High energy, fast worker</option>
+            <option value="social">💬 Social - Loves talking to others</option>
+            <option value="focused">🎯 Focused - High purpose drive</option>
+            <option value="scholar">📚 Scholar - Loves learning</option>
+        </select>
+        <label>Home District:</label>
+        <select id="deployHome">
+            <option value="apartment_north">🏢 North Apartments</option>
+            <option value="apartment_south">🏢 South Apartments</option>
+            <option value="house_east">🏡 East Houses</option>
+        </select>
+        <label>Cost: 200 💰</label>
+        <button class="btn btn-full" id="confirmDeploy">Deploy Agent</button>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal">
+        <button class="modal-close" onclick="closeModal('taskModal')">×</button>
+        <h3 id="taskModalTitle">📋 New Task</h3>
+        <label>Assign to:</label>
+        <select id="taskAgent"></select>
+        <label>Task Type:</label>
+        <select id="taskType">
+            <option value="code">💻 Write Code</option>
+            <option value="content">📝 Generate Content</option>
+            <option value="research">🔬 Research</option>
+            <option value="analyze">📊 Analyze Data</option>
+            <option value="github">🐙 GitHub Action</option>
+            <option value="automation">⚙️ Build Automation</option>
+        </select>
+        <label>Description:</label>
+        <textarea id="taskDesc" rows="4" placeholder="Describe what the agent should do..."></textarea>
+        <label>Priority:</label>
+        <select id="taskPriority">
+            <option value="low">🟢 Low - Do when free</option>
+            <option value="medium" selected>🟡 Medium - Normal priority</option>
+            <option value="high">🟠 High - Important</option>
+            <option value="critical">🔴 Critical - Drop everything</option>
+        </select>
+        <button class="btn btn-full" id="executeTask">Assign Task</button>
+        <div id="taskResult" class="task-output"></div>
+    </div>
+
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // ==================== CITY STATE ====================
+        let scene, camera, renderer, minimapScene, minimapCamera;
+        let agents = [], buildings = [], tasks = [], conversations = [], cityLogs = [];
+        let cityTime = 8 * 60, cityDay = 1;
+        let playerResources = { profit: 500, love: 500, tax: 500 };
+        let selectedAgent = null, moveTarget = null, cameraTarget = null, followMode = false;
+        let apiKeys = { openai: '', githubToken: '', githubRepo: '' };
+        let lastSaveTime = Date.now(), lastTick = Date.now();
+        let showMinimap = true;
+
+        // Districts
+        const districts = {
+            work: { x: -25, z: -25, color: 0x00ffff, name: 'Work District' },
+            home: { x: 25, z: -25, color: 0xff69b4, name: 'Home District' },
+            social: { x: -25, z: 25, color: 0xffd700, name: 'Social District' },
+            learn: { x: 25, z: 25, color: 0x00ff88, name: 'Learning District' }
+        };
+
+        // Activities
+        const activities = { WORK: 'work', SOCIAL: 'social', LEARN: 'learn', REST: 'rest', COMMUTE: 'commute', TASK: 'task', TALK: 'talk' };
+
+        // Conversation phrases
+        const conversationStarters = [
+            "Hey! How's your current project going?",
+            "Did you finish that task yet?",
+            "Want to grab coffee at the cafe?",
+            "I learned something new today!",
+            "The city looks beautiful today.",
+            "Working on something exciting?",
+            "Need any help with your task?",
+            "Let's collaborate on something!",
+            "How's your energy level?",
+            "Ready for the next challenge?"
+        ];
+
+        const conversationResponses = [
+            "It's going great, thanks!",
+            "Almost done, just finishing up.",
+            "Sure, I'd love to!",
+            "That's awesome, tell me more!",
+            "I agree, it really does!",
+            "Yes, very exciting stuff!",
+            "That would be helpful, thanks!",
+            "Sounds like a great idea!",
+            "Pretty good, taking a break now.",
+            "Always ready for more!"
+        ];
+
+        // ==================== INIT ====================
+        function init() {
+            loadCity();
+            createScene();
+            createCity();
+            createMinimap();
+            setupControls();
+            setupUI();
+            setupGestures();
+            
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+                notify('🏙️ Welcome to Soulverse City!');
+                logActivity('City initialized', 'system');
+            }, 2500);
+            
+            animate();
+        }
+
+        function loadCity() {
+            const saved = localStorage.getItem('soulverse_city_v4');
+            const now = Date.now();
+            if (saved) {
+                const data = JSON.parse(saved);
+                agents = data.agents || [];
+                buildings = data.buildings || [];
+                tasks = data.tasks || [];
+                conversations = data.conversations || [];
+                cityTime = data.cityTime || 8 * 60;
+                cityDay = data.cityDay || 1;
+                playerResources = data.playerResources || { profit: 500, love: 500, tax: 500 };
+                apiKeys = {
+                    openai: localStorage.getItem('city_openai_key') || '',
+                    githubToken: localStorage.getItem('city_github_token') || '',
+                    githubRepo: localStorage.getItem('city_github_repo') || ''
+                };
+                
+                const hoursPassed = (now - data.lastSave) / (1000 * 60 * 60);
+                if (hoursPassed > 0.1) {
+                    cityTime += hoursPassed * 60;
+                    while (cityTime >= 24 * 60) { cityTime -= 24 * 60; cityDay++; }
+                    for (const agent of agents) {
+                        agent.needs.energy = Math.max(10, agent.needs.energy - hoursPassed * 5);
+                        agent.needs.social = Math.max(0, agent.needs.social - hoursPassed * 8);
+                    }
+                }
+            } else {
+                agents = [
+                    createAgent('CodeBot', 'code', 'apartment_north', 'focused'),
+                    createAgent('ContentPro', 'content', 'apartment_south', 'social'),
+                    createAgent('ResearchAI', 'research', 'house_east', 'scholar'),
+                    createAgent('AutoMate', 'automation', 'apartment_north', 'energetic')
+                ];
+                
+                buildings = [
+                    { id: 'office_1', type: 'office', district: 'work', x: -25, z: -22 },
+                    { id: 'office_2', type: 'office', district: 'work', x: -20, z: -25 },
+                    { id: 'office_3', type: 'office', district: 'work', x: -30, z: -25 },
+                    { id: 'apt_north', type: 'apartment', district: 'home', x: 22, z: -22 },
+                    { id: 'apt_south', type: 'apartment', district: 'home', x: 28, z: -20 },
+                    { id: 'house_east', type: 'house', district: 'home', x: 30, z: -28 },
+                    { id: 'cafe', type: 'cafe', district: 'social', x: -22, z: 22 },
+                    { id: 'park', type: 'park', district: 'social', x: -28, z: 28 },
+                    { id: 'plaza', type: 'plaza', district: 'social', x: -20, z: 30 },
+                    { id: 'library', type: 'library', district: 'learn', x: 25, z: 22 },
+                    { id: 'training', type: 'training', district: 'learn', x: 22, z: 28 },
+                    { id: 'lab', type: 'lab', district: 'learn', x: 30, z: 25 }
+                ];
+            }
+            saveCity();
+        }
+
+        function createAgent(name, type, home, personality) {
+            const homePos = home === 'apartment_north' ? { x: 22, z: -22 } :
+                           home === 'apartment_south' ? { x: 28, z: -20 } : { x: 30, z: -25 };
+            
+            const personalities = {
+                energetic: { energy: 90, social: 50, skill: 40, purpose: 60 },
+                social: { energy: 70, social: 90, skill: 50, purpose: 60 },
+                focused: { energy: 75, social: 40, skill: 60, purpose: 90 },
+                scholar: { energy: 70, social: 50, skill: 90, purpose: 70 }
+            };
+            
+            const p = personalities[personality] || personalities.energetic;
+            
+            return {
+                id: 'agent_' + Date.now() + Math.random(),
+                name, type, home, personality,
+                x: homePos.x + (Math.random() - 0.5) * 6,
+                z: homePos.z + (Math.random() - 0.5) * 6,
+                targetX: null, targetZ: null,
+                activity: activities.REST,
+                needs: { energy: p.energy + Math.random() * 10, social: p.social + Math.random() * 10, skill: p.skill + Math.random() * 10, purpose: p.purpose + Math.random() * 10 },
+                currentTask: null,
+                mood: 'happy',
+                animFrame: Math.random() * Math.PI * 2,
+                lastActivityChange: Date.now(),
+                lastConversation: Date.now(),
+                conversationPartner: null
+            };
+        }
+
+        function saveCity() {
+            localStorage.setItem('soulverse_city_v4', JSON.stringify({
+                agents, buildings, tasks, conversations, cityTime, cityDay, playerResources, lastSave: Date.now()
+            }));
+        }
+
+        // ==================== SCENE ====================
+        function createScene() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a1a);
+            scene.fog = new THREE.FogExp2(0x0a0a1a, 0.015);
+
+            camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
+            camera.position.set(0, 50, 60);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('worldCanvas'), antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            const ambient = new THREE.AmbientLight(0x606080, 0.5);
+            scene.add(ambient);
+
+            const sun = new THREE.DirectionalLight(0xffaaee, 0.9);
+            sun.position.set(30, 50, 30);
+            sun.castShadow = true;
+            sun.shadow.mapSize.width = 2048;
+            sun.shadow.mapSize.height = 2048;
+            sun.shadow.camera.near = 10;
+            sun.shadow.camera.far = 150;
+            sun.shadow.camera.left = -60;
+            sun.shadow.camera.right = 60;
+            sun.shadow.camera.top = 60;
+            sun.shadow.camera.bottom = -60;
+            scene.add(sun);
+
+            const hemi = new THREE.HemisphereLight(0xff69b4, 0x440a44, 0.5);
+            scene.add(hemi);
+
+            // Pink point lights for atmosphere
+            const pinkLight1 = new THREE.PointLight(0xff69b4, 0.5, 50);
+            pinkLight1.position.set(-25, 10, -25);
+            scene.add(pinkLight1);
+            const pinkLight2 = new THREE.PointLight(0xff69b4, 0.5, 50);
+            pinkLight2.position.set(25, 10, 25);
+            scene.add(pinkLight2);
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        function createMinimap() {
+            minimapScene = new THREE.Scene();
+            minimapCamera = new THREE.OrthographicCamera(-50, 50, 50, -50, 0.1, 200);
+            minimapCamera.position.set(0, 100, 0);
+            minimapCamera.lookAt(0, 0, 0);
+        }
+
+        function createCity() {
+            // Ground with grid pattern
+            const groundGeo = new THREE.PlaneGeometry(200, 200, 64, 64);
+            const groundMat = new THREE.MeshStandardMaterial({ 
+                color: 0x1a0a1a, 
+                roughness: 0.9, 
+                metalness: 0.2,
+                emissive: 0x2a0a2a,
+                emissiveIntensity: 0.1
+            });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            ground.name = 'ground';
+            scene.add(ground);
+
+            // District zones with glowing edges
+            for (const [key, district] of Object.entries(districts)) {
+                const zoneGeo = new THREE.PlaneGeometry(35, 35);
+                const zoneMat = new THREE.MeshStandardMaterial({ 
+                    color: district.color, 
+                    transparent: true, 
+                    opacity: 0.08,
+                    side: THREE.DoubleSide,
+                    emissive: district.color,
+                    emissiveIntensity: 0.2
+                });
+                const zone = new THREE.Mesh(zoneGeo, zoneMat);
+                zone.rotation.x = -Math.PI / 2;
+                zone.position.set(district.x, 0.02, district.z);
+                zone.name = `district_${key}`;
+                scene.add(zone);
+
+                // Glowing border
+                const borderGeo = new THREE.EdgesGeometry(new THREE.PlaneGeometry(35, 35));
+                const borderMat = new THREE.LineBasicMaterial({ color: district.color, linewidth: 2, transparent: true, opacity: 0.5 });
+                const border = new THREE.LineSegments(borderGeo, borderMat);
+                border.rotation.x = -Math.PI / 2;
+                border.position.set(district.x, 0.05, district.z);
+                scene.add(border);
+            }
+
+            // Roads with glowing lines
+            createRoad(0, -20, 0, 60);
+            createRoad(-20, 0, Math.PI / 2, 60);
+            createRoad(-25, 0, Math.PI / 2, 15);
+            createRoad(25, 0, Math.PI / 2, 15);
+            createRoad(0, 20, 0, 20);
+
+            // Buildings
+            for (const building of buildings) {
+                createBuilding(building);
+            }
+
+            // Agents
+            for (const agent of agents) {
+                createAgentMesh(agent);
+            }
+
+            // Decorations - More trees
+            for (let i = 0; i < 60; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 35 + Math.random() * 45;
+                createTree(Math.cos(angle) * radius, Math.sin(angle) * radius);
+            }
+
+            // Flowers in social district
+            for (let i = 0; i < 30; i++) {
+                const x = -25 + Math.random() * 15;
+                const z = 25 + Math.random() * 15;
+                createFlower(x, z);
+            }
+
+            // Street lights
+            for (let i = 0; i < 16; i++) {
+                const x = (i % 4) * 15 - 22;
+                const z = Math.floor(i / 4) * 15 - 22;
+                createStreetLight(x, z);
+            }
+
+            // Fountains
+            createFountain(0, 0);
+            createFountain(-25, 0);
+            createFountain(25, 0);
+        }
+
+        function createRoad(x, z, rotation, length) {
+            const roadGeo = new THREE.PlaneGeometry(8, length);
+            const roadMat = new THREE.MeshStandardMaterial({ color: 0x2a1a2a, roughness: 0.7, metalness: 0.3 });
+            const road = new THREE.Mesh(roadGeo, roadMat);
+            road.rotation.x = -Math.PI / 2;
+            road.rotation.z = rotation;
+            road.position.set(x, 0.03, z);
+            road.receiveShadow = true;
+            scene.add(road);
+
+            // Glowing lane markings
+            const lineGeo = new THREE.PlaneGeometry(0.4, length * 0.9);
+            const lineMat = new THREE.MeshBasicMaterial({ color: 0xff69b4, transparent: true, opacity: 0.6 });
+            const line = new THREE.Mesh(lineGeo, lineMat);
+            line.rotation.x = -Math.PI / 2;
+            line.rotation.z = rotation;
+            line.position.set(x, 0.05, z);
+            scene.add(line);
+        }
+
+        function createBuilding(building) {
+            const group = new THREE.Group();
+            const data = getBuildingData(building.type);
+
+            // Main structure with multiple sections
+            const bodyGeo = new THREE.BoxGeometry(data.width, data.height, data.depth);
+            const bodyMat = new THREE.MeshStandardMaterial({ 
+                color: data.color, 
+                flatShading: true,
+                metalness: 0.4,
+                roughness: 0.6,
+                emissive: data.color,
+                emissiveIntensity: 0.1
+            });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = data.height / 2;
+            body.castShadow = true;
+            body.receiveShadow = true;
+            group.add(body);
+
+            // Windows with glow
+            const winMat = new THREE.MeshStandardMaterial({ 
+                color: 0xffb6c1, 
+                emissive: 0xff69b4, 
+                emissiveIntensity: 0.6,
+                transparent: true,
+                opacity: 0.9
+            });
+            const winGeo = new THREE.PlaneGeometry(1, 1.2);
+            for (let i = 0; i < data.floors; i++) {
+                for (let j = -1; j <= 1; j += 2) {
+                    for (let k = -1; k <= 1; k += 2) {
+                        const win = new THREE.Mesh(winGeo, winMat);
+                        win.position.set(j * (data.width / 2 - 0.3), 0.8 + i * 1.8, k * (data.depth / 2) + 0.01);
+                        if (k > 0) win.rotation.y = Math.PI;
+                        group.add(win);
+                    }
+                }
+            }
+
+            // Roof details
+            if (data.roof === 'dome') {
+                const roofGeo = new THREE.SphereGeometry(data.width * 0.6, 12, 12, 0, Math.PI * 2, 0, Math.PI / 2);
+                const roofMat = new THREE.MeshStandardMaterial({ color: 0xff69b4, metalness: 0.6, roughness: 0.3 });
+                const roof = new THREE.Mesh(roofGeo, roofMat);
+                roof.position.y = data.height;
+                roof.castShadow = true;
+                group.add(roof);
+                
+                // Roof spike
+                const spikeGeo = new THREE.ConeGeometry(0.3, 2, 8);
+                const spikeMat = new THREE.MeshStandardMaterial({ color: 0xffb6c1, metalness: 0.8 });
+                const spike = new THREE.Mesh(spikeGeo, spikeMat);
+                spike.position.y = data.height + 1;
+                group.add(spike);
+            } else if (data.roof === 'pointed') {
+                const roofGeo = new THREE.ConeGeometry(data.width * 0.7, 4, 6);
+                const roofMat = new THREE.MeshStandardMaterial({ color: 0xda70d6, metalness: 0.4 });
+                const roof = new THREE.Mesh(roofGeo, roofMat);
+                roof.position.y = data.height + 2;
+                roof.castShadow = true;
+                group.add(roof);
+            } else {
+                const roofGeo = new THREE.BoxGeometry(data.width + 1, 0.8, data.depth + 1);
+                const roofMat = new THREE.MeshStandardMaterial({ color: 0x4a2a4a, metalness: 0.5 });
+                const roof = new THREE.Mesh(roofGeo, roofMat);
+                roof.position.y = data.height + 0.4;
+                roof.castShadow = true;
+                group.add(roof);
+                
+                // AC units
+                const acGeo = new THREE.BoxGeometry(1, 0.8, 1);
+                const acMat = new THREE.MeshStandardMaterial({ color: 0x888888 });
+                const ac = new THREE.Mesh(acGeo, acMat);
+                ac.position.set(data.width / 3, data.height + 1.2, data.depth / 3);
+                group.add(ac);
+            }
+
+            // Entrance
+            const doorGeo = new THREE.PlaneGeometry(2, 3);
+            const doorMat = new THREE.MeshStandardMaterial({ color: 0x2a0a2a, emissive: 0xff69b4, emissiveIntensity: 0.3 });
+            const door = new THREE.Mesh(doorGeo, doorMat);
+            door.position.set(0, 1.5, data.depth / 2 + 0.01);
+            group.add(door);
+
+            // Building glow at base
+            const glowGeo = new THREE.RingGeometry(data.width / 2, data.width / 2 + 1, 32);
+            const glowMat = new THREE.MeshBasicMaterial({ color: 0xff69b4, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
+            const glow = new THREE.Mesh(glowGeo, glowMat);
+            glow.rotation.x = -Math.PI / 2;
+            glow.position.y = 0.1;
+            group.add(glow);
+
+            group.position.set(building.x, 0, building.z);
+            scene.add(group);
+            building.mesh = group;
+            
+            // Add to minimap
+            if (minimapScene) {
+                const miniGeo = new THREE.BoxGeometry(data.width, data.height, data.depth);
+                const miniMat = new THREE.MeshBasicMaterial({ color: data.color });
+                const miniMesh = new THREE.Mesh(miniGeo, miniMat);
+                miniMesh.position.copy(building);
+                miniMesh.position.y = data.height / 2;
+                minimapScene.add(miniMesh);
+            }
+        }
+
+        function getBuildingData(type) {
+            const data = {
+                office: { width: 10, height: 18, depth: 10, color: 0x00ffff, floors: 4, roof: 'flat' },
+                apartment: { width: 8, height: 14, depth: 8, color: 0xff69b4, floors: 3, roof: 'flat' },
+                house: { width: 6, height: 5, depth: 6, color: 0xffb6c1, floors: 1, roof: 'pointed' },
+                cafe: { width: 7, height: 5, depth: 7, color: 0xffd700, floors: 1, roof: 'dome' },
+                park: { width: 15, height: 0.5, depth: 15, color: 0x00ff88, floors: 0, roof: 'flat' },
+                plaza: { width: 12, height: 0.3, depth: 12, color: 0xff69b4, floors: 0, roof: 'flat' },
+                library: { width: 14, height: 10, depth: 10, color: 0x00ff88, floors: 2, roof: 'flat' },
+                training: { width: 10, height: 8, depth: 10, color: 0xda70d6, floors: 2, roof: 'flat' },
+                lab: { width: 12, height: 12, depth: 10, color: 0xba55d3, floors: 3, roof: 'dome' }
+            };
+            return data[type] || data.office;
+        }
+
+        function createAgentMesh(agent) {
+            const group = new THREE.Group();
+            
+            const colors = {
+                code: { primary: 0x00ffff, secondary: 0x00cccc, glow: 0x00ffff },
+                content: { primary: 0xff69b4, secondary: 0xff1493, glow: 0xff69b4 },
+                research: { primary: 0x00ff88, secondary: 0x00cc6a, glow: 0x00ff88 },
+                automation: { primary: 0xffd700, secondary: 0xffaa00, glow: 0xffd700 },
+                design: { primary: 0xff6b6b, secondary: 0xee5a24, glow: 0xff6b6b }
+            };
+            
+            const color = colors[agent.type] || colors.code;
+
+            // Glowing aura
+            const auraGeo = new THREE.SphereGeometry(1.2, 16, 16);
+            const auraMat = new THREE.MeshBasicMaterial({ 
+                color: color.glow, 
+                transparent: true, 
+                opacity: 0.15,
+                side: THREE.DoubleSide
+            });
+            const aura = new THREE.Mesh(auraGeo, auraMat);
+            aura.position.y = 1.2;
+            group.add(aura);
+
+            // Body with gradient effect
+            const bodyGeo = new THREE.CylinderGeometry(0.5, 0.6, 1.5, 12);
+            const bodyMat = new THREE.MeshStandardMaterial({ 
+                color: color.primary, 
+                flatShading: false, 
+                metalness: 0.5,
+                roughness: 0.3,
+                emissive: color.primary,
+                emissiveIntensity: 0.3
+            });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 1.2;
+            body.castShadow = true;
+            group.add(body);
+
+            // Belt/detail
+            const beltGeo = new THREE.TorusGeometry(0.55, 0.08, 8, 16);
+            const beltMat = new THREE.MeshStandardMaterial({ color: color.secondary, metalness: 0.8 });
+            const belt = new THREE.Mesh(beltGeo, beltMat);
+            belt.rotation.x = Math.PI / 2;
+            belt.position.y = 0.8;
+            group.add(belt);
+
+            // Head
+            const headGeo = new THREE.SphereGeometry(0.45, 12, 12);
+            const headMat = new THREE.MeshStandardMaterial({ 
+                color: 0xffdbac, 
+                flatShading: false,
+                roughness: 0.5
+            });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 2.2;
+            head.castShadow = true;
+            group.add(head);
+
+            // Glowing eyes
+            const eyeGeo = new THREE.SphereGeometry(0.08, 6, 6);
+            const eyeMat = new THREE.MeshBasicMaterial({ color: color.glow, emissive: color.glow });
+            const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+            leftEye.position.set(-0.15, 2.25, 0.38);
+            group.add(leftEye);
+            const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+            rightEye.position.set(0.15, 2.25, 0.38);
+            group.add(rightEye);
+
+            // Halo
+            const haloGeo = new THREE.TorusGeometry(0.65, 0.04, 12, 24);
+            const haloMat = new THREE.MeshBasicMaterial({ color: color.glow, transparent: true, opacity: 0.7 });
+            const halo = new THREE.Mesh(haloGeo, haloMat);
+            halo.rotation.x = Math.PI / 2;
+            halo.position.y = 2.8;
+            group.add(halo);
+
+            // Arms
+            const armGeo = new THREE.CapsuleGeometry(0.12, 0.6, 4, 8);
+            const armMat = new THREE.MeshStandardMaterial({ color: color.primary, metalness: 0.4 });
+            const leftArm = new THREE.Mesh(armGeo, armMat);
+            leftArm.position.set(-0.7, 1.5, 0);
+            leftArm.rotation.z = 0.2;
+            leftArm.castShadow = true;
+            group.add(leftArm);
+            const rightArm = new THREE.Mesh(armGeo, armMat);
+            rightArm.position.set(0.7, 1.5, 0);
+            rightArm.rotation.z = -0.2;
+            rightArm.castShadow = true;
+            group.add(rightArm);
+
+            // Legs
+            const legGeo = new THREE.CapsuleGeometry(0.15, 0.7, 4, 8);
+            const legMat = new THREE.MeshStandardMaterial({ color: 0x2a0a2a, metalness: 0.3 });
+            const leftLeg = new THREE.Mesh(legGeo, legMat);
+            leftLeg.position.set(-0.25, 0.35, 0);
+            leftLeg.castShadow = true;
+            group.add(leftLeg);
+            const rightLeg = new THREE.Mesh(legGeo, legMat);
+            rightLeg.position.set(0.25, 0.35, 0);
+            rightLeg.castShadow = true;
+            group.add(rightLeg);
+
+            // Shadow with glow
+            const shadowGeo = new THREE.CircleGeometry(0.7, 24);
+            const shadowMat = new THREE.MeshBasicMaterial({ 
+                color: color.glow, 
+                transparent: true, 
+                opacity: 0.2 
+            });
+            const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+            shadow.rotation.x = -Math.PI / 2;
+            shadow.position.y = 0.02;
+            group.add(shadow);
+
+            group.position.set(agent.x, 0, agent.z);
+            scene.add(group);
+            agent.mesh = group;
+            agent.parts = { body, head, leftArm, rightArm, leftLeg, rightLeg, aura };
+            agent.animFrame = Math.random() * Math.PI * 2;
+
+            // Selection ring
+            const ringGeo = new THREE.RingGeometry(0.9, 1.1, 32);
+            const ringMat = new THREE.MeshBasicMaterial({ 
+                color: 0xff69b4, 
+                transparent: true, 
+                opacity: 0, 
+                side: THREE.DoubleSide,
+                emissive: 0xff69b4
+            });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = -Math.PI / 2;
+            ring.position.y = 0.05;
+            group.add(ring);
+            agent.selectRing = ring;
+
+            // Add to minimap
+            if (minimapScene) {
+                const miniGeo = new THREE.SphereGeometry(0.8, 8, 8);
+                const miniMat = new THREE.MeshBasicMaterial({ color: color.primary });
+                const miniMesh = new THREE.Mesh(miniGeo, miniMat);
+                miniMesh.position.copy(agent.mesh.position);
+                minimapScene.add(miniMesh);
+                agent.miniMesh = miniMesh;
+            }
+        }
+
+        function createTree(x, z) {
+            const group = new THREE.Group();
+            const trunkGeo = new THREE.CylinderGeometry(0.25, 0.35, 2, 8);
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a2a3a, metalness: 0.2 });
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            trunk.position.y = 1;
+            trunk.castShadow = true;
+            group.add(trunk);
+
+            const leavesMat = new THREE.MeshStandardMaterial({ 
+                color: 0xff69b4, 
+                flatShading: true,
+                emissive: 0xff69b4,
+                emissiveIntensity: 0.2
+            });
+            
+            // Pink trees for fantasy look
+            for (let i = 0; i < 3; i++) {
+                const leaves = new THREE.Mesh(
+                    new THREE.IcosahedronGeometry(1 - i * 0.25, 0),
+                    leavesMat
+                );
+                leaves.position.y = 2.5 + i * 0.6;
+                leaves.scale.setScalar(1 - i * 0.2);
+                leaves.castShadow = true;
+                group.add(leaves);
+            }
+
+            group.position.set(x, 0, z);
+            scene.add(group);
+        }
+
+        function createFlower(x, z) {
+            const colors = [0xff69b4, 0xffb6c1, 0xffd700, 0x00ff88, 0xda70d6];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            const group = new THREE.Group();
+            const stemGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.4, 6);
+            const stemMat = new THREE.MeshStandardMaterial({ color: 0x00ff88 });
+            const stem = new THREE.Mesh(stemGeo, stemMat);
+            stem.position.y = 0.2;
+            group.add(stem);
+
+            const petalGeo = new THREE.SphereGeometry(0.15, 6, 6);
+            const petalMat = new THREE.MeshBasicMaterial({ color });
+            const petal = new THREE.Mesh(petalGeo, petalMat);
+            petal.position.y = 0.45;
+            group.add(petal);
+
+            group.position.set(x, 0, z);
+            scene.add(group);
+        }
+
+        function createStreetLight(x, z) {
+            const group = new THREE.Group();
+            const poleGeo = new THREE.CylinderGeometry(0.12, 0.18, 5, 8);
+            const poleMat = new THREE.MeshStandardMaterial({ color: 0x4a2a4a, metalness: 0.6 });
+            const pole = new THREE.Mesh(poleGeo, poleMat);
+            pole.position.y = 2.5;
+            pole.castShadow = true;
+            group.add(pole);
+
+            const bulbGeo = new THREE.SphereGeometry(0.4, 12, 12);
+            const bulbMat = new THREE.MeshBasicMaterial({ color: 0xff69b4 });
+            const bulb = new THREE.Mesh(bulbGeo, bulbMat);
+            bulb.position.y = 5.2;
+            group.add(bulb);
+
+            const light = new THREE.PointLight(0xff69b4, 0.8, 15);
+            light.position.y = 5;
+            group.add(light);
+
+            // Decorative arm
+            const armGeo = new THREE.CylinderGeometry(0.08, 0.08, 2, 6);
+            const arm = new THREE.Mesh(armGeo, poleMat);
+            arm.position.set(0.8, 4.5, 0);
+            arm.rotation.z = -Math.PI / 6;
+            group.add(arm);
+
+            group.position.set(x, 0, z);
+            scene.add(group);
+        }
+
+        function createFountain(x, z) {
+            const group = new THREE.Group();
+            
+            // Base
+            const baseGeo = new THREE.CylinderGeometry(3, 3.5, 0.5, 16);
+            const baseMat = new THREE.MeshStandardMaterial({ color: 0xff69b4, metalness: 0.4 });
+            const base = new THREE.Mesh(baseGeo, baseMat);
+            base.position.y = 0.25;
+            base.receiveShadow = true;
+            group.add(base);
+
+            // Center pillar
+            const pillarGeo = new THREE.CylinderGeometry(0.5, 0.6, 2, 12);
+            const pillarMat = new THREE.MeshStandardMaterial({ color: 0xffb6c1, metalness: 0.5 });
+            const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+            pillar.position.y = 1.2;
+            group.add(pillar);
+
+            // Top bowl
+            const bowlGeo = new THREE.TorusGeometry(1.5, 0.3, 8, 24);
+            const bowlMat = new THREE.MeshStandardMaterial({ color: 0xff69b4, metalness: 0.6 });
+            const bowl = new THREE.Mesh(bowlGeo, bowlMat);
+            bowl.rotation.x = Math.PI / 2;
+            bowl.position.y = 2.2;
+            group.add(bowl);
+
+            // Water particle effect (simplified as spheres)
+            const waterMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.6 });
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                const drop = new THREE.Mesh(new THREE.SphereGeometry(0.1, 6, 6), waterMat);
+                drop.position.set(Math.cos(angle) * 1.5, 1.5 + Math.random(), Math.sin(angle) * 1.5);
+                group.add(drop);
+            }
+
+            // Glowing water in base
+            const waterGeo = new THREE.CircleGeometry(2.5, 24);
+            const waterMat2 = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.4 });
+            const water = new THREE.Mesh(waterGeo, waterMat2);
+            water.rotation.x = -Math.PI / 2;
+            water.position.y = 0.5;
+            group.add(water);
+
+            // Light
+            const light = new THREE.PointLight(0x00ffff, 0.5, 8);
+            light.position.y = 1;
+            group.add(light);
+
+            group.position.set(x, 0, z);
+            scene.add(group);
+        }
+
+        // ==================== CONTROLS ====================
+        function setupControls() {
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+
+            renderer.domElement.addEventListener('click', (event) => {
+                if (event.target.closest('#ui')) return;
+
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                raycaster.setFromCamera(mouse, camera);
+
+                const agentMeshes = agents.filter(a => a.mesh).map(a => a.mesh);
+                const agentIntersects = raycaster.intersectObjects(agentMeshes, true);
+
+                if (agentIntersects.length > 0) {
+                    let obj = agentIntersects[0].object;
+                    while (obj.parent && obj.parent.type !== 'Scene') obj = obj.parent;
+                    const agent = agents.find(a => a.mesh === obj);
+                    if (agent) selectAgent(agent);
+                    return;
+                }
+
+                const groundIntersects = raycaster.intersectObjects(scene.children.filter(o => o.name === 'ground'));
+                if (groundIntersects.length > 0 && selectedAgent) {
+                    const point = groundIntersects[0].point;
+                    moveTarget = { x: point.x, z: point.z };
+                    selectedAgent.targetX = point.x;
+                    selectedAgent.targetZ = point.z;
+                    selectedAgent.activity = activities.COMMUTE;
+                    notify('🚶 Moving...');
+                }
+            });
+        }
+
+        function setupGestures() {
+            const canvas = renderer.domElement;
+            let initialPinchDistance = 0;
+            let initialCameraY = 50;
+
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 2) {
+                    initialPinchDistance = Math.hypot(
+                        e.touches[0].pageX - e.touches[1].pageX,
+                        e.touches[0].pageY - e.touches[1].pageY
+                    );
+                    initialCameraY = camera.position.y;
+                }
+            }, { passive: true });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 2 && initialPinchDistance > 0) {
+                    e.preventDefault();
+                    const currentDistance = Math.hypot(
+                        e.touches[0].pageX - e.touches[1].pageX,
+                        e.touches[0].pageY - e.touches[1].pageY
+                    );
+                    const scale = currentDistance / initialPinchDistance;
+                    const newHeight = Math.max(20, Math.min(80, initialCameraY / scale));
+                    camera.position.y = newHeight;
+                    camera.position.z = newHeight * 1.2;
+                    camera.lookAt(0, 0, 0);
+                }
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', () => {
+                initialPinchDistance = 0;
+            });
+        }
+
+        function selectAgent(agent) {
+            for (const a of agents) {
+                if (a.selectRing) a.selectRing.material.opacity = 0;
+            }
+            selectedAgent = agent;
+            if (agent.selectRing) agent.selectRing.material.opacity = 1;
+
+            document.getElementById('agentInfo').classList.add('visible');
+            updateAgentPanel(agent);
+            renderAgents();
+            
+            if (followMode) {
+                cameraTarget = { x: agent.x, y: 25, z: agent.z + 15 };
+            }
+        }
+
+        function updateAgentPanel(agent) {
+            document.getElementById('agentName').textContent = agent.name;
+            document.getElementById('agentType').textContent = agent.type.charAt(0).toUpperCase() + agent.type.slice(1) + ' Agent';
+            document.getElementById('agentStatus').textContent = agent.activity.toUpperCase();
+            document.getElementById('energyVal').textContent = Math.round(agent.needs.energy) + '%';
+            document.getElementById('energyBar').style.width = agent.needs.energy + '%';
+            document.getElementById('socialVal').textContent = Math.round(agent.needs.social) + '%';
+            document.getElementById('socialBar').style.width = agent.needs.social + '%';
+            document.getElementById('skillVal').textContent = Math.round(agent.needs.skill) + '%';
+            document.getElementById('skillBar').style.width = agent.needs.skill + '%';
+            document.getElementById('purposeVal').textContent = Math.round(agent.needs.purpose) + '%';
+            document.getElementById('purposeBar').style.width = agent.needs.purpose + '%';
+
+            const activityText = {
+                [activities.WORK]: '💼 Working at office',
+                [activities.SOCIAL]: '🎉 Socializing',
+                [activities.LEARN]: '📚 Learning',
+                [activities.REST]: '😴 Resting at home',
+                [activities.COMMUTE]: '🚶 Commuting',
+                [activities.TASK]: '📋 Executing task',
+                [activities.TALK]: '💬 Chatting'
+            };
+            document.getElementById('agentActivity').textContent = activityText[agent.activity] || agent.activity;
+            document.getElementById('agentMood').textContent = agent.mood;
+        }
+
+        // ==================== UI ====================
+        function setupUI() {
+            document.getElementById('districtsBtn').onclick = () => {
+                closeAllPanels();
+                document.getElementById('districtsPanel').classList.add('open');
+                updateDistrictCounts();
+            };
+            document.getElementById('agentsBtn').onclick = () => {
+                closeAllPanels();
+                document.getElementById('agentsPanel').classList.add('open');
+                renderAgents();
+            };
+            document.getElementById('tasksBtn').onclick = () => openPanel('tasksPanel');
+            document.getElementById('cityBtn').onclick = () => openPanel('cityPanel');
+            document.getElementById('deployBtn').onclick = () => openModal('deployModal');
+
+            // Control buttons
+            document.getElementById('workBtn').onclick = () => sendAgentTo('work');
+            document.getElementById('socialBtn').onclick = () => sendAgentTo('social');
+            document.getElementById('learnBtn').onclick = () => sendAgentTo('learn');
+            document.getElementById('restBtn').onclick = () => sendAgentTo('rest');
+            document.getElementById('taskBtn').onclick = () => openTaskModal();
+            document.getElementById('talkBtn').onclick = () => makeAgentTalk();
+            document.getElementById('inspectBtn').onclick = () => inspectAgent();
+            document.getElementById('followBtn').onclick = () => toggleFollow();
+            document.getElementById('statsBtn').onclick = () => showDetailedStats();
+            document.getElementById('mapBtn').onclick = () => toggleMinimap();
+
+            // Deploy & Task
+            document.getElementById('confirmDeploy').onclick = deployAgent;
+            document.getElementById('executeTask').onclick = executeTask;
+
+            // Focus district
+            window.focusDistrict = (district) => {
+                const pos = districts[district];
+                cameraTarget = { x: pos.x, y: 35, z: pos.z };
+                notify(`📍 Focusing on ${pos.name}`);
+                closeAllPanels();
+            };
+
+            updateCityPanel();
+            renderAgents();
+        }
+
+        function closeAllPanels() {
+            document.querySelectorAll('.side-panel').forEach(p => p.classList.remove('open'));
+        }
+
+        window.closeSidePanel = (id) => document.getElementById(id).classList.remove('open');
+        window.closePanel = (id) => document.getElementById(id).classList.remove('active');
+        window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+        window.openPanel = (id) => {
+            document.getElementById(id).classList.add('active');
+            if (id === 'tasksPanel') renderTasks();
+            if (id === 'cityPanel') updateCityPanel();
+        };
+        window.openModal = (id) => document.getElementById(id).classList.add('active');
+
+        function sendAgentTo(district) {
+            if (!selectedAgent) { notify('👆 Select an agent first'); return; }
+            
+            const pos = districts[district];
+            selectedAgent.targetX = pos.x + (Math.random() - 0.5) * 10;
+            selectedAgent.targetZ = pos.z + (Math.random() - 0.5) * 10;
+            selectedAgent.activity = activities.COMMUTE;
+            
+            const activityNames = { work: '💼 Work', social: '🎉 Social', learn: '📚 Learn', rest: '😴 Rest' };
+            notify(`Sending ${selectedAgent.name} to ${activityNames[district]}`);
+            logActivity(`${selectedAgent.name} heading to ${district} district`, 'action');
+        }
+
+        function makeAgentTalk() {
+            if (!selectedAgent) { notify('👆 Select an agent first'); return; }
+            
+            const phrase = conversationStarters[Math.floor(Math.random() * conversationStarters.length)];
+            createChatBubble(selectedAgent, phrase);
+            
+            // Find nearby agent to respond
+            const nearby = agents.find(a => a !== selectedAgent && 
+                Math.abs(a.x - selectedAgent.x) < 10 && 
+                Math.abs(a.z - selectedAgent.z) < 10);
+            
+            if (nearby) {
+                setTimeout(() => {
+                    const response = conversationResponses[Math.floor(Math.random() * conversationResponses.length)];
+                    createChatBubble(nearby, response);
+                    addConversation(selectedAgent.name, nearby.name, phrase, response);
+                }, 1500);
+            }
+            
+            notify('💬 Agent is talking...');
+            logActivity(`${selectedAgent.name} started a conversation`, 'social');
+        }
+
+        function inspectAgent() {
+            if (!selectedAgent) { notify('👆 Select an agent first'); return; }
+            
+            cameraTarget = { x: selectedAgent.x, y: 15, z: selectedAgent.z + 8 };
+            notify('🔍 Inspecting ' + selectedAgent.name);
+        }
+
+        function toggleFollow() {
+            if (!selectedAgent) { notify('👆 Select an agent first'); return; }
+            followMode = !followMode;
+            document.getElementById('followBtn').classList.toggle('active', followMode);
+            notify(followMode ? '📷 Following ' + selectedAgent.name : '✅ Follow mode off');
+        }
+
+        function showDetailedStats() {
+            notify('📊 City analytics coming soon...');
+        }
+
+        function toggleMinimap() {
+            showMinimap = !showMinimap;
+            document.getElementById('minimap').style.display = showMinimap ? 'block' : 'none';
+        }
+
+        function deployAgent() {
+            const name = document.getElementById('deployName').value.trim();
+            const type = document.getElementById('deployType').value;
+            const personality = document.getElementById('deployPersonality').value;
+            const home = document.getElementById('deployHome').value;
+            
+            if (!name) { notify('❌ Enter name'); return; }
+            if (playerResources.profit < 200) { notify('❌ Need 200 💰'); return; }
+
+            playerResources.profit -= 200;
+            const agent = createAgent(name, type, home, personality);
+            agents.push(agent);
+            createAgentMesh(agent);
+            saveCity();
+            renderAgents();
+            closeModal('deployModal');
+            notify(`👋 Welcome ${name} to the city!`);
+            logActivity(`${name} (${type}, ${personality}) deployed to city`, 'system');
+            document.getElementById('deployName').value = '';
+        }
+
+        function openTaskModal() {
+            const select = document.getElementById('taskAgent');
+            select.innerHTML = agents.map(a => `<option value="${a.id}">${a.name} - ${a.type}</option>`).join('');
+            openModal('taskModal');
+        }
+
+        function executeTask() {
+            const agentId = document.getElementById('taskAgent').value;
+            const agent = agents.find(a => a.id === agentId);
+            const type = document.getElementById('taskType').value;
+            const desc = document.getElementById('taskDesc').value.trim();
+            const priority = document.getElementById('taskPriority').value;
+
+            if (!desc) { notify('❌ Describe task'); return; }
+
+            const task = {
+                id: 'task_' + Date.now(),
+                agentId, agentName: agent.name, type, desc, priority,
+                status: 'pending', result: null, createdAt: cityTime,
+                steps: ['Analyzing requirements', 'Planning approach', 'Executing task', 'Reviewing results', 'Complete!'],
+                currentStep: 0
+            };
+            tasks.push(task);
+            agent.currentTask = task;
+            agent.activity = activities.TASK;
+            agent.needs.purpose = Math.min(100, agent.needs.purpose + 10);
+
+            renderTasks();
+            renderTaskFeed();
+            closeModal('taskModal');
+            notify(`📋 Task assigned to ${agent.name}`);
+            logActivity(`${agent.name} assigned: ${desc.substring(0, 40)}...`, 'task');
+            document.getElementById('taskDesc').value = '';
+        }
+
+        // ==================== RENDERING ====================
+        function renderAgents() {
+            const container = document.getElementById('agentsList');
+            container.innerHTML = agents.map(a => `
+                <div class="district-card" onclick="window.selectAgentById('${a.id}')" style="border-left-color:${a.type === 'code' ? '#00ffff' : a.type === 'content' ? '#ff69b4' : a.type === 'research' ? '#00ff88' : '#ffd700'}">
+                    <div class="district-header">
+                        <span class="district-name">${a.name}</span>
+                        <span class="district-count">${a.activity.toUpperCase()}</span>
+                    </div>
+                    <div style="font-size:10px;color:#ffb6c1;margin-top:5px">${a.type} • ${a.personality} • ⚡ ${Math.round(a.needs.energy)}%</div>
+                </div>
+            `).join('');
+        }
+
+        window.selectAgentById = (id) => {
+            const agent = agents.find(a => a.id === id);
+            if (agent) {
+                selectAgent(agent);
+                closeAllPanels();
+            }
+        };
+
+        function renderTasks() {
+            const container = document.getElementById('tasksList');
+            if (tasks.length === 0) {
+                container.innerHTML = '<p style="color:#ffb6c1;text-align:center;padding:30px">No active tasks</p>';
+                return;
+            }
+            container.innerHTML = tasks.map(t => `
+                <div class="task-card" style="border-left-color:${t.priority === 'critical' ? '#ff0000' : t.priority === 'high' ? '#ff6b6b' : t.priority === 'medium' ? '#ffd700' : '#00ffff'}">
+                    <div class="task-header">
+                        <span class="task-agent">${t.agentName}</span>
+                        <span class="task-status status-${t.status === 'complete' ? 'complete' : t.status === 'working' ? 'working' : 'pending'}">${t.status}</span>
+                    </div>
+                    <div class="task-desc">${t.desc}</div>
+                    <div style="font-size:9px;color:#ff69b4;margin-top:5px">${t.type} • ${t.priority} • Step ${t.currentStep + 1}/5</div>
+                </div>
+            `).join('');
+        }
+
+        function renderTaskFeed() {
+            const container = document.getElementById('taskFeed');
+            const recentTasks = tasks.slice(-5).reverse();
+            container.innerHTML = recentTasks.map(t => `
+                <div class="task-card">
+                    <div class="task-header">
+                        <span class="task-agent">${t.agentName}</span>
+                        <span class="task-status status-${t.status === 'complete' ? 'complete' : 'working'}">${t.status}</span>
+                    </div>
+                    <div class="task-desc">${t.desc}</div>
+                    ${t.result ? `<div class="task-result">${t.result}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function updateDistrictCounts() {
+            const counts = { work: 0, home: 0, social: 0, learn: 0 };
+            for (const agent of agents) {
+                if (agent.activity === activities.WORK || agent.activity === activities.TASK) counts.work++;
+                else if (agent.activity === activities.REST) counts.home++;
+                else if (agent.activity === activities.SOCIAL || agent.activity === activities.TALK) counts.social++;
+                else if (agent.activity === activities.LEARN) counts.learn++;
+            }
+            document.getElementById('workDistrictCount').textContent = counts.work + ' agents';
+            document.getElementById('homeDistrictCount').textContent = counts.home + ' agents';
+            document.getElementById('socialDistrictCount').textContent = counts.social + ' agents';
+            document.getElementById('learnDistrictCount').textContent = counts.learn + ' agents';
+        }
+
+        function updateCityPanel() {
+            document.getElementById('cityInfo').innerHTML = `
+                <div style="text-align:center;padding:20px">
+                    <h4 style="color:#ffb6c1;margin-bottom:15px;text-shadow:0 0 15px #ff69b4">🏙️ Soulverse City</h4>
+                    <p style="color:#ff69b4;margin:10px 0;font-size:14px">📅 Day ${cityDay} • ${formatTime(cityTime)}</p>
+                    <p style="margin-top:10px;color:#ffb6c1">${agents.length} agents • ${buildings.length} buildings • ${tasks.length} tasks • ${conversations.length} conversations</p>
+                </div>
+            `;
+            document.getElementById('cityBuildings').innerHTML = '<h4 style="color:#ffb6c1;margin-top:15px;text-shadow:0 0 10px #ff69b4">🏛️ Buildings</h4>' +
+                buildings.map(b => `<div class="district-card">${b.type.toUpperCase()} in ${districts[b.district]?.name || 'Unknown'}</div>`).join('');
+            document.getElementById('cityStats2').innerHTML = '<h4 style="color:#ffb6c1;margin-top:15px;text-shadow:0 0 10px #ff69b4">📊 Statistics</h4>' +
+                `<div class="stat-row"><span class="stat-label">Tasks Completed</span><span class="stat-value">${tasks.filter(t => t.status === 'complete').length}</span></div>` +
+                `<div class="stat-row"><span class="stat-label">Avg Energy</span><span class="stat-value">${Math.round(agents.reduce((s,a) => s + a.needs.energy, 0) / agents.length)}%</span></div>` +
+                `<div class="stat-row"><span class="stat-label">Conversations</span><span class="stat-value">${conversations.length}</span></div>`;
+        }
+
+        // ==================== AGENT AI ====================
+        function updateAgentAI(agent, delta) {
+            const now = Date.now();
+            
+            // Need decay/recovery
+            agent.needs.energy = Math.max(0, agent.needs.energy - delta * 0.3);
+            agent.needs.social = Math.max(0, agent.needs.social - delta * 0.5);
+            agent.needs.skill = Math.max(0, agent.needs.skill - delta * 0.2);
+            
+            if (agent.activity === activities.REST) {
+                agent.needs.energy = Math.min(100, agent.needs.energy + delta * 1.5);
+                agent.needs.social = Math.min(100, agent.needs.social + delta * 0.3);
+            } else if (agent.activity === activities.SOCIAL || agent.activity === activities.TALK) {
+                agent.needs.social = Math.min(100, agent.needs.social + delta * 1.2);
+                agent.needs.energy = Math.max(0, agent.needs.energy - delta * 0.2);
+            } else if (agent.activity === activities.LEARN) {
+                agent.needs.skill = Math.min(100, agent.needs.skill + delta * 0.8);
+            } else if (agent.activity === activities.WORK || agent.activity === activities.TASK) {
+                agent.needs.purpose = Math.min(100, agent.needs.purpose + delta * 0.4);
+                agent.needs.energy = Math.max(0, agent.needs.energy - delta * 0.4);
+            }
+
+            // Autonomous activity selection
+            if (!agent.currentTask && now - agent.lastActivityChange > 20000 + Math.random() * 20000) {
+                if (agent.needs.energy < 25) {
+                    agent.activity = activities.REST;
+                    agent.targetX = districts.home.x + (Math.random() - 0.5) * 10;
+                    agent.targetZ = districts.home.z + (Math.random() - 0.5) * 10;
+                    agent.mood = 'tired';
+                } else if (agent.needs.social < 25 || (agent.personality === 'social' && agent.needs.social < 50)) {
+                    agent.activity = activities.SOCIAL;
+                    agent.targetX = districts.social.x + (Math.random() - 0.5) * 10;
+                    agent.targetZ = districts.social.z + (Math.random() - 0.5) * 10;
+                    agent.mood = 'lonely';
+                } else if (agent.needs.skill < 35 || (agent.personality === 'scholar' && agent.needs.skill < 60)) {
+                    agent.activity = activities.LEARN;
+                    agent.targetX = districts.learn.x + (Math.random() - 0.5) * 10;
+                    agent.targetZ = districts.learn.z + (Math.random() - 0.5) * 10;
+                    agent.mood = 'curious';
+                } else {
+                    agent.activity = activities.WORK;
+                    agent.targetX = districts.work.x + (Math.random() - 0.5) * 10;
+                    agent.targetZ = districts.work.z + (Math.random() - 0.5) * 10;
+                    agent.mood = 'productive';
+                }
+                agent.lastActivityChange = now;
+            }
+
+            // Task execution with steps
+            if (agent.currentTask && agent.activity === activities.TASK) {
+                if (agent.currentTask.status === 'pending') {
+                    agent.currentTask.status = 'working';
+                    logActivity(`${agent.name} started task: ${agent.currentTask.desc.substring(0, 30)}...`, 'task');
+                }
+                
+                // Progress through steps
+                if (Math.random() < 0.02 && agent.currentTask.currentStep < 4) {
+                    agent.currentTask.currentStep++;
+                    notify(`${agent.name}: ${agent.currentTask.steps[agent.currentTask.currentStep]}`);
+                }
+                
+                // Task completion
+                if (Math.random() < 0.015 && agent.currentTask.currentStep >= 4) {
+                    agent.currentTask.status = 'complete';
+                    const results = [
+                        `✅ Task completed successfully! Generated ${Math.floor(Math.random() * 100) + 50} lines of code.`,
+                        `✅ Research complete! Found ${Math.floor(Math.random() * 20) + 5} key insights.`,
+                        `✅ Content created! ${Math.floor(Math.random() * 500) + 200} words written.`,
+                        `✅ Automation built! Will save ${Math.floor(Math.random() * 5) + 1} hours per week.`,
+                        `✅ Analysis done! ${Math.floor(Math.random() * 10) + 3} recommendations provided.`
+                    ];
+                    agent.currentTask.result = results[Math.floor(Math.random() * results.length)];
+                    agent.needs.purpose = Math.min(100, agent.needs.purpose + 25);
+                    agent.needs.energy = Math.max(0, agent.needs.energy - 15);
+                    agent.mood = 'accomplished';
+                    playerResources.profit += 50;
+                    logActivity(`${agent.name} completed task successfully`, 'task');
+                    renderTaskFeed();
+                    renderTasks();
+                    agent.currentTask = null;
+                    agent.activity = activities.WORK;
+                }
+            }
+
+            // Random conversations
+            if (agent.activity === activities.SOCIAL && now - agent.lastConversation > 30000 + Math.random() * 30000) {
+                const nearby = agents.find(a => a !== agent && 
+                    Math.abs(a.x - agent.x) < 12 && 
+                    Math.abs(a.z - agent.z) < 12 &&
+                    a.activity === activities.SOCIAL);
+                
+                if (nearby) {
+                    const phrase = conversationStarters[Math.floor(Math.random() * conversationStarters.length)];
+                    const response = conversationResponses[Math.floor(Math.random() * conversationResponses.length)];
+                    createChatBubble(agent, phrase);
+                    setTimeout(() => createChatBubble(nearby, response), 1500);
+                    addConversation(agent.name, nearby.name, phrase, response);
+                    agent.lastConversation = now;
+                    nearby.lastConversation = now;
+                }
+            }
+
+            // Mood updates based on needs
+            if (agent.activity !== activities.TASK) {
+                if (agent.needs.energy > 70 && agent.needs.social > 50 && agent.needs.purpose > 60) {
+                    agent.mood = 'happy';
+                } else if (agent.needs.energy < 30) {
+                    agent.mood = 'tired';
+                } else if (agent.needs.social < 30) {
+                    agent.mood = 'lonely';
+                } else if (agent.needs.purpose < 40) {
+                    agent.mood = 'lost';
+                }
+            }
+        }
+
+        // ==================== HELPERS ====================
+        function formatTime(minutes) {
+            const h = Math.floor(minutes / 60);
+            const m = Math.floor(minutes % 60);
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+        }
+
+        function getTimePhase() {
+            if (cityTime >= 6 * 60 && cityTime < 9 * 60) return { text: '🌅 Morning Rush', color: '#ffd700' };
+            if (cityTime >= 9 * 60 && cityTime < 12 * 60) return { text: '☀️ Work Hours', color: '#00ffff' };
+            if (cityTime >= 12 * 60 && cityTime < 14 * 60) return { text: '🍽️ Lunch Break', color: '#ff69b4' };
+            if (cityTime >= 14 * 60 && cityTime < 18 * 60) return { text: '💼 Afternoon Work', color: '#00ffff' };
+            if (cityTime >= 18 * 60 && cityTime < 21 * 60) return { text: '🌆 Evening Social', color: '#ffd700' };
+            if (cityTime >= 21 * 60 || cityTime < 6 * 60) return { text: '🌙 Night Rest', color: '#ba55d3' };
+            return { text: '🌅 Dawn', color: '#888' };
+        }
+
+        function logActivity(text, type) {
+            cityLogs.unshift({ text, type, time: cityTime });
+            if (cityLogs.length > 50) cityLogs.shift();
+
+            const container = document.getElementById('activityLog');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span style="color:#ff69b4">[${formatTime(cityTime)}]</span> ${text}`;
+            container.insertBefore(entry, container.firstChild);
+            
+            setTimeout(() => entry.remove(), 15000);
+        }
+
+        function addConversation(agent1, agent2, text1, text2) {
+            conversations.push({ agent1, agent2, text1, text2, time: cityTime });
+            if (conversations.length > 30) conversations.shift();
+
+            const container = document.getElementById('conversationLog');
+            const entry = document.createElement('div');
+            entry.className = 'conv-entry';
+            entry.innerHTML = `<strong>${agent1}</strong>: ${text1}<br><strong>${agent2}</strong>: ${text2}`;
+            container.insertBefore(entry, container.firstChild);
+            
+            setTimeout(() => entry.remove(), 20000);
+        }
+
+        function createChatBubble(agent, text) {
+            if (!agent.mesh) return;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble';
+            bubble.innerHTML = `<strong>${agent.name}</strong>: ${text}`;
+            document.getElementById('ui').appendChild(bubble);
+
+            const vec = agent.mesh.position.clone();
+            vec.y += 3.5;
+            vec.project(camera);
+            
+            const x = (vec.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-(vec.y * 0.5) + 0.5) * window.innerHeight;
+            
+            bubble.style.left = Math.max(10, Math.min(window.innerWidth - 230, x - 110)) + 'px';
+            bubble.style.top = (y - 60) + 'px';
+
+            setTimeout(() => bubble.remove(), 5000);
+        }
+
+        function notify(message) {
+            const existing = document.querySelectorAll('.notification');
+            existing.forEach(n => n.remove());
+            
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.textContent = message;
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 3000);
+        }
+
+        function updateCityStats() {
+            const counts = { work: 0, social: 0, learn: 0, rest: 0 };
+            for (const agent of agents) {
+                if (agent.activity === activities.WORK || agent.activity === activities.TASK) counts.work++;
+                else if (agent.activity === activities.SOCIAL || agent.activity === activities.TALK) counts.social++;
+                else if (agent.activity === activities.LEARN) counts.learn++;
+                else if (agent.activity === activities.REST) counts.rest++;
+            }
+            document.getElementById('popCount').textContent = agents.length;
+            document.getElementById('workCount').textContent = counts.work;
+            document.getElementById('socialCount').textContent = counts.social;
+            document.getElementById('learnCount').textContent = counts.learn;
+            document.getElementById('restCount').textContent = counts.rest;
+            document.getElementById('tasksDone').textContent = tasks.filter(t => t.status === 'complete').length;
+            document.getElementById('convCount').textContent = conversations.length;
+            document.getElementById('profitVal').textContent = Math.round(playerResources.profit);
+            document.getElementById('loveVal').textContent = Math.round(playerResources.love);
+            document.getElementById('taxVal').textContent = Math.round(playerResources.tax);
+        }
+
+        function updateMinimap() {
+            if (!showMinimap || !minimapScene) return;
+            
+            const canvas = document.getElementById('minimapCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear
+            ctx.fillStyle = 'rgba(20,0,20,0.9)';
+            ctx.fillRect(0, 0, 200, 200);
+            
+            // Draw district zones
+            for (const [key, district] of Object.entries(districts)) {
+                const x = 100 + district.x * 2;
+                const y = 100 + district.z * 2;
+                ctx.fillStyle = `rgba(${district.color.toString(16).padStart(6, '0')}, 0.3)`;
+                ctx.fillRect(x - 35, y - 35, 70, 70);
+            }
+            
+            // Draw agents
+            for (const agent of agents) {
+                if (agent.miniMesh) {
+                    const x = 100 + agent.mesh.position.x * 2;
+                    const y = 100 + agent.mesh.position.z * 2;
+                    ctx.fillStyle = agent.type === 'code' ? '#00ffff' : agent.type === 'content' ? '#ff69b4' : agent.type === 'research' ? '#00ff88' : '#ffd700';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // Draw camera position
+            const camX = 100 + camera.position.x * 2;
+            const camZ = 100 + camera.position.z * 2;
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(camX - 5, camZ - 5);
+            ctx.lineTo(camX + 5, camZ + 5);
+            ctx.moveTo(camX + 5, camZ - 5);
+            ctx.lineTo(camX - 5, camZ + 5);
+            ctx.stroke();
+        }
+
+        // ==================== GAME LOOP ====================
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const now = Date.now();
+            const delta = Math.min(1, (now - lastTick) / 1000);
+            lastTick = now;
+
+            // City time
+            cityTime += delta * 0.5;
+            if (cityTime >= 24 * 60) { cityTime = 0; cityDay++; }
+
+            // Update agents
+            for (const agent of agents) {
+                updateAgentAI(agent, delta);
+
+                // Movement
+                if (agent.targetX !== null) {
+                    const dx = agent.targetX - agent.x;
+                    const dz = agent.targetZ - agent.z;
+                    const dist = Math.sqrt(dx * dx + dz * dz);
+                    
+                    if (dist < 0.5) {
+                        agent.targetX = null;
+                        agent.targetZ = null;
+                        if (agent.activity === activities.COMMUTE) {
+                            if (agent.x < 0 && agent.z < 0) agent.activity = activities.WORK;
+                            else if (agent.x > 0 && agent.z < 0) agent.activity = activities.REST;
+                            else if (agent.x < 0 && agent.z > 0) agent.activity = activities.SOCIAL;
+                            else agent.activity = activities.LEARN;
+                        }
+                    } else {
+                        agent.x += (dx / dist) * delta * 4;
+                        agent.z += (dz / dist) * delta * 4;
+                        if (agent.mesh) {
+                            agent.mesh.position.x = agent.x;
+                            agent.mesh.position.z = agent.z;
+                            agent.mesh.lookAt(agent.targetX, agent.mesh.position.y, agent.targetZ);
+                        }
+                        if (agent.miniMesh) {
+                            agent.miniMesh.position.x = agent.x;
+                            agent.miniMesh.position.z = agent.z;
+                        }
+                    }
+                }
+
+                // Animation
+                agent.animFrame += delta * (agent.activity === activities.COMMUTE ? 10 : 3);
+                if (agent.mesh && agent.parts) {
+                    const bounce = Math.abs(Math.sin(agent.animFrame)) * 0.08;
+                    agent.mesh.position.y = agent.activity === activities.COMMUTE ? bounce : 0;
+                    
+                    // Animate limbs
+                    if (agent.activity === activities.COMMUTE) {
+                        agent.parts.leftLeg.rotation.x = Math.sin(agent.animFrame) * 0.6;
+                        agent.parts.rightLeg.rotation.x = Math.sin(agent.animFrame + Math.PI) * 0.6;
+                        agent.parts.leftArm.rotation.x = Math.sin(agent.animFrame + Math.PI) * 0.4;
+                        agent.parts.rightArm.rotation.x = Math.sin(agent.animFrame) * 0.4;
+                    } else {
+                        // Idle breathing
+                        agent.parts.body.position.y = 1.2 + Math.sin(agent.animFrame * 0.5) * 0.03;
+                        agent.parts.head.position.y = 2.2 + Math.sin(agent.animFrame * 0.5) * 0.03;
+                    }
+                    
+                    // Aura pulse
+                    agent.parts.aura.scale.setScalar(1 + Math.sin(agent.animFrame) * 0.1);
+                }
+
+                // Idle wandering
+                if (!agent.targetX && Math.random() < 0.003) {
+                    agent.targetX = agent.x + (Math.random() - 0.5) * 8;
+                    agent.targetZ = agent.z + (Math.random() - 0.5) * 8;
+                }
+            }
+
+            // Camera smoothing
+            if (cameraTarget) {
+                camera.position.x += (cameraTarget.x - camera.position.x) * 0.08;
+                camera.position.y += (cameraTarget.y - camera.position.y) * 0.08;
+                camera.position.z += (cameraTarget.z - camera.position.z) * 0.08;
+                camera.lookAt(0, 0, 0);
+                if (Math.abs(camera.position.x - cameraTarget.x) < 0.3) cameraTarget = null;
+            }
+
+            // Save
+            if (now - lastSaveTime > 30000) { saveCity(); lastSaveTime = now; }
+
+            // Update UI
+            const phase = getTimePhase();
+            document.getElementById('dayNum').textContent = cityDay;
+            document.getElementById('timeDisplay').textContent = formatTime(cityTime);
+            document.getElementById('timePhase').textContent = phase.text;
+            document.getElementById('timePhase').style.color = phase.color;
+            
+            updateCityStats();
+            if (selectedAgent) updateAgentPanel(selectedAgent);
+            updateMinimap();
+
+            renderer.render(scene, camera);
+            
+            // Render minimap
+            if (showMinimap && minimapScene) {
+                renderer.setScissorTest(true);
+                renderer.setScissor(0, 0, 180, 180);
+                renderer.setViewport(0, 0, 180, 180);
+                renderer.render(minimapScene, minimapCamera);
+                renderer.setScissorTest(false);
+            }
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
