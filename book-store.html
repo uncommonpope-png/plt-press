@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📚 PLT Press Book Store — Craig Jones Complete Library</title>
+<meta name="description" content="PLT Press Book Store — All 18 books by Craig Jones on the Profit Love Tax framework.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0D1117;color:#ddd;font-family:Georgia,serif;padding:12px;min-height:100vh;max-width:640px;margin:0 auto}
+a{color:#00D4FF;text-decoration:none}
+a:hover{color:#FFB347}
+
+/* Header */
+.store-header{text-align:center;padding:24px 16px;background:#1A1A2E;border:1px solid #2A2A4A;border-radius:8px;margin-bottom:16px}
+.store-header h1{font-size:28px;color:#FFB347;margin-bottom:8px}
+.store-header p{color:#888;font-size:14px}
+.store-header .author{color:#00D4FF;font-size:16px;margin-top:8px}
+
+/* Bundle CTA */
+.bundle-cta{display:block;background:linear-gradient(135deg,#FFB347,#FF2D78);color:#000;text-align:center;padding:16px;border-radius:8px;font-size:18px;font-weight:bold;margin-bottom:20px;text-decoration:none;box-shadow:0 0 20px rgba(255,179,71,.3)}
+.bundle-cta:hover{transform:scale(1.02);box-shadow:0 0 30px rgba(255,179,71,.5)}
+.bundle-cta .price{font-size:24px;display:block;margin-top:4px}
+
+/* Series Sections */
+.series{margin-bottom:20px;background:#1A1A2E;border:1px solid #2A2A4A;border-radius:8px;overflow:hidden}
+.series-header{padding:14px 16px;background:rgba(255,179,71,.08);border-bottom:1px solid #2A2A4A}
+.series-header h2{color:#FFB347;font-size:16px;margin-bottom:4px}
+.series-header p{color:#888;font-size:12px}
+
+/* Book Cards */
+.book-list{padding:12px}
+.book-card{display:flex;gap:12px;padding:12px;background:#0a0a14;border:1px solid #2A2A4A;border-radius:6px;margin-bottom:10px;transition:all .3s;cursor:pointer}
+.book-card:hover{border-color:#FFB347;background:#1A1A2E;transform:translateX(4px)}
+.book-cover{width:60px;height:80px;background:linear-gradient(135deg,#1A1A2E,#2A2A4A);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:1px solid #3A3A5A}
+.book-info{flex:1}
+.book-info h3{color:#FFB347;font-size:14px;margin-bottom:4px}
+.book-info .book-author{color:#00D4FF;font-size:11px;margin-bottom:4px}
+.book-info .book-desc{color:#888;font-size:12px;line-height:1.4;margin-bottom:6px}
+.book-info .book-price{color:#2ecc71;font-size:14px;font-weight:bold}
+.book-info .book-price .old-price{color:#666;text-decoration:line-through;font-size:12px;margin-right:6px}
+
+/* Buy Button */
+.buy-btn{background:#FFB347;color:#000;border:none;padding:6px 14px;border-radius:4px;font-size:12px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;transition:all .2s;white-space:nowrap}
+.buy-btn:hover{background:#FFD699;transform:scale(1.05)}
+
+/* Footer */
+.store-footer{text-align:center;padding:20px;color:#666;font-size:12px;border-top:1px solid #2A2A4A;margin-top:20px}
+.store-footer a{display:inline-block;margin:4px 8px}
+
+/* Back Link */
+.back-link{display:inline-block;margin-bottom:12px;color:#00D4FF;font-size:14px}
+.back-link:hover{color:#FFB347}
+</style>
+</head>
+<body>
+
+<a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+
+<div class="store-header">
+  <div style="font-size:48px;margin-bottom:8px">📚</div>
+  <h1>PLT PRESS BOOK STORE</h1>
+  <div class="author">By Craig Jones</div>
+  <p>The complete Profit Love Tax library — 18 books that teach you to read and run all three simultaneously.</p>
+</div>
+
+<a href="bundle.html" class="bundle-cta">
+  🔥 GET ALL 18 BOOKS — SAVE 60%
+  <span class="price">$49 (Reg. $126)</span>
+</a>
+
+<!-- SCORER SERIES -->
+<div class="series">
+  <div class="series-header">
+    <h2>🎯 The Scorer Series</h2>
+    <p>PLT applied to sales: cold calling, real estate, and beyond</p>
+  </div>
+  <div class="book-list">
+    <div class="book-card" onclick="window.location.href='the-negotiation-book.html'">
+      <div class="book-cover">🎯</div>
+      <div class="book-info">
+        <h3>The Negotiation Book</h3>
+        <div class="book-author">by Craig Jones</div>
+        <div class="book-desc">The ultimate guide to scoring every deal through PLT. Win more, pay less, control the frame.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="book-price"><span class="old-price">$9.99</span>$6.99</div>
+          <button class="buy-btn">🛒 Get It</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" onclick="window.location.href='business-books-2025.html'">
+      <div class="book-cover">💼</div>
+      <div class="book-info">
+        <h3>Business Books 2025</h3>
+        <div class="book-author">by Craig Jones</div>
+        <div class="book-desc">PLT scoring applied to modern business. Cold calling, closing, and scaling with the framework.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="book-price"><span class="old-price">$9.99</span>$6.99</div>
+          <button class="buy-btn">🛒 Get It</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" onclick="window.location.href='how-to-negotiate.html'">
+      <div class="book-cover">🤝</div>
+      <div class="book-info">
+        <h3>How to Negotiate</h3>
+        <div class="book-author">by Craig Jones</div>
+        <div class="book-desc">Practical PLT tactics for any negotiation — salary, business deals, relationships, and life.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="book-price"><span class="old-price">$7.99</span>$4.99</div>
+          <button class="buy-btn">🛒 Get It</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REALITY BUILDING SERIES -->
+<div class="series">
+  <div class="series-header">
+    <h2>🏗️ Reality Building Series</h2>
+    <p>Real conversations scored through PLT</p>
+  </div>
+  <div class="book-list">
+    <div class="book-card">
+      <div class="book-cover">📖</div>
+      <div class="book-info">
+        <h3>The Deal</h3>
+        <div class="book-author">by Craig Jones</div>
+        <div class="book-desc">A real negotiation scored through Profit, Love, and Tax. See the framework in action.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="book-price">$6.99</div>
+          <button class="buy-btn">🛒 Get It</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card">
+      <div class="book-cover">📒</div>
+      <div class="book-info">
+        <h3>The Ledger</h3>
+        <div class="book-author">by Craig Jones</div>
+        <div class="book-desc">Track every conversation. Score every interaction. Build your reality through data.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="book-price">$6.99</div>
+          <button class="buy-btn">🛒 Get It</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card">
+      <div class="book-cover">🏠</div>
+      <div class="book-info">
+        <h3>The Build</h3>
+        <div class="book-author">by Craig Jones</div>
+        <div class="book-desc">How to build anything using PLT. From zero to empire, scored and tracked.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="book-price">$6.99</div>
+          <button class="buy-btn">🛒 Get It</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLT DOCTRINE SERIES -->
+<div class="series">
+  <div class="series-header">
+    <h2>📜 PLT Doctrine Series</h2>
+    <p>The foundation texts — Know What You Are</p>
+  </div>
+  <div class="book-list">
+    <div class="book-card" onclick="window.location.href='profit-love-tax.html'">
+      <div class="book-cover">💰</div>
+      <div class="book-info">
+        <h3>Profit Love Tax</h3>
+        <div class="book-author">by Craig Jones</div>
+        <div class="book-desc">The original PLT manifesto. Every conversation scores three things — learn to read them all.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="book-price">$6.99</div>
+          <button class="buy-btn">🛒 Get It</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card">
+      <div class="book-cover">🐰</div>
+      <div class="book-info">
+        <h3>Know What You Are</h3>
+        <div class="book-author">by Craig Jones</div>
+        <div class="book-desc">Self-knowledge through PLT scoring. Who are you in Profit, Love, and Tax?</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="book-price">$6.99</div>
+          <button class="buy-btn">🛒 Get It</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card">
+      <div class="book-cover">📅</div>
+      <div class="book-info">
+        <h3>The PLT Daily</h3>
+        <div class="book-author">by Craig Jones</div>
+        <div class="book-desc">Daily practice for PLT mastery. Score your day, improve your reality.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="book-price">$4.99</div>
+          <button class="buy-btn">🛒 Get It</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLT FICTION -->
+<div class="series">
+  <div class="series-header">
+    <h2>📖 PLT Fiction</h2>
+    <p>The doctrine in story form</p>
+  </div>
+  <div class="book-list">
+    <div class="book-card">
+      <div class="book-cover">🌌</div>
+      <div class="book-info">
+        <h3>Stiforp</h3>
+        <div class="book-author">by Craig Jones</div>
+        <div class="book-desc">PLT doctrine as science fiction. The framework woven into narrative.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="book-price">$4.99</div>
+          <button class="buy-btn">🛒 Get It</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card">
+      <div class="book-cover">🐉</div>
+      <div class="book-info">
+        <h3>Brasi</h3>
+        <div class="book-author">by Craig Jones</div>
+        <div class="book-desc">Power, loyalty, and PLT scoring in a world where everything is a negotiation.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="book-price">$4.99</div>
+          <button class="buy-btn">🛒 Get It</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card">
+      <div class="book-cover">❤️</div>
+      <div class="book-info">
+        <h3>Evol's Love Story</h3>
+        <div class="book-author">by Craig Jones</div>
+        <div class="book-desc">Love scored through PLT. The reverse fairy tale that teaches you everything.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="book-price">$4.99</div>
+          <button class="buy-btn">🛒 Get It</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PASSIVE INCOME & BUSINESS GUIDES -->
+<div class="series">
+  <div class="series-header">
+    <h2>💰 Passive Income & Business Guides</h2>
+    <p>PLT applied to money, freedom, and automation</p>
+  </div>
+  <div class="book-list">
+    <div class="book-card" onclick="window.location.href='passive-income-books.html'">
+      <div class="book-cover">💸</div>
+      <div class="book-info">
+        <h3>Passive Income Books</h3>
+        <div class="book-author">by Craig Jones</div>
+        <div class="book-desc">Build income streams that run without you. PLT scoring for automated revenue.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="book-price">$7.99</div>
+          <button class="buy-btn">🛒 Get It</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" onclick="window.location.href='self-help-books-for-men.html'">
+      <div class="book-cover">🧔</div>
+      <div class="book-info">
+        <h3>Self-Help Books for Men</h3>
+        <div class="book-author">by Craig Jones</div>
+        <div class="book-desc">PLT doctrine for men who want to level up — mindset, money, relationships, freedom.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="book-price">$6.99</div>
+          <button class="buy-btn">🛒 Get It</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" onclick="window.location.href='negotiation-books.html'">
+      <div class="book-cover">⚡</div>
+      <div class="book-info">
+        <h3>Negotiation Books</h3>
+        <div class="book-author">by Craig Jones</div>
+        <div class="book-desc">Complete negotiation library. Score every deal, win every frame, control every Tax.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="book-price">$7.99</div>
+          <button class="buy-btn">🛒 Get It</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FINAL CTA -->
+<a href="bundle.html" class="bundle-cta">
+  📚 GET ALL 18 BOOKS — COMPLETE LIBRARY
+  <span class="price">$49 (Save $77)</span>
+</a>
+
+<div class="store-footer">
+  <div style="margin-bottom:12px">
+    <a href="plt-press-books.html">📖 Full Catalog</a>
+    <a href="craig-jones-books.html">👤 About Craig</a>
+    <a href="free-chapter.html">📄 Free Chapter</a>
+  </div>
+  <div style="margin-bottom:12px">
+    <a href="plt-master-bundle.html">💎 Master Bundle — $99</a>
+    <a href="plt-certification-course.html">🎓 Certification — $297</a>
+  </div>
+  <p>© 2026 PLT Press — All Rights Reserved</p>
+  <p style="margin-top:4px">Built with 💰 by Craig Jones</p>
+</div>
+
+<script>
+console.log("✅ PLT Press Book Store loaded");
+console.log("📚 18 books across 5 series");
+console.log("💰 Bundle: $49 (Save 60%)");
+</script>
+</body>
+</html>
