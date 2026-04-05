@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE ESTATE — PLT Press / Craig Jones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & BASE ─── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:#050508;
+  color:#d4c9a8;
+  font-family:Georgia,'Times New Roman',serif;
+  overflow-x:hidden;
+  min-height:100vh;
+}
+a{cursor:pointer;text-decoration:none;color:inherit}
+button{cursor:pointer;border:none;background:none;font-family:inherit}
+input{font-family:'Courier New',monospace}
+
+/* ─── CANVAS ─── */
+#world,#mb{
+  position:fixed;top:0;left:0;
+  width:100vw;height:100vh;
+  pointer-events:none;z-index:0;
+}
+#world{z-index:0}
+#mb{z-index:1;opacity:.5}
+
+/* ─── TICKER ─── */
+#ticker{
+  position:fixed;top:0;left:0;right:0;
+  height:32px;z-index:200;
+  background:#0a0a0a;
+  border-bottom:1px solid #c8a85a44;
+  display:flex;align-items:center;
+  font-family:'Courier New',monospace;
+  font-size:11px;
+  display:none;
+}
+#ticker.vis{display:flex}
+.tl{
+  flex-shrink:0;
+  padding:0 14px;
+  color:#c8a85a;
+  letter-spacing:.12em;
+  font-weight:700;
+  border-right:1px solid #c8a85a44;
+  height:100%;display:flex;align-items:center;
+}
+.ts{flex:1;overflow:hidden;height:100%;display:flex;align-items:center}
+.ti{
+  display:inline-block;
+  white-space:nowrap;
+  color:#a89870;
+  animation:ticker-scroll 40s linear infinite;
+}
+@keyframes ticker-scroll{
+  0%{transform:translateX(100vw)}
+  100%{transform:translateX(-100%)}
+}
+
+/* ─── GATE ─── */
+#gate{
+  position:fixed;inset:0;
+  background:#050508;
+  z-index:9000;
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .8s ease;
+}
+#gate.fade{opacity:0;pointer-events:none}
+.gi{
+  text-align:center;
+  padding:60px 40px;
+  max-width:560px;
+  position:relative;
+}
+.gs{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:clamp(42px,8vw,72px);
+  font-weight:900;
+  color:#c8a85a;
+  letter-spacing:.25em;
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+.gsb{
+  font-family:'Courier New',monospace;
+  font-size:12px;
+  letter-spacing:.25em;
+  color:#6b6050;
+  text-transform:uppercase;
+  margin-bottom:40px;
+}
+.gl{
+  width:120px;height:2px;
+  background:linear-gradient(90deg,transparent,#c8a85a,transparent);
+  margin:0 auto 40px;
+}
+.gbtn{
+  display:inline-block;
+  padding:16px 48px;
+  border:1px solid #c8a85a;
+  color:#c8a85a;
+  font-family:'Courier New',monospace;
+  font-size:13px;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  transition:all .3s;
+  background:transparent;
+  position:relative;
+  overflow:hidden;
+}
+.gbtn::before{
+  content:'';position:absolute;inset:0;
+  background:#c8a85a;
+  transform:translateX(-100%);
+  transition:transform .3s;
+  z-index:-1;
+}
+.gbtn:hover{color:#050508}
+.gbtn:hover::before{transform:translateX(0)}
+.gcr{
+  margin-top:32px;
+  font-family:'Courier New',monospace;
+  font-size:10px;
+  letter-spacing:.15em;
+  color:#3a3428;
+  text-transform:uppercase;
+}
+/* Gate corner ornaments */
+.gi::before,.gi::after{
+  content:'';position:absolute;
+  width:40px;height:40px;
+  border-color:#c8a85a22;
+  border-style:solid;
+}
+.gi::before{top:0;left:0;border-width:1px 0 0 1px}
+.gi::after{bottom:0;right:0;border-width:0 1px 1px 0}
+
+/* ─── NAV ─── */
+nav{
+  position:fixed;top:32px;left:0;right:0;
+  height:52px;z-index:190;
+  background:rgba(5,5,8,.95);
+  border-bottom:1px solid #c8a85a22;
+  display:flex;align-items:center;
+  padding:0 24px;
+  backdrop-filter:blur(8px);
+  display:none;
+}
+nav.vis{display:flex}
+.nb{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:15px;
+  font-weight:700;
+  color:#c8a85a;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  margin-right:32px;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.nl{
+  display:flex;list-style:none;gap:4px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.nl::-webkit-scrollbar{display:none}
+.nl li a{
+  display:block;
+  padding:6px 12px;
+  font-family:'Courier New',monospace;
+  font-size:11px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#6b6050;
+  transition:color .2s;
+  white-space:nowrap;
+  border-bottom:2px solid transparent;
+}
+.nl li a:hover{color:#c8a85a}
+.nl li a.act{color:#c8a85a;border-bottom-color:#c8a85a}
+
+/* ─── MAIN WRAPPER ─── */
+#app{
+  position:relative;z-index:10;
+  padding-top:84px;
+  display:none;
+}
+#app.vis{display:block}
+
+/* ─── PAGES ─── */
+.page{display:none}
+.page.act{display:block}
+
+/* ─── DIVIDER ─── */
+.dv{
+  height:1px;
+  background:linear-gradient(90deg,transparent,#c8a85a44,transparent);
+  margin:0 auto;
+  max-width:900px;
+}
+
+/* ─── SECTION WRAPPER ─── */
+.sec{
+  max-width:1100px;
+  margin:0 auto;
+  padding:60px 24px;
+}
+.sh1{
+  font-family:'Courier New',monospace;
+  font-size:11px;
+  letter-spacing:.3em;
+  color:#c8a85a;
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+.sh2{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:clamp(28px,4vw,48px);
+  font-weight:900;
+  color:#e8dfc0;
+  letter-spacing:.05em;
+  margin-bottom:16px;
+  line-height:1.1;
+}
+.sdesc{
+  font-size:15px;
+  line-height:1.7;
+  color:#8a7f68;
+  max-width:680px;
+  margin-bottom:48px;
+}
+
+/* ─── HERO ─── */
+.hero{
+  position:relative;
+  min-height:calc(100vh - 84px);
+  display:flex;flex-direction:column;
+  justify-content:center;
+  overflow:hidden;
+  padding:0 24px;
+}
+.hfog{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 40%,rgba(200,168,90,.06) 0%,transparent 65%),
+             linear-gradient(180deg,rgba(5,5,8,0) 0%,rgba(5,5,8,.7) 100%);
+  pointer-events:none;
+}
+.hc{
+  position:relative;
+  max-width:860px;
+  margin:0 auto;
+  text-align:center;
+  padding:80px 0 40px;
+}
+.bcl{
+  font-family:'Courier New',monospace;
+  font-size:10px;
+  letter-spacing:.4em;
+  color:#c8a85a;
+  text-transform:uppercase;
+  margin-bottom:20px;
+  opacity:.8;
+}
+.bcm{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:clamp(22px,3.5vw,38px);
+  font-weight:700;
+  color:#e8dfc0;
+  line-height:1.3;
+  min-height:60px;
+  margin-bottom:16px;
+  transition:opacity .5s;
+}
+.bce{
+  font-family:'Courier New',monospace;
+  font-size:12px;
+  letter-spacing:.3em;
+  color:#c8a85a;
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+.bcp{
+  font-family:Georgia,serif;
+  font-style:italic;
+  font-size:14px;
+  color:#6b6050;
+  min-height:22px;
+  transition:opacity .5s;
+}
+.hbot{flex:1}
+.hcta{
+  display:flex;gap:12px;justify-content:center;flex-wrap:wrap;
+  padding:40px 0 24px;
+}
+.bg,.bo{
+  display:inline-block;
+  padding:13px 32px;
+  font-family:'Courier New',monospace;
+  font-size:11px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all .25s;
+}
+.bg{
+  background:#c8a85a;
+  color:#050508;
+}
+.bg:hover{background:#e0c070}
+.bo{
+  border:1px solid #c8a85a44;
+  color:#a89870;
+}
+.bo:hover{border-color:#c8a85a;color:#c8a85a}
+.sh{
+  font-family:'Courier New',monospace;
+  font-size:10px;
+  letter-spacing:.3em;
+  color:#3a3428;
+  text-align:center;
+  padding-bottom:20px;
+  animation:pulse-sh 2.5s ease-in-out infinite;
+}
+@keyframes pulse-sh{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* ─── HOME GRID ─── */
+.hgrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:1px;
+  background:#c8a85a11;
+  max-width:1100px;margin:0 auto;
+}
+.hcard{
+  background:#0a0a0e;
+  padding:36px 28px;
+  cursor:pointer;
+  transition:background .25s;
+  position:relative;
+  overflow:hidden;
+}
+.hcard::after{
+  content:'';position:absolute;
+  bottom:0;left:0;right:0;height:2px;
+  background:#c8a85a;
+  transform:scaleX(0);
+  transition:transform .3s;
+}
+.hcard:hover{background:#0f0f14}
+.hcard:hover::after{transform:scaleX(1)}
+.hn{
+  font-family:'Courier New',monospace;
+  font-size:10px;
+  letter-spacing:.3em;
+  color:#c8a85a44;
+  margin-bottom:12px;
+}
+.ht{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:18px;
+  font-weight:700;
+  color:#c8a85a;
+  margin-bottom:10px;
+}
+.hb{
+  font-size:13px;
+  line-height:1.65;
+  color:#6b6050;
+}
+
+/* ─── BOOK CARDS ─── */
+.books{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:16px;
+  margin-top:40px;
+}
+.bk{
+  background:#0a0a0e;
+  border:1px solid #c8a85a18;
+  padding:28px;
+  transition:border-color .25s;
+  position:relative;
+}
+.bk:hover{border-color:#c8a85a55}
+.bkn{
+  font-family:'Courier New',monospace;
+  font-size:10px;letter-spacing:.25em;
+  color:#c8a85a66;margin-bottom:8px;
+}
+.bkt{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:20px;font-weight:700;
+  color:#e8dfc0;margin-bottom:10px;
+}
+.bkd{font-size:13px;line-height:1.6;color:#6b6050}
+
+/* ─── ESTATES ─── */
+.estate-list{
+  display:flex;flex-direction:column;gap:0;
+  margin-top:40px;
+}
+.est{
+  border-bottom:1px solid #c8a85a11;
+  padding:28px 0;
+  display:grid;
+  grid-template-columns:80px 1fr;
+  gap:20px;
+}
+.est:hover .estb{color:#a89870}
+.estn{
+  font-family:'Courier New',monospace;
+  font-size:11px;letter-spacing:.2em;
+  color:#c8a85a55;
+  padding-top:4px;
+}
+.estt{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:18px;font-weight:700;
+  color:#c8a85a;margin-bottom:8px;
+}
+.estb{font-size:14px;line-height:1.7;color:#6b6050;transition:color .2s}
+
+/* ─── BRIEF CALCS ─── */
+.calc-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:20px;
+  margin-top:40px;
+}
+.calc{
+  background:#0a0a0e;
+  border:1px solid #c8a85a18;
+  padding:28px;
+}
+.calc-title{
+  font-family:'Courier New',monospace;
+  font-size:10px;letter-spacing:.25em;
+  color:#c8a85a;text-transform:uppercase;
+  margin-bottom:6px;
+}
+.calc-name{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:18px;font-weight:700;
+  color:#e8dfc0;margin-bottom:18px;
+}
+.calc label{
+  display:block;
+  font-family:'Courier New',monospace;
+  font-size:11px;letter-spacing:.1em;
+  color:#6b6050;text-transform:uppercase;
+  margin-bottom:4px;margin-top:12px;
+}
+.calc input,.calc select{
+  width:100%;
+  background:#050508;
+  border:1px solid #c8a85a22;
+  color:#d4c9a8;
+  padding:8px 10px;
+  font-family:'Courier New',monospace;
+  font-size:13px;
+  outline:none;
+  transition:border-color .2s;
+}
+.calc input:focus,.calc select:focus{border-color:#c8a85a66}
+.calc-btn{
+  display:block;
+  width:100%;
+  margin-top:18px;
+  padding:11px;
+  background:transparent;
+  border:1px solid #c8a85a44;
+  color:#c8a85a;
+  font-family:'Courier New',monospace;
+  font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all .25s;
+}
+.calc-btn:hover{background:#c8a85a;color:#050508}
+.calc-result{
+  margin-top:16px;
+  padding:14px;
+  background:#050508;
+  border-left:2px solid #c8a85a;
+  font-family:'Courier New',monospace;
+  font-size:13px;
+  color:#c8a85a;
+  display:none;
+  line-height:1.7;
+}
+.calc-result.vis{display:block}
+
+/* ─── VAULT ─── */
+.vault-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:20px;
+  margin-top:40px;
+}
+.vcard{
+  background:#0a0a0e;
+  border:1px solid #8b000033;
+  padding:28px;
+  position:relative;
+  overflow:hidden;
+}
+.vcard::before{
+  content:'CLASSIFIED';
+  position:absolute;top:14px;right:-20px;
+  font-family:'Courier New',monospace;
+  font-size:9px;letter-spacing:.2em;
+  color:#8b000066;
+  transform:rotate(0deg);
+  border:1px solid #8b000033;
+  padding:2px 8px;
+}
+.vsn{
+  font-family:'Courier New',monospace;
+  font-size:10px;letter-spacing:.25em;
+  color:#8b0000;margin-bottom:8px;
+}
+.vt{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:17px;font-weight:700;
+  color:#e8dfc0;margin-bottom:12px;
+}
+.vb{font-size:13px;line-height:1.65;color:#6b6050}
+
+/* ─── PLT SCORER ─── */
+.plt-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;
+  margin-top:40px;
+}
+.plt-cat{
+  background:#0a0a0e;
+  border:1px solid #c8a85a18;
+  padding:28px;
+}
+.plt-cat-title{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:20px;font-weight:700;
+  color:#c8a85a;margin-bottom:6px;
+}
+.plt-cat-sub{
+  font-family:'Courier New',monospace;
+  font-size:10px;letter-spacing:.2em;
+  color:#6b6050;text-transform:uppercase;
+  margin-bottom:20px;
+}
+.plt-row{margin-bottom:14px}
+.plt-row label{
+  display:flex;justify-content:space-between;
+  font-family:'Courier New',monospace;
+  font-size:11px;letter-spacing:.08em;
+  color:#6b6050;margin-bottom:6px;
+}
+.plt-row label span{color:#c8a85a;font-size:13px}
+.plt-slider{
+  width:100%;
+  -webkit-appearance:none;appearance:none;
+  height:3px;
+  background:#c8a85a22;
+  outline:none;
+}
+.plt-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:14px;height:14px;
+  border-radius:50%;
+  background:#c8a85a;
+  cursor:pointer;
+}
+.plt-result{
+  max-width:600px;margin:40px auto 0;
+  background:#0a0a0e;
+  border:1px solid #c8a85a44;
+  padding:36px;
+  text-align:center;
+}
+.plt-score-label{
+  font-family:'Courier New',monospace;
+  font-size:10px;letter-spacing:.3em;
+  color:#c8a85a;text-transform:uppercase;
+  margin-bottom:12px;
+}
+.plt-score-val{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:72px;font-weight:900;
+  color:#c8a85a;line-height:1;
+  margin-bottom:8px;
+}
+.plt-score-int{
+  font-size:15px;
+  color:#8a7f68;
+  line-height:1.6;
+  margin-top:12px;
+}
+.plt-btn{
+  display:inline-block;
+  margin-top:32px;
+  padding:13px 40px;
+  border:1px solid #c8a85a44;
+  color:#c8a85a;
+  font-family:'Courier New',monospace;
+  font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all .25s;
+  background:transparent;
+}
+.plt-btn:hover{background:#c8a85a;color:#050508}
+
+/* ─── FOOTER ─── */
+footer{
+  position:relative;z-index:10;
+  border-top:1px solid #c8a85a11;
+  padding:40px 24px;
+  text-align:center;
+  font-family:'Courier New',monospace;
+  font-size:11px;
+  letter-spacing:.15em;
+  color:#3a3428;
+  text-transform:uppercase;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#0a0a0a}
+::-webkit-scrollbar-thumb{background:#c8a85a33;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#c8a85a66}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:640px){
+  .nl li a{padding:6px 8px;font-size:10px}
+  .nb{font-size:13px;margin-right:16px}
+  .est{grid-template-columns:50px 1fr;gap:12px}
+  .hgrid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:400px){
+  .hgrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<canvas id="world"></canvas>
+<canvas id="mb"></canvas>
+
+<!-- TICKER -->
+<div id="ticker">
+  <div class="tl">LIVE DOCTRINE</div>
+  <div class="ts"><div class="ti" id="tti"></div></div>
+</div>
+
+<!-- GATE -->
+<div id="gate">
+  <div class="gi">
+    <div class="gs">THE ESTATE</div>
+    <div class="gsb">Classified Access &nbsp;&middot;&nbsp; PLT Press</div>
+    <div class="gl"></div>
+    <button class="gbtn" onclick="openGate()">Enter the World</button>
+    <div class="gcr">Craig Jones &nbsp;&middot;&nbsp; Little Bunny &nbsp;&middot;&nbsp; Numbered Distribution Only</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <span class="nb" onclick="show('home')">THE ESTATE</span>
+  <ul class="nl">
+    <li><a onclick="show('home')" id="nh" class="act">Home</a></li>
+    <li><a onclick="show('doctrine')" id="nd">Doctrine</a></li>
+    <li><a onclick="show('estate')" id="ne">The Estate</a></li>
+    <li><a onclick="show('brief')" id="nb2">The Brief</a></li>
+    <li><a onclick="show('arsenal')" id="na">Arsenal</a></li>
+    <li><a onclick="show('vault')" id="nv">The Vault</a></li>
+    <li><a onclick="show('plt')" id="np">PLT Scorer</a></li>
+  </ul>
+</nav>
+
+<!-- APP WRAPPER -->
+<div id="app">
+
+<!--     HOME     -->
+<div id="home" class="page act">
+  <div class="hero">
+    <div class="hfog"></div>
+    <div class="hc">
+      <div class="bcl">LIVE DOCTRINE BROADCAST</div>
+      <div class="bcm" id="bcm">Loading...</div>
+      <div class="bce" id="bce"></div>
+      <div class="bcp" id="bcp"></div>
+    </div>
+    <div class="hbot"></div>
+    <div class="hcta">
+      <span class="bg" onclick="show('doctrine')">Read The Doctrine</span>
+      <span class="bo" onclick="show('estate')">The Estate</span>
+      <span class="bo" onclick="show('arsenal')">The Arsenal</span>
+    </div>
+    <div class="sh">SCROLL &nbsp;&darr;</div>
+  </div>
+  <div class="dv"></div>
+  <div class="hgrid">
+    <div class="hcard" onclick="show('doctrine')"><div class="hn">I</div><div class="ht">The Doctrine</div><div class="hb">Forty Estates. Seven Books. The complete classified doctrine of the real estate agent who has decided to win.</div></div>
+    <div class="hcard" onclick="show('estate')"><div class="hn">II</div><div class="ht">The Estate</div><div class="hb">Read Estates I through XL in full. The Laws. The Philosophy. The Cheat Codes. The Mirror. Everything the industry doesn't teach.</div></div>
+    <div class="hcard" onclick="show('brief')"><div class="hn">III</div><div class="ht">The Brief</div><div class="hb">Seven calculations the industry depends on agents never running. With live tools that run them on your actual numbers.</div></div>
+    <div class="hcard" onclick="show('arsenal')"><div class="hn">IV</div><div class="ht">The Arsenal</div><div class="hb">Ten live professional calculators. Net per transaction. Referral gap. Runway. Tax savings. Commission defense. And more.</div></div>
+    <div class="hcard" onclick="show('vault')"><div class="hn">V</div><div class="ht">The Vault</div><div class="hb">Classified intelligence. Each secret is a practice from the deeper Estates — operational knowledge that produces results immediately.</div></div>
+  </div>
+</div>
+
+<!--     DOCTRINE     -->
+<div id="doctrine" class="page">
+  <div class="sec">
+    <div class="sh1">PLT Press &nbsp;&middot;&nbsp; Craig Jones</div>
+    <div class="sh2">SEVEN BOOKS. FORTY ESTATES.</div>
+    <div class="sdesc">The Estate is a classified real estate doctrine — a complete system for the agent who has decided to win. Seven Books govern forty Estates. Each Estate is a Law, a Philosophy, or a Cheat Code that the industry has never wanted you to have.</div>
+    <div class="dv"></div>
+    <div class="books">
+      <div class="bk">
+        <div class="bkn">Book I</div>
+        <div class="bkt">The Foundation</div>
+        <div class="bkd">Laws of the Professional Agent. The bedrock principles that separate a career from a practice. Estates I–VI.</div>
+      </div>
+      <div class="bk">
+        <div class="bkn">Book II</div>
+        <div class="bkt">The Numbers</div>
+        <div class="bkd">The Brief and the Calculations. Seven numbers the industry depends on agents never running. Estates VII–XII.</div>
+      </div>
+      <div class="bk">
+        <div class="bkn">Book III</div>
+        <div class="bkt">The Arsenal</div>
+        <div class="bkd">Tools of the Winning Agent. The systems, scripts, and instruments that accelerate conversion and income. Estates XIII–XIX.</div>
+      </div>
+      <div class="bk">
+        <div class="bkn">Book IV</div>
+        <div class="bkt">The Philosophy</div>
+        <div class="bkd">Why Most Agents Lose. The psychological and structural forces that keep agents in motion without progress. Estates XX–XXVI.</div>
+      </div>
+      <div class="bk">
+        <div class="bkn">Book V</div>
+        <div class="bkt">The Mirror</div>
+        <div class="bkd">Self-Examination and Identity. The hardest book. The agent who reads it either changes everything or closes it immediately. Estates XXVII–XXXII.</div>
+      </div>
+      <div class="bk">
+        <div class="bkn">Book VI</div>
+        <div class="bkt">The Vault</div>
+        <div class="bkd">Classified Intelligence and Secrets. Ten operational protocols extracted from elite agent practice. Estates XXXIII–XXXVII.</div>
+      </div>
+      <div class="bk">
+        <div class="bkn">Book VII</div>
+        <div class="bkt">The Cheat Codes</div>
+        <div class="bkd">Shortcuts the Industry Hides. The leverage moves, compounding habits, and asymmetric plays that produce outsized results. Estates XXXVIII–XL.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--     THE ESTATE     -->
+<div id="estate" class="page">
+  <div class="sec">
+    <div class="sh1">The Complete Doctrine</div>
+    <div class="sh2">THE FORTY ESTATES</div>
+    <div class="sdesc">Each Estate is a classified doctrine passage. Read them in order. Return to the ones that change you.</div>
+    <div class="dv"></div>
+    <div class="estate-list" id="estate-list"></div>
+  </div>
+</div>
+
+<!--     THE BRIEF     -->
+<div id="brief" class="page">
+  <div class="sec">
+    <div class="sh1">Book II &nbsp;&middot;&nbsp; The Numbers</div>
+    <div class="sh2">THE SEVEN CALCULATIONS</div>
+    <div class="sdesc">These are the seven calculations the industry depends on agents never running. Run them now on your actual numbers. The results will change how you see your business.</div>
+    <div class="dv"></div>
+    <div class="calc-grid">
+
+      <!-- 1: Net Per Transaction -->
+      <div class="calc">
+        <div class="calc-title">Calculation I</div>
+        <div class="calc-name">Net Per Transaction</div>
+        <label>Sale Price ($)</label>
+        <input type="number" id="c1-price" placeholder="500000">
+        <label>Commission Rate (%)</label>
+        <input type="number" id="c1-comm" placeholder="2.5" step="0.1">
+        <label>Brokerage Split (% you keep)</label>
+        <input type="number" id="c1-split" placeholder="70" step="1">
+        <label>Transaction Expenses ($)</label>
+        <input type="number" id="c1-exp" placeholder="1200">
+        <button class="calc-btn" onclick="calcNet()">Calculate</button>
+        <div class="calc-result" id="c1-res"></div>
+      </div>
+
+      <!-- 2: Annual Income Target -->
+      <div class="calc">
+        <div class="calc-title">Calculation II</div>
+        <div class="calc-name">Annual Income Target</div>
+        <label>Target Annual Income ($)</label>
+        <input type="number" id="c2-target" placeholder="150000">
+        <label>Average Net Per Deal ($)</label>
+        <input type="number" id="c2-net" placeholder="8000">
+        <label>Overhead / Year ($)</label>
+        <input type="number" id="c2-oh" placeholder="24000">
+        <button class="calc-btn" onclick="calcAnnual()">Calculate</button>
+        <div class="calc-result" id="c2-res"></div>
+      </div>
+
+      <!-- 3: Referral Gap -->
+      <div class="calc">
+        <div class="calc-title">Calculation III</div>
+        <div class="calc-name">Referral Gap Calculator</div>
+        <label>Referrals Given (last 12 months)</label>
+        <input type="number" id="c3-given" placeholder="8">
+        <label>Referrals Received (last 12 months)</label>
+        <input type="number" id="c3-rec" placeholder="2">
+        <label>Average Deal Value ($)</label>
+        <input type="number" id="c3-val" placeholder="8000">
+        <button class="calc-btn" onclick="calcReferral()">Calculate</button>
+        <div class="calc-result" id="c3-res"></div>
+      </div>
+
+      <!-- 4: Runway -->
+      <div class="calc">
+        <div class="calc-title">Calculation IV</div>
+        <div class="calc-name">Runway Calculator</div>
+        <label>Current Savings / Reserves ($)</label>
+        <input type="number" id="c4-sav" placeholder="30000">
+        <label>Monthly Personal Expenses ($)</label>
+        <input type="number" id="c4-per" placeholder="4500">
+        <label>Monthly Business Expenses ($)</label>
+        <input type="number" id="c4-biz" placeholder="1800">
+        <button class="calc-btn" onclick="calcRunway()">Calculate</button>
+        <div class="calc-result" id="c4-res"></div>
+      </div>
+
+      <!-- 5: Lead Conversion Funnel -->
+      <div class="calc">
+        <div class="calc-title">Calculation V</div>
+        <div class="calc-name">Lead Conversion Rate</div>
+        <label>Total Leads</label>
+        <input type="number" id="c5-leads" placeholder="200">
+        <label>Appointments Set</label>
+        <input type="number" id="c5-appt" placeholder="40">
+        <label>Contracts Written</label>
+        <input type="number" id="c5-cont" placeholder="18">
+        <label>Closings</label>
+        <input type="number" id="c5-close" placeholder="14">
+        <button class="calc-btn" onclick="calcFunnel()">Calculate</button>
+        <div class="calc-result" id="c5-res"></div>
+      </div>
+
+      <!-- 6: Commission Defense -->
+      <div class="calc">
+        <div class="calc-title">Calculation VI</div>
+        <div class="calc-name">Commission Defense</div>
+        <label>List Price ($)</label>
+        <input type="number" id="c6-list" placeholder="600000">
+        <label>Your Commission Rate (%)</label>
+        <input type="number" id="c6-rate" placeholder="3" step="0.1">
+        <label>Proposed Discounted Rate (%)</label>
+        <input type="number" id="c6-disc" placeholder="2" step="0.1">
+        <button class="calc-btn" onclick="calcCommDef()">Calculate</button>
+        <div class="calc-result" id="c6-res"></div>
+      </div>
+
+      <!-- 7: Tax Savings -->
+      <div class="calc">
+        <div class="calc-title">Calculation VII</div>
+        <div class="calc-name">Tax Savings Estimate</div>
+        <label>Gross Commission Income ($)</label>
+        <input type="number" id="c7-gross" placeholder="180000">
+        <label>Tracked Deductible Expenses ($)</label>
+        <input type="number" id="c7-ded" placeholder="42000">
+        <label>Estimated Tax Rate (%)</label>
+        <input type="number" id="c7-rate" placeholder="32" step="1">
+        <button class="calc-btn" onclick="calcTax()">Calculate</button>
+        <div class="calc-result" id="c7-res"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!--     ARSENAL     -->
+<div id="arsenal" class="page">
+  <div class="sec">
+    <div class="sh1">Book III &nbsp;&middot;&nbsp; The Arsenal</div>
+    <div class="sh2">TEN PROFESSIONAL CALCULATORS</div>
+    <div class="sdesc">The complete toolkit. Every calculation a winning agent needs — run on your numbers, not industry averages.</div>
+    <div class="dv"></div>
+    <div class="calc-grid">
+
+      <!-- Repeat Brief calcs inline for Arsenal (abbreviated labels) -->
+      <div class="calc">
+        <div class="calc-title">Calculator I</div>
+        <div class="calc-name">Net Per Transaction</div>
+        <label>Sale Price ($)</label><input type="number" id="a1-price" placeholder="500000">
+        <label>Commission Rate (%)</label><input type="number" id="a1-comm" placeholder="2.5" step="0.1">
+        <label>Split (% you keep)</label><input type="number" id="a1-split" placeholder="70">
+        <label>Expenses ($)</label><input type="number" id="a1-exp" placeholder="1200">
+        <button class="calc-btn" onclick="calcNetA()">Calculate</button>
+        <div class="calc-result" id="a1-res"></div>
+      </div>
+
+      <div class="calc">
+        <div class="calc-title">Calculator II</div>
+        <div class="calc-name">Annual Income Target</div>
+        <label>Target Income ($)</label><input type="number" id="a2-target" placeholder="150000">
+        <label>Avg Net Per Deal ($)</label><input type="number" id="a2-net" placeholder="8000">
+        <label>Overhead / Year ($)</label><input type="number" id="a2-oh" placeholder="24000">
+        <button class="calc-btn" onclick="calcAnnualA()">Calculate</button>
+        <div class="calc-result" id="a2-res"></div>
+      </div>
+
+      <div class="calc">
+        <div class="calc-title">Calculator III</div>
+        <div class="calc-name">Referral Gap</div>
+        <label>Referrals Given</label><input type="number" id="a3-given" placeholder="8">
+        <label>Referrals Received</label><input type="number" id="a3-rec" placeholder="2">
+        <label>Avg Deal Value ($)</label><input type="number" id="a3-val" placeholder="8000">
+        <button class="calc-btn" onclick="calcReferralA()">Calculate</button>
+        <div class="calc-result" id="a3-res"></div>
+      </div>
+
+      <div class="calc">
+        <div class="calc-title">Calculator IV</div>
+        <div class="calc-name">Runway</div>
+        <label>Reserves ($)</label><input type="number" id="a4-sav" placeholder="30000">
+        <label>Monthly Personal Exp ($)</label><input type="number" id="a4-per" placeholder="4500">
+        <label>Monthly Business Exp ($)</label><input type="number" id="a4-biz" placeholder="1800">
+        <button class="calc-btn" onclick="calcRunwayA()">Calculate</button>
+        <div class="calc-result" id="a4-res"></div>
+      </div>
+
+      <div class="calc">
+        <div class="calc-title">Calculator V</div>
+        <div class="calc-name">Lead Conversion Funnel</div>
+        <label>Total Leads</label><input type="number" id="a5-leads" placeholder="200">
+        <label>Appointments</label><input type="number" id="a5-appt" placeholder="40">
+        <label>Contracts</label><input type="number" id="a5-cont" placeholder="18">
+        <label>Closings</label><input type="number" id="a5-close" placeholder="14">
+        <button class="calc-btn" onclick="calcFunnelA()">Calculate</button>
+        <div class="calc-result" id="a5-res"></div>
+      </div>
+
+      <div class="calc">
+        <div class="calc-title">Calculator VI</div>
+        <div class="calc-name">Commission Defense</div>
+        <label>List Price ($)</label><input type="number" id="a6-list" placeholder="600000">
+        <label>Your Rate (%)</label><input type="number" id="a6-rate" placeholder="3" step="0.1">
+        <label>Proposed Discount (%)</label><input type="number" id="a6-disc" placeholder="2" step="0.1">
+        <button class="calc-btn" onclick="calcCommDefA()">Calculate</button>
+        <div class="calc-result" id="a6-res"></div>
+      </div>
+
+      <div class="calc">
+        <div class="calc-title">Calculator VII</div>
+        <div class="calc-name">Tax Savings Estimate</div>
+        <label>Gross Income ($)</label><input type="number" id="a7-gross" placeholder="180000">
+        <label>Deductible Expenses ($)</label><input type="number" id="a7-ded" placeholder="42000">
+        <label>Tax Rate (%)</label><input type="number" id="a7-rate" placeholder="32">
+        <button class="calc-btn" onclick="calcTaxA()">Calculate</button>
+        <div class="calc-result" id="a7-res"></div>
+      </div>
+
+      <!-- 8: Price Per Sq Ft -->
+      <div class="calc">
+        <div class="calc-title">Calculator VIII</div>
+        <div class="calc-name">Price Per Square Foot</div>
+        <label>Property A — Price ($)</label><input type="number" id="a8-pa" placeholder="650000">
+        <label>Property A — Sq Ft</label><input type="number" id="a8-sfa" placeholder="2200">
+        <label>Property B — Price ($)</label><input type="number" id="a8-pb" placeholder="710000">
+        <label>Property B — Sq Ft</label><input type="number" id="a8-sfb" placeholder="2500">
+        <button class="calc-btn" onclick="calcSqFt()">Calculate</button>
+        <div class="calc-result" id="a8-res"></div>
+      </div>
+
+      <!-- 9: Buyer Affordability -->
+      <div class="calc">
+        <div class="calc-title">Calculator IX</div>
+        <div class="calc-name">Buyer Affordability</div>
+        <label>Annual Gross Income ($)</label><input type="number" id="a9-inc" placeholder="120000">
+        <label>Monthly Debt Payments ($)</label><input type="number" id="a9-debt" placeholder="800">
+        <label>Down Payment ($)</label><input type="number" id="a9-dp" placeholder="60000">
+        <label>Interest Rate (%)</label><input type="number" id="a9-rate" placeholder="7.0" step="0.1">
+        <button class="calc-btn" onclick="calcAfford()">Calculate</button>
+        <div class="calc-result" id="a9-res"></div>
+      </div>
+
+      <!-- 10: Investment ROI -->
+      <div class="calc">
+        <div class="calc-title">Calculator X</div>
+        <div class="calc-name">Investment ROI</div>
+        <label>Purchase Price ($)</label><input type="number" id="a10-pp" placeholder="350000">
+        <label>Annual Gross Rent ($)</label><input type="number" id="a10-rent" placeholder="28800">
+        <label>Annual Operating Expenses ($)</label><input type="number" id="a10-exp" placeholder="9600">
+        <label>Cash Invested / Down ($)</label><input type="number" id="a10-cash" placeholder="70000">
+        <button class="calc-btn" onclick="calcROI()">Calculate</button>
+        <div class="calc-result" id="a10-res"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!--     VAULT     -->
+<div id="vault" class="page">
+  <div class="sec">
+    <div class="sh1">Book VI &nbsp;&middot;&nbsp; Classified Intelligence</div>
+    <div class="sh2">THE VAULT</div>
+    <div class="sdesc">Ten operational protocols. Each one extracted from elite agent practice and classified here for numbered distribution only. Read. Apply. Do not share.</div>
+    <div class="dv"></div>
+    <div class="vault-grid" id="vault-grid"></div>
+  </div>
+</div>
+
+<!--     PLT SCORER     -->
+<div id="plt" class="page">
+  <div class="sec">
+    <div class="sh1">Estate XXXVIII &nbsp;&middot;&nbsp; The Cheat Code</div>
+    <div class="sh2">PLT SCORER</div>
+    <div class="sdesc">Profit. Love. Tax. The only three numbers that matter. Score yourself honestly on each dimension. The score does not lie — and it will show you exactly where to focus next.</div>
+    <div class="dv"></div>
+    <div class="plt-grid">
+      <!-- PROFIT -->
+      <div class="plt-cat">
+        <div class="plt-cat-title">Profit</div>
+        <div class="plt-cat-sub">Financial Clarity &amp; Growth</div>
+        <div class="plt-row"><label>Income Tracking <span id="ps1-v">5</span></label><input type="range" class="plt-slider" id="ps1" min="1" max="10" value="5" oninput="updateSlider('ps1')"></div>
+        <div class="plt-row"><label>Net Per Deal Awareness <span id="ps2-v">5</span></label><input type="range" class="plt-slider" id="ps2" min="1" max="10" value="5" oninput="updateSlider('ps2')"></div>
+        <div class="plt-row"><label>Runway Secured <span id="ps3-v">5</span></label><input type="range" class="plt-slider" id="ps3" min="1" max="10" value="5" oninput="updateSlider('ps3')"></div>
+        <div class="plt-row"><label>Annual Income Goal Clarity <span id="ps4-v">5</span></label><input type="range" class="plt-slider" id="ps4" min="1" max="10" value="5" oninput="updateSlider('ps4')"></div>
+      </div>
+      <!-- LOVE -->
+      <div class="plt-cat">
+        <div class="plt-cat-title">Love</div>
+        <div class="plt-cat-sub">Relationships &amp; Reputation</div>
+        <div class="plt-row"><label>Client Relationship Depth <span id="pl1-v">5</span></label><input type="range" class="plt-slider" id="pl1" min="1" max="10" value="5" oninput="updateSlider('pl1')"></div>
+        <div class="plt-row"><label>Referral Pipeline Health <span id="pl2-v">5</span></label><input type="range" class="plt-slider" id="pl2" min="1" max="10" value="5" oninput="updateSlider('pl2')"></div>
+        <div class="plt-row"><label>Online Reviews / Reputation <span id="pl3-v">5</span></label><input type="range" class="plt-slider" id="pl3" min="1" max="10" value="5" oninput="updateSlider('pl3')"></div>
+        <div class="plt-row"><label>Community Presence <span id="pl4-v">5</span></label><input type="range" class="plt-slider" id="pl4" min="1" max="10" value="5" oninput="updateSlider('pl4')"></div>
+      </div>
+      <!-- TAX -->
+      <div class="plt-cat">
+        <div class="plt-cat-title">Tax</div>
+        <div class="plt-cat-sub">Financial Education &amp; Defense</div>
+        <div class="plt-row"><label>Deductions Actively Tracked <span id="pt1-v">5</span></label><input type="range" class="plt-slider" id="pt1" min="1" max="10" value="5" oninput="updateSlider('pt1')"></div>
+        <div class="plt-row"><label>CPA / Tax Professional Relationship <span id="pt2-v">5</span></label><input type="range" class="plt-slider" id="pt2" min="1" max="10" value="5" oninput="updateSlider('pt2')"></div>
+        <div class="plt-row"><label>Quarterly Estimated Tax Filing <span id="pt3-v">5</span></label><input type="range" class="plt-slider" id="pt3" min="1" max="10" value="5" oninput="updateSlider('pt3')"></div>
+        <div class="plt-row"><label>Tax Strategy / Planning <span id="pt4-v">5</span></label><input type="range" class="plt-slider" id="pt4" min="1" max="10" value="5" oninput="updateSlider('pt4')"></div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:32px">
+      <button class="plt-btn" onclick="calcPLT()">Calculate My PLT Score</button>
+    </div>
+    <div class="plt-result" id="plt-result" style="display:none">
+      <div class="plt-score-label">YOUR PLT SCORE</div>
+      <div class="plt-score-val" id="plt-score-val">—</div>
+      <div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:.3em;color:#6b6050;margin-top:4px">OUT OF 120</div>
+      <div class="dv" style="margin:20px 0"></div>
+      <div style="display:flex;justify-content:center;gap:40px;margin-bottom:16px;flex-wrap:wrap">
+        <div><div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:.2em;color:#c8a85a44">PROFIT</div><div style="font-size:28px;font-family:'Playfair Display',serif;color:#c8a85a" id="plt-p-score">—</div></div>
+        <div><div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:.2em;color:#c8a85a44">LOVE</div><div style="font-size:28px;font-family:'Playfair Display',serif;color:#c8a85a" id="plt-l-score">—</div></div>
+        <div><div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:.2em;color:#c8a85a44">TAX</div><div style="font-size:28px;font-family:'Playfair Display',serif;color:#c8a85a" id="plt-t-score">—</div></div>
+      </div>
+      <div class="plt-score-int" id="plt-score-int"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<footer>
+  &copy; PLT Press &nbsp;&middot;&nbsp; Craig Jones &nbsp;&middot;&nbsp; The Estate &nbsp;&middot;&nbsp; Numbered Distribution Only
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════
+   CANVAS — WORLD (particle field)
+═══════════════════════════════════════════════ */
+(function(){
+  var cv=document.getElementById('world'),ctx=cv.getContext('2d');
+  var pts=[],W,H,N=120;
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;init()}
+  function init(){
+    pts=[];
+    for(var i=0;i<N;i++)pts.push({
+      x:Math.random()*W,y:Math.random()*H,
+      vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,
+      r:Math.random()*1.2+.3
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(function(p){
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(200,168,90,.18)';
+      ctx.fill();
+    });
+    // connections
+    for(var i=0;i<pts.length;i++){
+      for(var j=i+1;j<pts.length;j++){
+        var dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y;
+        var d=Math.sqrt(dx*dx+dy*dy);
+        if(d<120){
+          ctx.beginPath();
+          ctx.strokeStyle='rgba(200,168,90,'+((.06*(1-d/120))).toFixed(3)+')';
+          ctx.lineWidth=.5;
+          ctx.moveTo(pts[i].x,pts[i].y);
+          ctx.lineTo(pts[j].x,pts[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',resize);
+  resize();draw();
+})();
+
+/* ═══════════════════════════════════════════════
+   CANVAS — MB (atmospheric vignette sweep)
+═══════════════════════════════════════════════ */
+(function(){
+  var cv=document.getElementById('mb'),ctx=cv.getContext('2d');
+  var W,H,t=0;
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight}
+  function draw(){
+    t+=.003;
+    ctx.clearRect(0,0,W,H);
+    var gx=ctx.createRadialGradient(
+      W*.5+Math.sin(t)*W*.15,H*.4+Math.cos(t*.7)*H*.1,0,
+      W*.5,H*.5,W*.6
+    );
+    gx.addColorStop(0,'rgba(200,168,90,.04)');
+    gx.addColorStop(.5,'rgba(139,0,0,.02)');
+    gx.addColorStop(1,'transparent');
+    ctx.fillStyle=gx;
+    ctx.fillRect(0,0,W,H);
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',resize);
+  resize();draw();
+})();
+
+/* ═══════════════════════════════════════════════
+   TICKER DATA
+═══════════════════════════════════════════════ */
+var tickerItems=[
+  'Estate I: The agent who tracks their numbers owns the game.',
+  'Estate VII: Referral gaps are the industry\'s greatest theft from agents.',
+  'Estate XIV: Your tax bill is a reflection of your financial education.',
+  'Estate XIX: Commission compression is negotiated, not mandated.',
+  'Estate XXIII: Runway determines your negotiating power.',
+  'Estate XXXI: The Brief is the weapon the industry never wanted you to have.',
+  'Estate XXXVIII: PLT — Profit. Love. Tax. The only three numbers that matter.',
+  'Estate II: Visibility is not vanity. It is the foundation of market position.',
+  'Estate XI: Every lead has a cost. Every appointment has a cost. Know them.',
+  'Estate XXVII: The agent who cannot see themselves cannot improve.',
+];
+document.getElementById('tti').textContent=tickerItems.join('   \u2014   ');
+
+/* ═══════════════════════════════════════════════
+   BROADCAST MESSAGES (hero rotation)
+═══════════════════════════════════════════════ */
+var broadcasts=[
+  {estate:'Estate I',msg:'The agent who tracks their numbers owns the game. The agent who ignores them plays someone else\'s.',passage:'Knowledge of your metrics is the first act of professional sovereignty.'},
+  {estate:'Estate VII',msg:'Referral gaps are the industry\'s greatest silent theft. You are funding other people\'s businesses.',passage:'The agent who gives without tracking gives without power.'},
+  {estate:'Estate XIV',msg:'Your tax bill is a direct reflection of your financial education — and nothing else.',passage:'The informed agent pays less. The uninformed agent pays more. Both pay on time.'},
+  {estate:'Estate XIX',msg:'Commission compression is negotiated, not mandated. You set the rate. You defend the rate.',passage:'The market does not cut your commission. Agents cut their own commission.'},
+  {estate:'Estate XXIII',msg:'Runway determines your negotiating power in every transaction and every career decision.',passage:'Three months of reserves is survival. Six months is freedom. Twelve months is power.'},
+  {estate:'Estate XXXI',msg:'The Brief is the weapon the industry never wanted you to have. Seven numbers. Complete clarity.',passage:'Run the calculations. Then decide if you still believe what you believed before.'},
+  {estate:'Estate XXXVIII',msg:'Profit. Love. Tax. The only three numbers that matter in the career of a winning agent.',passage:'Score yourself honestly. The number does not lie.'},
+];
+var broadcastIdx=0;
+function rotateBroadcast(){
+  var b=broadcasts[broadcastIdx%broadcasts.length];
+  broadcastIdx++;
+  var bcm=document.getElementById('bcm');
+  var bcp=document.getElementById('bcp');
+  bcm.style.opacity=0;bcp.style.opacity=0;
+  setTimeout(function(){
+    bcm.textContent=b.msg;
+    document.getElementById('bce').textContent=b.estate;
+    bcp.textContent=b.passage;
+    bcm.style.opacity=1;bcp.style.opacity=1;
+  },500);
+}
+rotateBroadcast();
+setInterval(rotateBroadcast,8000);
+
+/* ═══════════════════════════════════════════════
+   GATE
+═══════════════════════════════════════════════ */
+function openGate(){
+  var gate=document.getElementById('gate');
+  gate.classList.add('fade');
+  setTimeout(function(){
+    gate.style.display='none';
+    document.getElementById('ticker').classList.add('vis');
+    document.querySelector('nav').classList.add('vis');
+    document.getElementById('app').classList.add('vis');
+  },800);
+  try{localStorage.setItem('estate-gate','1')}catch(e){}
+}
+// Check saved state
+(function(){
+  try{
+    if(localStorage.getItem('estate-gate')==='1'){
+      document.getElementById('gate').style.display='none';
+      document.getElementById('ticker').classList.add('vis');
+      document.querySelector('nav').classList.add('vis');
+      document.getElementById('app').classList.add('vis');
+    }
+  }catch(e){}
+})();
+
+/* ═══════════════════════════════════════════════
+   NAV / SHOW
+═══════════════════════════════════════════════ */
+var navMap={
+  home:'nh',doctrine:'nd',estate:'ne',brief:'nb2',arsenal:'na',vault:'nv',plt:'np'
+};
+function show(sec){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('act')});
+  document.querySelectorAll('.nl li a').forEach(function(a){a.classList.remove('act')});
+  var pg=document.getElementById(sec);
+  if(pg){pg.classList.add('act')}
+  var link=document.getElementById(navMap[sec]);
+  if(link){link.classList.add('act')}
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ═══════════════════════════════════════════════
+   ESTATES DATA (40 estates)
+═══════════════════════════════════════════════ */
+var estates=[
+  // Book I: The Foundation
+  {n:'I',t:'The Law of Numbers',b:'The agent who does not track their numbers is navigating blind in a market that can see perfectly. Gross commission income is not income — net is income. Until you know the difference, you are working for the industry, not for yourself.'},
+  {n:'II',t:'The Law of Presence',b:'Visibility is not vanity. It is the foundation of market position and the prerequisite for every transaction. The agent who cannot be found does not exist. Presence is the minimum viable product of a real estate career.'},
+  {n:'III',t:'The Law of Conversion',b:'Leads are currency. Conversion is the exchange rate. An agent with a low conversion rate is burning money with every lead that does not close. Know your rates at every stage of the funnel — or you cannot improve them.'},
+  {n:'IV',t:'The Law of the Listing',b:'The listing is the leverage point of the real estate business. The agent who lists controls the transaction, controls their schedule, and compounds their brand. A buyer-dependent practice is a practice built on the shifting sand of other people\'s urgency.'},
+  {n:'V',t:'The Law of Consistency',b:'The market rewards consistency above talent. The agent who shows up daily — calling, writing, building — will always outlast the agent who produces brilliance in bursts. Systems create consistency. Motivation does not.'},
+  {n:'VI',t:'The Law of the Offer',b:'Every offer you make — on yourself, your services, your time — is a negotiation. The agent who cannot negotiate their own commission cannot negotiate for their client. Commission defense begins at the listing table and is trained long before you sit down.'},
+  // Book II: The Numbers
+  {n:'VII',t:'The Law of the Referral Gap',b:'Every referral you send out and do not receive back is a receivable on your income statement that will never be collected. The referral gap is the most expensive silent loss in most agent businesses. Close the gap or accept the cost.'},
+  {n:'VIII',t:'The Law of Net',b:'Gross commission is the number the industry celebrates. Net is the number that pays your mortgage. Every agent should be able to state — within minutes — their exact net per transaction on any deal. If you cannot, the number is probably uncomfortable.'},
+  {n:'IX',t:'The Law of Runway',b:'Runway is not savings — it is freedom. Three months of reserves is survival. Six months is choice. Twelve months is negotiating power. The agent with no runway accepts every deal because they must. The agent with runway accepts only the right deals.'},
+  {n:'X',t:'The Law of the Target',b:'An income goal without a deal count is a wish. Calculate the exact number of closings required to hit your annual target. Then build backwards: closings require contracts, contracts require appointments, appointments require leads. Work the math.'},
+  {n:'XI',t:'The Law of Lead Cost',b:'Every lead has a cost — in money, time, or both. The agent who tracks lead cost per closing knows whether their marketing is an investment or an expense. Most agents do not track this number. That is why most agents do not own their marketing strategy.'},
+  {n:'XII',t:'The Law of the Tax Bill',b:'Your tax bill is a direct reflection of your financial education — nothing more. The agent who does not track deductions pays more. The agent without a CPA pays significantly more. Tax planning is the highest-return activity in your financial life.'},
+  // Book III: The Arsenal
+  {n:'XIII',t:'The Law of the Script',b:'A script is not a manipulation — it is a map. The agent without a practiced script is improvising in every conversation. Improvisation produces inconsistent results. The script, refined over time, produces mastery. Mastery produces confidence. Confidence closes.'},
+  {n:'XIV',t:'The Law of the Pre-Listing Package',b:'The pre-listing package is a document that sells you before you enter the room. An agent who arrives without one is asking to be compared to every other agent on price alone. Arrive prepared and the conversation begins on your terms, not theirs.'},
+  {n:'XV',t:'The Law of Follow-Up',b:'Forty-eight hours after every meaningful interaction — appointment, offer, showing, conversation — follow up. The industry average is silence. Your average will be different. The fortune in real estate is in systematic, documented follow-up that continues until there is a decision.'},
+  {n:'XVI',t:'The Law of the Buyer Consult',b:'The buyer consult is not a courtesy — it is a qualification event. The agent who skips it works with unqualified buyers. The agent who masters it converts qualified buyers into loyal clients before the first showing. The consult is where commitment begins.'},
+  {n:'XVII',t:'The Law of the CMA',b:'A comparative market analysis is not a price guess — it is a professional opinion supported by documented evidence. The agent who presents a CMA with confidence wins the listing. The agent who presents one with uncertainty loses it before leaving the driveway.'},
+  {n:'XVIII',t:'The Law of Objection',b:'Every objection is a question in disguise. The agent who hears an objection as a rejection has been defeated before they responded. The agent who hears it as a question answers it. The answer is always a reframe, a clarification, or a demonstration of value.'},
+  {n:'XIX',t:'The Law of Commission Defense',b:'Commission compression is negotiated, not mandated. You set the rate. You defend the rate. The market does not cut your commission — agents cut their own commission, usually because they have not calculated or articulated their value with precision.'},
+  // Book IV: The Philosophy
+  {n:'XX',t:'The Law of Identity',b:'The agent who sees themselves as a salesperson is limited to transactions. The agent who sees themselves as a trusted advisor is limitless. Identity precedes behavior. If you want to change what you do, change what you believe you are.'},
+  {n:'XXI',t:'The Law of Motion Without Progress',b:'Most agents are extraordinarily busy and financially average. Busyness is not business. The agent who cannot distinguish between productive activity and the illusion of productivity is trapped in motion without progress. Measure outcomes, not effort.'},
+  {n:'XXII',t:'The Law of the Market\'s Leverage',b:'The market does not favor the experienced — it favors the positioned. Position is built before the market moves, not in response to it. The agent who waits to see where the market goes arrives late. The agent who studies where it has been arrives first.'},
+  {n:'XXIII',t:'The Law of Runway as Power',b:'The agent with no financial reserves negotiates from fear. They accept difficult clients because they need the deal. They cut their commission because they cannot afford to lose the listing. Runway is not a savings account — it is the foundation of professional courage.'},
+  {n:'XXIV',t:'The Law of the Competitor',b:'Your competitor is not the agent across town. Your competitor is your own inconsistency, your own avoidance, and your own under-investment in your skills. The agent who focuses externally loses. The agent who focuses internally wins.'},
+  {n:'XXV',t:'The Law of the Plateau',b:'Every plateau in a real estate career has a known cause: a skill not developed, a habit not built, a system not installed. The agent who has stalled is not unlucky — they are unskilled in a specific area they have not yet identified. Find the skill. Build it.'},
+  {n:'XXVI',t:'The Law of the Industry\'s Bargain',b:'The real estate industry offers a bargain: high freedom, high ceiling, low floor, and almost no training. Most agents accept this bargain without understanding the terms. The ones who win read the fine print and build what the industry refuses to provide.'},
+  // Book V: The Mirror
+  {n:'XXVII',t:'The Law of Self-Examination',b:'The agent who cannot see themselves clearly cannot improve deliberately. Self-examination is not self-criticism — it is professional intelligence gathering. Score yourself honestly. The score does not lie. And neither does the production report.'},
+  {n:'XXVIII',t:'The Law of the Ceiling',b:'Every agent has a ceiling — and every ceiling is self-installed. It is built from beliefs about what is possible, what is appropriate, and what you deserve. The ceiling is not the market\'s limit. The ceiling is yours. You can raise it. But you must see it first.'},
+  {n:'XXIX',t:'The Law of Comfort',b:'Comfort is the enemy of production. Not because comfort is wrong — but because the activities that produce results are usually uncomfortable until they are mastered. The agent who avoids discomfort avoids growth. Growth precedes income.'},
+  {n:'XXX',t:'The Law of the Story You Tell',b:'Every agent tells themselves a story about why their numbers are what they are. The story is usually wrong — or at best, incomplete. The market does not care about the story. It responds to behavior. Change the behavior; the story becomes irrelevant.'},
+  {n:'XXXI',t:'The Law of the Brief',b:'The Brief is a set of seven calculations the industry depends on agents never running. Once you run them on your actual numbers, you cannot pretend the results are different. The Brief is the weapon the industry never wanted you to have. Use it.'},
+  {n:'XXXII',t:'The Law of the Mirror',b:'The Mirror Estate is the hardest. It asks you to sit with your actual numbers, your actual habits, and your actual results — and to compare them honestly with your stated goals. Most agents close the book here. The ones who proceed are the ones who win.'},
+  // Book VI: The Vault
+  {n:'XXXIII',t:'The Law of the Pocket Listing',b:'The pocket listing is not a shortcut — it is a positioning instrument. Offered correctly to the right seller, it communicates exclusivity, precision, and access. Offered incorrectly, it costs the seller money. Know the difference. Present it accordingly.'},
+  {n:'XXXIV',t:'The Law of the Expired',b:'The expired listing is the most mishandled opportunity in real estate. The seller has already said yes to the process. They need a different answer to why. The agent who can diagnose why the listing expired — and communicate that diagnosis clearly — wins the listing.'},
+  {n:'XXXV',t:'The Law of the Annual Review',b:'The agent who calls their past clients once a year to review their real estate position is not doing a favor — they are conducting a professional service that virtually no other agent delivers. The annual client review is the highest-leverage retention tool in the business.'},
+  {n:'XXXVI',t:'The Law of the Price Reduction',b:'The price reduction conversation is not a failure — it is the most professional conversation in real estate. The agent who avoids it costs their client money and time. The agent who initiates it early, with data, and without apology, earns trust and a faster close.'},
+  {n:'XXXVII',t:'The Law of Intelligence',b:'Classified intelligence is simply documented practice. Every elite agent operates on systems that are invisible to the public and unshared with competitors. The Vault holds ten of them. They are not secrets because they are complex. They are secrets because no one writes them down.'},
+  // Book VII: The Cheat Codes
+  {n:'XXXVIII',t:'The Law of PLT',b:'Profit. Love. Tax. These are the only three numbers that define a sustainable real estate career. Profit without love is a transaction business. Love without profit is a charity. Profit and love without tax strategy is a charity for the IRS. Score all three. Optimize all three.'},
+  {n:'XXXIX',t:'The Law of Leverage',b:'Leverage is doing once what produces results repeatedly. A video that educates and positions you is leverage. A system that follows up automatically is leverage. The agent who works only in transactions has no leverage. The agent who builds systems works once and earns many times.'},
+  {n:'XL',t:'The Law of the Estate',b:'The Estate is not a book — it is a classification. The agent who has read these forty Estates and applied even five of them is operating at a level most agents will never reach. The agent who applies all forty has built something that compound interest cannot unwind. This is the Estate.'},
+];
+
+/* Build estate list */
+(function(){
+  var el=document.getElementById('estate-list');
+  estates.forEach(function(e){
+    var d=document.createElement('div');d.className='est';
+    d.innerHTML='<div class="estn">Estate '+e.n+'</div><div><div class="estt">'+e.t+'</div><div class="estb">'+e.b+'</div></div>';
+    el.appendChild(d);
+  });
+})();
+
+/* ═══════════════════════════════════════════════
+   VAULT DATA
+═══════════════════════════════════════════════ */
+var vaultSecrets=[
+  {n:'Secret I',t:'The Pocket Listing Protocol',b:'Before taking any listing to market, present the seller with a structured 72-hour private network campaign. Price it at 2% above your market analysis. If it sells, the seller wins. If it doesn\'t, you launch at the correct price with urgency already established.'},
+  {n:'Secret II',t:'The Objection Disarm',b:'When a prospect objects to your commission, agree with them first: "You\'re right to question it — I would too." Then ask: "What would make this commission feel completely worth it to you?" The answer tells you exactly what to demonstrate. This single move closes more listings than any counter-argument.'},
+  {n:'Secret III',t:'The Commission Defense Script',b:'"I charge [X]% because I produce results that justify it — and I\'ll show you those results right now." Then produce three data points: your average days on market vs. the area average, your average sale-to-list ratio, and one testimonial. Numbers end the commission conversation.'},
+  {n:'Secret IV',t:'The Referral Activation Method',b:'Call your top ten past clients twice a year. Not to ask for referrals — to check in on their real estate position. End every call with: "I always have room for one or two people like you in my schedule. Is there anyone in your life I should know?" The ask follows the relationship.'},
+  {n:'Secret V',t:'The 48-Hour Follow-Up System',b:'After every appointment, send a handwritten note within 24 hours and a follow-up call within 48 hours. Document both. The industry average is one or no follow-ups. Your average — systematically applied — makes you the only agent in their memory when the decision is made.'},
+  {n:'Secret VI',t:'The Price Reduction Conversation',b:'"The market has spoken. It hasn\'t said no — it\'s told us the price. If we adjust by [X], we\'re back in conversation with [Y] buyers who looked and moved on. That\'s your audience. Shall we get back in front of them?" This is not a failure conversation. It is a strategy conversation.'},
+  {n:'Secret VII',t:'The Expired Listing Approach',b:'Call expireds with a diagnosis, not a pitch. "Your listing expired. I\'ve studied why — and it\'s not what you think. Can I take ten minutes to show you?" The expired seller has already decided to sell. They just need a credible new reason to believe. Your diagnosis is that reason.'},
+  {n:'Secret VIII',t:'The Pre-Listing Package Blueprint',b:'Deliver your pre-listing package 24 hours before the appointment. Include: your bio, three comparable closed listings with notes, your marketing plan (with specifics), your average sale-to-list ratio, and three testimonials. The seller who reads this before you arrive has already partially decided.'},
+  {n:'Secret IX',t:'The Buyer Consult Script',b:'The first ten minutes of every buyer consult should establish your value, not discover their preferences. "Before we look at a single home, I want to show you exactly how I work and why it matters to you." Competence first. Preferences second. Commitment follows.'},
+  {n:'Secret X',t:'The Annual Client Review System',b:'Once a year, contact every past client with a personalized real estate position review: current estimated equity, neighborhood market update, and one action item (refinance? sell? hold?). No ask. Just value. The agent who does this retains clients for life and earns referrals that competitors never see.'},
+];
+(function(){
+  var vg=document.getElementById('vault-grid');
+  vaultSecrets.forEach(function(s){
+    var d=document.createElement('div');d.className='vcard';
+    d.innerHTML='<div class="vsn">'+s.n+'</div><div class="vt">'+s.t+'</div><div class="vb">'+s.b+'</div>';
+    vg.appendChild(d);
+  });
+})();
+
+/* ═══════════════════════════════════════════════
+   CALCULATORS — THE BRIEF
+═══════════════════════════════════════════════ */
+function fmt(n){return n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}
+function fmtD(n){return '$'+fmt(Math.round(n))}
+function showRes(id,html){var el=document.getElementById(id);el.innerHTML=html;el.classList.add('vis')}
+
+function calcNet(){
+  var price=+document.getElementById('c1-price').value||0;
+  var comm=+document.getElementById('c1-comm').value||0;
+  var split=+document.getElementById('c1-split').value||0;
+  var exp=+document.getElementById('c1-exp').value||0;
+  var gross=price*(comm/100);
+  var agent=gross*(split/100);
+  var net=agent-exp;
+  showRes('c1-res','Gross Commission: '+fmtD(gross)+'<br>Your Portion ('+split+'%): '+fmtD(agent)+'<br>Transaction Expenses: '+fmtD(exp)+'<br><strong>NET PER DEAL: '+fmtD(net)+'</strong>');
+}
+function calcAnnual(){
+  var target=+document.getElementById('c2-target').value||0;
+  var net=+document.getElementById('c2-net').value||1;
+  var oh=+document.getElementById('c2-oh').value||0;
+  var needed=Math.ceil((target+oh)/net);
+  showRes('c2-res','Target + Overhead: '+fmtD(target+oh)+'<br>Net Per Deal: '+fmtD(net)+'<br><strong>DEALS NEEDED: '+needed+' closings / year</strong><br>That\'s '+Math.ceil(needed/12)+' per month.');
+}
+function calcReferral(){
+  var given=+document.getElementById('c3-given').value||0;
+  var rec=+document.getElementById('c3-rec').value||0;
+  var val=+document.getElementById('c3-val').value||0;
+  var gap=given-rec;
+  var cost=gap*val;
+  showRes('c3-res','Referrals Given: '+given+'<br>Referrals Received: '+rec+'<br>Referral Gap: '+gap+' unreturned<br><strong>ESTIMATED GAP COST: '+fmtD(cost)+'</strong>');
+}
+function calcRunway(){
+  var sav=+document.getElementById('c4-sav').value||0;
+  var per=+document.getElementById('c4-per').value||0;
+  var biz=+document.getElementById('c4-biz').value||0;
+  var monthly=per+biz;
+  var months=monthly>0?Math.floor(sav/monthly):999;
+  var label=months>=12?'POWER (12+ months)':months>=6?'FREEDOM (6–12 months)':months>=3?'SURVIVAL (3–6 months)':'CRITICAL (under 3 months)';
+  showRes('c4-res','Monthly Burn: '+fmtD(monthly)+'<br>Reserves: '+fmtD(sav)+'<br><strong>RUNWAY: '+months+' months</strong><br>Status: '+label);
+}
+function calcFunnel(){
+  var leads=+document.getElementById('c5-leads').value||1;
+  var appt=+document.getElementById('c5-appt').value||0;
+  var cont=+document.getElementById('c5-cont').value||0;
+  var close=+document.getElementById('c5-close').value||0;
+  var l2a=(appt/leads*100).toFixed(1);
+  var a2c=(appt>0?cont/appt*100:0).toFixed(1);
+  var c2cl=(cont>0?close/cont*100:0).toFixed(1);
+  var l2cl=(close/leads*100).toFixed(1);
+  showRes('c5-res','Lead → Appt: '+l2a+'%<br>Appt → Contract: '+a2c+'%<br>Contract → Close: '+c2cl+'%<br><strong>LEAD → CLOSE: '+l2cl+'%</strong><br>(1 in every '+Math.round(leads/(close||1))+' leads becomes a closing)');
+}
+function calcCommDef(){
+  var list=+document.getElementById('c6-list').value||0;
+  var rate=+document.getElementById('c6-rate').value||0;
+  var disc=+document.getElementById('c6-disc').value||0;
+  var full=list*(rate/100);
+  var cut=list*(disc/100);
+  var diff=full-cut;
+  showRes('c6-res','Full Commission ('+rate+'%): '+fmtD(full)+'<br>Discounted ('+disc+'%): '+fmtD(cut)+'<br><strong>COST OF DISCOUNT: '+fmtD(diff)+'</strong><br>That\'s what your concession costs — not the buyer\'s gain.');
+}
+function calcTax(){
+  var gross=+document.getElementById('c7-gross').value||0;
+  var ded=+document.getElementById('c7-ded').value||0;
+  var rate=+document.getElementById('c7-rate').value||0;
+  var taxable=Math.max(0,gross-ded);
+  var taxNow=taxable*(rate/100);
+  var taxNoDeductions=gross*(rate/100);
+  var saved=taxNoDeductions-taxNow;
+  showRes('c7-res','Gross Income: '+fmtD(gross)+'<br>Deductions: '+fmtD(ded)+'<br>Taxable Income: '+fmtD(taxable)+'<br>Estimated Tax: '+fmtD(taxNow)+'<br><strong>TAX SAVINGS FROM DEDUCTIONS: '+fmtD(saved)+'</strong>');
+}
+
+/* ═══════════════════════════════════════════════
+   CALCULATORS — ARSENAL (shared logic, different IDs)
+═══════════════════════════════════════════════ */
+function calcNetA(){
+  var price=+document.getElementById('a1-price').value||0,comm=+document.getElementById('a1-comm').value||0,split=+document.getElementById('a1-split').value||0,exp=+document.getElementById('a1-exp').value||0;
+  var gross=price*(comm/100),agent=gross*(split/100),net=agent-exp;
+  showRes('a1-res','Gross: '+fmtD(gross)+' | Your Portion: '+fmtD(agent)+'<br><strong>NET: '+fmtD(net)+'</strong>');
+}
+function calcAnnualA(){
+  var target=+document.getElementById('a2-target').value||0,net=+document.getElementById('a2-net').value||1,oh=+document.getElementById('a2-oh').value||0;
+  var needed=Math.ceil((target+oh)/net);
+  showRes('a2-res','<strong>'+needed+' closings needed</strong> ('+Math.ceil(needed/12)+'/month)');
+}
+function calcReferralA(){
+  var given=+document.getElementById('a3-given').value||0,rec=+document.getElementById('a3-rec').value||0,val=+document.getElementById('a3-val').value||0;
+  showRes('a3-res','Gap: '+(given-rec)+' | <strong>Cost: '+fmtD((given-rec)*val)+'</strong>');
+}
+function calcRunwayA(){
+  var sav=+document.getElementById('a4-sav').value||0,per=+document.getElementById('a4-per').value||0,biz=+document.getElementById('a4-biz').value||0;
+  var m=per+biz,months=m>0?Math.floor(sav/m):999;
+  showRes('a4-res','Monthly burn: '+fmtD(m)+'<br><strong>Runway: '+months+' months</strong>');
+}
+function calcFunnelA(){
+  var leads=+document.getElementById('a5-leads').value||1,appt=+document.getElementById('a5-appt').value||0,cont=+document.getElementById('a5-cont').value||0,close=+document.getElementById('a5-close').value||0;
+  showRes('a5-res','L→A: '+(appt/leads*100).toFixed(1)+'% | A→C: '+(appt>0?cont/appt*100:0).toFixed(1)+'% | C→Cl: '+(cont>0?close/cont*100:0).toFixed(1)+'%<br><strong>Lead→Close: '+(close/leads*100).toFixed(1)+'%</strong>');
+}
+function calcCommDefA(){
+  var list=+document.getElementById('a6-list').value||0,rate=+document.getElementById('a6-rate').value||0,disc=+document.getElementById('a6-disc').value||0;
+  showRes('a6-res','Full: '+fmtD(list*(rate/100))+' | Discounted: '+fmtD(list*(disc/100))+'<br><strong>Concession cost: '+fmtD(list*((rate-disc)/100))+'</strong>');
+}
+function calcTaxA(){
+  var gross=+document.getElementById('a7-gross').value||0,ded=+document.getElementById('a7-ded').value||0,rate=+document.getElementById('a7-rate').value||0;
+  var taxable=Math.max(0,gross-ded),saved=(gross-taxable)*(rate/100);
+  showRes('a7-res','Taxable income: '+fmtD(taxable)+'<br><strong>Tax savings: '+fmtD(saved)+'</strong>');
+}
+function calcSqFt(){
+  var pa=+document.getElementById('a8-pa').value||0,sfa=+document.getElementById('a8-sfa').value||1;
+  var pb=+document.getElementById('a8-pb').value||0,sfb=+document.getElementById('a8-sfb').value||1;
+  var ppsfA=pa/sfa,ppsfB=pb/sfb;
+  showRes('a8-res','Property A: $'+ppsfA.toFixed(2)+'/sq ft<br>Property B: $'+ppsfB.toFixed(2)+'/sq ft<br><strong>'+(ppsfA<ppsfB?'Property A is '+((ppsfB-ppsfA)/ppsfB*100).toFixed(1)+'% better value per sq ft':'Property B is '+((ppsfA-ppsfB)/ppsfA*100).toFixed(1)+'% better value per sq ft')+'</strong>');
+}
+function calcAfford(){
+  var inc=+document.getElementById('a9-inc').value||0,debt=+document.getElementById('a9-debt').value||0;
+  var dp=+document.getElementById('a9-dp').value||0,rate=+document.getElementById('a9-rate').value||7;
+  var monthlyInc=inc/12;
+  var maxPayment=monthlyInc*.43-debt;
+  var r=rate/100/12,n=360;
+  var loanAmt=maxPayment*(1-Math.pow(1+r,-n))/r;
+  var maxPrice=loanAmt+dp;
+  showRes('a9-res','Max Monthly PITI: '+fmtD(maxPayment)+'<br>Max Loan (@ '+rate+'%): '+fmtD(loanAmt)+'<br><strong>Estimated Max Purchase Price: '+fmtD(maxPrice)+'</strong>');
+}
+function calcROI(){
+  var pp=+document.getElementById('a10-pp').value||1,rent=+document.getElementById('a10-rent').value||0;
+  var exp=+document.getElementById('a10-exp').value||0,cash=+document.getElementById('a10-cash').value||1;
+  var noi=rent-exp;
+  var capRate=(noi/pp*100).toFixed(2);
+  var cocROI=(noi/cash*100).toFixed(2);
+  var grossYield=(rent/pp*100).toFixed(2);
+  showRes('a10-res','Gross Yield: '+grossYield+'%<br>Cap Rate: '+capRate+'%<br><strong>Cash-on-Cash ROI: '+cocROI+'%</strong><br>NOI: '+fmtD(noi)+'/yr');
+}
+
+/* ═══════════════════════════════════════════════
+   PLT SCORER
+═══════════════════════════════════════════════ */
+function updateSlider(id){
+  document.getElementById(id+'-v').textContent=document.getElementById(id).value;
+}
+function calcPLT(){
+  var ids=['ps1','ps2','ps3','ps4','pl1','pl2','pl3','pl4','pt1','pt2','pt3','pt4'];
+  var p=0,l=0,t=0;
+  ['ps1','ps2','ps3','ps4'].forEach(function(id){p+=+document.getElementById(id).value});
+  ['pl1','pl2','pl3','pl4'].forEach(function(id){l+=+document.getElementById(id).value});
+  ['pt1','pt2','pt3','pt4'].forEach(function(id){t+=+document.getElementById(id).value});
+  var total=p+l+t;
+  var interp;
+  if(total>=100)interp='You are operating at an elite level across all three dimensions. The key now is to identify your lowest sub-score and close the gap — top performers finish in balance, not in imbalance.';
+  else if(total>=80)interp='Strong performance with clear room to advance. Review your lowest category score. One focused quarter on that dimension will produce a compounding return across all three.';
+  else if(total>=60)interp='Mid-tier performance with specific gaps. These gaps are not weaknesses — they are an identified roadmap. The agent who acts on this score is already ahead of the agent who ignores it.';
+  else if(total>=40)interp='Foundational work remains. This score is not a verdict — it is a starting point. Every high performer started somewhere. The difference is what they did when they saw the number.';
+  else interp='This score is an honest starting point. The most important thing you can do now is choose one category — the lowest — and commit to one specific change in the next 30 days. One change. Then score again.';
+  document.getElementById('plt-score-val').textContent=total;
+  document.getElementById('plt-p-score').textContent=p+'/40';
+  document.getElementById('plt-l-score').textContent=l+'/40';
+  document.getElementById('plt-t-score').textContent=t+'/40';
+  document.getElementById('plt-score-int').textContent=interp;
+  var r=document.getElementById('plt-result');
+  r.style.display='block';
+  r.scrollIntoView({behavior:'smooth',block:'center'});
+}
+</script>
+</body>
+</html>
