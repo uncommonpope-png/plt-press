@@ -107,13 +107,11 @@
             const saved = localStorage.getItem('soulforge_souls');
             if (saved) {
                 souls = JSON.parse(saved);
+                const defaults = { mood: 'neutral', energy: 100, hunger: 50, social: 50, location: 'main_hall', relationships: {} };
                 souls.forEach(soul => {
-                    if (!soul.mood) soul.mood = 'neutral';
-                    if (soul.energy === undefined) soul.energy = 100;
-                    if (soul.hunger === undefined) soul.hunger = 50;
-                    if (soul.social === undefined) soul.social = 50;
-                    if (!soul.location) soul.location = 'main_hall';
-                    if (!soul.relationships) soul.relationships = {};
+                    Object.entries(defaults).forEach(([k, v]) => {
+                        if (soul[k] === undefined || soul[k] === null || (k === 'mood' && !soul[k])) soul[k] = v;
+                    });
                 });
             } else {
                 souls = [
