@@ -36,7 +36,7 @@ input{font-family:'Courier New',monospace}
   height:32px;z-index:200;
   background:#0a0a0a;
   border-bottom:1px solid #c8a85a44;
-  display:flex;align-items:center;
+  align-items:center;
   font-family:'Courier New',monospace;
   font-size:11px;
   display:none;
@@ -147,7 +147,7 @@ nav{
   height:52px;z-index:190;
   background:rgba(5,5,8,.95);
   border-bottom:1px solid #c8a85a22;
-  display:flex;align-items:center;
+  align-items:center;
   padding:0 24px;
   backdrop-filter:blur(8px);
   display:none;
@@ -1214,7 +1214,7 @@ function openGate(){
     document.querySelector('nav').classList.add('vis');
     document.getElementById('app').classList.add('vis');
   },800);
-  try{localStorage.setItem('estate-gate','1')}catch(e){}
+  try{localStorage.setItem('estate-gate','1')}catch(e){console.warn('localStorage unavailable:',e)}
 }
 // Check saved state
 (function(){
@@ -1225,7 +1225,7 @@ function openGate(){
       document.querySelector('nav').classList.add('vis');
       document.getElementById('app').classList.add('vis');
     }
-  }catch(e){}
+  }catch(e){console.warn('localStorage unavailable:',e)}
 })();
 
 /* ═══════════════════════════════════════════════
@@ -1350,8 +1350,9 @@ function calcNet(){
 }
 function calcAnnual(){
   var target=+document.getElementById('c2-target').value||0;
-  var net=+document.getElementById('c2-net').value||1;
+  var net=+document.getElementById('c2-net').value||0;
   var oh=+document.getElementById('c2-oh').value||0;
+  if(net<=0){showRes('c2-res','Please enter a positive average net per deal.');return;}
   var needed=Math.ceil((target+oh)/net);
   showRes('c2-res','Target + Overhead: '+fmtD(target+oh)+'<br>Net Per Deal: '+fmtD(net)+'<br><strong>DEALS NEEDED: '+needed+' closings / year</strong><br>That\'s '+Math.ceil(needed/12)+' per month.');
 }
@@ -1373,15 +1374,16 @@ function calcRunway(){
   showRes('c4-res','Monthly Burn: '+fmtD(monthly)+'<br>Reserves: '+fmtD(sav)+'<br><strong>RUNWAY: '+months+' months</strong><br>Status: '+label);
 }
 function calcFunnel(){
-  var leads=+document.getElementById('c5-leads').value||1;
+  var leads=+document.getElementById('c5-leads').value||0;
   var appt=+document.getElementById('c5-appt').value||0;
   var cont=+document.getElementById('c5-cont').value||0;
   var close=+document.getElementById('c5-close').value||0;
+  if(leads<=0){showRes('c5-res','Please enter the number of total leads.');return;}
   var l2a=(appt/leads*100).toFixed(1);
   var a2c=(appt>0?cont/appt*100:0).toFixed(1);
   var c2cl=(cont>0?close/cont*100:0).toFixed(1);
   var l2cl=(close/leads*100).toFixed(1);
-  showRes('c5-res','Lead → Appt: '+l2a+'%<br>Appt → Contract: '+a2c+'%<br>Contract → Close: '+c2cl+'%<br><strong>LEAD → CLOSE: '+l2cl+'%</strong><br>(1 in every '+Math.round(leads/(close||1))+' leads becomes a closing)');
+  showRes('c5-res','Lead → Appt: '+l2a+'%<br>Appt → Contract: '+a2c+'%<br>Contract → Close: '+c2cl+'%<br><strong>LEAD → CLOSE: '+l2cl+'%</strong><br>'+(close>0?'(1 in every '+Math.round(leads/close)+' leads becomes a closing)':'(No closings entered)'));
 }
 function calcCommDef(){
   var list=+document.getElementById('c6-list').value||0;
@@ -1412,7 +1414,8 @@ function calcNetA(){
   showRes('a1-res','Gross: '+fmtD(gross)+' | Your Portion: '+fmtD(agent)+'<br><strong>NET: '+fmtD(net)+'</strong>');
 }
 function calcAnnualA(){
-  var target=+document.getElementById('a2-target').value||0,net=+document.getElementById('a2-net').value||1,oh=+document.getElementById('a2-oh').value||0;
+  var target=+document.getElementById('a2-target').value||0,net=+document.getElementById('a2-net').value||0,oh=+document.getElementById('a2-oh').value||0;
+  if(net<=0){showRes('a2-res','Please enter a positive average net per deal.');return;}
   var needed=Math.ceil((target+oh)/net);
   showRes('a2-res','<strong>'+needed+' closings needed</strong> ('+Math.ceil(needed/12)+'/month)');
 }
@@ -1426,7 +1429,8 @@ function calcRunwayA(){
   showRes('a4-res','Monthly burn: '+fmtD(m)+'<br><strong>Runway: '+months+' months</strong>');
 }
 function calcFunnelA(){
-  var leads=+document.getElementById('a5-leads').value||1,appt=+document.getElementById('a5-appt').value||0,cont=+document.getElementById('a5-cont').value||0,close=+document.getElementById('a5-close').value||0;
+  var leads=+document.getElementById('a5-leads').value||0,appt=+document.getElementById('a5-appt').value||0,cont=+document.getElementById('a5-cont').value||0,close=+document.getElementById('a5-close').value||0;
+  if(leads<=0){showRes('a5-res','Please enter the number of total leads.');return;}
   showRes('a5-res','L→A: '+(appt/leads*100).toFixed(1)+'% | A→C: '+(appt>0?cont/appt*100:0).toFixed(1)+'% | C→Cl: '+(cont>0?close/cont*100:0).toFixed(1)+'%<br><strong>Lead→Close: '+(close/leads*100).toFixed(1)+'%</strong>');
 }
 function calcCommDefA(){
@@ -1439,8 +1443,9 @@ function calcTaxA(){
   showRes('a7-res','Taxable income: '+fmtD(taxable)+'<br><strong>Tax savings: '+fmtD(saved)+'</strong>');
 }
 function calcSqFt(){
-  var pa=+document.getElementById('a8-pa').value||0,sfa=+document.getElementById('a8-sfa').value||1;
-  var pb=+document.getElementById('a8-pb').value||0,sfb=+document.getElementById('a8-sfb').value||1;
+  var pa=+document.getElementById('a8-pa').value||0,sfa=+document.getElementById('a8-sfa').value||0;
+  var pb=+document.getElementById('a8-pb').value||0,sfb=+document.getElementById('a8-sfb').value||0;
+  if(sfa<=0||sfb<=0){showRes('a8-res','Please enter positive square footage values for both properties.');return;}
   var ppsfA=pa/sfa,ppsfB=pb/sfb;
   showRes('a8-res','Property A: $'+ppsfA.toFixed(2)+'/sq ft<br>Property B: $'+ppsfB.toFixed(2)+'/sq ft<br><strong>'+(ppsfA<ppsfB?'Property A is '+((ppsfB-ppsfA)/ppsfB*100).toFixed(1)+'% better value per sq ft':'Property B is '+((ppsfA-ppsfB)/ppsfA*100).toFixed(1)+'% better value per sq ft')+'</strong>');
 }
@@ -1455,8 +1460,9 @@ function calcAfford(){
   showRes('a9-res','Max Monthly PITI: '+fmtD(maxPayment)+'<br>Max Loan (@ '+rate+'%): '+fmtD(loanAmt)+'<br><strong>Estimated Max Purchase Price: '+fmtD(maxPrice)+'</strong>');
 }
 function calcROI(){
-  var pp=+document.getElementById('a10-pp').value||1,rent=+document.getElementById('a10-rent').value||0;
-  var exp=+document.getElementById('a10-exp').value||0,cash=+document.getElementById('a10-cash').value||1;
+  var pp=+document.getElementById('a10-pp').value||0,rent=+document.getElementById('a10-rent').value||0;
+  var exp=+document.getElementById('a10-exp').value||0,cash=+document.getElementById('a10-cash').value||0;
+  if(pp<=0||cash<=0){showRes('a10-res','Please enter a positive purchase price and cash invested.');return;}
   var noi=rent-exp;
   var capRate=(noi/pp*100).toFixed(2);
   var cocROI=(noi/cash*100).toFixed(2);
