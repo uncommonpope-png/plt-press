@@ -8,9 +8,14 @@
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
         body { background: #000000; overflow: hidden; font-family: 'Orbitron', 'Courier New', monospace; height: 100vh; width: 100vw; }
         #world-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        /* Nav overlay for 3D world */
+        .nav-bar { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; padding: 10px 16px; background: rgba(0,0,0,0.55); backdrop-filter: blur(10px); z-index: 500; border-bottom: 1px solid rgba(255,170,68,0.2); pointer-events: auto; }
+        .nav-back { background: rgba(255,170,68,0.1); border: 1px solid rgba(255,170,68,0.4); border-radius: 30px; padding: 5px 14px; font-size: 11px; cursor: pointer; color: #ffaa44; transition: background 0.2s; font-family: monospace; }
+        .nav-back:hover { background: rgba(255,170,68,0.25); }
+        .nav-title { flex: 1; text-align: center; font-size: 11px; color: #554422; letter-spacing: 2px; pointer-events: none; }
         .hud { position: absolute; bottom: 30px; left: 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); border-radius: 40px; padding: 10px 20px; font-size: 11px; z-index: 100; font-family: monospace; pointer-events: none; border-left: 2px solid #ffaa44; }
-        .realm-status { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); border-radius: 20px; padding: 10px 16px; font-size: 10px; z-index: 100; text-align: right; font-family: monospace; pointer-events: none; border-right: 2px solid #ffaa44; }
-        .persistence-badge { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); border-radius: 20px; padding: 6px 12px; font-size: 9px; z-index: 100; color: #88ffaa; font-family: monospace; pointer-events: none; }
+        .realm-status { position: absolute; top: 50px; right: 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); border-radius: 20px; padding: 10px 16px; font-size: 10px; z-index: 100; text-align: right; font-family: monospace; pointer-events: none; border-right: 2px solid #ffaa44; }
+        .persistence-badge { position: absolute; top: 50px; left: 20px; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); border-radius: 20px; padding: 6px 12px; font-size: 9px; z-index: 100; color: #88ffaa; font-family: monospace; pointer-events: none; }
         .voice-input { position: absolute; bottom: 30px; right: 20px; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); border-radius: 40px; padding: 8px 16px; display: flex; gap: 8px; z-index: 100; pointer-events: auto; border: 1px solid rgba(255,170,68,0.4); }
         .voice-input input { background: transparent; border: none; color: #ffdd99; font-family: monospace; outline: none; width: 220px; }
         .voice-input button { background: rgba(255,170,68,0.2); border: none; color: #ffaa44; cursor: pointer; font-family: monospace; padding: 4px 16px; border-radius: 30px; }
@@ -21,6 +26,11 @@
     </style>
 </head>
 <body>
+    <div class="nav-bar">
+        <button class="nav-back" onclick="window.location.href='index.html'">← HOME</button>
+        <span class="nav-title">⚡ PLT PRESS — PERSISTENT REALM</span>
+        <span style="width:80px;"></span>
+    </div>
     <canvas id="world-canvas"></canvas>
     <div class="persistence-badge" id="persistenceBadge">🔄 PERSISTENT REALM — Souls never sleep</div>
     <div class="hud">🌌 SOULVERSE | <span id="soulCount">0</span> souls | <span id="timeDisplay">Day 0</span></div>

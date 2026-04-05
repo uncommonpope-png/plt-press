@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>⚡ SOUL EXECUTOR — Souls That Work | PLT Press</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -27,9 +27,19 @@
         .api-config { background: rgba(0,0,0,0.5); border-radius: 20px; padding: 20px; margin-top: 20px; border: 1px solid #88aaff; }
         .api-input { background: rgba(0,0,0,0.5); border: 1px solid #88aaff; border-radius: 40px; padding: 10px 20px; width: 100%; color: #ffdd99; font-family: monospace; margin-top: 10px; }
         footer { text-align: center; padding: 30px; font-size: 10px; color: #665533; border-top: 1px solid rgba(255,170,68,0.2); margin-top: 40px; }
+        /* Nav */
+        .nav-bar { display: flex; align-items: center; padding: 12px 20px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,170,68,0.2); position: sticky; top: 0; z-index: 100; }
+        .nav-back { background: rgba(255,170,68,0.1); border: 1px solid rgba(255,170,68,0.4); border-radius: 30px; padding: 6px 16px; font-size: 12px; cursor: pointer; color: #ffaa44; transition: background 0.2s; font-family: monospace; }
+        .nav-back:hover { background: rgba(255,170,68,0.25); }
+        .nav-title { flex: 1; text-align: center; font-size: 13px; color: #886644; letter-spacing: 2px; }
     </style>
 </head>
 <body>
+    <div class="nav-bar">
+        <button class="nav-back" onclick="window.location.href='index.html'">← HOME</button>
+        <span class="nav-title">⚡ PLT PRESS</span>
+        <span style="width:80px;"></span>
+    </div>
     <div class="container">
         <div class="header"><h1>⚡ SOUL EXECUTOR</h1><p>Souls that work — code, calendar, business, API</p></div>
         <div class="api-config">

@@ -11,35 +11,68 @@
             color: #e8d8b0;
             font-family: 'Courier New', monospace;
             min-height: 100vh;
+            overflow-x: hidden;
         }
+        /* Nav */
+        .nav-bar { display: flex; align-items: center; padding: 12px 20px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(136,255,170,0.2); position: sticky; top: 0; z-index: 100; }
+        .nav-back { background: rgba(136,255,170,0.1); border: 1px solid rgba(136,255,170,0.4); border-radius: 30px; padding: 6px 16px; font-size: 12px; cursor: pointer; color: #88ffaa; transition: background 0.2s; font-family: monospace; }
+        .nav-back:hover { background: rgba(136,255,170,0.25); }
+        .nav-title { flex: 1; text-align: center; font-size: 13px; color: #336644; letter-spacing: 2px; }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        .header { text-align: center; padding: 30px 20px; border-bottom: 2px solid #88ffaa; margin-bottom: 30px; }
-        h1 { font-size: 2.5rem; background: linear-gradient(135deg, #88ffaa, #ffaa88, #88aaff); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .habitat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 30px; }
-        .room-card { background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); border-radius: 28px; border: 1px solid rgba(136,255,170,0.3); overflow: hidden; }
-        .room-header { background: rgba(136,255,170,0.1); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .room-name { font-weight: bold; color: #88ffaa; }
-        .room-stats { font-size: 10px; color: #aa9977; }
-        .souls-in-room { padding: 15px; min-height: 200px; }
-        .soul-avatar { background: rgba(136,255,170,0.1); border-radius: 16px; padding: 12px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; }
-        .soul-avatar:hover { background: rgba(136,255,170,0.2); transform: translateX(4px); }
+        .header { text-align: center; padding: 30px 20px 24px; border-bottom: 2px solid rgba(136,255,170,0.4); margin-bottom: 28px; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); border-radius: 28px; }
+        h1 { font-size: clamp(1.8rem, 5vw, 3rem); background: linear-gradient(135deg, #88ffaa, #ffaa88, #88aaff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .header p { font-size: 13px; color: #557755; margin-top: 10px; }
+        /* Control bar */
+        .control-bar { display: flex; gap: 12px; justify-content: center; margin: 0 0 24px; flex-wrap: wrap; }
+        .control-btn { background: linear-gradient(135deg, #55cc77, #33aa55); border: none; color: #0a1a0a; padding: 10px 22px; border-radius: 40px; font-weight: bold; cursor: pointer; font-family: monospace; font-size: 12px; transition: transform 0.2s, box-shadow 0.2s; }
+        .control-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(85,204,119,0.4); }
+        /* Habitat grid */
+        .habitat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 28px; }
+        .room-card { background: rgba(0,0,0,0.65); backdrop-filter: blur(14px); border-radius: 24px; border: 1px solid rgba(136,255,170,0.2); overflow: hidden; transition: border-color 0.3s; }
+        .room-card:hover { border-color: rgba(136,255,170,0.45); }
+        .room-header { background: rgba(136,255,170,0.1); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(136,255,170,0.1); }
+        .room-name { font-weight: bold; color: #88ffaa; font-size: 14px; }
+        .room-stats { font-size: 10px; color: #557755; }
+        .souls-in-room { padding: 14px; min-height: 190px; }
+        .soul-avatar { background: rgba(136,255,170,0.07); border-radius: 14px; padding: 11px 14px; margin: 7px 0; display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer; transition: background 0.2s, transform 0.2s; border: 1px solid rgba(136,255,170,0.1); }
+        .soul-avatar:hover { background: rgba(136,255,170,0.16); transform: translateX(3px); }
         .soul-info { flex: 1; }
-        .soul-name { font-weight: bold; color: #ffaa66; }
-        .soul-mood { font-size: 10px; color: #88ffaa; }
-        .mood-icon { font-size: 20px; }
-        .action-buttons { display: flex; gap: 8px; margin-top: 10px; }
-        .action-btn { background: rgba(136,255,170,0.1); border: 1px solid #88ffaa; border-radius: 20px; padding: 6px 12px; font-size: 10px; cursor: pointer; transition: all 0.2s; }
-        .action-btn:hover { background: #88ffaa; color: #0a0a1a; }
-        .activity-feed { background: rgba(0,0,0,0.5); border-radius: 24px; padding: 20px; margin-top: 20px; border: 1px solid rgba(136,255,170,0.2); }
-        .feed-entry { padding: 8px; border-bottom: 1px solid rgba(136,255,170,0.1); font-size: 11px; display: flex; gap: 10px; animation: fadeIn 0.3s ease; }
-        .feed-time { color: #88ffaa; min-width: 60px; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .control-bar { display: flex; gap: 15px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
-        .control-btn { background: linear-gradient(135deg, #88ffaa, #66cc88); border: none; color: #0a0a1a; padding: 10px 24px; border-radius: 40px; font-weight: bold; cursor: pointer; font-family: monospace; }
-        footer { text-align: center; padding: 30px; font-size: 10px; color: #558866; border-top: 1px solid rgba(136,255,170,0.2); margin-top: 30px; }
+        .soul-name { font-weight: bold; color: #ffcc77; font-size: 13px; }
+        .soul-mood { font-size: 10px; color: #88ffaa; margin-top: 3px; }
+        /* Stat mini bars */
+        .mini-bars { margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
+        .mini-bar-row { display: flex; align-items: center; gap: 6px; font-size: 9px; color: #556655; }
+        .mini-bar-bg { flex: 1; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+        .mini-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+        .bar-energy { background: linear-gradient(90deg, #44cc88, #88ffaa); }
+        .bar-hunger { background: linear-gradient(90deg, #cc8844, #ffaa44); }
+        .bar-social { background: linear-gradient(90deg, #8844cc, #aa88ff); }
+        .action-buttons { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+        .action-btn { background: rgba(136,255,170,0.08); border: 1px solid rgba(136,255,170,0.3); border-radius: 18px; padding: 5px 11px; font-size: 10px; cursor: pointer; transition: background 0.2s; font-family: monospace; color: #e8d8b0; }
+        .action-btn:hover { background: rgba(136,255,170,0.22); color: #88ffaa; }
+        .mood-icon { font-size: 22px; margin-left: 8px; filter: drop-shadow(0 0 4px rgba(136,255,170,0.2)); }
+        .empty-room { text-align: center; color: #334433; padding: 24px 10px; font-size: 12px; }
+        /* Activity feed */
+        .activity-feed { background: rgba(0,0,0,0.55); border-radius: 24px; padding: 20px; margin-top: 20px; border: 1px solid rgba(136,255,170,0.15); }
+        .activity-feed h3 { color: #88ffaa; margin-bottom: 12px; font-size: 14px; }
+        .feed-entry { padding: 8px 10px; border-bottom: 1px solid rgba(136,255,170,0.06); font-size: 11px; display: flex; gap: 10px; animation: fadeIn 0.3s ease; }
+        .feed-entry:last-child { border-bottom: none; }
+        .feed-time { color: #447744; min-width: 65px; font-size: 10px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        footer { text-align: center; padding: 30px; font-size: 10px; color: #336644; border-top: 1px solid rgba(136,255,170,0.15); margin-top: 30px; line-height: 2; }
+        @media (max-width: 480px) {
+            .habitat-grid { grid-template-columns: 1fr; }
+            .control-bar { gap: 8px; }
+            .control-btn { padding: 9px 16px; font-size: 11px; }
+        }
     </style>
 </head>
 <body>
+    <div class="nav-bar">
+        <button class="nav-back" onclick="window.location.href='index.html'">← HOME</button>
+        <span class="nav-title">⚡ PLT PRESS</span>
+        <span style="width:80px;"></span>
+    </div>
     <div class="container">
         <div class="header">
             <h1>🏠 SOUL HABITAT</h1>
@@ -52,7 +85,7 @@
         </div>
         <div class="habitat-grid" id="habitatGrid"></div>
         <div class="activity-feed">
-            <h3 style="color: #88ffaa; margin-bottom: 12px;">📡 ACTIVITY FEED</h3>
+            <h3>📡 ACTIVITY FEED</h3>
             <div id="activityFeed"></div>
         </div>
         <footer>
@@ -62,6 +95,7 @@
     </div>
     <script>
         let souls = [], time = 0, activityLog = [];
+        let habitatInterval = null;
         const rooms = [
             { id: 'main_hall', name: '🏛️ Main Hall', description: 'Where souls gather', capacity: 10, activity: 'socialize' },
             { id: 'library', name: '📚 Library', description: 'Study and learn', capacity: 5, activity: 'study' },
@@ -75,9 +109,9 @@
                 souls = JSON.parse(saved);
                 souls.forEach(soul => {
                     if (!soul.mood) soul.mood = 'neutral';
-                    if (!soul.energy) soul.energy = 100;
-                    if (!soul.hunger) soul.hunger = 50;
-                    if (!soul.social) soul.social = 50;
+                    if (soul.energy === undefined) soul.energy = 100;
+                    if (soul.hunger === undefined) soul.hunger = 50;
+                    if (soul.social === undefined) soul.social = 50;
                     if (!soul.location) soul.location = 'main_hall';
                     if (!soul.relationships) soul.relationships = {};
                 });
@@ -97,10 +131,14 @@
         }
         function renderActivityFeed() {
             const feed = document.getElementById('activityFeed');
-            feed.innerHTML = activityLog.slice(0, 20).map(e => `<div class="feed-entry"><span class="feed-time">${e.time}</span><span>${e.message}</span></div>`).join('');
-            if (activityLog.length === 0) feed.innerHTML = '<div class="feed-entry">✨ The habitat is quiet.</div>';
+            if (!feed) return;
+            const entries = activityLog.slice(0, 20);
+            feed.innerHTML = entries.map(e => `<div class="feed-entry"><span class="feed-time">${e.time}</span><span>${e.message}</span></div>`).join('');
+            if (entries.length === 0) feed.innerHTML = '<div class="feed-entry" style="color:#334433;">✨ The habitat is quiet.</div>';
         }
-        function getMoodIcon(m) { return {happy:'😊',energetic:'⚡',tired:'😴',hungry:'🍽️',lonely:'😔',neutral:'😐',angry:'😠',inspired:'✨'}[m]||'😐'; }
+        function getMoodIcon(m) {
+            return { happy:'😊', energetic:'⚡', tired:'😴', hungry:'🍽️', lonely:'😔', neutral:'😐', angry:'😠', inspired:'✨', content:'🌙' }[m] || '😐';
+        }
         function updateMood(soul) {
             if (soul.energy < 20) soul.mood = 'tired';
             else if (soul.hunger < 20) soul.mood = 'hungry';
@@ -109,47 +147,67 @@
             else if (soul.energy > 90) soul.mood = 'energetic';
             else soul.mood = 'neutral';
         }
+        function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
         function renderHabitat() {
             document.getElementById('habitatGrid').innerHTML = rooms.map(room => {
                 const inRoom = souls.filter(s => s.location === room.id);
-                return `<div class="room-card"><div class="room-header"><span class="room-name">${room.name}</span><span class="room-stats">${inRoom.length}/${room.capacity}</span></div>
-                <div class="souls-in-room">${inRoom.map(soul => `<div class="soul-avatar"><div class="soul-info">
-                <div class="soul-name">${getMoodIcon(soul.mood)} ${soul.name}</div>
-                <div class="soul-mood">${soul.mood} · ⚡${Math.floor(soul.energy)}% · 🍽️${Math.floor(soul.hunger)}% · 👥${Math.floor(soul.social)}%</div>
-                <div class="action-buttons">
-                <button class="action-btn" onclick="interactWithSoul('${soul.id}','talk')">💬</button>
-                <button class="action-btn" onclick="interactWithSoul('${soul.id}','train')">⚔️</button>
-                <button class="action-btn" onclick="moveSoul('${soul.id}')">🚪</button>
-                </div></div><div class="mood-icon">${getMoodIcon(soul.mood)}</div></div>`).join('')}${inRoom.length===0?'<div style="text-align:center;color:#558866;padding:20px;">Empty</div>':''}</div></div>`;
+                return `<div class="room-card">
+                  <div class="room-header">
+                    <span class="room-name">${room.name}</span>
+                    <span class="room-stats">${inRoom.length}/${room.capacity} · ${room.activity}</span>
+                  </div>
+                  <div class="souls-in-room">
+                    ${inRoom.map(soul => `
+                      <div class="soul-avatar">
+                        <div class="soul-info">
+                          <div class="soul-name">${getMoodIcon(soul.mood)} ${soul.name}</div>
+                          <div class="soul-mood">${soul.mood}</div>
+                          <div class="mini-bars">
+                            <div class="mini-bar-row">⚡<div class="mini-bar-bg"><div class="mini-bar-fill bar-energy" style="width:${clamp(soul.energy,0,100)}%"></div></div>${Math.floor(soul.energy)}%</div>
+                            <div class="mini-bar-row">🍽️<div class="mini-bar-bg"><div class="mini-bar-fill bar-hunger" style="width:${clamp(soul.hunger,0,100)}%"></div></div>${Math.floor(soul.hunger)}%</div>
+                            <div class="mini-bar-row">👥<div class="mini-bar-bg"><div class="mini-bar-fill bar-social" style="width:${clamp(soul.social,0,100)}%"></div></div>${Math.floor(soul.social)}%</div>
+                          </div>
+                          <div class="action-buttons">
+                            <button class="action-btn" onclick="interactWithSoul('${soul.id}','talk')">💬 Talk</button>
+                            <button class="action-btn" onclick="interactWithSoul('${soul.id}','train')">⚔️ Train</button>
+                            <button class="action-btn" onclick="moveSoul('${soul.id}')">🚪 Move</button>
+                          </div>
+                        </div>
+                        <div class="mood-icon">${getMoodIcon(soul.mood)}</div>
+                      </div>
+                    `).join('')}
+                    ${inRoom.length === 0 ? '<div class="empty-room">Empty</div>' : ''}
+                  </div>
+                </div>`;
             }).join('');
         }
         window.interactWithSoul = function(id, action) {
             const soul = souls.find(s => s.id === id); if (!soul) return;
-            if (action === 'talk') { soul.social = Math.min(100, soul.social + 15); addActivity(`You talk with ${soul.name}.`, soul.name); }
-            else if (action === 'train') { soul.energy = Math.max(0, soul.energy - 10); addActivity(`You train with ${soul.name}.`, soul.name); }
+            if (action === 'talk') { soul.social = clamp(soul.social + 15, 0, 100); addActivity(`You talk with ${soul.name}. (+15 social)`, soul.name); }
+            else if (action === 'train') { soul.energy = clamp(soul.energy - 10, 0, 100); addActivity(`You train with ${soul.name}. (-10 energy)`, soul.name); }
             updateMood(soul); saveSouls(); renderHabitat();
         };
         window.moveSoul = function(id) {
             const soul = souls.find(s => s.id === id); if (!soul) return;
             const available = rooms.filter(r => r.id !== soul.location && souls.filter(s => s.location === r.id).length < r.capacity);
-            if (available.length === 0) { addActivity(`No space for ${soul.name}.`, soul.name); return; }
-            const newRoomId = prompt(`Move ${soul.name} to: ${available.map(r=>r.name).join(', ')}`, available[0].id);
+            if (available.length === 0) { addActivity(`No available room for ${soul.name}.`, soul.name); return; }
+            const newRoomId = prompt(`Move ${soul.name} to:\n${available.map(r=>r.name+' ('+r.id+')').join('\n')}\n\nEnter room id:`, available[0].id);
             const newRoom = rooms.find(r => r.id === newRoomId);
             if (newRoom && available.includes(newRoom)) { soul.location = newRoom.id; addActivity(`${soul.name} moves to ${newRoom.name}.`, soul.name); saveSouls(); renderHabitat(); }
         };
         function advanceTime(hours = 1) {
-            time += hours; addActivity(`⏰ Time advances: ${time}h`);
+            time += hours; addActivity(`⏰ Time advances: ${time}h total`);
             souls.forEach(soul => {
-                soul.energy = Math.max(0, soul.energy - hours*2);
-                soul.hunger = Math.max(0, soul.hunger + hours*3);
-                soul.social = Math.max(0, soul.social - hours*1.5);
+                soul.energy = clamp(soul.energy - hours*2, 0, 100);
+                soul.hunger = clamp(soul.hunger + hours*3, 0, 100);
+                soul.social = clamp(soul.social - hours*1.5, 0, 100);
                 const room = rooms.find(r => r.id === soul.location);
                 if (room) {
-                    if (room.activity === 'socialize') { soul.social = Math.min(100, soul.social + hours*5); soul.mood = 'happy'; addActivity(`${soul.name} socializes.`, soul.name); }
-                    else if (room.activity === 'study') { soul.energy -= hours*3; addActivity(`${soul.name} studies.`, soul.name); }
-                    else if (room.activity === 'craft') { soul.energy -= hours*4; addActivity(`${soul.name} crafts.`, soul.name); }
-                    else if (room.activity === 'rest') { soul.energy = Math.min(100, soul.energy + hours*8); addActivity(`${soul.name} rests.`, soul.name); }
-                    else if (room.activity === 'train') { soul.energy -= hours*5; addActivity(`${soul.name} trains.`, soul.name); }
+                    if (room.activity === 'socialize') { soul.social = clamp(soul.social + hours*5, 0, 100); soul.mood = 'happy'; addActivity(`${soul.name} socializes in ${room.name}.`, soul.name); }
+                    else if (room.activity === 'study') { soul.energy = clamp(soul.energy - hours*3, 0, 100); addActivity(`${soul.name} studies in the Library.`, soul.name); }
+                    else if (room.activity === 'craft') { soul.energy = clamp(soul.energy - hours*4, 0, 100); addActivity(`${soul.name} crafts in the Workshop.`, soul.name); }
+                    else if (room.activity === 'rest') { soul.energy = clamp(soul.energy + hours*8, 0, 100); addActivity(`${soul.name} rests in the Garden.`, soul.name); }
+                    else if (room.activity === 'train') { soul.energy = clamp(soul.energy - hours*5, 0, 100); addActivity(`${soul.name} trains in the Arena.`, soul.name); }
                 }
                 updateMood(soul);
             });
@@ -157,18 +215,33 @@
         }
         function addRandomSoul() {
             const names = ['Shadow Weaver','Light Seeker','Truth Keeper','Dream Walker','Storm Caller'];
-            const newSoul = { id: `soul_${Date.now()}`, name: names[Math.floor(Math.random()*names.length)]+' '+Math.floor(Math.random()*100),
-                type: ['profit','love','tax','hybrid'][Math.floor(Math.random()*4)], personality: 'A mysterious soul.', skills: ['strategize'],
-                plt: { profit: Math.random(), love: Math.random(), tax: Math.random() }, level: 1, mood: 'neutral', energy: 80, hunger: 50, social: 50,
-                location: 'main_hall', relationships: {} };
-            souls.push(newSoul); saveSouls(); addActivity(`✨ A new soul arrives: ${newSoul.name}.`, newSoul.name); renderHabitat();
+            const types = ['profit','love','tax','hybrid'];
+            const type = types[Math.floor(Math.random()*types.length)];
+            const plt = { profit: Math.random(), love: Math.random(), tax: Math.random() };
+            const sum = plt.profit+plt.love+plt.tax; plt.profit/=sum; plt.love/=sum; plt.tax/=sum;
+            const newSoul = {
+                id: `soul_${Date.now()}`,
+                name: names[Math.floor(Math.random()*names.length)]+' #'+Math.floor(Math.random()*100),
+                type, personality: 'A mysterious soul.',
+                skills: ['strategize'],
+                plt, level: 1, mood: 'neutral',
+                energy: 80, hunger: 50, social: 50,
+                location: 'main_hall', relationships: {}
+            };
+            souls.push(newSoul); saveSouls();
+            addActivity(`✨ A new soul arrives: ${newSoul.name}.`, newSoul.name);
+            renderHabitat();
         }
-        function resetDay() { souls.forEach(s => { s.energy = 100; s.hunger = 30; s.social = 60; updateMood(s); }); addActivity('🌅 New day begins.'); saveSouls(); renderHabitat(); }
+        function resetDay() {
+            souls.forEach(s => { s.energy = 100; s.hunger = 30; s.social = 60; updateMood(s); });
+            addActivity('🌅 New day begins. All souls refreshed.'); saveSouls(); renderHabitat();
+        }
         document.getElementById('advanceTimeBtn').addEventListener('click', () => advanceTime(1));
         document.getElementById('resetDayBtn').addEventListener('click', resetDay);
         document.getElementById('addRandomSoulBtn').addEventListener('click', addRandomSoul);
         loadSouls();
-        setInterval(() => advanceTime(0.5), 30000);
+        if (habitatInterval) clearInterval(habitatInterval);
+        habitatInterval = setInterval(() => advanceTime(0.5), 30000);
         addActivity('🏠 Soul Habitat awakened.');
     </script>
 </body>

@@ -6,41 +6,88 @@
     <title>🧬 SOUL COLLECTOR — Catch Wild Souls | PLT Press</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: radial-gradient(circle at 30% 20%, #0a2a3a 0%, #010105 100%); color: #e8d8b0; font-family: 'Courier New', monospace; min-height: 100vh; }
+        body { background: radial-gradient(circle at 30% 20%, #0a2a3a 0%, #010105 100%); color: #e8d8b0; font-family: 'Courier New', monospace; min-height: 100vh; overflow-x: hidden; }
+        /* Nav */
+        .nav-bar { display: flex; align-items: center; padding: 12px 20px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(136,170,255,0.2); position: sticky; top: 0; z-index: 100; }
+        .nav-back { background: rgba(136,170,255,0.1); border: 1px solid rgba(136,170,255,0.4); border-radius: 30px; padding: 6px 16px; font-size: 12px; cursor: pointer; color: #88aaff; transition: background 0.2s; font-family: monospace; }
+        .nav-back:hover { background: rgba(136,170,255,0.25); }
+        .nav-title { flex: 1; text-align: center; font-size: 13px; color: #446688; letter-spacing: 2px; }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        .header { text-align: center; padding: 30px 20px; border-bottom: 2px solid #88aaff; margin-bottom: 30px; }
-        h1 { font-size: 2.5rem; background: linear-gradient(135deg, #88aaff, #ffaa88, #ff88aa); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .weave-container { background: rgba(0,0,0,0.5); backdrop-filter: blur(12px); border-radius: 28px; border: 1px solid #88aaff; padding: 30px; margin-bottom: 30px; text-align: center; }
-        .wild-soul-card { background: rgba(136,170,255,0.1); border-radius: 24px; padding: 20px; margin: 20px auto; max-width: 400px; animation: pulseGlow 2s infinite; }
-        @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(136,170,255,0.3); } 70% { box-shadow: 0 0 0 15px rgba(136,170,255,0); } 100% { box-shadow: 0 0 0 0 rgba(136,170,255,0); } }
-        .wild-name { font-size: 28px; font-weight: bold; color: #88aaff; }
-        .wild-type { font-size: 12px; margin: 5px 0; }
-        .rarity { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 10px; margin: 10px 0; }
-        .rarity-common { background: #2a6a2a; color: #aaffaa; }
-        .rarity-rare { background: #2a6a8a; color: #88aaff; }
-        .rarity-epic { background: #8a2a8a; color: #ff88ff; }
-        .rarity-legendary { background: #aa8a2a; color: #ffcc88; }
-        .catch-btn { background: linear-gradient(135deg, #88aaff, #6688dd); border: none; color: #0a0a1a; padding: 12px 28px; border-radius: 40px; font-weight: bold; cursor: pointer; font-family: monospace; margin: 10px; }
-        .collection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; max-height: 400px; overflow-y: auto; }
-        .collection-card { background: rgba(0,0,0,0.5); border-radius: 16px; padding: 12px; border-left: 4px solid; cursor: pointer; transition: all 0.2s; }
-        .collection-card:hover { transform: translateY(-2px); background: rgba(136,170,255,0.1); }
-        .evolution-chamber { background: rgba(0,0,0,0.5); border-radius: 24px; padding: 20px; margin-top: 20px; border: 1px solid #ffaa88; }
-        .control-bar { display: flex; gap: 15px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
-        .control-btn { background: linear-gradient(135deg, #88aaff, #6688dd); border: none; color: #0a0a1a; padding: 10px 24px; border-radius: 40px; font-weight: bold; cursor: pointer; font-family: monospace; }
-        .control-btn.secondary { background: #2a2a3a; color: #88aaff; border: 1px solid #88aaff; }
-        footer { text-align: center; padding: 30px; font-size: 10px; color: #558866; border-top: 1px solid rgba(136,170,255,0.2); margin-top: 30px; }
+        .header { text-align: center; padding: 30px 20px 24px; border-bottom: 2px solid rgba(136,170,255,0.5); margin-bottom: 30px; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); border-radius: 28px; }
+        h1 { font-size: clamp(1.8rem, 5vw, 3rem); background: linear-gradient(135deg, #88aaff, #ffaa88, #ff88aa); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .header p { font-size: 13px; color: #667788; margin-top: 10px; }
+        /* Weave area */
+        .weave-container { background: rgba(0,0,0,0.55); backdrop-filter: blur(14px); border-radius: 28px; border: 1px solid rgba(136,170,255,0.3); padding: 32px; margin-bottom: 28px; text-align: center; position: relative; overflow: hidden; }
+        .weave-container::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 30%, rgba(136,170,255,0.06) 0%, transparent 70%); pointer-events: none; }
+        .weave-title { color: #88aaff; margin-bottom: 20px; font-size: 15px; letter-spacing: 2px; }
+        /* Wild soul card */
+        .wild-soul-card { background: rgba(136,170,255,0.08); border-radius: 24px; padding: 28px 20px; margin: 16px auto; max-width: 420px; position: relative; border: 1px solid rgba(136,170,255,0.2); }
+        .wild-soul-card.rarity-common { animation: pulseCommon 2.5s infinite; border-color: rgba(100,200,100,0.3); }
+        .wild-soul-card.rarity-rare { animation: pulseRare 2s infinite; border-color: rgba(100,150,255,0.4); }
+        .wild-soul-card.rarity-epic { animation: pulseEpic 1.8s infinite; border-color: rgba(180,80,255,0.5); }
+        .wild-soul-card.rarity-legendary { animation: pulseLegendary 1.5s infinite; border-color: rgba(255,200,50,0.6); }
+        @keyframes pulseCommon { 0%,100% { box-shadow: 0 0 0 0 rgba(100,200,100,0.2); } 50% { box-shadow: 0 0 20px 6px rgba(100,200,100,0.15); } }
+        @keyframes pulseRare { 0%,100% { box-shadow: 0 0 0 0 rgba(100,150,255,0.3); } 50% { box-shadow: 0 0 25px 8px rgba(100,150,255,0.2); } }
+        @keyframes pulseEpic { 0%,100% { box-shadow: 0 0 0 0 rgba(180,80,255,0.35); } 50% { box-shadow: 0 0 30px 10px rgba(180,80,255,0.25); } }
+        @keyframes pulseLegendary { 0%,100% { box-shadow: 0 0 8px 2px rgba(255,200,50,0.3); } 50% { box-shadow: 0 0 40px 14px rgba(255,200,50,0.4); } }
+        .wild-name { font-size: 26px; font-weight: bold; color: #aaccff; margin-bottom: 6px; }
+        .wild-type { font-size: 12px; color: #778899; margin: 4px 0; }
+        .plt-display { font-size: 13px; margin: 12px 0; color: #c8d8e8; }
+        /* Rarity badges */
+        .rarity { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: bold; margin: 10px 4px; letter-spacing: 1px; }
+        .rarity-common  { background: rgba(40,100,40,0.6);  border: 1px solid #44aa44; color: #aaffaa; }
+        .rarity-rare    { background: rgba(30,50,120,0.6);  border: 1px solid #4466dd; color: #88aaff; }
+        .rarity-epic    { background: rgba(80,20,120,0.6);  border: 1px solid #9933cc; color: #dd88ff; }
+        .rarity-legendary { background: rgba(100,70,0,0.6); border: 1px solid #ddaa22; color: #ffdd88; text-shadow: 0 0 8px rgba(255,200,50,0.5); }
+        /* Buttons */
+        .catch-btn { background: linear-gradient(135deg, #5588dd, #3366bb); border: none; color: #ddeeff; padding: 12px 28px; border-radius: 40px; font-weight: bold; cursor: pointer; font-family: monospace; margin: 8px 6px; transition: transform 0.2s, box-shadow 0.2s; font-size: 14px; }
+        .catch-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(85,136,221,0.4); }
+        .catch-btn.run { background: rgba(30,30,50,0.8); color: #88aaff; border: 1px solid rgba(136,170,255,0.3); }
+        .catch-btn.run:hover { background: rgba(136,170,255,0.15); }
+        /* Collection */
+        .collection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-top: 16px; max-height: 420px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(136,170,255,0.3) transparent; }
+        .collection-grid::-webkit-scrollbar { width: 4px; }
+        .collection-grid::-webkit-scrollbar-thumb { background: rgba(136,170,255,0.3); border-radius: 2px; }
+        .collection-card { background: rgba(0,0,0,0.55); border-radius: 16px; padding: 14px; border-left: 4px solid; cursor: pointer; transition: transform 0.2s, background 0.2s; }
+        .collection-card:hover { transform: translateY(-3px); background: rgba(136,170,255,0.1); }
+        .collection-card strong { color: #aaccff; display: block; margin-bottom: 4px; }
+        .collection-card .level { font-size: 10px; color: #667788; }
+        .collection-card .plt { font-size: 9px; color: #556677; margin-top: 3px; }
+        /* Evolution */
+        .evolution-chamber { background: rgba(0,0,0,0.55); border-radius: 24px; padding: 24px; margin-top: 20px; border: 1px solid rgba(255,170,136,0.3); }
+        .evolution-chamber h3 { color: #ffaa88; margin-bottom: 12px; }
+        .evolution-chamber p { font-size: 12px; color: #886655; margin-bottom: 16px; }
+        .control-bar { display: flex; gap: 14px; justify-content: center; margin: 22px 0; flex-wrap: wrap; }
+        .control-btn { background: linear-gradient(135deg, #4477cc, #2255aa); border: none; color: #ddeeff; padding: 10px 26px; border-radius: 40px; font-weight: bold; cursor: pointer; font-family: monospace; font-size: 13px; transition: transform 0.2s, box-shadow 0.2s; }
+        .control-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(68,119,204,0.4); }
+        .control-btn.secondary { background: rgba(15,20,40,0.9); color: #88aaff; border: 1px solid rgba(136,170,255,0.4); }
+        .control-btn.secondary:hover { background: rgba(136,170,255,0.12); box-shadow: 0 6px 18px rgba(136,170,255,0.2); }
+        .explore-area { padding: 30px; }
+        .explore-btn { background: linear-gradient(135deg, #4477cc, #2255aa); border: none; color: #ddeeff; padding: 14px 36px; border-radius: 40px; font-weight: bold; cursor: pointer; font-family: monospace; font-size: 15px; transition: transform 0.2s, box-shadow 0.2s; }
+        .explore-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(68,119,204,0.45); }
+        footer { text-align: center; padding: 30px; font-size: 10px; color: #446688; border-top: 1px solid rgba(136,170,255,0.15); margin-top: 30px; line-height: 2; }
+        @media (max-width: 480px) {
+            .collection-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+        }
     </style>
 </head>
 <body>
+    <div class="nav-bar">
+        <button class="nav-back" onclick="window.location.href='index.html'">← HOME</button>
+        <span class="nav-title">⚡ PLT PRESS</span>
+        <span style="width:80px;"></span>
+    </div>
     <div class="container">
         <div class="header">
             <h1>🧬 SOUL COLLECTOR</h1>
             <p>Explore the Weave. Catch Wild Souls. Evolve Your Collection.</p>
         </div>
         <div class="weave-container" id="weaveContainer">
-            <h3 style="color: #88aaff;">🌀 THE WEAVE — Wild Souls Appear Here</h3>
+            <div class="weave-title">🌀 THE WEAVE — Wild Souls Appear Here</div>
             <div id="wildSoulArea">
-                <button class="control-btn" id="exploreBtn">🔍 EXPLORE THE WEAVE</button>
+                <div class="explore-area">
+                    <button class="explore-btn" id="exploreBtn">🔍 EXPLORE THE WEAVE</button>
+                </div>
             </div>
         </div>
         <div class="control-bar">
@@ -48,20 +95,20 @@
             <button class="control-btn secondary" id="showEvolutionBtn">✨ EVOLUTION CHAMBER</button>
         </div>
         <div id="collectionPanel" style="display: none;">
-            <h3 style="color: #88aaff;">📜 YOUR SOUL COLLECTION</h3>
+            <h3 style="color: #88aaff; margin-bottom: 12px;">📜 YOUR SOUL COLLECTION (<span id="collectionCount">0</span>)</h3>
             <div class="collection-grid" id="collectionGrid"></div>
         </div>
         <div id="evolutionPanel" style="display: none;">
             <div class="evolution-chamber">
-                <h3 style="color: #ffaa88;">✨ EVOLUTION CHAMBER</h3>
-                <p>Select a soul to evolve (requires level 5+)</p>
+                <h3>✨ EVOLUTION CHAMBER</h3>
+                <p>Select a soul below to evolve it (requires level 3+)</p>
                 <div id="evolutionGrid" class="collection-grid"></div>
             </div>
         </div>
         <footer>⚡ PLT PRESS — Profit · Love · Tax ⚡<br>Catch them all. Evolve the strongest.</footer>
     </div>
     <script>
-        let souls = [], currentWildSoul = null, exploring = false;
+        let souls = [], currentWildSoul = null;
         const wildSoulPool = {
             common: [
                 { name: "Weave Sprout", type: "hybrid", basePlt: { profit: 0.4, love: 0.3, tax: 0.3 }, skills: ["observe"], level: 1 },
@@ -98,6 +145,9 @@
             "Tax Root": { evolvesTo: "Tax Keeper", requiredLevel: 3 },
             "Tax Keeper": { evolvesTo: "Tax Scale", requiredLevel: 5 }
         };
+        const rarityColor = { common: '#44aa44', rare: '#4466dd', epic: '#9933cc', legendary: '#ddaa22' };
+        const typeColor = { profit: '#ffaa44', love: '#ff88aa', tax: '#88aaff', hybrid: '#aaffcc' };
+
         function loadSouls() {
             const saved = localStorage.getItem('soulforge_souls');
             if (saved) { souls = JSON.parse(saved); }
@@ -105,6 +155,7 @@
             renderCollection();
         }
         function saveSouls() { localStorage.setItem('soulforge_souls', JSON.stringify(souls)); }
+
         function generateWildSoul() {
             const rarityRoll = Math.random();
             let rarity, pool;
@@ -113,58 +164,145 @@
             else if (rarityRoll < 0.97) { rarity = 'epic'; pool = wildSoulPool.epic; }
             else { rarity = 'legendary'; pool = wildSoulPool.legendary; }
             const template = pool[Math.floor(Math.random() * pool.length)];
-            const pltVar = { profit: template.basePlt.profit + (Math.random()-0.5)*0.1, love: template.basePlt.love + (Math.random()-0.5)*0.1, tax: template.basePlt.tax + (Math.random()-0.5)*0.1 };
+            const pltVar = {
+                profit: template.basePlt.profit + (Math.random()-0.5)*0.1,
+                love: template.basePlt.love + (Math.random()-0.5)*0.1,
+                tax: template.basePlt.tax + (Math.random()-0.5)*0.1
+            };
             const sum = pltVar.profit + pltVar.love + pltVar.tax;
             pltVar.profit /= sum; pltVar.love /= sum; pltVar.tax /= sum;
-            currentWildSoul = { id: `wild_${Date.now()}`, name: template.name, type: template.type, personality: `A wild ${template.name} found in the weave.`, skills: [...template.skills], plt: pltVar, level: template.level, rarity: rarity, catchRate: rarity==='common'?0.7:rarity==='rare'?0.5:rarity==='epic'?0.3:0.15, caught: false };
+            currentWildSoul = {
+                id: `wild_${Date.now()}`, name: template.name, type: template.type,
+                personality: `A wild ${template.name} found in the weave.`,
+                skills: [...template.skills], plt: pltVar, level: template.level,
+                rarity: rarity,
+                catchRate: rarity==='common'?0.7 : rarity==='rare'?0.5 : rarity==='epic'?0.3 : 0.15,
+                caught: false
+            };
             renderWildSoul();
         }
+
         function renderWildSoul() {
             const area = document.getElementById('wildSoulArea');
-            if (!currentWildSoul) { area.innerHTML = '<button class="control-btn" id="exploreBtn">🔍 EXPLORE THE WEAVE</button>'; document.getElementById('exploreBtn')?.addEventListener('click', generateWildSoul); return; }
-            area.innerHTML = `<div class="wild-soul-card"><div class="wild-name">🌀 ${currentWildSoul.name}</div><div class="wild-type">${currentWildSoul.type.toUpperCase()} Soul · Lv.${currentWildSoul.level}</div><div class="rarity rarity-${currentWildSoul.rarity}">✨ ${currentWildSoul.rarity.toUpperCase()}</div><div>💰 ${Math.floor(currentWildSoul.plt.profit*100)}% · ❤️ ${Math.floor(currentWildSoul.plt.love*100)}% · ⚖️ ${Math.floor(currentWildSoul.plt.tax*100)}%</div><div style="margin-top:15px;"><button class="catch-btn" id="catchBtn">🎯 CATCH (${Math.floor(currentWildSoul.catchRate*100)}%)</button><button class="catch-btn" id="runBtn">🏃 RUN</button></div></div>`;
-            document.getElementById('catchBtn')?.addEventListener('click', attemptCatch);
-            document.getElementById('runBtn')?.addEventListener('click', () => { currentWildSoul = null; renderWildSoul(); });
+            if (!currentWildSoul) {
+                area.innerHTML = `<div class="explore-area"><button class="explore-btn" id="exploreBtn">🔍 EXPLORE THE WEAVE</button></div>`;
+                document.getElementById('exploreBtn').addEventListener('click', generateWildSoul);
+                return;
+            }
+            const rarityEmoji = { common: '⚪', rare: '🔵', epic: '🟣', legendary: '⭐' };
+            area.innerHTML = `<div class="wild-soul-card rarity-${currentWildSoul.rarity}">
+              <div class="wild-name">🌀 ${currentWildSoul.name}</div>
+              <div class="wild-type">${currentWildSoul.type.toUpperCase()} Soul · Lv.${currentWildSoul.level}</div>
+              <span class="rarity rarity-${currentWildSoul.rarity}">${rarityEmoji[currentWildSoul.rarity]} ${currentWildSoul.rarity.toUpperCase()}</span>
+              <div class="plt-display">💰 ${Math.floor(currentWildSoul.plt.profit*100)}% &nbsp; ❤️ ${Math.floor(currentWildSoul.plt.love*100)}% &nbsp; ⚖️ ${Math.floor(currentWildSoul.plt.tax*100)}%</div>
+              <div style="font-size:11px;color:#667788;margin-bottom:14px;">Skills: ${currentWildSoul.skills.join(', ')}</div>
+              <div>
+                <button class="catch-btn" id="catchBtn">🎯 CATCH (${Math.floor(currentWildSoul.catchRate*100)}%)</button>
+                <button class="catch-btn run" id="runBtn">🏃 RUN</button>
+              </div>
+            </div>`;
+            document.getElementById('catchBtn').addEventListener('click', attemptCatch);
+            document.getElementById('runBtn').addEventListener('click', () => { currentWildSoul = null; renderWildSoul(); });
         }
+
         function attemptCatch() {
             if (!currentWildSoul) return;
             const success = Math.random() < currentWildSoul.catchRate;
             if (success) {
-                souls.push({ id: `soul_${Date.now()}`, name: currentWildSoul.name, type: currentWildSoul.type, personality: currentWildSoul.personality, skills: currentWildSoul.skills, plt: currentWildSoul.plt, level: currentWildSoul.level, xp: 0, energy: 100, hp: 100, maxHp: 100, battlesWon: 0, battlesLost: 0, caught: true, caughtAt: Date.now() });
-                saveSouls(); alert(`✨ SUCCESS! You caught ${currentWildSoul.name}!`);
+                souls.push({
+                    id: `soul_${Date.now()}`, name: currentWildSoul.name, type: currentWildSoul.type,
+                    personality: currentWildSoul.personality, skills: currentWildSoul.skills,
+                    plt: currentWildSoul.plt, level: currentWildSoul.level, xp: 0,
+                    energy: 100, hp: 100, maxHp: 100, battlesWon: 0, battlesLost: 0,
+                    caught: true, caughtAt: Date.now(), rarity: currentWildSoul.rarity
+                });
+                saveSouls();
+                alert(`✨ SUCCESS!\n\nYou caught ${currentWildSoul.name}!\nRarity: ${currentWildSoul.rarity.toUpperCase()}`);
                 currentWildSoul = null; renderWildSoul(); renderCollection();
-            } else { alert(`😭 The ${currentWildSoul.name} escaped!`); currentWildSoul = null; renderWildSoul(); }
+            } else {
+                alert(`😭 The ${currentWildSoul.name} escaped!\n\nTry again — explore the Weave.`);
+                currentWildSoul = null; renderWildSoul();
+            }
         }
+
         function renderCollection() {
-            const grid = document.getElementById('collectionGrid'); if (!grid) return;
-            grid.innerHTML = souls.map(soul => `<div class="collection-card" style="border-left-color: ${soul.type==='profit'?'#ffaa44':soul.type==='love'?'#ff88aa':'#88aaff'}" onclick="viewSoulDetails('${soul.id}')"><strong>${soul.name}</strong><div style="font-size:10px;">Lv.${soul.level} · ${soul.type.toUpperCase()}</div><div style="font-size:9px;">💰${Math.floor(soul.plt.profit*100)}% ❤️${Math.floor(soul.plt.love*100)}% ⚖️${Math.floor(soul.plt.tax*100)}%</div></div>`).join('');
+            const grid = document.getElementById('collectionGrid');
+            const count = document.getElementById('collectionCount');
+            if (count) count.textContent = souls.length;
+            if (!grid) return;
+            grid.innerHTML = souls.map(soul => {
+                const tc = typeColor[soul.type] || '#aaaaff';
+                const rc = rarityColor[soul.rarity] || '#666688';
+                return `<div class="collection-card" style="border-left-color:${rc}" onclick="viewSoulDetails('${soul.id}')">
+                  <strong style="color:${tc}">${soul.name}</strong>
+                  <div class="level">Lv.${soul.level} · ${soul.type.toUpperCase()}${soul.rarity ? ' · ' + soul.rarity : ''}</div>
+                  <div class="plt">💰${Math.floor(soul.plt.profit*100)}% ❤️${Math.floor(soul.plt.love*100)}% ⚖️${Math.floor(soul.plt.tax*100)}%</div>
+                </div>`;
+            }).join('');
         }
-        window.viewSoulDetails = function(id) { const soul = souls.find(s => s.id === id); if (soul) alert(`🌀 ${soul.name}\n📜 Type: ${soul.type.toUpperCase()}\n🏆 Level: ${soul.level}\n⚡ Skills: ${soul.skills.join(', ')}\n🎭 PLT: ${Math.floor(soul.plt.profit*100)}% P, ${Math.floor(soul.plt.love*100)}% L, ${Math.floor(soul.plt.tax*100)}% T`); };
+
+        window.viewSoulDetails = function(id) {
+            const soul = souls.find(s => s.id === id);
+            if (soul) alert(`🌀 ${soul.name}\n\n📜 Type: ${soul.type.toUpperCase()}\n🏆 Level: ${soul.level}${soul.rarity ? '\n⭐ Rarity: ' + soul.rarity.toUpperCase() : ''}\n⚡ Skills: ${soul.skills.join(', ')}\n🎭 PLT: ${Math.floor(soul.plt.profit*100)}% P · ${Math.floor(soul.plt.love*100)}% L · ${Math.floor(soul.plt.tax*100)}% T`);
+        };
+
         function renderEvolutionChamber() {
-            const grid = document.getElementById('evolutionGrid'); if (!grid) return;
+            const grid = document.getElementById('evolutionGrid');
+            if (!grid) return;
             const evolvable = souls.filter(s => evolutionPaths[s.name] && s.level >= evolutionPaths[s.name].requiredLevel);
-            if (evolvable.length === 0) { grid.innerHTML = '<div style="text-align:center;padding:40px;">No souls ready to evolve. Level them to 5+.</div>'; return; }
-            grid.innerHTML = evolvable.map(soul => { const path = evolutionPaths[soul.name]; return `<div class="collection-card" style="border-left-color:#ffaa88;" onclick="evolveSoul('${soul.id}')"><strong>${soul.name}</strong><div style="font-size:10px;">Lv.${soul.level} → ${path.evolvesTo}</div></div>`; }).join('');
+            if (evolvable.length === 0) {
+                grid.innerHTML = '<div style="text-align:center;padding:40px;color:#446688;">No souls ready to evolve yet.<br>Level them up to 3+ in battle.</div>';
+                return;
+            }
+            grid.innerHTML = evolvable.map(soul => {
+                const path = evolutionPaths[soul.name];
+                return `<div class="collection-card" style="border-left-color:#ffaa88" onclick="evolveSoul('${soul.id}')">
+                  <strong style="color:#ffbb88">${soul.name}</strong>
+                  <div class="level">Lv.${soul.level} → ${path.evolvesTo}</div>
+                  <div class="plt" style="color:#ffaa66;">✨ TAP TO EVOLVE</div>
+                </div>`;
+            }).join('');
         }
+
         window.evolveSoul = function(id) {
-            const soul = souls.find(s => s.id === id); if (!soul) return;
-            const path = evolutionPaths[soul.name]; if (!path) { alert(`${soul.name} cannot evolve.`); return; }
-            if (soul.level < path.requiredLevel) { alert(`${soul.name} needs level ${path.requiredLevel}.`); return; }
-            if (confirm(`✨ Evolve ${soul.name} into ${path.evolvesTo}?`)) {
-                let evoTemplate; for (const pool of Object.values(wildSoulPool)) { evoTemplate = pool.find(s => s.name === path.evolvesTo); if (evoTemplate) break; }
+            const soul = souls.find(s => s.id === id);
+            if (!soul) return;
+            const path = evolutionPaths[soul.name];
+            if (!path) { alert(`${soul.name} cannot evolve further.`); return; }
+            if (soul.level < path.requiredLevel) { alert(`${soul.name} needs to reach level ${path.requiredLevel} first.`); return; }
+            if (confirm(`✨ EVOLVE ${soul.name} into ${path.evolvesTo}?\n\nThis cannot be undone.`)) {
+                let evoTemplate;
+                for (const pool of Object.values(wildSoulPool)) {
+                    evoTemplate = pool.find(s => s.name === path.evolvesTo);
+                    if (evoTemplate) break;
+                }
                 if (evoTemplate) {
                     soul.name = evoTemplate.name; soul.type = evoTemplate.type; soul.skills = [...evoTemplate.skills];
                     soul.plt = { profit: evoTemplate.basePlt.profit+0.05, love: evoTemplate.basePlt.love+0.05, tax: evoTemplate.basePlt.tax+0.05 };
-                    const sum = soul.plt.profit+soul.plt.love+soul.plt.tax; soul.plt.profit/=sum; soul.plt.love/=sum; soul.plt.tax/=sum;
+                    const sum = soul.plt.profit+soul.plt.love+soul.plt.tax;
+                    soul.plt.profit/=sum; soul.plt.love/=sum; soul.plt.tax/=sum;
                     soul.level += 1; soul.hp = 100; soul.energy = 100;
-                    saveSouls(); renderCollection(); renderEvolutionChamber(); alert(`✨ ${soul.name} evolved into ${path.evolvesTo}!`);
+                    saveSouls(); renderCollection(); renderEvolutionChamber();
+                    alert(`✨ EVOLUTION COMPLETE!\n\n${soul.name} has transformed!\nNew skills: ${soul.skills.join(', ')}`);
                 }
             }
         };
+
         let collectionVisible = false, evolutionVisible = false;
-        document.getElementById('viewCollectionBtn').addEventListener('click', () => { collectionVisible = !collectionVisible; document.getElementById('collectionPanel').style.display = collectionVisible ? 'block' : 'none'; if (collectionVisible) renderCollection(); });
-        document.getElementById('showEvolutionBtn').addEventListener('click', () => { evolutionVisible = !evolutionVisible; document.getElementById('evolutionPanel').style.display = evolutionVisible ? 'block' : 'none'; if (evolutionVisible) renderEvolutionChamber(); });
-        loadSouls(); setTimeout(() => { if (!currentWildSoul) generateWildSoul(); }, 500);
+        document.getElementById('viewCollectionBtn').addEventListener('click', () => {
+            collectionVisible = !collectionVisible;
+            document.getElementById('collectionPanel').style.display = collectionVisible ? 'block' : 'none';
+            if (collectionVisible) renderCollection();
+        });
+        document.getElementById('showEvolutionBtn').addEventListener('click', () => {
+            evolutionVisible = !evolutionVisible;
+            document.getElementById('evolutionPanel').style.display = evolutionVisible ? 'block' : 'none';
+            if (evolutionVisible) renderEvolutionChamber();
+        });
+        document.getElementById('exploreBtn').addEventListener('click', generateWildSoul);
+
+        loadSouls();
+        setTimeout(() => { if (!currentWildSoul) generateWildSoul(); }, 500);
     </script>
 </body>
 </html>

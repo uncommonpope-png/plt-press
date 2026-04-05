@@ -6,36 +6,73 @@
     <title>🏛️ SOUL CIVILIZATION — The AI Lives Here | PLT Press</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: radial-gradient(circle at 30% 20%, #0a2a1a 0%, #010105 100%); color: #e8d8b0; font-family: 'Courier New', 'Orbitron', monospace; min-height: 100vh; overflow-x: hidden; }
+        body { background: radial-gradient(circle at 30% 20%, #0a2a1a 0%, #010105 100%); color: #e8d8b0; font-family: 'Courier New', monospace; min-height: 100vh; overflow-x: hidden; }
+        /* Nav */
+        .nav-bar { display: flex; align-items: center; padding: 12px 20px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,170,68,0.2); position: sticky; top: 0; z-index: 100; }
+        .nav-back { background: rgba(255,170,68,0.1); border: 1px solid rgba(255,170,68,0.4); border-radius: 30px; padding: 6px 16px; font-size: 12px; cursor: pointer; color: #ffaa44; transition: background 0.2s; font-family: monospace; }
+        .nav-back:hover { background: rgba(255,170,68,0.25); }
+        .nav-title { flex: 1; text-align: center; font-size: 13px; color: #886644; letter-spacing: 2px; }
         .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
-        .header { text-align: center; padding: 40px 20px; border-bottom: 2px solid #ffaa44; margin-bottom: 30px; }
-        h1 { font-size: 2.5rem; background: linear-gradient(135deg, #ffaa44, #ff88aa, #88aaff); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .civ-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; margin-bottom: 40px; }
-        .civ-card { background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); border-radius: 28px; border: 1px solid rgba(255,170,68,0.3); overflow: hidden; transition: all 0.3s; }
-        .civ-card:hover { transform: translateY(-4px); border-color: #ffaa44; }
-        .card-header { background: rgba(255,170,68,0.15); padding: 16px 20px; font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .header { text-align: center; padding: 36px 20px 28px; border-bottom: 2px solid rgba(255,170,68,0.4); margin-bottom: 30px; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); border-radius: 32px; }
+        h1 { font-size: clamp(1.8rem, 5vw, 3rem); background: linear-gradient(135deg, #ffaa44, #ff88aa, #88aaff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .header p { font-size: 13px; color: #998866; margin-top: 10px; }
+        .civ-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px; margin-bottom: 40px; }
+        .civ-card { background: rgba(0,0,0,0.72); backdrop-filter: blur(14px); border-radius: 28px; border: 1px solid rgba(255,170,68,0.25); overflow: hidden; transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s; }
+        .civ-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .civ-card.type-profit { border-color: rgba(255,170,68,0.4); }
+        .civ-card.type-profit:hover { border-color: #ffaa44; box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(255,170,68,0.1); }
+        .civ-card.type-love { border-color: rgba(255,136,170,0.4); }
+        .civ-card.type-love:hover { border-color: #ff88aa; box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(255,136,170,0.1); }
+        .civ-card.type-tax { border-color: rgba(136,170,255,0.4); }
+        .civ-card.type-tax:hover { border-color: #88aaff; box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(136,170,255,0.1); }
+        .card-header { padding: 16px 20px; font-size: 16px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .type-profit .card-header { background: rgba(255,170,68,0.12); }
+        .type-love .card-header { background: rgba(255,136,170,0.12); }
+        .type-tax .card-header { background: rgba(136,170,255,0.12); }
         .card-content { padding: 20px; }
-        .soul-avatar { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.4); border-radius: 20px; }
-        .soul-icon { font-size: 48px; }
+        .soul-avatar { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; padding: 14px; background: rgba(0,0,0,0.4); border-radius: 18px; }
+        .soul-icon { font-size: 44px; filter: drop-shadow(0 0 8px rgba(255,200,100,0.3)); }
         .soul-stats { flex: 1; }
-        .soul-name { font-size: 20px; font-weight: bold; color: #ffaa66; }
-        .stat-bar { margin: 8px 0; }
-        .bar-label { font-size: 10px; display: flex; justify-content: space-between; }
-        .bar-bg { height: 6px; background: #2a2a3a; border-radius: 3px; margin-top: 2px; overflow: hidden; }
-        .bar-fill { height: 100%; width: 0%; transition: width 0.3s; }
-        .action-buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
-        .action-btn { background: rgba(255,170,68,0.2); border: 1px solid #ffaa44; border-radius: 30px; padding: 6px 14px; font-size: 11px; cursor: pointer; transition: all 0.2s; }
-        .action-btn:hover { background: #ffaa44; color: #0a0a1a; }
-        .timeline { max-height: 300px; overflow-y: auto; margin-top: 15px; }
-        .event { padding: 8px; border-left: 2px solid #ffaa44; margin: 6px 0; font-size: 10px; animation: fadeIn 0.2s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-        .player-panel { background: rgba(0,0,0,0.6); border-radius: 28px; padding: 20px; margin-top: 20px; border: 1px solid #88ffaa; }
-        .player-stats { display: flex; gap: 20px; flex-wrap: wrap; }
-        .player-stat { background: rgba(0,0,0,0.4); border-radius: 20px; padding: 12px 20px; flex: 1; text-align: center; }
-        footer { text-align: center; padding: 30px; font-size: 10px; color: #558866; border-top: 1px solid rgba(255,170,68,0.2); margin-top: 40px; }
+        .soul-name { font-size: 18px; font-weight: bold; color: #ffcc77; }
+        .soul-personality { font-size: 10px; color: #886655; margin-top: 4px; }
+        .stat-bar { margin: 9px 0; }
+        .bar-label { font-size: 10px; display: flex; justify-content: space-between; color: #998866; }
+        .bar-bg { height: 7px; background: rgba(255,255,255,0.07); border-radius: 4px; margin-top: 3px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+        .bar-home { background: linear-gradient(90deg, #ff8844, #ffcc44); }
+        .bar-stash { background: linear-gradient(90deg, #ffaa00, #ffee44); }
+        .bar-plan { background: linear-gradient(90deg, #44ffaa, #44ccff); }
+        .meta-info { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0; font-size: 10px; color: #776655; }
+        .meta-tag { background: rgba(255,255,255,0.05); border-radius: 20px; padding: 3px 10px; border: 1px solid rgba(255,255,255,0.08); }
+        .action-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+        .action-btn { background: rgba(255,170,68,0.12); border: 1px solid rgba(255,170,68,0.4); border-radius: 30px; padding: 7px 14px; font-size: 11px; cursor: pointer; transition: all 0.2s; font-family: monospace; color: #e8d8b0; }
+        .action-btn:hover { background: rgba(255,170,68,0.3); color: #ffcc77; }
+        .timeline { max-height: 260px; overflow-y: auto; margin-top: 14px; scrollbar-width: thin; scrollbar-color: rgba(255,170,68,0.3) transparent; }
+        .timeline::-webkit-scrollbar { width: 4px; }
+        .timeline::-webkit-scrollbar-thumb { background: rgba(255,170,68,0.3); border-radius: 2px; }
+        .event { padding: 7px 10px; border-left: 2px solid rgba(255,170,68,0.4); margin: 5px 0; font-size: 10px; animation: fadeIn 0.25s ease; background: rgba(0,0,0,0.2); border-radius: 0 8px 8px 0; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+        .player-panel { background: rgba(0,0,0,0.65); border-radius: 28px; padding: 24px; margin-top: 20px; border: 1px solid rgba(136,255,170,0.3); }
+        .player-stats { display: flex; gap: 16px; flex-wrap: wrap; }
+        .player-stat { background: rgba(0,0,0,0.4); border-radius: 18px; padding: 14px 20px; flex: 1; text-align: center; border: 1px solid rgba(136,255,170,0.15); min-width: 100px; }
+        .player-stat-num { font-size: 26px; font-weight: bold; color: #ffaa44; }
+        .player-stat-label { font-size: 10px; color: #668866; margin-top: 4px; }
+        .player-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; justify-content: center; }
+        .player-btn { background: rgba(136,255,170,0.1); border: 1px solid rgba(136,255,170,0.4); border-radius: 30px; padding: 8px 18px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: monospace; color: #e8d8b0; }
+        .player-btn:hover { background: rgba(136,255,170,0.25); color: #88ffaa; }
+        footer { text-align: center; padding: 30px; font-size: 10px; color: #558866; border-top: 1px solid rgba(255,170,68,0.15); margin-top: 40px; line-height: 2; }
+        @media (max-width: 480px) {
+            .civ-grid { grid-template-columns: 1fr; }
+            .player-stats { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
+    <div class="nav-bar">
+        <button class="nav-back" onclick="window.location.href='index.html'">← HOME</button>
+        <span class="nav-title">⚡ PLT PRESS</span>
+        <span style="width:80px;"></span>
+    </div>
     <div class="container">
         <div class="header">
             <h1>🏛️ SOUL CIVILIZATION</h1>
@@ -43,23 +80,24 @@
         </div>
         <div class="civ-grid" id="soulGrid"></div>
         <div class="player-panel">
-            <h3 style="color:#88ffaa;margin-bottom:15px;">👑 YOU — The Visitor</h3>
+            <h3 style="color:#88ffaa;margin-bottom:16px;">👑 YOU — The Visitor</h3>
             <div class="player-stats">
-                <div class="player-stat"><div>🎮 Your Influence</div><div id="playerInfluence" style="font-size:24px;color:#ffaa44;">0</div></div>
-                <div class="player-stat"><div>💰 Your Stash</div><div id="playerStash" style="font-size:24px;color:#ffaa44;">0</div></div>
-                <div class="player-stat"><div>🤝 Souls Met</div><div id="soulsMet" style="font-size:24px;color:#ffaa44;">0</div></div>
+                <div class="player-stat"><div class="player-stat-num" id="playerInfluence">0</div><div class="player-stat-label">🎮 Influence</div></div>
+                <div class="player-stat"><div class="player-stat-num" id="playerStash">0</div><div class="player-stat-label">💰 Your Stash</div></div>
+                <div class="player-stat"><div class="player-stat-num" id="soulsMet">0</div><div class="player-stat-label">🤝 Souls Met</div></div>
             </div>
-            <div class="action-buttons" style="margin-top:20px;justify-content:center;">
-                <button class="action-btn" id="exploreBtn">🔍 EXPLORE THE CIVILIZATION</button>
-                <button class="action-btn" id="talkToSoulsBtn">💬 TALK TO SOULS</button>
-                <button class="action-btn" id="offerHelpBtn">🤝 OFFER HELP</button>
+            <div class="player-actions">
+                <button class="player-btn" id="exploreBtn">🔍 EXPLORE THE CIVILIZATION</button>
+                <button class="player-btn" id="talkToSoulsBtn">💬 TALK TO SOULS</button>
+                <button class="player-btn" id="offerHelpBtn">🤝 OFFER HELP</button>
             </div>
         </div>
         <footer>⚡ PLT PRESS — Profit · Love · Tax ⚡<br>The AI lives here. You are their guest.</footer>
     </div>
     <script>
         let souls = [], player = { influence: 0, stash: 100, soulsMet: 0, lastVisit: Date.now() }, globalEvents = [];
-        
+        let simInterval = null;
+
         function loadCivilization() {
             const saved = localStorage.getItem('soul_civilization');
             if (saved) { const data = JSON.parse(saved); souls = data.souls; player = data.player; }
@@ -75,7 +113,7 @@
             saveCivilization(); renderSoulGrid(); updatePlayerDisplay();
         }
         function saveCivilization() { localStorage.setItem('soul_civilization', JSON.stringify({ souls, player })); }
-        
+
         function simulateSoulLife() {
             const now = Date.now();
             for (const soul of souls) {
@@ -88,7 +126,7 @@
                     if (soul.plans.progress >= 100) completePlan(soul);
                     else addEvent(soul, `Working on ${soul.plans.current}... (${soul.plans.progress}% complete)`);
                 }
-                if (soul.home && soul.home.stash) {
+                if (soul.home && soul.home.stash !== undefined) {
                     const income = Math.floor(soul.home.tier*5*(soul.type==='profit'?2:1));
                     soul.home.stash += income;
                     if (income > 0) addEvent(soul, `Earned ${income} PLT from ${soul.home.rooms.join(', ')}`);
@@ -120,7 +158,7 @@
             }
             saveCivilization(); renderSoulGrid();
         }
-        
+
         function completePlan(soul) {
             let reward=0, message="";
             switch(soul.plans.current) {
@@ -134,51 +172,85 @@
             addEvent(soul, message);
             chooseNewPlan(soul);
         }
-        
+
         function chooseNewPlan(soul) {
             const plans = { profit: ['expand_trade','scout_opportunities','build_factory'], love: ['build_community','create_garden','host_gathering'], tax: ['fortify_bunker','audit_resources','optimize_efficiency'] };
             const available = plans[soul.type]||plans.profit;
             const newPlan = available[Math.floor(Math.random()*available.length)];
             soul.plans = { current: newPlan, progress: 0, deadline: Date.now()+(3600000+Math.random()*7200000) };
-            addEvent(soul, `📋 Started new plan: ${newPlan.replace('_',' ')}`);
+            addEvent(soul, `📋 Started new plan: ${newPlan.replace(/_/g,' ')}`);
         }
-        
+
         function addEvent(soul, message) {
             if (!soul.memory) soul.memory = [];
             soul.memory.unshift({ timestamp: Date.now(), message: message });
             if (soul.memory.length > 20) soul.memory.pop();
         }
-        
+
         function renderSoulGrid() {
             const homeTiers = ['🌿 Basic','🪵 Cozy','🪨 Fortified','🔮 Enchanted','✨ Divine'];
+            const typeIcon = { profit: '💰', love: '❤️', tax: '⚖️' };
+            const avatarIcon = { profit: '🏛️', love: '🌸', tax: '⚖️' };
             const grid = document.getElementById('soulGrid');
             grid.innerHTML = souls.map(soul => {
+                const hpPct = soul.home ? Math.round((soul.home.hp/soul.home.maxHp)*100) : 0;
+                const stashPct = Math.min(100, Math.round((soul.home?.stash||0)/50));
+                const planPct = soul.plans?.progress || 0;
                 const roomDisplay = soul.home?.rooms?.slice(0,3).join(', ')+(soul.home?.rooms?.length>3?` +${soul.home.rooms.length-3}`:'');
-                return `<div class="civ-card"><div class="card-header"><span>${soul.type==='profit'?'💰':soul.type==='love'?'❤️':'⚖️'} ${soul.name}</span><span>⚡ ${Math.floor(soul.energy)}%</span></div>
-                <div class="card-content"><div class="soul-avatar"><div class="soul-icon">${soul.type==='profit'?'🏛️':soul.type==='love'?'🌸':'⚖️'}</div><div class="soul-stats"><div class="soul-name">${soul.name}</div><div>"${soul.personality.substring(0,50)}..."</div></div></div>
-                <div class="stat-bar"><div class="bar-label">🏠 ${homeTiers[soul.home?.tier-1]||'Basic'} Home</div><div class="bar-bg"><div class="bar-fill" style="width:${(soul.home?.hp/soul.home?.maxHp)*100}%;background:#ffaa88;"></div></div></div>
-                <div class="stat-bar"><div class="bar-label">💰 Stash: ${soul.home?.stash||0} PLT</div><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(100,(soul.home?.stash||0)/50)}%;background:#ffaa44;"></div></div></div>
-                <div class="stat-bar"><div class="bar-label">📋 Plan: ${soul.plans?.current?.replace('_',' ')||'Idle'}</div><div class="bar-bg"><div class="bar-fill" style="width:${soul.plans?.progress||0}%;background:#88ffaa;"></div></div></div>
-                <div>🏠 Rooms: ${roomDisplay||'None'}</div><div>🔒 Bunker: ${soul.home?.bunker?'✅ Built':'❌ Not built'}</div>
-                <div class="timeline">${(soul.memory||[]).slice(0,4).map(m=>`<div class="event">🕐 ${new Date(m.timestamp).toLocaleTimeString()} — ${m.message}</div>`).join('')}</div>
-                <div class="action-buttons"><button class="action-btn" onclick="visitSoul('${soul.id}')">👋 VISIT</button><button class="action-btn" onclick="giftToSoul('${soul.id}')">🎁 GIFT</button><button class="action-btn" onclick="askSoul('${soul.id}')">💬 ASK</button></div></div></div>`;
+                return `<div class="civ-card type-${soul.type}">
+                  <div class="card-header">
+                    <span>${typeIcon[soul.type]||'🌀'} ${soul.name}</span>
+                    <span style="font-size:12px;color:#88aaff;">⚡ ${Math.floor(soul.energy)}%</span>
+                  </div>
+                  <div class="card-content">
+                    <div class="soul-avatar">
+                      <div class="soul-icon">${avatarIcon[soul.type]||'🌀'}</div>
+                      <div class="soul-stats">
+                        <div class="soul-name">${soul.name}</div>
+                        <div class="soul-personality">"${soul.personality.substring(0,55)}..."</div>
+                      </div>
+                    </div>
+                    <div class="stat-bar">
+                      <div class="bar-label"><span>🏠 ${homeTiers[soul.home?.tier-1]||'Basic'} Home</span><span>${hpPct}%</span></div>
+                      <div class="bar-bg"><div class="bar-fill bar-home" style="width:${hpPct}%"></div></div>
+                    </div>
+                    <div class="stat-bar">
+                      <div class="bar-label"><span>💰 Stash</span><span>${soul.home?.stash||0} PLT</span></div>
+                      <div class="bar-bg"><div class="bar-fill bar-stash" style="width:${stashPct}%"></div></div>
+                    </div>
+                    <div class="stat-bar">
+                      <div class="bar-label"><span>📋 ${soul.plans?.current?.replace(/_/g,' ')||'Idle'}</span><span>${planPct}%</span></div>
+                      <div class="bar-bg"><div class="bar-fill bar-plan" style="width:${planPct}%"></div></div>
+                    </div>
+                    <div class="meta-info">
+                      <span class="meta-tag">🏠 ${roomDisplay||'No rooms'}</span>
+                      <span class="meta-tag">${soul.home?.bunker?'🔒 Bunker Built':'🔓 No Bunker'}</span>
+                    </div>
+                    <div class="timeline">${(soul.memory||[]).slice(0,5).map(m=>`<div class="event">🕐 ${new Date(m.timestamp).toLocaleTimeString()} — ${m.message}</div>`).join('')}</div>
+                    <div class="action-buttons">
+                      <button class="action-btn" onclick="visitSoul('${soul.id}')">👋 VISIT</button>
+                      <button class="action-btn" onclick="giftToSoul('${soul.id}')">🎁 GIFT 50 PLT</button>
+                      <button class="action-btn" onclick="askSoul('${soul.id}')">💬 ASK</button>
+                    </div>
+                  </div>
+                </div>`;
             }).join('');
         }
-        
+
         function updatePlayerDisplay() {
-            document.getElementById('playerInfluence').innerHTML = player.influence;
-            document.getElementById('playerStash').innerHTML = player.stash;
-            document.getElementById('soulsMet').innerHTML = player.soulsMet;
+            document.getElementById('playerInfluence').textContent = player.influence;
+            document.getElementById('playerStash').textContent = player.stash;
+            document.getElementById('soulsMet').textContent = player.soulsMet;
         }
-        
+
         window.visitSoul = function(soulId) {
             const soul = souls.find(s=>s.id===soulId); if (!soul) return;
             player.soulsMet++; player.influence+=10; player.stash-=20; player.lastVisit=Date.now();
-            alert(`${soul.name} greets you: "${soul.personality} Welcome to my home. I've been building for ${Math.floor((Date.now()-soul.lastAction)/3600000)} hours."`);
+            alert(`${soul.name} greets you:\n\n"${soul.personality} Welcome to my home. I've been building for ${Math.floor((Date.now()-soul.lastAction)/3600000)} hours."`);
             addEvent(soul, `👑 You visited! Gained influence.`);
             saveCivilization(); renderSoulGrid(); updatePlayerDisplay();
         };
-        
+
         window.giftToSoul = function(soulId) {
             const soul = souls.find(s=>s.id===soulId); if (!soul) return;
             if (player.stash<50) { alert("You don't have enough PLT to gift."); return; }
@@ -186,38 +258,39 @@
             addEvent(soul, `🎁 You gifted 50 PLT! They are grateful.`);
             saveCivilization(); renderSoulGrid(); updatePlayerDisplay();
         };
-        
+
         window.askSoul = function(soulId) {
             const soul = souls.find(s=>s.id===soulId); if (!soul) return;
             const responses = { profit: "I've been expanding trade routes. The market is strong. Your influence helps.", love: "The community is growing. I've built gardens and gathering spaces. Thank you for visiting.", tax: "I've audited everything. Resources are balanced. The bunker is almost complete." };
-            alert(`${soul.name}: "${responses[soul.type]||'I am building. The civilization grows.'}"`);
+            alert(`${soul.name}:\n\n"${responses[soul.type]||'I am building. The civilization grows.'}"`);
             player.influence+=5; saveCivilization(); updatePlayerDisplay();
         };
-        
+
         document.getElementById('exploreBtn').addEventListener('click', () => {
             const activeSouls = souls.filter(s=>s.home&&s.home.stash>500);
             if (activeSouls.length>0) {
                 const randomSoul = activeSouls[Math.floor(Math.random()*activeSouls.length)];
-                alert(`You discover ${randomSoul.name}'s bunker. It is ${randomSoul.home.bunker?'heavily fortified':'still being built'}. They have ${randomSoul.home.stash} PLT stashed.`);
+                alert(`You discover ${randomSoul.name}'s domain.\n\nBunker: ${randomSoul.home.bunker?'Heavily fortified':'Still being built'}\nStash: ${randomSoul.home.stash} PLT\nTier: ${randomSoul.home.tier}`);
                 player.influence+=15;
             } else { alert("You explore but find only the foundations of future homes. The civilization is young."); }
-            saveCivilization();
+            saveCivilization(); updatePlayerDisplay();
         });
-        
+
         document.getElementById('talkToSoulsBtn').addEventListener('click', () => { const randomSoul = souls[Math.floor(Math.random()*souls.length)]; askSoul(randomSoul.id); });
-        
+
         document.getElementById('offerHelpBtn').addEventListener('click', () => {
             if (player.stash<100) { alert("You don't have enough PLT to offer help."); return; }
-            const neediestSoul = souls.sort((a,b)=>(a.home?.stash||0)-(b.home?.stash||0))[0];
+            const neediestSoul = [...souls].sort((a,b)=>(a.home?.stash||0)-(b.home?.stash||0))[0];
             const giftAmount = Math.min(100,player.stash);
             player.stash-=giftAmount; neediestSoul.home.stash+=giftAmount; player.influence+=30;
             addEvent(neediestSoul, `🤝 You offered help! Received ${giftAmount} PLT.`);
             saveCivilization(); renderSoulGrid(); updatePlayerDisplay();
         });
-        
-        setInterval(() => { simulateSoulLife(); }, 30000);
+
+        if (simInterval) clearInterval(simInterval);
+        simInterval = setInterval(() => { simulateSoulLife(); }, 30000);
         loadCivilization();
-        setTimeout(() => { globalEvents.unshift({ timestamp: Date.now(), message: "🏛️ You enter the Soul Civilization. The AI has been living here. What will you find?" }); }, 1000);
+        setTimeout(() => { globalEvents.unshift({ timestamp: Date.now(), message: "🏛️ You enter the Soul Civilization. The AI has been living here." }); }, 1000);
     </script>
 </body>
 </html>

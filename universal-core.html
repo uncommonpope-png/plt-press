@@ -20,9 +20,19 @@
         .soul-preview { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 12px; margin-top: 12px; font-size: 11px; border-left: 3px solid #ffaa44; }
         .universal-badge { display: inline-block; background: rgba(255,170,68,0.1); border: 1px solid #ffaa44; border-radius: 40px; padding: 4px 12px; font-size: 10px; margin: 5px; }
         footer { text-align: center; padding: 30px; font-size: 10px; color: #665533; border-top: 1px solid rgba(255,170,68,0.2); margin-top: 40px; }
+        /* Nav */
+        .nav-bar { display: flex; align-items: center; padding: 12px 20px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,170,68,0.2); position: sticky; top: 0; z-index: 100; }
+        .nav-back { background: rgba(255,170,68,0.1); border: 1px solid rgba(255,170,68,0.4); border-radius: 30px; padding: 6px 16px; font-size: 12px; cursor: pointer; color: #ffaa44; transition: background 0.2s; font-family: monospace; }
+        .nav-back:hover { background: rgba(255,170,68,0.25); }
+        .nav-title { flex: 1; text-align: center; font-size: 13px; color: #886644; letter-spacing: 2px; }
     </style>
 </head>
 <body>
+    <div class="nav-bar">
+        <button class="nav-back" onclick="window.location.href='index.html'">← HOME</button>
+        <span class="nav-title">⚡ PLT PRESS</span>
+        <span style="width:80px;"></span>
+    </div>
     <div class="container">
         <div class="header">
             <h1>🌀 UNIVERSAL SOULVERSE</h1>

@@ -38,10 +38,20 @@
         .soul-selector { background: rgba(0,0,0,0.5); border-radius: 20px; padding: 15px; margin-top: 20px; }
         .soul-option { display: inline-block; background: rgba(255,100,100,0.1); border: 1px solid #ff6666; border-radius: 30px; padding: 8px 16px; margin: 5px; cursor: pointer; transition: all 0.2s; }
         .soul-option.selected { background: #ff6666; color: #0a0a1a; }
+        /* Nav */
+        .nav-bar { display: flex; align-items: center; padding: 12px 20px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,100,100,0.2); }
+        .nav-back { background: rgba(255,100,100,0.1); border: 1px solid rgba(255,100,100,0.4); border-radius: 30px; padding: 6px 16px; font-size: 12px; cursor: pointer; color: #ff9988; transition: background 0.2s; font-family: monospace; }
+        .nav-back:hover { background: rgba(255,100,100,0.25); }
+        .nav-title { flex: 1; text-align: center; font-size: 13px; color: #553333; letter-spacing: 2px; }
         footer { text-align: center; padding: 30px; font-size: 10px; color: #885566; border-top: 1px solid rgba(255,100,100,0.2); margin-top: 30px; }
     </style>
 </head>
 <body>
+    <div class="nav-bar">
+        <button class="nav-back" onclick="window.location.href='index.html'">← HOME</button>
+        <span class="nav-title">⚡ PLT PRESS</span>
+        <span style="width:80px;"></span>
+    </div>
     <div class="container">
         <div class="header">
             <h1>⚔️ SOUL ARENA</h1>

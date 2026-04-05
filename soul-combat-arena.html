@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soul Combat Arena - PLT Battle System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🎮 Soul Combat Arena — PLT Battle System | PLT Press</title>
     <style>
         * {
             margin: 0;
@@ -11,12 +11,18 @@
             box-sizing: border-box;
         }
 
+        /* Nav */
+        .nav-bar { display: flex; align-items: center; padding: 12px 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,107,107,0.2); position: sticky; top: 0; z-index: 200; font-family: 'Courier New', monospace; }
+        .nav-back { background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.4); border-radius: 30px; padding: 6px 16px; font-size: 12px; cursor: pointer; color: #ff9988; transition: background 0.2s; font-family: monospace; }
+        .nav-back:hover { background: rgba(255,107,107,0.25); }
+        .nav-title { flex: 1; text-align: center; font-size: 13px; color: #553333; letter-spacing: 2px; font-family: 'Courier New', monospace; }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: radial-gradient(circle at 20% 10%, #1a1a2e 0%, #0d0d1a 100%);
             color: #fff;
             min-height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         .arena-container {
@@ -28,11 +34,11 @@
         .arena-header {
             text-align: center;
             padding: 20px 0;
-            border-bottom: 2px solid rgba(255,255,255,0.1);
+            border-bottom: 2px solid rgba(255,255,255,0.08);
         }
 
         .arena-title {
-            font-size: 2.5em;
+            font-size: clamp(1.6em, 5vw, 2.5em);
             background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -40,8 +46,8 @@
         }
 
         .arena-subtitle {
-            color: rgba(255,255,255,0.7);
-            font-size: 1.1em;
+            color: rgba(255,255,255,0.55);
+            font-size: 1em;
         }
 
         .battle-area {
@@ -530,6 +536,11 @@
     </style>
 </head>
 <body>
+    <div class="nav-bar">
+        <button class="nav-back" onclick="window.location.href='index.html'">← HOME</button>
+        <span class="nav-title">⚡ PLT PRESS</span>
+        <span style="width:80px;"></span>
+    </div>
     <!-- Setup Panel -->
     <div class="setup-panel" id="setupPanel">
         <div class="setup-content">
