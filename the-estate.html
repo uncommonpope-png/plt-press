@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>THE ESTATE — PLT Press / Craig Jones</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+
 <style>
 /* ─── RESET & BASE ─── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1088,40 +1087,40 @@ footer{
    CANVAS — WORLD (particle field)
 ═══════════════════════════════════════════════ */
 (function(){
-  var cv=document.getElementById('world'),ctx=cv.getContext('2d');
-  var pts=[],W,H,N=120;
-  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;init()}
+  var canvas=document.getElementById('world'),context=canvas.getContext('2d');
+  var particles=[],width,height,particleCount=120;
+  function resize(){width=canvas.width=innerWidth;height=canvas.height=innerHeight;init()}
   function init(){
-    pts=[];
-    for(var i=0;i<N;i++)pts.push({
-      x:Math.random()*W,y:Math.random()*H,
+    particles=[];
+    for(var i=0;i<particleCount;i++)particles.push({
+      x:Math.random()*width,y:Math.random()*height,
       vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,
       r:Math.random()*1.2+.3
     });
   }
   function draw(){
-    ctx.clearRect(0,0,W,H);
-    pts.forEach(function(p){
+    context.clearRect(0,0,width,height);
+    particles.forEach(function(p){
       p.x+=p.vx;p.y+=p.vy;
-      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
-      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle='rgba(200,168,90,.18)';
-      ctx.fill();
+      if(p.x<0)p.x=width;if(p.x>width)p.x=0;
+      if(p.y<0)p.y=height;if(p.y>height)p.y=0;
+      context.beginPath();
+      context.arc(p.x,p.y,p.r,0,Math.PI*2);
+      context.fillStyle='rgba(200,168,90,.18)';
+      context.fill();
     });
     // connections
-    for(var i=0;i<pts.length;i++){
-      for(var j=i+1;j<pts.length;j++){
-        var dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y;
+    for(var i=0;i<particles.length;i++){
+      for(var j=i+1;j<particles.length;j++){
+        var dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y;
         var d=Math.sqrt(dx*dx+dy*dy);
         if(d<120){
-          ctx.beginPath();
-          ctx.strokeStyle='rgba(200,168,90,'+((.06*(1-d/120))).toFixed(3)+')';
-          ctx.lineWidth=.5;
-          ctx.moveTo(pts[i].x,pts[i].y);
-          ctx.lineTo(pts[j].x,pts[j].y);
-          ctx.stroke();
+          context.beginPath();
+          context.strokeStyle='rgba(200,168,90,'+((.06*(1-d/120))).toFixed(3)+')';
+          context.lineWidth=.5;
+          context.moveTo(particles[i].x,particles[i].y);
+          context.lineTo(particles[j].x,particles[j].y);
+          context.stroke();
         }
       }
     }
@@ -1135,21 +1134,21 @@ footer{
    CANVAS — MB (atmospheric vignette sweep)
 ═══════════════════════════════════════════════ */
 (function(){
-  var cv=document.getElementById('mb'),ctx=cv.getContext('2d');
-  var W,H,t=0;
-  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight}
+  var canvas=document.getElementById('mb'),context=canvas.getContext('2d');
+  var width,height,time=0;
+  function resize(){width=canvas.width=innerWidth;height=canvas.height=innerHeight}
   function draw(){
-    t+=.003;
-    ctx.clearRect(0,0,W,H);
-    var gx=ctx.createRadialGradient(
-      W*.5+Math.sin(t)*W*.15,H*.4+Math.cos(t*.7)*H*.1,0,
-      W*.5,H*.5,W*.6
+    time+=.003;
+    context.clearRect(0,0,width,height);
+    var gradient=context.createRadialGradient(
+      width*.5+Math.sin(time)*width*.15,height*.4+Math.cos(time*.7)*height*.1,0,
+      width*.5,height*.5,width*.6
     );
-    gx.addColorStop(0,'rgba(200,168,90,.04)');
-    gx.addColorStop(.5,'rgba(139,0,0,.02)');
-    gx.addColorStop(1,'transparent');
-    ctx.fillStyle=gx;
-    ctx.fillRect(0,0,W,H);
+    gradient.addColorStop(0,'rgba(200,168,90,.04)');
+    gradient.addColorStop(.5,'rgba(139,0,0,.02)');
+    gradient.addColorStop(1,'transparent');
+    context.fillStyle=gradient;
+    context.fillRect(0,0,width,height);
     requestAnimationFrame(draw);
   }
   window.addEventListener('resize',resize);
@@ -1214,7 +1213,7 @@ function openGate(){
     document.querySelector('nav').classList.add('vis');
     document.getElementById('app').classList.add('vis');
   },800);
-  try{localStorage.setItem('estate-gate','1')}catch(e){console.warn('localStorage unavailable:',e)}
+  try{localStorage.setItem('estate-gate','1')}catch(e){console.warn('localStorage unavailable: Gate state will not persist across sessions.',e)}
 }
 // Check saved state
 (function(){
@@ -1225,7 +1224,7 @@ function openGate(){
       document.querySelector('nav').classList.add('vis');
       document.getElementById('app').classList.add('vis');
     }
-  }catch(e){console.warn('localStorage unavailable:',e)}
+  }catch(e){console.warn('localStorage unavailable: Gate state will not persist across sessions.',e)}
 })();
 
 /* ═══════════════════════════════════════════════
@@ -1334,9 +1333,10 @@ var vaultSecrets=[
 /* ═══════════════════════════════════════════════
    CALCULATORS — THE BRIEF
 ═══════════════════════════════════════════════ */
-function fmt(n){return n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}
-function fmtD(n){return '$'+fmt(Math.round(n))}
+function formatNumber(n){return n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}
+function formatDollar(n){return '$'+formatNumber(Math.round(n))}
 function showRes(id,html){var el=document.getElementById(id);el.innerHTML=html;el.classList.add('vis')}
+var UNLIMITED_RUNWAY=999; // sentinel value meaning expenses are $0 (unlimited runway)
 
 function calcNet(){
   var price=+document.getElementById('c1-price').value||0;
@@ -1346,7 +1346,7 @@ function calcNet(){
   var gross=price*(comm/100);
   var agent=gross*(split/100);
   var net=agent-exp;
-  showRes('c1-res','Gross Commission: '+fmtD(gross)+'<br>Your Portion ('+split+'%): '+fmtD(agent)+'<br>Transaction Expenses: '+fmtD(exp)+'<br><strong>NET PER DEAL: '+fmtD(net)+'</strong>');
+  showRes('c1-res','Gross Commission: '+formatDollar(gross)+'<br>Your Portion ('+split+'%): '+formatDollar(agent)+'<br>Transaction Expenses: '+formatDollar(exp)+'<br><strong>NET PER DEAL: '+formatDollar(net)+'</strong>');
 }
 function calcAnnual(){
   var target=+document.getElementById('c2-target').value||0;
@@ -1354,7 +1354,7 @@ function calcAnnual(){
   var oh=+document.getElementById('c2-oh').value||0;
   if(net<=0){showRes('c2-res','Please enter a positive average net per deal.');return;}
   var needed=Math.ceil((target+oh)/net);
-  showRes('c2-res','Target + Overhead: '+fmtD(target+oh)+'<br>Net Per Deal: '+fmtD(net)+'<br><strong>DEALS NEEDED: '+needed+' closings / year</strong><br>That\'s '+Math.ceil(needed/12)+' per month.');
+  showRes('c2-res','Target + Overhead: '+formatDollar(target+oh)+'<br>Net Per Deal: '+formatDollar(net)+'<br><strong>DEALS NEEDED: '+needed+' closings / year</strong><br>That\'s '+Math.ceil(needed/12)+' per month.');
 }
 function calcReferral(){
   var given=+document.getElementById('c3-given').value||0;
@@ -1362,16 +1362,16 @@ function calcReferral(){
   var val=+document.getElementById('c3-val').value||0;
   var gap=given-rec;
   var cost=gap*val;
-  showRes('c3-res','Referrals Given: '+given+'<br>Referrals Received: '+rec+'<br>Referral Gap: '+gap+' unreturned<br><strong>ESTIMATED GAP COST: '+fmtD(cost)+'</strong>');
+  showRes('c3-res','Referrals Given: '+given+'<br>Referrals Received: '+rec+'<br>Referral Gap: '+gap+' unreturned<br><strong>ESTIMATED GAP COST: '+formatDollar(cost)+'</strong>');
 }
 function calcRunway(){
   var sav=+document.getElementById('c4-sav').value||0;
   var per=+document.getElementById('c4-per').value||0;
   var biz=+document.getElementById('c4-biz').value||0;
   var monthly=per+biz;
-  var months=monthly>0?Math.floor(sav/monthly):999;
+  var months=monthly>0?Math.floor(sav/monthly):UNLIMITED_RUNWAY;
   var label=months>=12?'POWER (12+ months)':months>=6?'FREEDOM (6–12 months)':months>=3?'SURVIVAL (3–6 months)':'CRITICAL (under 3 months)';
-  showRes('c4-res','Monthly Burn: '+fmtD(monthly)+'<br>Reserves: '+fmtD(sav)+'<br><strong>RUNWAY: '+months+' months</strong><br>Status: '+label);
+  showRes('c4-res','Monthly Burn: '+formatDollar(monthly)+'<br>Reserves: '+formatDollar(sav)+'<br><strong>RUNWAY: '+months+' months</strong><br>Status: '+label);
 }
 function calcFunnel(){
   var leads=+document.getElementById('c5-leads').value||0;
@@ -1392,7 +1392,7 @@ function calcCommDef(){
   var full=list*(rate/100);
   var cut=list*(disc/100);
   var diff=full-cut;
-  showRes('c6-res','Full Commission ('+rate+'%): '+fmtD(full)+'<br>Discounted ('+disc+'%): '+fmtD(cut)+'<br><strong>COST OF DISCOUNT: '+fmtD(diff)+'</strong><br>That\'s what your concession costs — not the buyer\'s gain.');
+  showRes('c6-res','Full Commission ('+rate+'%): '+formatDollar(full)+'<br>Discounted ('+disc+'%): '+formatDollar(cut)+'<br><strong>COST OF DISCOUNT: '+formatDollar(diff)+'</strong><br>That\'s what your concession costs — not the buyer\'s gain.');
 }
 function calcTax(){
   var gross=+document.getElementById('c7-gross').value||0;
@@ -1402,7 +1402,7 @@ function calcTax(){
   var taxNow=taxable*(rate/100);
   var taxNoDeductions=gross*(rate/100);
   var saved=taxNoDeductions-taxNow;
-  showRes('c7-res','Gross Income: '+fmtD(gross)+'<br>Deductions: '+fmtD(ded)+'<br>Taxable Income: '+fmtD(taxable)+'<br>Estimated Tax: '+fmtD(taxNow)+'<br><strong>TAX SAVINGS FROM DEDUCTIONS: '+fmtD(saved)+'</strong>');
+  showRes('c7-res','Gross Income: '+formatDollar(gross)+'<br>Deductions: '+formatDollar(ded)+'<br>Taxable Income: '+formatDollar(taxable)+'<br>Estimated Tax: '+formatDollar(taxNow)+'<br><strong>TAX SAVINGS FROM DEDUCTIONS: '+formatDollar(saved)+'</strong>');
 }
 
 /* ═══════════════════════════════════════════════
@@ -1411,7 +1411,7 @@ function calcTax(){
 function calcNetA(){
   var price=+document.getElementById('a1-price').value||0,comm=+document.getElementById('a1-comm').value||0,split=+document.getElementById('a1-split').value||0,exp=+document.getElementById('a1-exp').value||0;
   var gross=price*(comm/100),agent=gross*(split/100),net=agent-exp;
-  showRes('a1-res','Gross: '+fmtD(gross)+' | Your Portion: '+fmtD(agent)+'<br><strong>NET: '+fmtD(net)+'</strong>');
+  showRes('a1-res','Gross: '+formatDollar(gross)+' | Your Portion: '+formatDollar(agent)+'<br><strong>NET: '+formatDollar(net)+'</strong>');
 }
 function calcAnnualA(){
   var target=+document.getElementById('a2-target').value||0,net=+document.getElementById('a2-net').value||0,oh=+document.getElementById('a2-oh').value||0;
@@ -1421,12 +1421,12 @@ function calcAnnualA(){
 }
 function calcReferralA(){
   var given=+document.getElementById('a3-given').value||0,rec=+document.getElementById('a3-rec').value||0,val=+document.getElementById('a3-val').value||0;
-  showRes('a3-res','Gap: '+(given-rec)+' | <strong>Cost: '+fmtD((given-rec)*val)+'</strong>');
+  showRes('a3-res','Gap: '+(given-rec)+' | <strong>Cost: '+formatDollar((given-rec)*val)+'</strong>');
 }
 function calcRunwayA(){
   var sav=+document.getElementById('a4-sav').value||0,per=+document.getElementById('a4-per').value||0,biz=+document.getElementById('a4-biz').value||0;
-  var m=per+biz,months=m>0?Math.floor(sav/m):999;
-  showRes('a4-res','Monthly burn: '+fmtD(m)+'<br><strong>Runway: '+months+' months</strong>');
+  var m=per+biz,months=m>0?Math.floor(sav/m):UNLIMITED_RUNWAY;
+  showRes('a4-res','Monthly burn: '+formatDollar(m)+'<br><strong>Runway: '+months+' months</strong>');
 }
 function calcFunnelA(){
   var leads=+document.getElementById('a5-leads').value||0,appt=+document.getElementById('a5-appt').value||0,cont=+document.getElementById('a5-cont').value||0,close=+document.getElementById('a5-close').value||0;
@@ -1435,12 +1435,12 @@ function calcFunnelA(){
 }
 function calcCommDefA(){
   var list=+document.getElementById('a6-list').value||0,rate=+document.getElementById('a6-rate').value||0,disc=+document.getElementById('a6-disc').value||0;
-  showRes('a6-res','Full: '+fmtD(list*(rate/100))+' | Discounted: '+fmtD(list*(disc/100))+'<br><strong>Concession cost: '+fmtD(list*((rate-disc)/100))+'</strong>');
+  showRes('a6-res','Full: '+formatDollar(list*(rate/100))+' | Discounted: '+formatDollar(list*(disc/100))+'<br><strong>Concession cost: '+formatDollar(list*((rate-disc)/100))+'</strong>');
 }
 function calcTaxA(){
   var gross=+document.getElementById('a7-gross').value||0,ded=+document.getElementById('a7-ded').value||0,rate=+document.getElementById('a7-rate').value||0;
   var taxable=Math.max(0,gross-ded),saved=(gross-taxable)*(rate/100);
-  showRes('a7-res','Taxable income: '+fmtD(taxable)+'<br><strong>Tax savings: '+fmtD(saved)+'</strong>');
+  showRes('a7-res','Taxable income: '+formatDollar(taxable)+'<br><strong>Tax savings: '+formatDollar(saved)+'</strong>');
 }
 function calcSqFt(){
   var pa=+document.getElementById('a8-pa').value||0,sfa=+document.getElementById('a8-sfa').value||0;
@@ -1457,7 +1457,7 @@ function calcAfford(){
   var r=rate/100/12,n=360;
   var loanAmt=maxPayment*(1-Math.pow(1+r,-n))/r;
   var maxPrice=loanAmt+dp;
-  showRes('a9-res','Max Monthly PITI: '+fmtD(maxPayment)+'<br>Max Loan (@ '+rate+'%): '+fmtD(loanAmt)+'<br><strong>Estimated Max Purchase Price: '+fmtD(maxPrice)+'</strong>');
+  showRes('a9-res','Max Monthly PITI: '+formatDollar(maxPayment)+'<br>Max Loan (@ '+rate+'%): '+formatDollar(loanAmt)+'<br><strong>Estimated Max Purchase Price: '+formatDollar(maxPrice)+'</strong>');
 }
 function calcROI(){
   var pp=+document.getElementById('a10-pp').value||0,rent=+document.getElementById('a10-rent').value||0;
@@ -1467,7 +1467,7 @@ function calcROI(){
   var capRate=(noi/pp*100).toFixed(2);
   var cocROI=(noi/cash*100).toFixed(2);
   var grossYield=(rent/pp*100).toFixed(2);
-  showRes('a10-res','Gross Yield: '+grossYield+'%<br>Cap Rate: '+capRate+'%<br><strong>Cash-on-Cash ROI: '+cocROI+'%</strong><br>NOI: '+fmtD(noi)+'/yr');
+  showRes('a10-res','Gross Yield: '+grossYield+'%<br>Cap Rate: '+capRate+'%<br><strong>Cash-on-Cash ROI: '+cocROI+'%</strong><br>NOI: '+formatDollar(noi)+'/yr');
 }
 
 /* ═══════════════════════════════════════════════
