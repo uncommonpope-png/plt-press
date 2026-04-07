@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>THE ESTATE - Enter the World</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#C4A95A;--gold2:#e8c96a;--gold3:#8a7435;
+  --black:#060606;--dark:#0d0d0d;--dark2:#111111;--dark3:#161616;
+  --text:#d4d0c8;--muted:#666660;--faint:#333330;
+  --profit:#A8C4D4;--love:#D4A8A8;--tax:#D4C4A8;
+  --border:rgba(196,169,90,0.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--text);font-family:'EB Garamond',Georgia,serif;overflow-x:hidden;overflow-y:auto;}
+#world{position:fixed;inset:0;z-index:0;pointer-events:none;}
+#gate{position:fixed;inset:0;z-index:4000;background:#050504;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1.8s,visibility 1.8s;}
+#gate.gone{opacity:0;visibility:hidden;pointer-events:none;}
+#gate-space{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+#gate-cv{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;}
+.gate-ui{position:relative;z-index:2;text-align:center;display:flex;flex-direction:column;align-items:center;padding:20px;}
+.g-seal{font-family:'Cinzel',serif;font-size:clamp(38px,9vw,84px);font-weight:700;color:var(--gold);letter-spacing:.16em;animation:up 1.3s ease .5s both;}
+.g-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(12px,2vw,18px);color:var(--muted);letter-spacing:.3em;margin-top:10px;animation:up 1.2s ease .9s both;}
+.g-line{width:0;height:1px;background:var(--gold);margin:28px auto;animation:grow 1s ease 1.3s both;}
+.g-btn{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.45em;color:var(--black);background:var(--gold);border:none;padding:14px 44px;cursor:pointer;text-transform:uppercase;animation:up 1s ease 1.7s both;transition:all .3s;}
+.g-btn:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 8px 36px rgba(196,169,90,.45);}
+.g-credit{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.35em;color:var(--muted);margin-top:18px;animation:up 1s ease 2.1s both;}
+@keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes grow{from{opacity:0;width:0}to{opacity:1;width:88px}}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:linear-gradient(to bottom,rgba(5,4,3,.97) 0%,transparent 100%);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;justify-content:space-between;align-items:center;}
+.nav-brand{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.35em;color:var(--gold);text-decoration:none;cursor:pointer;}
+.nav-links{display:flex;gap:0;list-style:none;}
+.nav-links a{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.22em;color:var(--muted);text-decoration:none;padding:6px 12px;transition:color .3s;text-transform:uppercase;cursor:pointer;}
+.nav-links a:hover,.nav-links a.active{color:var(--gold);}
+@media(max-width:700px){.nav-links{display:none;}nav{padding:12px 18px;}}
+.page{position:relative;z-index:1;display:none;min-height:100vh;padding-bottom:50px;}
+.page.active{display:block;}
+#ticker{position:fixed;bottom:0;left:0;right:0;z-index:150;background:rgba(5,4,3,.92);border-top:1px solid var(--border);padding:8px 20px;display:flex;align-items:center;gap:16px;}
+.ticker-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.4em;color:var(--gold);white-space:nowrap;flex-shrink:0;}
+.ticker-scroll{overflow:hidden;flex:1;}
+.ticker-inner{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:rgba(212,208,200,.75);white-space:nowrap;display:inline-block;}
+.btn-g{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.3em;color:var(--black);background:var(--gold);border:none;padding:12px 32px;cursor:pointer;transition:all .3s;text-decoration:none;display:inline-block;text-transform:uppercase;}
+.btn-g:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(196,169,90,.3);}
+.btn-o{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.3em;color:var(--gold);background:transparent;border:1px solid rgba(196,169,90,.45);padding:12px 32px;cursor:pointer;transition:all .3s;text-decoration:none;display:inline-block;text-transform:uppercase;}
+.btn-o:hover{background:rgba(196,169,90,.08);transform:translateY(-2px);}
+.sec{padding:80px 44px;max-width:1100px;margin:0 auto;}
+.s-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.55em;color:var(--gold);margin-bottom:12px;}
+.s-title{font-family:'Cinzel',serif;font-size:clamp(24px,5vw,48px);font-weight:600;color:var(--text);line-height:1.1;margin-bottom:16px;}
+.g-rule{width:48px;height:2px;background:var(--gold);margin-bottom:28px;}
+.s-body{font-size:18px;line-height:1.85;color:#a8a49e;max-width:680px;}
+.divider{width:100%;height:1px;background:linear-gradient(to right,transparent,rgba(196,169,90,.3),transparent);}
+#home{padding-top:0;}
+#home-hero{position:relative;height:100vh;min-height:600px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+#hero-cv{position:absolute;inset:0;width:100%;height:100%;}
+.hero-fog{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(5,4,3,.05) 0%,rgba(5,4,3,.3) 50%,rgba(5,4,3,.97) 100%);pointer-events:none;}
+.hero-center{position:relative;z-index:5;text-align:center;padding:0 24px;}
+.bc-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.6em;color:var(--gold);margin-bottom:20px;animation:pulse 2s ease infinite;}
+.bc-msg{font-family:'Cormorant Garamond',serif;font-size:clamp(20px,4vw,40px);color:var(--text);line-height:1.25;min-height:110px;display:flex;align-items:center;justify-content:center;transition:opacity .7s;padding:0 20px;max-width:800px;margin:0 auto;}
+.bc-estate-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.4em;color:var(--gold3);margin-top:16px;}
+.bc-plt{display:flex;gap:20px;justify-content:center;margin-top:12px;font-family:'Cinzel',serif;font-size:12px;opacity:.7;}
+.hero-cta{position:absolute;bottom:90px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center;z-index:5;}
+.scroll-hint{position:absolute;bottom:44px;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:9px;letter-spacing:.5em;color:var(--muted);animation:pulse 2.5s ease infinite;z-index:5;}
+@keyframes pulse{0%,100%{opacity:.22}50%{opacity:.68}}
+.home-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2px;background:rgba(196,169,90,.08);margin:0;}
+.home-card{background:rgba(6,5,3,.88);padding:36px 32px;cursor:pointer;transition:all .3s;border-bottom:2px solid transparent;}
+.home-card:hover{background:rgba(10,9,5,.95);border-bottom-color:var(--gold);}
+.hc-num{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.5em;color:var(--gold);margin-bottom:10px;}
+.hc-title{font-family:'Cinzel',serif;font-size:18px;color:var(--text);margin-bottom:8px;line-height:1.3;}
+.hc-body{font-size:14px;color:var(--muted);line-height:1.6;}
+#page-doctrine{background:rgba(6,5,3,.88);}
+.doctrine-hero{height:280px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+#doctrine-cv{position:absolute;inset:0;width:100%;height:100%;}
+.doctrine-feed{max-width:900px;margin:0 auto;padding:60px 44px 100px;}
+.estate-block{margin-bottom:72px;padding-bottom:56px;border-bottom:1px solid var(--border);}
+.estate-block:last-child{border-bottom:none;}
+.eb-header{display:flex;align-items:baseline;gap:20px;margin-bottom:24px;}
+.eb-num{font-family:'Cinzel',serif;font-size:28px;color:var(--gold);font-weight:700;flex-shrink:0;}
+.eb-title{font-family:'Cinzel',serif;font-size:22px;color:var(--text);}
+.eb-law{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;color:var(--gold);border-left:3px solid var(--gold);padding:16px 20px;margin-bottom:24px;background:rgba(196,169,90,.04);}
+.eb-body p{font-size:18px;line-height:1.9;color:#a8a49e;margin-bottom:18px;}
+.eb-cheat{margin-top:28px;}
+.eb-cheat-title{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.4em;color:var(--gold);margin-bottom:16px;}
+.eb-step{display:flex;gap:16px;margin-bottom:14px;padding:14px 18px;background:rgba(196,169,90,.04);border-left:2px solid rgba(196,169,90,.3);}
+.eb-step-num{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);flex-shrink:0;padding-top:3px;}
+.eb-step-body{font-size:16px;line-height:1.7;color:#9e9a92;}
+.eb-plt{display:flex;gap:0;margin-top:20px;font-family:'Cinzel',serif;font-size:11px;}
+.plt-p{background:rgba(168,196,212,.1);color:var(--profit);padding:8px 16px;border:1px solid rgba(168,196,212,.2);}
+.plt-l{background:rgba(212,168,168,.1);color:var(--love);padding:8px 16px;border:1px solid rgba(212,168,168,.2);}
+.plt-t{background:rgba(212,196,168,.1);color:var(--tax);padding:8px 16px;border:1px solid rgba(212,196,168,.2);}
+.mirror{margin-top:24px;padding:20px 24px;border-left:4px solid var(--gold);background:rgba(196,169,90,.05);font-style:italic;font-size:17px;color:#b8b4ac;}
+.mirror strong{font-style:normal;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.3em;color:var(--gold);display:block;margin-bottom:8px;}
+#page-estate{background:rgba(6,5,3,.88);}
+.estate-full-header{height:220px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+#estate-head-cv{position:absolute;inset:0;width:100%;height:100%;}
+.estate-full-content{max-width:880px;margin:0 auto;padding:60px 44px 120px;}
+.estate-section{margin-bottom:80px;padding-bottom:60px;border-bottom:1px solid var(--border);}
+.estate-section:last-child{border-bottom:none;}
+.full-estate-law{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--gold);border-left:4px solid var(--gold);padding:20px 24px;margin-bottom:28px;background:rgba(196,169,90,.04);line-height:1.6;}
+.full-estate-philosophy p{font-size:18px;line-height:1.95;color:#a8a49e;margin-bottom:20px;}
+.full-estate-cheat-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.5em;color:var(--gold);margin:32px 0 16px;}
+.full-estate-step{padding:18px 20px;border-left:2px solid rgba(196,169,90,.25);background:rgba(196,169,90,.03);margin-bottom:12px;font-size:16px;line-height:1.75;color:#9e9a92;}
+.full-estate-mirror{padding:24px;border-left:4px solid var(--gold);background:rgba(196,169,90,.06);font-style:italic;font-size:18px;color:#b8b4ac;margin-top:28px;}
+.full-estate-mirror strong{font-style:normal;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.4em;color:var(--gold);display:block;margin-bottom:10px;}
+#page-brief{background:rgba(6,5,3,.88);}
+.brief-hero{height:220px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+#brief-cv{position:absolute;inset:0;width:100%;height:100%;}
+.calc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2px;background:rgba(196,169,90,.08);}
+.calc-panel{background:rgba(6,5,3,.92);padding:30px 28px;}
+.cp-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.4em;color:var(--gold);margin-bottom:7px;}
+.cp-name{font-family:'Cinzel',serif;font-size:16px;color:var(--text);margin-bottom:18px;line-height:1.3;}
+.ig{margin-bottom:10px;}
+.ig label{display:block;font-family:'Cinzel',serif;font-size:8px;letter-spacing:.25em;color:var(--muted);margin-bottom:4px;}
+.ti{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(196,169,90,.12);color:var(--text);font-family:'EB Garamond',serif;font-size:16px;padding:8px 10px;outline:none;transition:border-color .3s;}
+.ti:focus{border-color:var(--gold);}select.ti{cursor:pointer;}
+.t-btn{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.25em;color:var(--black);background:var(--gold);border:none;padding:10px 18px;cursor:pointer;margin-top:4px;transition:all .3s;width:100%;text-transform:uppercase;}
+.t-btn:hover{background:var(--gold2);}
+.t-res{margin-top:12px;padding:12px;background:rgba(196,169,90,.05);border-left:2px solid var(--gold);display:none;}
+.t-res.on{display:block;}
+.rr{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;}
+.rr:last-child{border-bottom:none;}
+.rl{color:var(--muted);}
+.rv{color:var(--text);font-weight:600;}
+.rv.gold{color:var(--gold);font-size:17px;}
+.rv.green{color:#8bc49a;}
+.rv.red{color:#c49090;}
+#page-arsenal{background:rgba(6,5,3,.88);}
+.arsenal-hero{height:220px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+#arsenal-cv{position:absolute;inset:0;width:100%;height:100%;}
+#page-vault{background:rgba(6,5,3,.88);}
+.vault-hero{height:260px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+#vault-cv{position:absolute;inset:0;width:100%;height:100%;}
+.vault-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:2px;background:rgba(196,169,90,.08);margin:40px 44px 100px;}
+.secret-card{background:rgba(6,5,3,.92);padding:32px;cursor:pointer;transition:all .3s;border-bottom:2px solid transparent;}
+.secret-card:hover,.secret-card.open{border-bottom-color:var(--gold);background:rgba(10,9,5,.96);}
+.sc-estate{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.4em;color:var(--gold);margin-bottom:8px;}
+.sc-title{font-family:'Cinzel',serif;font-size:16px;color:var(--text);margin-bottom:10px;line-height:1.3;}
+.sc-preview{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+.sc-body{font-size:15px;color:#9e9a92;line-height:1.75;display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;}
+.secret-card.open .sc-body{display:block;}
+.sc-plt{display:flex;gap:12px;margin-top:12px;font-family:'Cinzel',serif;font-size:11px;}
+.sc-p{color:var(--profit);}
+.sc-l{color:var(--love);}
+.sc-t{color:var(--tax);}
+#page-plt{background:rgba(6,5,3,.88);}
+.plt-hero{height:260px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+#plt-cv{position:absolute;inset:0;width:100%;height:100%;}
+.plt-wrap{max-width:900px;margin:0 auto;padding:60px 44px 100px;}
+.sdsp{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin:36px 0;background:rgba(196,169,90,.1);}
+.sbox{background:rgba(6,5,3,.92);padding:24px 16px;text-align:center;}
+.sbox-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.4em;margin-bottom:8px;}
+.sbox-val{font-family:'Cinzel',serif;font-size:44px;font-weight:700;line-height:1;transition:all .3s;}
+.sbox-nm{font-size:11px;margin-top:6px;opacity:.5;}
+.pb .sbox-lbl,.pb .sbox-val{color:var(--profit);}
+.lb .sbox-lbl,.lb .sbox-val{color:var(--love);}
+.tb2 .sbox-lbl,.tb2 .sbox-val{color:var(--tax);}
+.tv-bar{background:rgba(196,169,90,.06);border:1px solid rgba(196,169,90,.3);padding:20px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.tv-eq{font-family:'Cinzel',serif;font-size:13px;color:var(--muted);letter-spacing:.1em;}
+.tv-val{font-family:'Cinzel',serif;font-size:38px;color:var(--gold);font-weight:700;transition:color .4s;}
+.slg{margin-bottom:18px;}
+.slg label{display:flex;justify-content:space-between;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;margin-bottom:8px;}
+.slg input[type=range]{width:100%;-webkit-appearance:none;height:2px;background:rgba(196,169,90,.2);outline:none;cursor:pointer;}
+.slg input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;cursor:pointer;}
+.ps input[type=range]::-webkit-slider-thumb{background:var(--profit);}
+.ls input[type=range]::-webkit-slider-thumb{background:var(--love);}
+.ts input[type=range]::-webkit-slider-thumb{background:var(--tax);}
+.s-read{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;color:var(--muted);text-align:center;margin-top:16px;min-height:48px;transition:all .4s;}
+.plt-guide{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:2px;background:rgba(196,169,90,.08);margin-top:40px;}
+.pg-card{background:rgba(6,5,3,.92);padding:28px;}
+.pg-letter{font-family:'Cinzel',serif;font-size:48px;font-weight:700;margin-bottom:8px;}
+.pg-name{font-family:'Cinzel',serif;font-size:14px;letter-spacing:.3em;margin-bottom:14px;}
+.pg-body{font-size:15px;line-height:1.7;color:#9e9a92;}
+.scenario-list{margin-top:40px;}
+.scenario-item{padding:20px;border-left:2px solid var(--border);margin-bottom:12px;cursor:pointer;transition:all .3s;background:rgba(6,5,3,.7);}
+.scenario-item:hover{border-left-color:var(--gold);background:rgba(10,9,5,.9);}
+.si-title{font-family:'Cinzel',serif;font-size:14px;color:var(--text);margin-bottom:6px;}
+.si-scores{display:flex;gap:16px;font-family:'Cinzel',serif;font-size:11px;}
+footer{position:relative;z-index:1;background:rgba(5,4,3,.96);border-top:1px solid var(--border);padding:50px 44px;text-align:center;}
+.f-brand{font-family:'Cinzel',serif;font-size:16px;letter-spacing:.35em;color:var(--gold);margin-bottom:8px;}
+.f-eq{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--muted);margin-bottom:22px;}
+.f-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;list-style:none;}
+.f-links a{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.3em;color:var(--muted);text-decoration:none;cursor:pointer;transition:color .3s;}
+.f-links a:hover{color:var(--gold);}
+.f-copy{margin-top:22px;font-size:12px;color:var(--muted);opacity:.4;}
+.reveal{opacity:1;transform:none;}
+.reveal.on{opacity:1;transform:none;}
+@media(max-width:580px){
+  .sec,.doctrine-feed,.estate-full-content,.plt-wrap{padding:50px 18px 90px;}
+  .calc-grid,.vault-grid,.home-grid,.plt-guide{grid-template-columns:1fr;}
+  .sdsp{grid-template-columns:1fr;}
+  .eb-plt{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="world"></canvas>
+<div id="ticker">
+  <div class="ticker-label">LIVE DOCTRINE</div>
+  <div class="ticker-scroll"><div class="ticker-inner" id="ticker-text"></div></div>
+</div>
+<div id="gate">
+  <canvas id="gate-space"></canvas>
+  <canvas id="gate-cv"></canvas>
+  <div class="gate-ui">
+    <div class="g-seal">THE ESTATE</div>
+    <div class="g-sub">Classified Access &nbsp;&middot;&nbsp; PLT Press</div>
+    <div class="g-line"></div>
+    <button class="g-btn" onclick="openGate()">Enter the World</button>
+    <div class="g-credit">Craig Jones &nbsp;&middot;&nbsp; Little Bunny &nbsp;&middot;&nbsp; Numbered Distribution Only</div>
+    <a href="https://uncommonpope-png.github.io/plt-press/" target="_blank" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.3em;color:var(--gold);margin-top:16px;text-decoration:none;border:1px solid rgba(196,169,90,.4);padding:10px 24px;transition:all .3s;animation:up 1s ease 2.5s both;">VISIT PLT PRESS BOOKSTORE</a>
+  </div>
+</div>
+
+<nav>
+  <span class="nav-brand" onclick="showPage('home')">THE ESTATE</span>
+  <ul class="nav-links">
+    <li><a onclick="showPage('home')" id="nav-home" class="active">Home</a></li>
+    <li><a onclick="showPage('doctrine')" id="nav-doctrine">Doctrine</a></li>
+    <li><a onclick="showPage('estate')" id="nav-estate">The Estate</a></li>
+    <li><a onclick="showPage('brief')" id="nav-brief">The Brief</a></li>
+    <li><a onclick="showPage('arsenal')" id="nav-arsenal">Arsenal</a></li>
+    <li><a onclick="showPage('vault')" id="nav-vault">The Vault</a></li>
+    <li><a onclick="showPage('plt')" id="nav-plt">PLT Scorer</a></li>
+  </ul>
+</nav>
+
+<!-- HOME -->
+<div id="home" class="page active">
+  <section id="home-hero">
+    <canvas id="hero-cv"></canvas>
+    <div class="hero-fog"></div>
+    <div class="hero-center">
+      <div class="bc-lbl">LIVE DOCTRINE BROADCAST</div>
+      <div class="bc-msg" id="bc-msg">Loading...</div>
+      <div class="bc-estate-lbl" id="bc-estate"></div>
+      <div class="bc-plt" id="bc-plt"></div>
+    </div>
+    <div class="hero-cta">
+      <span class="btn-g" onclick="showPage('doctrine')">Read The Doctrine</span>
+      <span class="btn-o" onclick="showPage('estate')">The Estate</span>
+      <span class="btn-o" onclick="showPage('arsenal')">The Arsenal</span>
+    </div>
+    <div class="scroll-hint">SCROLL &nbsp;&darr;</div>
+  </section>
+  <div class="divider"></div>
+  <div class="home-grid">
+    <div class="home-card" onclick="showPage('doctrine')"><div class="hc-num">I</div><div class="hc-title">The Doctrine</div><div class="hc-body">Forty Estates. Seven Books. The complete classified doctrine.</div></div>
+    <div class="home-card" onclick="showPage('estate')"><div class="hc-num">II</div><div class="hc-title">The Estate</div><div class="hc-body">Read Estates I through V in full.</div></div>
+    <div class="home-card" onclick="showPage('brief')"><div class="hc-num">III</div><div class="hc-title">The Brief</div><div class="hc-body">Seven calculations the industry depends on agents never running.</div></div>
+    <div class="home-card" onclick="showPage('arsenal')"><div class="hc-num">IV</div><div class="hc-title">The Arsenal</div><div class="hc-body">Ten live professional calculators.</div></div>
+    <div class="home-card" onclick="showPage('vault')"><div class="hc-num">V</div><div class="hc-title">The Vault</div><div class="hc-body">Classified intelligence released weekly.</div></div>
+    <div class="home-card" onclick="showPage('plt')"><div class="hc-num">VI</div><div class="hc-title">PLT Scorer</div><div class="hc-body">Score any professional decision in real time.</div></div>
+  </div>
+  <div style="padding:60px 44px;background:rgba(6,5,3,.7);text-align:center;">
+    <div class="s-lbl">The Framework</div>
+    <div style="font-family:'Cinzel',serif;font-size:clamp(28px,6vw,64px);color:var(--gold);letter-spacing:.06em;margin:20px 0;">PROFIT + LOVE &minus; TAX</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(18px,3vw,28px);color:var(--muted);">= True Value</div>
+  </div>
+  <footer>
+    <div class="f-brand">THE ESTATE</div>
+    <div class="f-eq">Profit + Love &minus; Tax = True Value</div>
+    <ul class="f-links">
+      <li><a onclick="showPage('doctrine')">Doctrine</a></li>
+      <li><a onclick="showPage('estate')">The Estate</a></li>
+      <li><a onclick="showPage('brief')">The Brief</a></li>
+      <li><a onclick="showPage('arsenal')">Arsenal</a></li>
+      <li><a onclick="showPage('vault')">The Vault</a></li>
+      <li><a onclick="showPage('plt')">PLT Scorer</a></li>
+      <li><a href="https://uncommonpope-png.github.io/plt-press/" target="_blank">PLT Press</a></li>
+    </ul>
+    <div class="f-copy">&copy; Craig Jones &middot; Little Bunny &middot; PLT Press &middot; Classified Distribution Only</div>
+  </footer>
+</div>
+
+<!-- DOCTRINE -->
+<div id="page-doctrine" class="page">
+  <div class="doctrine-hero"><canvas id="doctrine-cv"></canvas>
+    <div class="doctrine-hero-text" style="position:relative;z-index:2;text-align:center;">
+      <div class="s-lbl">THE CLASSIFIED DOCTRINE</div>
+      <div style="font-family:'Cinzel',serif;font-size:clamp(28px,6vw,56px);color:var(--text);">Forty Estates</div>
+    </div>
+  </div>
+  <div class="doctrine-feed" id="doctrine-feed"></div>
+</div>
+
+<!-- ESTATE -->
+<div id="page-estate" class="page">
+  <div class="estate-full-header"><canvas id="estate-head-cv"></canvas>
+    <div style="position:relative;z-index:2;text-align:center;">
+      <div class="s-lbl">COMPLETE TEXT</div>
+      <div style="font-family:'Cinzel',serif;font-size:clamp(26px,5vw,52px);color:var(--text);">The Estate</div>
+    </div>
+  </div>
+  <div class="estate-full-content" id="estate-full-content"></div>
+  <div style="text-align:center;padding:40px 44px 80px;background:rgba(196,169,90,.04);border-top:1px solid var(--border);">
+    <div class="s-lbl">FULL DOCUMENT</div>
+    <a href="THE_ESTATE_FINAL.docx" download class="btn-g">Download The Estate</a>
+    <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.3em;color:var(--muted);margin-top:14px;">CLASSIFIED &middot; NUMBERED COPY</div>
+  </div>
+</div>
+
+<!-- BRIEF -->
+<div id="page-brief" class="page">
+  <div class="brief-hero"><canvas id="brief-cv"></canvas>
+    <div style="position:relative;z-index:2;text-align:center;">
+      <div class="s-lbl">SEVEN CALCULATIONS</div>
+      <div style="font-family:'Cinzel',serif;font-size:clamp(26px,5vw,52px);color:var(--text);">The Brief</div>
+    </div>
+  </div>
+  <div class="sec" style="max-width:1100px;">
+    <p class="s-body" style="margin-bottom:48px;">The industry profits from the gap between what you know and what is true.</p>
+    <div style="margin-bottom:48px;"><div class="be-num">NUMBER 01</div><div class="be-title" style="font-family:'Cinzel',serif;font-size:20px;color:var(--text);margin-bottom:10px;">Your Actual Net Per Transaction</div><div class="be-truth">The $9,200 commission and the $3,800 you actually keep are not the same career.</div></div>
+    <div style="margin-bottom:48px;"><div class="be-num">NUMBER 02</div><div class="be-title" style="font-family:'Cinzel',serif;font-size:20px;color:var(--text);margin-bottom:10px;">The Referral Rate</div><div class="be-truth">The referrals that don't come are invisible.</div></div>
+    <div style="margin-bottom:48px;"><div class="be-num">NUMBER 03</div><div class="be-title" style="font-family:'Cinzel',serif;font-size:20px;color:var(--text);margin-bottom:10px;">Brokerage Cost</div><div class="be-truth">The split they quote and the amount you keep are two different numbers.</div></div>
+    <div style="margin-bottom:48px;"><div class="be-num">NUMBER 04</div><div class="be-title" style="font-family:'Cinzel',serif;font-size:20px;color:var(--text);margin-bottom:10px;">Tax You Don't Owe</div><div class="be-truth">You have already earned this money.</div></div>
+    <div style="margin-bottom:48px;"><div class="be-num">NUMBER 05</div><div class="be-title" style="font-family:'Cinzel',serif;font-size:20px;color:var(--text);margin-bottom:10px;">Worst Client Cost</div><div class="be-truth">The decline is the most expensive free thing.</div></div>
+    <div style="margin-bottom:48px;"><div class="be-num">NUMBER 06</div><div class="be-title" style="font-family:'Cinzel',serif;font-size:20px;color:var(--text);margin-bottom:10px;">Database Value</div><div class="be-truth">Your database is an asset.</div></div>
+    <div style="margin-bottom:48px;"><div class="be-num">NUMBER 07</div><div class="be-title" style="font-family:'Cinzel',serif;font-size:20px;color:var(--text);margin-bottom:10px;">Runway</div><div class="be-truth">The client reads the runway in ninety seconds.</div></div>
+    <div style="text-align:center;padding:40px 0 20px;"><a href="THE_BRIEF.docx" download class="btn-g">Download The Brief</a></div>
+  </div>
+  <div class="divider"></div>
+  <div class="sec" style="max-width:1100px;padding-top:60px;">
+    <div class="s-lbl">Run The Numbers</div>
+    <h2 class="s-title">Live Calculators</h2>
+    <div class="g-rule"></div>
+    <div class="calc-grid" id="brief-calcs"></div>
+  </div>
+</div>
+
+<!-- ARSENAL -->
+<div id="page-arsenal" class="page">
+  <div class="arsenal-hero"><canvas id="arsenal-cv"></canvas>
+    <div style="position:relative;z-index:2;text-align:center;">
+      <div class="s-lbl">TEN PROFESSIONAL TOOLS</div>
+      <div style="font-family:'Cinzel',serif;font-size:clamp(26px,5vw,52px);color:var(--text);">The Arsenal</div>
+    </div>
+  </div>
+  <div style="max-width:1100px;margin:0 auto;padding:40px 44px 100px;">
+    <div class="calc-grid" id="arsenal-calcs"></div>
+  </div>
+</div>
+
+<!-- VAULT -->
+<div id="page-vault" class="page">
+  <div class="vault-hero"><canvas id="vault-cv"></canvas>
+    <div style="position:relative;z-index:2;text-align:center;">
+      <div class="s-lbl">CLASSIFIED INTELLIGENCE</div>
+      <div style="font-family:'Cinzel',serif;font-size:clamp(26px,5vw,52px);color:var(--text);">The Vault</div>
+    </div>
+  </div>
+  <div class="vault-grid" id="vault-grid"></div>
+</div>
+
+<!-- PLT SCORER -->
+<div id="page-plt" class="page">
+  <div class="plt-hero"><canvas id="plt-cv"></canvas>
+    <div style="position:relative;z-index:2;text-align:center;">
+      <div class="s-lbl">THE FRAMEWORK</div>
+      <div style="font-family:'Cinzel',serif;font-size:clamp(26px,5vw,52px);color:var(--text);">PLT Scorer</div>
+    </div>
+  </div>
+  <div class="plt-wrap">
+    <div class="slg ps"><label><span style="color:var(--profit)">PROFIT</span><span id="pv" style="color:var(--profit)">5</span></label><input type="range" min="0" max="10" value="5" id="sp" oninput="score()"></div>
+    <div class="slg ls"><label><span style="color:var(--love)">LOVE</span><span id="lv" style="color:var(--love)">5</span></label><input type="range" min="-10" max="10" value="5" id="sl" oninput="score()"></div>
+    <div class="slg ts"><label><span style="color:var(--tax)">TAX</span><span id="tv2" style="color:var(--tax)">3</span></label><input type="range" min="0" max="10" value="3" id="st" oninput="score()"></div>
+    <div class="sdsp">
+      <div class="sbox pb"><div class="sbox-lbl">P</div><div class="sbox-val" id="dp">5</div><div class="sbox-nm">Profit</div></div>
+      <div class="sbox lb"><div class="sbox-lbl">L</div><div class="sbox-val" id="dl">5</div><div class="sbox-nm">Love</div></div>
+      <div class="sbox tb2"><div class="sbox-lbl">T</div><div class="sbox-val" id="dt">3</div><div class="sbox-nm">Tax</div></div>
+    </div>
+    <div class="tv-bar"><div class="tv-eq">P + L &minus; T = TRUE VALUE</div><div class="tv-val" id="tvv">7</div></div>
+    <div class="s-read" id="sr">Adjust the sliders.</div>
+    <div class="plt-guide" style="margin-top:48px;">
+      <div class="pg-card"><div class="pg-letter" style="color:var(--profit)">P</div><div class="pg-name" style="color:var(--profit)">PROFIT</div><div class="pg-body">Financial return. Scored 0 to 10.</div></div>
+      <div class="pg-card"><div class="pg-letter" style="color:var(--love)">L</div><div class="pg-name" style="color:var(--love)">LOVE</div><div class="pg-body">Trust and referral capital. Scored -10 to 10.</div></div>
+      <div class="pg-card"><div class="pg-letter" style="color:var(--tax)">T</div><div class="pg-name" style="color:var(--tax)">TAX</div><div class="pg-body">Total cost visible and invisible. Scored 0 to 10.</div></div>
+    </div>
+    <div style="margin-top:48px;">
+      <div class="s-lbl">SCENARIO LIBRARY</div>
+      <div class="g-rule"></div>
+      <div class="scenario-list" id="scenario-list"></div>
+    </div>
+  </div>
+</div>
+<script>
+function openGate(){var g=document.getElementById('gate');if(!g)return;g.style.transition='opacity 1.6s ease';g.style.opacity='0';setTimeout(function(){g.style.display='none';},1600);}
+function showPage(name){document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.nav-links a').forEach(function(a){a.classList.remove('active');});var pg=document.getElementById(name==='home'?'home':'page-'+name);if(pg){pg.classList.add('active');window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;setTimeout(function(){window.scrollTo(0,0);document.documentElement.scrollTop=0;observeReveal();},50);}var navMap={'home':'nav-home','doctrine':'nav-doctrine','estate':'nav-estate','brief':'nav-brief','arsenal':'nav-arsenal','vault':'nav-vault','plt':'nav-plt'};var nel=document.getElementById(navMap[name]);if(nel)nel.classList.add('active');}
+var DOCTRINE_TICKER=['The client decides in 90 seconds. The signal is the position.','PROFIT + LOVE - TAX = TRUE VALUE.','The delinquent tax list is public record. Fewer than 5 agents read it.','The reluctant partner is the actual decision.','Your database is worth $121,600 more maintained.','The appraisal package changes the outcome.','$25,000 to $40,000 per year in unnecessary tax.','The surplus is the precondition.','Voluntary disclosure converts limitation into trust.','The permit pull finds the seller 6 months before.'];
+(function(){var wrap=document.querySelector('.ticker-scroll');var el=document.getElementById('ticker-text');if(!wrap||!el)return;var txt=DOCTRINE_TICKER.join(' | ');el.textContent=txt+'     '+txt;var pos=0;var speed=0.5;setTimeout(function(){var fullW=el.scrollWidth/2;function tick(){pos+=speed;if(pos>=fullW)pos=0;el.style.transform='translateX(-'+pos+'px)';requestAnimationFrame(tick);}tick();},100);})();
+var BROADCAST=[{msg:'The client decides whether you are the agent in the first ninety seconds.',estate:'ESTATE I',p:'P +9',l:'L +8',tx:'T -2'},{msg:'PROFIT + LOVE - TAX = TRUE VALUE. Every professional decision has a score.',estate:'PLT FRAMEWORK',p:'P +10',l:'L +10',tx:'T -1'},{msg:'The delinquent tax list is public record.',estate:'ESTATE III',p:'P +9',l:'L +9',tx:'T -3'},{msg:'Every couple contains one person who has already decided.',estate:'ESTATE V',p:'P +8',l:'L +10',tx:'T -2'}];
+var bcIdx=0;var _bcFirst=true;
+function showBroadcast(i){var d=BROADCAST[i%BROADCAST.length];var msg=document.getElementById('bc-msg');var est=document.getElementById('bc-estate');var plt=document.getElementById('bc-plt');if(!msg)return;function setContent(){msg.textContent=d.msg;if(est)est.textContent=d.estate;if(plt)plt.innerHTML='<span style="color:var(--profit)">'+d.p+'</span>&nbsp;&nbsp;<span style="color:var(--love)">'+d.l+'</span>&nbsp;&nbsp;<span style="color:var(--tax)">'+d.tx+'</span>';}if(_bcFirst){_bcFirst=false;msg.style.opacity='1';setContent();}else{msg.style.transition='opacity 0.6s';msg.style.opacity='0';setTimeout(function(){setContent();msg.style.opacity='1';},620);}}
+function nextBroadcast(){bcIdx=(bcIdx+1)%BROADCAST.length;showBroadcast(bcIdx);setTimeout(nextBroadcast,6500);}
+showBroadcast(bcIdx);setTimeout(nextBroadcast,6500);
+
+/* DOCTRINE DATA */
+var DOCTRINE_FULL=[{num:'I',title:'The Pre-Decision',law:'Every transaction is decided before the first word of the presentation.',philosophy:['There is a sequence of events in every first client encounter that most agents have never mapped.','The verdict is about one variable: do you need this deal.','The surplus position is a professional performance instrument.'],cheat:['Calculate your liquid runway.','Run the Zero Consequence Review.','Rehearse genuine indifference.','The Ninety-Second Discipline.','Maintain the Signal Ledger.'],mirror:'What is your exact liquid runway right now?',p:'P +9',l:'L +8',tx:'T -2'},{num:'II',title:'The Tax of Transparency',law:'Voluntary disclosure converts limitation into trust deposit worth 10x.',philosophy:['Every agent manages concealments.','Disclosure generates Love deposits.','The math is not close.'],cheat:['Run the Transparency Inventory.','Apply the Disclosure Calculus.','The Disclosure Opening.','The Limitation Disclosure Formula.'],mirror:'Name the truth you are most actively managing.',p:'P +7',l:'L +9',tx:'T -2'},{num:'III',title:'The Delinquent Tax List',law:'The pre-distress seller is in the county records.',philosophy:['The delinquent list is public record.','The agent provides genuine help.','Response rate: 30 to 45 percent.'],cheat:['Locate the list for your county.','Filter and cross-reference.','Handwritten note approach.','Incoming call protocol.'],mirror:'When did you last access the list?',p:'P +9',l:'L +9',tx:'T -3'},{num:'IV',title:'The Probate Filing',law:'The estate announces itself in probate court.',philosophy:['The filing is public record.','The representative faces unique challenges.','Fewer than five agents access these records.'],cheat:['Access probate filings.','Prioritize by time and equity.','Professional letter approach.','Know the legal mechanics.','Build attorney relationships.'],mirror:'How many estate sales in your market?',p:'P +8',l:'L +9',tx:'T -3'},{num:'V',title:'The Reluctant Partner',law:'The transaction is blocked by the person not speaking.',philosophy:['The enthusiastic partner is already sold.','The reluctance is about an unspoken fear.','It can only be addressed in private.'],cheat:['Identify within ten minutes.','Redirect sixty percent of attention.','Create private moment.','The unblocking question.','Follow up call specifically.'],mirror:'Who was the reluctant partner?',p:'P +8',l:'L +10',tx:'T -2'},{num:'VI',title:'The Net Sheet First',law:'The real question is almost never about price.',philosophy:['The real agenda: can I afford this move?','The agent who opens with the net sheet wins.'],cheat:['Build the template.','The opening.','Fill it together.'],mirror:'When did they first see net proceeds?',p:'P +8',l:'L +9',tx:'T -2'},{num:'VII',title:'The Permit Intelligence',law:'Every permit reveals intention before the owner knows.',philosophy:['The signal predates the listing by 6-18 months.','The overimprovement is most valuable.'],cheat:['Access permit records.','Map four data points.','Contact during renovation.'],mirror:'How many renovations underway now?',p:'P +9',l:'L +10',tx:'T -3'},{num:'VIII',title:'The Divorce Attorney',law:'The attorney needs one agent they trust.',philosophy:['The position is vacant in most markets.','85% conversion rate from referral.'],cheat:['Identify family law attorneys.','Learn the legal framework.','Formal commitment letter.'],mirror:'How many attorneys do you know?',p:'P +9',l:'L +9',tx:'T -2'},{num:'XI',title:'The Appraisal Package',law:'The agent who provides the right dataset controls the outcome.',philosophy:['The MLS record does not show everything.','The informed assessment protects everyone.'],cheat:['Build the template.','Deliver before inspection.','Negative comparable analysis.'],mirror:'How many appraisals had packages?',p:'P +9',l:'L +7',tx:'T -3'},{num:'XX',title:'The Commission Tax Trap',law:'The tax system extracts maximum from the unaware agent.',philosophy:['Sole proprietors pay the most.','Four decisions change this permanently.'],cheat:['Calculate effective rate.','S-corp election.','Home office deduction.','Mileage log.','SEP-IRA.'],mirror:'What is your effective tax rate?',p:'P +10',l:'L +5',tx:'T -2'}];
+(function(){var feed=document.getElementById('doctrine-feed');if(!feed)return;var html='';DOCTRINE_FULL.forEach(function(d){html+='<div class="estate-block reveal"><div class="eb-header"><span class="eb-num">'+d.num+'</span><span class="eb-title">'+d.title+'</span></div><div class="eb-law">'+d.law+'</div><div class="eb-body">';d.philosophy.forEach(function(p){html+='<p>'+p+'</p>';});html+='</div><div class="eb-cheat"><div class="eb-cheat-title">THE CHEAT CODE</div>';d.cheat.forEach(function(s,i){html+='<div class="eb-step"><span class="eb-step-num">0'+(i+1)+'</span><span class="eb-step-body">'+s+'</span></div>';});html+='</div><div class="eb-plt"><span class="plt-p">'+d.p+'</span><span class="plt-l">'+d.l+'</span><span class="plt-t">'+d.tx+'</span></div><div class="mirror"><strong>MIRROR</strong>'+d.mirror+'</div></div>';});feed.innerHTML=html;observeReveal();})();
+(function(){var cont=document.getElementById('estate-full-content');if(!cont)return;var html='';DOCTRINE_FULL.forEach(function(d){html+='<div class="estate-section reveal"><div class="eb-header"><span class="eb-num">'+d.num+'</span><span class="eb-title" style="font-family:\'Cinzel\',serif;font-size:28px;color:var(--text);">'+d.title+'</span></div><div class="full-estate-law">'+d.law+'</div><div class="full-estate-philosophy">';d.philosophy.forEach(function(p){html+='<p>'+p+'</p>';});html+='</div><div class="full-estate-cheat-title">THE CHEAT CODE</div>';d.cheat.forEach(function(s,i){html+='<div class="full-estate-step"><strong style="font-family:\'Cinzel\',serif;font-size:10px;color:var(--gold);">0'+(i+1)+'</strong>&nbsp;&nbsp;'+s+'</div>';});html+='<div class="eb-plt" style="margin-top:20px;"><span class="plt-p">'+d.p+'</span><span class="plt-l">'+d.l+'</span><span class="plt-t">'+d.tx+'</span></div><div class="full-estate-mirror"><strong>MIRROR</strong>'+d.mirror+'</div></div>';});html+='<div class="estate-section reveal" style="text-align:center;padding:60px 0;"><div style="font-family:\'Cinzel\',serif;font-size:11px;letter-spacing:.5em;color:var(--gold);margin-bottom:20px;">ESTATES VI THROUGH XL</div><div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-size:26px;color:var(--text);margin-bottom:16px;">Thirty-five more Estates remain.</div><a href="THE_ESTATE_FINAL.docx" download class="btn-g">Download The Complete Estate</a></div>';cont.innerHTML=html;observeReveal();})();
+
+/* CALCULATORS */
+function id(x){return document.getElementById(x);}function fmt(n){return '$'+Math.abs(Math.round(n)).toLocaleString();}function showRes(x){var el=id(x);if(el)el.classList.add('on');}
+var CALCS=[{id:'c1',label:'Calculator 01',name:'Net Per Transaction',fields:[{id:'c1g',label:'Gross Commission ($)',val:9200},{id:'c1s',label:'Split You Keep (%)',val:70},{id:'c1m',label:'Annual Marketing ($)',val:10000},{id:'c1t',label:'Annual Transactions',val:18},{id:'c1h',label:'Hours Per Transaction',val:48}],fn:'calcNet1',results:[{id:'c1a',label:'After split'},{id:'c1b',label:'Marketing',cls:'red'},{id:'c1c',label:'Time cost',cls:'red'},{id:'c1d',label:'SE Tax',cls:'red'},{id:'c1e',label:'Actual net',cls:'gold'},{id:'c1f',label:'You keep'}]},{id:'c2',label:'Calculator 02',name:'Referral Gap',fields:[{id:'c2c',label:'Current Referral Rate (%)',val:22},{id:'c2v',label:'Annual Volume',val:18},{id:'c2n',label:'Net Commission ($)',val:3800}],fn:'calcRef1',results:[{id:'c2a',label:'Current referrals'},{id:'c2b',label:'Capable at 65%',cls:'green'},{id:'c2c2',label:'Gap in deals'},{id:'c2d',label:'Revenue gap',cls:'gold'},{id:'c2e',label:'Hours to close'},{id:'c2f',label:'Return per hour',cls:'green'}]},{id:'c3',label:'Calculator 03',name:'Database Value',fields:[{id:'c3c',label:'Database Size',val:60},{id:'c3n',label:'Net Commission ($)',val:3800}],fn:'calcDB1',results:[{id:'c3a',label:'Maintained (65%)',cls:'green'},{id:'c3b',label:'Unmaintained (11%)',cls:'red'},{id:'c3c2',label:'3-year gap',cls:'gold'},{id:'c3d',label:'Annual hours'},{id:'c3e',label:'Return per hour',cls:'green'}]},{id:'c4',label:'Calculator 04',name:'Runway & Signal',fields:[{id:'c4r',label:'Liquid Reserves ($)',val:25000},{id:'c4e',label:'Monthly Expenses ($)',val:6500}],fn:'calcRun1',results:[{id:'c4a',label:'Runway',cls:'gold'},{id:'c4b',label:'Signal Quality'},{id:'c4c',label:'Gap to 6-month'},{id:'c4d',label:'',cls:'italic'}]},{id:'c5',label:'Calculator 05',name:'Tax Savings',fields:[{id:'c5p',label:'Annual Net Profit ($)',val:120000},{id:'c5s',label:'Structure',type:'select',options:['Sole Prop','S-Corp'],vals:['sole','scorp']},{id:'c5o',label:'Home Office %',val:12},{id:'c5h',label:'Annual Home Costs ($)',val:28000},{id:'c5mi',label:'Business Miles',val:18000}],fn:'calcTax1',results:[{id:'c5a',label:'S-corp savings',cls:'green'},{id:'c5b',label:'Home office',cls:'green'},{id:'c5c',label:'Mileage',cls:'green'},{id:'c5d',label:'SEP-IRA',cls:'green'},{id:'c5e',label:'Total annual',cls:'gold'},{id:'c5f',label:'10-year compound',cls:'gold'}]},{id:'c6',label:'Calculator 06',name:'Commission Defense',fields:[{id:'c6g',label:'Full Rate (%)',val:3},{id:'c6d',label:'Discounted Rate (%)',val:2.5},{id:'c6p',label:'Sale Price ($)',val:450000},{id:'c6t',label:'Annual Transactions',val:12}],fn:'calcComm',results:[{id:'c6a',label:'Full commission'},{id:'c6b',label:'Discounted'},{id:'c6c',label:'Per deal',cls:'red'},{id:'c6d2',label:'Annual',cls:'red'},{id:'c6e',label:'5-year',cls:'red'},{id:'c6f',label:'Verdict',cls:'gold'}]},{id:'c7',label:'Calculator 07',name:'Market Share',fields:[{id:'c7t',label:'Market Transactions/Year',val:2400},{id:'c7y',label:'Your Transactions',val:18},{id:'c7g',label:'Target Share (%)',val:2}],fn:'calcShare',results:[{id:'c7a',label:'Current share'},{id:'c7b',label:'At target',cls:'green'},{id:'c7c',label:'Additional needed'},{id:'c7d',label:'Revenue at target',cls:'gold'},{id:'c7e',label:'Additional revenue',cls:'green'}]},{id:'c8',label:'Calculator 08',name:'Price Decision',fields:[{id:'c8a',label:'Target Price ($)',val:499000},{id:'c8m',label:'Supported Price ($)',val:475000},{id:'c8r',label:'Commission Rate (%)',val:3},{id:'c8c',label:'Monthly Carrying ($)',val:3800}],fn:'calcPrice',results:[{id:'c8r2',label:'At target'},{id:'c8s',label:'At supported'},{id:'c8dom',label:'Extra DOM',cls:'red'},{id:'c8cc',label:'Extra carrying',cls:'red'},{id:'c8net',label:'Net advantage',cls:'gold'},{id:'c8v',label:'Verdict',cls:'gold'}]},{id:'c9',label:'Calculator 09',name:'Open House Value',fields:[{id:'c9o',label:'Open Houses/Month',val:4},{id:'c9v',label:'Serious Contacts/OH',val:2},{id:'c9r',label:'Conversion (%)',val:40},{id:'c9c',label:'Net Commission ($)',val:3800}],fn:'calcOH',results:[{id:'c9a',label:'Monthly contacts'},{id:'c9b',label:'Monthly conversions'},{id:'c9d',label:'Annual deals',cls:'green'},{id:'c9e',label:'Annual revenue',cls:'gold'},{id:'c9f',label:'Per open house',cls:'green'}]},{id:'c10',label:'Calculator 10',name:'Surplus Builder',fields:[{id:'c10e',label:'Monthly Expenses ($)',val:6500},{id:'c10c',label:'Current Reserves ($)',val:15000},{id:'c10s',label:'Monthly Savings ($)',val:1200}],fn:'calcSurplus',results:[{id:'c10a',label:'Current runway'},{id:'c10b',label:'Target (6 mo)',cls:'gold'},{id:'c10gap',label:'Gap',cls:'red'},{id:'c10mo',label:'Months to target'},{id:'c10sig',label:'Signal quality'},{id:'c10v',label:'Signal at target',cls:'green'}]}];
+function buildCalcHTML(calc){var html='<div class="calc-panel"><div class="cp-lbl">'+calc.label+'</div><div class="cp-name">'+calc.name+'</div>';calc.fields.forEach(function(f){html+='<div class="ig"><label>'+f.label+'</label>';if(f.type==='select'){html+='<select class="ti" id="'+f.id+'">';f.options.forEach(function(o,i){html+='<option value="'+(f.vals?f.vals[i]:o)+'">'+o+'</option>';});html+='</select>';}else{html+='<input class="ti" id="'+f.id+'" type="number" value="'+f.val+'">';}html+='</div>';});html+='<button class="t-btn" onclick="'+calc.fn+'()">Calculate</button><div class="t-res" id="res-'+calc.id+'">';calc.results.forEach(function(r){html+='<div class="rr"><span class="rl">'+r.label+'</span><span class="rv'+(r.cls?' '+r.cls:'')+'" id="'+r.id+'">-</span></div>';});html+='</div></div>';return html;}
+(function(){var bc=document.getElementById('brief-calcs');if(!bc)return;var html='';CALCS.slice(0,5).forEach(function(c){html+=buildCalcHTML(c);});bc.innerHTML=html;})();
+(function(){var ac=document.getElementById('arsenal-calcs');if(!ac)return;var html='';CALCS.forEach(function(c){html+=buildCalcHTML(c);});ac.innerHTML=html;})();
+function calcNet1(){var g=+id('c1g').value||0,sp=+id('c1s').value/100||.7,m=+id('c1m').value||0,tx=+id('c1t').value||1,h=+id('c1h').value||48;var as=g*sp,ma=m/tx,tc=h*75,sub=as-ma-tc,se=Math.max(0,sub*.153*.9235),net=sub-se;id('c1a').textContent=fmt(as);id('c1b').textContent='- '+fmt(ma);id('c1c').textContent='- '+fmt(tc);id('c1d').textContent='- '+fmt(se);id('c1e').textContent=fmt(net);id('c1f').textContent=(net/g*100).toFixed(1)+'%';showRes('res-c1');}
+function calcRef1(){var c=+id('c2c').value/100||.22,v=+id('c2v').value||18,n=+id('c2n').value||3800,cap=.65;var gap=(cap-c)*v,rev=gap*n,hrs=Math.round(v*1.5);id('c2a').textContent=(c*v).toFixed(1);id('c2b').textContent=(cap*v).toFixed(1);id('c2c2').textContent=gap.toFixed(1);id('c2d').textContent=fmt(rev);id('c2e').textContent=hrs+' hrs/yr';id('c2f').textContent='$'+Math.round(rev/hrs)+'/hr';showRes('res-c2');}
+function calcDB1(){var cl=+id('c3c').value||60,co=+id('c3n').value||3800;var ma=Math.round(cl*.65),um=Math.round(cl*.11),gap=ma-um;id('c3a').textContent=ma+' referrals';id('c3b').textContent=um+' referrals';id('c3c2').textContent=fmt(gap*co);id('c3d').textContent=cl+' hrs/yr';id('c3e').textContent='$'+Math.round(gap*co/3/cl)+'/hr';showRes('res-c3');}
+function calcRun1(){var r=+id('c4r').value||0,e=+id('c4e').value||1,run=r/e,gap=Math.max(0,(6-run)*e);var sig,read;if(run>=7){sig='Excellent - Abundance';read='The signal broadcasts trust.';}else if(run>=5){sig='Strong - Solid';read='Good foundation.';}else if(run>=3){sig='Moderate - Build';read='Need is influencing signal.';}else if(run>=1){sig='Weak';read='Cannot afford to lose next listing.';}else{sig='Critical';read='Surplus is the first priority.';}id('c4a').textContent=run.toFixed(1)+' months';id('c4b').textContent=sig;id('c4c').textContent=gap>0?fmt(gap)+' needed':'Target met';id('c4d').textContent=read;showRes('res-c4');}
+function calcTax1(){var p=+id('c5p').value||0,st=id('c5s').value;var op=+id('c5o').value/100||.12,hc=+id('c5h').value||0,mi=+id('c5mi').value||0;var sc=st==='sole'?p*.4*.153*.5:0,od=hc*op,md=mi*.67,sep=Math.min(p*.20,66000),tr=.28;var total=sc+(od+md+sep)*tr,comp=total*((Math.pow(1.07,10)-1)/.07);id('c5a').textContent=st==='sole'?fmt(sc)+'/yr':'Already elected';id('c5b').textContent=fmt(od)+' deduction';id('c5c').textContent=fmt(md)+' deduction';id('c5d').textContent=fmt(sep)+' deductible';id('c5e').textContent=fmt(total)+'/yr';id('c5f').textContent=fmt(Math.round(comp));showRes('res-c5');}
+function calcComm(){var full=+id('c6g').value/100||.03,disc=+id('c6d').value/100||.025,price=+id('c6p').value||0,txns=+id('c6t').value||1;var fc=price*full,dc=price*disc,diff=fc-dc,annual=diff*txns,comp5=annual*5;id('c6a').textContent=fmt(fc);id('c6b').textContent=fmt(dc);id('c6c').textContent=fmt(diff)+' per deal';id('c6d2').textContent=fmt(annual);id('c6e').textContent=fmt(comp5);id('c6f').textContent=comp5>50000?'Hold the rate.':'Defend it.';showRes('res-c6');}
+function calcShare(){var total=+id('c7t').value||1,mine=+id('c7y').value||0,target=+id('c7g').value/100||.02;var curr=mine/total*100,ttxns=total*target,add=ttxns-mine,rev=ttxns*3800,addRev=add*3800;id('c7a').textContent=curr.toFixed(2)+'%';id('c7b').textContent=ttxns.toFixed(1);id('c7c').textContent=Math.max(0,add).toFixed(1);id('c7d').textContent=fmt(rev);id('c7e').textContent=fmt(Math.max(0,addRev));showRes('res-c7');}
+function calcPrice(){var target=+id('c8a').value||0,supported=+id('c8m').value||0,rate=+id('c8r').value/100||.03,carry=+id('c8c').value||0;var commTarget=target*rate,commSupp=supported*rate,priceDiff=target-supported;var extraDOM=Math.round(priceDiff/8000*14),extraCarry=extraDOM/30*carry;var netAdvantage=extraCarry+(priceDiff*.15);id('c8r2').textContent=fmt(commTarget);id('c8s').textContent=fmt(commSupp);id('c8dom').textContent=extraDOM+' days';id('c8cc').textContent=fmt(extraCarry);id('c8net').textContent=fmt(netAdvantage);id('c8v').textContent=netAdvantage>5000?'Price at supported number.':'Check comparables.';showRes('res-c8');}
+function calcOH(){var oh=+id('c9o').value||0,contacts=+id('c9v').value||0,conv=+id('c9r').value/100||.4,comm=+id('c9c').value||3800;var monthly=oh*contacts,convM=monthly*conv,annual=convM*12,rev=annual*comm,perOH=rev/(oh*12);id('c9a').textContent=monthly.toFixed(0);id('c9b').textContent=convM.toFixed(1);id('c9d').textContent=annual.toFixed(0);id('c9e').textContent=fmt(rev);id('c9f').textContent=fmt(perOH);showRes('res-c9');}
+function calcSurplus(){var e=+id('c10e').value||1,curr=+id('c10c').value||0,save=+id('c10s').value||1;var run=curr/e,target=6*e,gap=Math.max(0,target-curr),months=Math.ceil(gap/save);var sig=run>=6?'Abundance':run>=4?'Solid':run>=2?'Need-Influenced':'Scarcity';var sigT='Abundance at target';id('c10a').textContent=run.toFixed(1)+' months';id('c10b').textContent=fmt(target);id('c10gap').textContent=fmt(gap);id('c10mo').textContent=months+' months';id('c10sig').textContent=sig;id('c10v').textContent=sigT;showRes('res-c10');}
+
+/* VAULT */
+var SECRETS=[{estate:'ESTATE III',title:'The Delinquent Tax List',preview:'Public record. Free access.',body:'Every county publishes a list of homeowners who missed property taxes. Response rate: 30 to 45 percent.',p:'P +9',l:'L +9',tx:'T -3'},{estate:'ESTATE V',title:'The Reluctant Partner',preview:'The enthusiastic partner is already closed.',body:'Every couple contains the actual decision-maker. The reluctance is about an unspoken fear.',p:'P +8',l:'L +10',tx:'T -2'},{estate:'ESTATE XI',title:'The Appraisal Package',preview:'You can show them more.',body:'A six-section document delivered before inspection protects 20 to 30 percent more transactions.',p:'P +9',l:'L +7',tx:'T -3'},{estate:'ESTATE IV',title:'The Probate Filing',preview:'Public court record.',body:'Fewer than five agents access these records systematically.',p:'P +8',l:'L +9',tx:'T -3'},{estate:'ESTATE I',title:'The First Ninety Seconds',preview:'The client decides before the first word.',body:'The surplus position is a professional performance instrument.',p:'P +9',l:'L +8',tx:'T -2'},{estate:'ESTATE VII',title:'The Permit Pull',preview:'Six months before the listing exists.',body:'Every building permit reveals homeowner intention.',p:'P +9',l:'L +10',tx:'T -3'},{estate:'ESTATE VIII',title:'The Divorce Attorney',preview:'One professional relationship.',body:'Conversion rate from attorney referral: 85 percent.',p:'P +9',l:'L +9',tx:'T -2'},{estate:'ESTATE XIII',title:'The Open House',preview:'3% of homes sell at the open house.',body:'The follow-up call within 24 hours converts the visitor.',p:'P +9',l:'L +8',tx:'T -3'},{estate:'ESTATE XX',title:'$25,000 to $40,000 in Unnecessary Tax',preview:'Four decisions. One meeting. Every year.',body:'S-corp, home office, SEP-IRA, mileage log.',p:'P +10',l:'L +5',tx:'T -2'},{estate:'ESTATE II',title:'The Concealment Costs More',preview:'The math is not close.',body:'Management: 144 to 192 Tax units. Disclosure: 3 Tax and 8 to 10 Love.',p:'P +7',l:'L +9',tx:'T -2'},{estate:'ESTATE XXIII',title:'The Decline',preview:'The wrong client costs more than they pay.',body:'The full cost frequently exceeds the gross commission.',p:'P +8',l:'L +8',tx:'T -2'},{estate:'ESTATE XL',title:'The Transaction Closes. The Relationship Persists.',preview:'Build for the relationship.',body:'Forty Estates describe forty domains of practice.',p:'P +9',l:'L +10',tx:'T -2'}];
+(function(){var vg=document.getElementById('vault-grid');if(!vg)return;var html='';SECRETS.forEach(function(s,i){html+='<div class="secret-card" onclick="toggleSecret('+i+')" id="sc-'+i+'"><div class="sc-estate">'+s.estate+'</div><div class="sc-title">'+s.title+'</div><div class="sc-preview">'+s.preview+'</div><div class="sc-plt"><span class="sc-p">'+s.p+'</span><span class="sc-l">'+s.l+'</span><span class="sc-t">'+s.tx+'</span></div><div class="sc-body">'+s.body+'</div></div>';});vg.innerHTML=html;})();
+function toggleSecret(i){var card=document.getElementById('sc-'+i);if(card)card.classList.toggle('open');}
+
+/* PLT SCENARIOS */
+var SCENARIOS=[{title:'Accepting the Overpriced Listing',p:1,l:-6,t:9,note:'The commission arrives. The referral never comes.'},{title:'Declining the Overpriced Listing',p:0,l:8,t:-2,note:'No immediate commission. Permanent signal.'},{title:'Delivering the Honest CMA',p:8,l:9,t:-2,note:'The seller may not like it. The referral will come.'},{title:'Telling the Client What They Want',p:2,l:-5,t:9,note:'The listing is won. The transaction will fail.'},{title:'The Voluntary Disclosure',p:6,l:9,t:-3,note:'Costs something. Produces permanent trust.'},{title:'Managing a Concealment',p:0,l:-4,t:8,note:'The bandwidth consumed. The advice distorted.'},{title:'Building the Surplus',p:9,l:7,t:-3,note:'Costs now. Produces forever.'},{title:'Referral Architecture',p:9,l:10,t:-3,note:'60 hours per year. $267 per hour return.'},{title:'Appraisal Package',p:9,l:7,t:-3,note:'Three hours. 20 to 30 percent more protected.'},{title:'Probate Courthouse',p:8,l:9,t:-3,note:'One hour per week. Zero competition.'},{title:'Cold Prospecting',p:2,l:1,t:7,note:'High volume. Low signal. Low conversion.'},{title:'Handwritten Note',p:9,l:9,t:-3,note:'Costs almost nothing. Almost no agent sends it.'}];
+(function(){var sl=document.getElementById('scenario-list');if(!sl)return;var html='';SCENARIOS.forEach(function(s,i){html+='<div class="scenario-item" onclick="loadScenario('+i+')"><div class="si-title">'+s.title+'</div><div class="si-scores"><span style="color:var(--profit)">P '+s.p+'</span><span style="color:var(--love)">L '+s.l+'</span><span style="color:var(--tax)">T '+s.t+'</span></div></div>';});sl.innerHTML=html;})();
+function loadScenario(i){var s=SCENARIOS[i];id('sp').value=Math.max(0,s.p);id('sl').value=s.l;id('st').value=Math.max(0,s.t);score();id('sr').textContent=s.note;window.scrollTo(0,0);}
+function score(){var p=+id('sp').value,l=+id('sl').value,t=+id('st').value,tv=p+l-t;id('pv').textContent=p;id('lv').textContent=l;id('tv2').textContent=t;id('dp').textContent=p;id('dl').textContent=l;id('dt').textContent=t;id('tvv').textContent=tv;var r='';if(tv>=15)r='Compounds permanently.';else if(tv>=10)r='Strong True Value. Move.';else if(tv>=6)r='Positive. Can Tax be reduced?';else if(tv>=2)r='Marginal. Examine invisible costs.';else if(tv>=-2)r='Near zero.';else if(tv>=-6)r='Negative. Decline or restructure.';else r='Destroys more than it creates.';id('sr').textContent=r;id('tvv').style.color=tv>=5?'var(--gold)':tv>=0?'var(--text)':'#c49090';}
+function observeReveal(){document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('on');});}
+observeReveal();
+
+/* 3D ENGINE - ORIGINAL, UNCHANGED */
+function proj(x,y,z,cx,cy,fov){var s=fov/(fov+z);return{x:cx+x*s,y:cy+y*s,s:s,z:z};}
+function rX(v,a){return{x:v.x,y:v.y*Math.cos(a)-v.z*Math.sin(a),z:v.y*Math.sin(a)+v.z*Math.cos(a)};}
+function rY(v,a){return{x:v.x*Math.cos(a)+v.z*Math.sin(a),y:v.y,z:-v.x*Math.sin(a)+v.z*Math.cos(a)};}
+function rZ(v,a){return{x:v.x*Math.cos(a)-v.y*Math.sin(a),y:v.x*Math.sin(a)+v.y*Math.cos(a),z:v.z};}
+function xfv(v,rx,ry,rz,sc){var s={x:v.x*sc,y:v.y*sc,z:v.z*sc};if(rz)s=rZ(s,rz);if(rx)s=rX(s,rx);if(ry)s=rY(s,ry);return s;}
+function gw(ctx,col,r){ctx.shadowBlur=r;ctx.shadowColor=col;}
+function ng(ctx){ctx.shadowBlur=0;}
+var GC='rgba(196,169,90,',PC='rgba(168,196,212,',LC='rgba(212,168,168,',TC='rgba(212,196,168,';
+var ESTATE_V=[{x:-2.2,y:-1.0,z:-.7},{x:2.2,y:-1.0,z:-.7},{x:2.2,y:.8,z:-.7},{x:-2.2,y:.8,z:-.7},{x:-2.2,y:-1.0,z:.7},{x:2.2,y:-1.0,z:.7},{x:2.2,y:.8,z:.7},{x:-2.2,y:.8,z:.7},{x:0,y:1.8,z:-.7},{x:0,y:1.8,z:.7},{x:-3.2,y:-1.0,z:-.5},{x:-2.2,y:-1.0,z:-.5},{x:-2.2,y:.3,z:-.5},{x:-3.2,y:.3,z:-.5},{x:-3.2,y:-1.0,z:.5},{x:-2.2,y:-1.0,z:.5},{x:-2.2,y:.3,z:.5},{x:-3.2,y:.3,z:.5},{x:-2.7,y:.9,z:-.5},{x:-2.7,y:.9,z:.5},{x:2.2,y:-1.0,z:-.5},{x:3.2,y:-1.0,z:-.5},{x:3.2,y:.3,z:-.5},{x:2.2,y:.3,z:-.5},{x:2.2,y:-1.0,z:.5},{x:3.2,y:-1.0,z:.5},{x:3.2,y:.3,z:.5},{x:2.2,y:.3,z:.5},{x:2.7,y:.9,z:-.5},{x:2.7,y:.9,z:.5}];
+var ESTATE_E=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7],[3,8],[2,8],[7,9],[6,9],[8,9],[10,11],[11,12],[12,13],[13,10],[14,15],[15,16],[16,17],[17,14],[10,14],[13,17],[12,16],[18,19],[13,18],[17,19],[20,21],[21,22],[22,23],[23,20],[24,25],[25,26],[26,27],[27,24],[20,24],[23,27],[22,26],[28,29],[23,28],[27,29]];
+var PILLAR_XS=[-1.6,-.8,0,.8,1.6];
+function makeCanvas3D(id,drawFn){var cv=document.getElementById(id);if(!cv)return;var ctx=cv.getContext('2d'),W,H,t=0;function resize(){var p=cv.parentElement;W=cv.width=p?p.offsetWidth:window.innerWidth;H=cv.height=p?p.offsetHeight:300;}function loop(){t+=0.012;ctx.clearRect(0,0,W,H);drawFn(ctx,W,H,t);requestAnimationFrame(loop);}window.addEventListener('resize',resize);resize();loop();}
+function drawEstate(ctx,W,H,t,cx,cy,sc){var fov=sc*9,rx=-0.22,ry=t;var bg=ctx.createRadialGradient(cx,cy,0,cx,cy,sc*4);bg.addColorStop(0,GC+'0.06)');bg.addColorStop(1,GC+'0)');ctx.fillStyle=bg;ctx.fillRect(cx-sc*4,cy-sc*4,sc*8,sc*8);for(var gx=-4;gx<=4;gx++){var v1=xfv({x:gx*.55,y:-1,z:-2.5},rx,ry,0,sc),v2=xfv({x:gx*.55,y:-1,z:2.5},rx,ry,0,sc);var p1=proj(v1.x,v1.y,v1.z,cx,cy,fov),p2=proj(v2.x,v2.y,v2.z,cx,cy,fov);ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.strokeStyle=GC+'0.05)';ctx.lineWidth=.4;ctx.stroke();}var tv=ESTATE_V.map(function(v){var sv=xfv(v,rx,ry,0,sc);return{p:proj(sv.x,sv.y,sv.z,cx,cy,fov),v:sv};});var FACES=[[0,1,2,3],[4,7,6,5],[0,3,7,4],[1,5,6,2],[3,8,9,7],[2,6,9,8]];FACES.map(function(f){var z=0;f.forEach(function(i){z+=tv[i].v.z;});return{f:f,z:z/f.length};}).sort(function(a,b){return b.z-a.z;}).forEach(function(sf){var pts=sf.f.map(function(i){return tv[i].p;});ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);for(var i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);ctx.closePath();var d=Math.max(0,Math.min(1,(sf.z+sc*3)/(sc*6)));ctx.fillStyle='rgba(6,5,2,'+(0.12+d*.08)+')';ctx.fill();});ESTATE_E.forEach(function(e){var a=tv[e[0]],b=tv[e[1]];if(!a||!b)return;var d=Math.max(0,Math.min(1,(a.v.z+b.v.z+sc*3)/(sc*6)));gw(ctx,GC+'0.7)',d*8);ctx.strokeStyle=GC+(0.1+d*.6)+')';ctx.lineWidth=.4+d*1.4;ctx.beginPath();ctx.moveTo(a.p.x,a.p.y);ctx.lineTo(b.p.x,b.p.y);ctx.stroke();ng(ctx);});PILLAR_XS.forEach(function(px){var bot=xfv({x:px,y:-1.0,z:-1.2},rx,ry,0,sc),top=xfv({x:px,y:1.0,z:-1.2},rx,ry,0,sc);var pb=proj(bot.x,bot.y,bot.z,cx,cy,fov),pt=proj(top.x,top.y,top.z,cx,cy,fov);var d=Math.max(0,Math.min(1,(bot.z+sc*3)/(sc*6)));gw(ctx,GC+'1)',d*14);ctx.strokeStyle=GC+(0.25+d*.55)+')';ctx.lineWidth=1.2+d*2;ctx.beginPath();ctx.moveTo(pb.x,pb.y);ctx.lineTo(pt.x,pt.y);ctx.stroke();ng(ctx);gw(ctx,GC+'1)',d*20);ctx.fillStyle=GC+(0.5+d*.4)+')';ctx.beginPath();ctx.arc(pt.x,pt.y,1.8+d*2.2,0,Math.PI*2);ctx.fill();ng(ctx);});[-2.2,2.2].forEach(function(lx){var lv=xfv({x:lx,y:1.4,z:-.7},rx,ry,0,sc);var lp=proj(lv.x,lv.y,lv.z,cx,cy,fov);var pulse=.7+Math.sin(t*2.8+lx)*.3;gw(ctx,GC+'1)',22*pulse);ctx.fillStyle=GC+(0.65*pulse)+')';ctx.beginPath();ctx.arc(lp.x,lp.y,2.8,0,Math.PI*2);ctx.fill();ng(ctx);});}
+var PY_V=[{x:0,y:-1,z:0},{x:-1,y:.5,z:-1},{x:1,y:.5,z:-1},{x:1,y:.5,z:1},{x:-1,y:.5,z:1}];
+var PY_F=[[0,1,2],[0,2,3],[0,3,4],[0,4,1],[1,4,3,2]];
+function drawPyramid(ctx,cx,cy,sc,rx,ry,alpha,col){var fov=sc*6;var tv=PY_V.map(function(v){var sv=xfv(v,rx,ry,0,sc);return{p:proj(sv.x,sv.y,sv.z,cx,cy,fov),v:sv};});PY_F.map(function(f){var z=0;f.forEach(function(i){z+=tv[i].v.z;});return{f:f,z:z/f.length};}).sort(function(a,b){return b.z-a.z;}).forEach(function(sf){var pts=sf.f.map(function(i){return tv[i].p;});ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);for(var i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);ctx.closePath();var d=Math.max(0,Math.min(1,(sf.z+sc*2)/(sc*4)));ctx.fillStyle='rgba(4,3,1,'+(0.28+d*.25)+')';ctx.fill();ctx.strokeStyle=(col||GC)+(alpha*(0.3+d*.65))+')';ctx.lineWidth=.5+d*.9;ctx.stroke();});gw(ctx,(col||GC)+'0.8)',alpha*12);ctx.fillStyle=(col||GC)+(alpha*.7)+')';ctx.beginPath();ctx.arc(tv[0].p.x,tv[0].p.y,1.5,0,Math.PI*2);ctx.fill();ng(ctx);}
+
+/* WORLD CANVAS - ORIGINAL */
+(function(){var cv=document.getElementById('world'),ctx=cv.getContext('2d'),W,H,t=0;var pts=[],syms=[];var SYM_TYPES=['$','%','P','L','T','$','$'];var SYM_COLS=[GC,GC,PC,LC,TC,GC,GC];function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;init();}function init(){pts=[];for(var i=0;i<40;i++)pts.push({x:Math.random()*W,y:Math.random()*H,r:.3+Math.random()*1.2,vy:-(0.08+Math.random()*.3),a:Math.random()*Math.PI*2,sp:.005+Math.random()*.008,d:Math.random()});syms=[];for(var j=0;j<18;j++){var ti=Math.floor(Math.random()*SYM_TYPES.length);syms.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.4,vy:-(Math.random()*.5+.1),s:10+Math.random()*28,alpha:.05+Math.random()*.14,rot:Math.random()*Math.PI*2,dr:(Math.random()-.5)*.008,t:ti,col:SYM_COLS[ti],life:Math.random()*400,max:300+Math.random()*400});}}function draw(){t+=.016;ctx.clearRect(0,0,W,H);var bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#040403');bg.addColorStop(1,'#060605');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);ctx.strokeStyle=GC+'0.025)';ctx.lineWidth=.4;for(var gx=0;gx<W;gx+=80){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke();}for(var gy=0;gy<H;gy+=80){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();}pts.forEach(function(p){p.y+=p.vy;p.a+=p.sp;if(p.y<-5){p.y=H+5;p.x=Math.random()*W;}var al=(Math.sin(p.a)*.5+.5)*(.08+p.d*.25);ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=GC+al+')';ctx.fill();});syms.forEach(function(s){s.x+=s.vx;s.y+=s.vy;s.rot+=s.dr;s.life++;if(s.y<-s.s*2||s.life>s.max){s.x=Math.random()*W;s.y=H+s.s;s.life=0;}var fa=Math.min(1,s.life/30)*Math.min(1,(s.max-s.life)/30);ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.rot);ctx.font='bold '+(s.s)+'px Cinzel,serif';ctx.fillStyle=(s.col||GC)+s.alpha*fa+')';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(SYM_TYPES[s.t],0,0);ctx.restore();});requestAnimationFrame(draw);}window.addEventListener('resize',resize);resize();draw();})();
+
+/* GATE SPACE CANVAS - NEW: stars, galaxies, neon (z-index 0, behind gate-cv) */
+makeCanvas3D('gate-space',function(ctx,W,H,t){
+  if(!window._gs){window._gs=[];for(var i=0;i<400;i++)window._gs.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*2+.5,tw:Math.random()*Math.PI*2,ts:Math.random()*3+1,col:['rgba(255,255,255,','rgba(220,200,140,','rgba(180,210,240,'][Math.floor(Math.random()*3)]});}
+  window._gs.forEach(function(s){s.tw+=s.ts*.02;var tw=(Math.sin(s.tw)*.5+.5)*.8+.2;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=s.col+tw+')';if(s.r>1){ctx.shadowBlur=s.r*8;ctx.shadowColor=s.col+'0.5)';}ctx.fill();});
+  ctx.shadowBlur=0;
+  if(!window._gg){window._gg=[];for(var i=0;i<4;i++)window._gg.push({x:W*(.1+i*.27),y:H*(.1+Math.random()*.25),sc:25+Math.random()*35,rot:Math.random()*Math.PI*2,rs:(Math.random()-.5)*.015,col:['rgba(196,169,90,','rgba(168,200,255,','rgba(255,180,220,','rgba(150,255,200,'][i]});}
+  window._gg.forEach(function(g){g.rot+=g.rs;ctx.save();ctx.translate(g.x,g.y);for(var a=0;a<4;a++){var aa=a/4*Math.PI*2+g.rot;for(var p=0;p<35;p++){var d=p/35*g.sc,ang=aa+p*.1;ctx.fillStyle=g.col+((1-p/35)*.15)+')';ctx.beginPath();ctx.arc(Math.cos(ang)*d,Math.sin(ang)*d*.5,1.2,0,Math.PI*2);ctx.fill();}}ctx.restore();});
+  if(!window._gn){window._gn=[];for(var i=0;i<40;i++)window._gn.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,r:1+Math.random()*2,col:['rgba(0,255,200,','rgba(100,180,255,','rgba(255,100,255,','rgba(100,255,100,','rgba(255,200,50,'][Math.floor(Math.random()*5)],life:Math.random()*500});}
+  window._gn.forEach(function(n){n.x+=n.vx;n.y+=n.vy;n.life++;if(n.x<-10)n.x=W+10;if(n.x>W+10)n.x=-10;if(n.y<-10)n.y=H+10;if(n.y>H+10)n.y=-10;var pulse=Math.sin(n.life*.05)*.3+.7;ctx.beginPath();ctx.arc(n.x,n.y,n.r*pulse,0,Math.PI*2);ctx.fillStyle=n.col+(.2+Math.sin(n.life*.1)*.15)+')';ctx.shadowBlur=n.r*10;ctx.shadowColor=n.col+'0.4)';ctx.fill();});
+  ctx.shadowBlur=0;
+});
+
+/* GATE CANVAS - ORIGINAL: just drawEstate, nothing changed */
+makeCanvas3D('gate-cv',function(ctx,W,H,t){
+  drawEstate(ctx,W,H,t,W/2,H*.5,Math.min(W,H)*.14);
+});
+
+/* HERO CANVAS - ORIGINAL */
+(function(){var cv=document.getElementById('hero-cv');if(!cv)return;var ctx=cv.getContext('2d'),W,H,t=0;var objs=[];function makeObj(){var cols=[GC,PC,LC,TC,GC];var c=cols[Math.floor(Math.random()*cols.length)];var e=Math.floor(Math.random()*4);var x,y,vx=0,vy=0,spd=.6+Math.random()*1.8;if(e===0){x=-150;y=Math.random()*H;vx=spd;vy=(Math.random()-.5)*.5;}else if(e===1){x=W+150;y=Math.random()*H;vx=-spd;vy=(Math.random()-.5)*.5;}else if(e===2){x=Math.random()*W;y=-150;vy=spd*.6;vx=(Math.random()-.5)*.4;}else{x=Math.random()*W;y=H+150;vy=-spd*.6;vx=(Math.random()-.5)*.4;}return{x:x,y:y,vx:vx,vy:vy,sc:22+Math.random()*40,alpha:.2+Math.random()*.4,rx:Math.random()*Math.PI*2,ry:Math.random()*Math.PI*2,drx:(Math.random()-.5)*.018,dry:.018+Math.random()*.025,trail:[],life:0,max:350+Math.random()*300,col:c};}for(var i=0;i<12;i++)objs.push(makeObj());function resize(){var p=cv.parentElement;W=cv.width=p?p.offsetWidth:window.innerWidth;H=cv.height=p?p.offsetHeight:window.innerHeight;}function draw(){t+=.016;ctx.clearRect(0,0,W,H);drawEstate(ctx,W,H,t*.3,W/2,H*.6,Math.min(W,H)*.18);objs.forEach(function(ob){ob.x+=ob.vx;ob.y+=ob.vy;ob.rx+=ob.drx;ob.ry+=ob.dry;ob.life++;ob.trail.push({x:ob.x,y:ob.y});if(ob.trail.length>16)ob.trail.shift();for(var ti=1;ti<ob.trail.length;ti++){var pct=ti/ob.trail.length,ta=ob.trail[ti-1],tb=ob.trail[ti];ctx.strokeStyle=(ob.col)+pct*.12+')';ctx.lineWidth=pct*2;ctx.beginPath();ctx.moveTo(ta.x,ta.y);ctx.lineTo(tb.x,tb.y);ctx.stroke();}drawPyramid(ctx,ob.x,ob.y,ob.sc,ob.rx,ob.ry,ob.alpha*Math.min(1,ob.life/30)*Math.min(1,(ob.max-ob.life)/30),ob.col);if(ob.x<-200||ob.x>W+200||ob.y<-200||ob.y>H+200||ob.life>ob.max)Object.assign(ob,makeObj());});while(objs.length<12)objs.push(makeObj());requestAnimationFrame(draw);}window.addEventListener('resize',resize);resize();draw();})();
+
+/* SECTION CANVASES - ORIGINAL */
+['doctrine-cv','estate-head-cv','brief-cv','arsenal-cv','vault-cv','plt-cv'].forEach(function(cvId){makeCanvas3D(cvId,function(ctx,W,H,t){var cols=[GC,PC,LC,TC];for(var i=0;i<5;i++){var cx=(i+.5)/5*W;var cy=H*.55+Math.sin(t*.8+i)*H*.12;var c=cols[i%4];drawPyramid(ctx,cx,cy,Math.min(W/7,H*.35),-.25,t*.3+i*.8,.3+Math.sin(t+i)*.1,c);}drawEstate(ctx,W,H,t*.2,W/2,H*.55,Math.min(W,H)*.08);});});
+
+/* VAULT CANVAS - ORIGINAL */
+makeCanvas3D('vault-cv',function(ctx,W,H,t){var cx=W/2,cy=H*.5,sc=Math.min(W,H)*.38,fov=Math.min(W,H)*1.8;var grd=ctx.createRadialGradient(cx,cy,0,cx,cy,sc*1.6);grd.addColorStop(0,GC+'0.1)');grd.addColorStop(1,GC+'0)');ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);var ringCfg=[[sc,0.2,t*.12,.4],[sc*.78,.4,-t*.18,.3],[sc*.58,.7,t*.28,.35],[sc*.38,1.0,-t*.42,.4],[sc*.22,.3,t*.65,.5]];ringCfg.forEach(function(r){ctx.save();ctx.strokeStyle=GC+r[3]+')';ctx.lineWidth=.9;gw(ctx,GC+'0.7)',r[3]*18);ctx.beginPath();var f=true;for(var i=0;i<=64;i++){var a=i/64*Math.PI*2;var v=rX(rY({x:Math.cos(a)*r[0],y:Math.sin(a)*r[0],z:0},r[2]),r[1]);var p=proj(v.x,v.y,v.z,cx,cy,fov);if(f){ctx.moveTo(p.x,p.y);f=false;}else ctx.lineTo(p.x,p.y);}ctx.stroke();ng(ctx);ctx.restore();});for(var gi=0;gi<20;gi++){var ga=gi/20*Math.PI*2+t*.12,ri=sc,ro=sc*1.12,tw=.07;var tpts=[[Math.cos(ga)*ri,Math.sin(ga)*ri],[Math.cos(ga+tw)*ri,Math.sin(ga+tw)*ri],[Math.cos(ga+tw)*ro,Math.sin(ga+tw)*ro],[Math.cos(ga)*ro,Math.sin(ga)*ro]].map(function(p){var v=rX({x:p[0],y:p[1],z:0},.2);return proj(v.x,v.y,v.z,cx,cy,fov);});ctx.beginPath();ctx.moveTo(tpts[0].x,tpts[0].y);tpts.forEach(function(p){ctx.lineTo(p.x,p.y);});ctx.closePath();ctx.fillStyle='rgba(4,3,1,.4)';ctx.fill();ctx.strokeStyle=GC+'0.25)';ctx.lineWidth=.5;ctx.stroke();}var ds=sc*.14*(0.8+Math.sin(t*1.8)*.2);gw(ctx,GC+'1)',28);ctx.strokeStyle=GC+'0.7)';ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(cx,cy-ds);ctx.lineTo(cx+ds,cy);ctx.lineTo(cx,cy+ds);ctx.lineTo(cx-ds,cy);ctx.closePath();ctx.stroke();ng(ctx);[[cx-W*.35,cy],[cx+W*.35,cy]].forEach(function(pos,pi){drawPyramid(ctx,pos[0],pos[1],Math.min(W,H)*.07,-.25,(pi===0?1:-1)*t*.5,.35+Math.sin(t+pi)*.1,GC);});});
+
+/* PLT CANVAS - ORIGINAL */
+makeCanvas3D('plt-cv',function(ctx,W,H,t){var cx=W/2,cy=H*.5,sc=Math.min(W,H)*.12,fov=sc*6;var sphereCols=[PC,LC,TC];var spherePhases=[0,2.094,4.189];var sphereTilts=[.4,-.35,.55];var pos3=spherePhases.map(function(ph,i){var a=ph+t*.35;var v=rX({x:Math.cos(a)*1.5*sc,y:0,z:Math.sin(a)*1.5*sc},sphereTilts[i]);return{v:v,p:proj(v.x,v.y,v.z,cx,cy,fov),col:sphereCols[i]};});for(var ci=0;ci<3;ci++){var pa=pos3[ci].v,pb=pos3[(ci+1)%3].v;var pa2=proj(pa.x,pa.y,pa.z,cx,cy,fov),pb2=proj(pb.x,pb.y,pb.z,cx,cy,fov);ctx.strokeStyle=GC+'0.1)';ctx.lineWidth=.5;ctx.beginPath();ctx.moveTo(pa2.x,pa2.y);ctx.lineTo(pb2.x,pb2.y);ctx.stroke();}gw(ctx,GC+'0.5)',12);ctx.font='bold '+(sc*.5)+'px Cinzel,serif';ctx.fillStyle=GC+'0.4)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('PLT',cx,cy);ng(ctx);['P','L','T'].forEach(function(lbl,i){var pd=pos3[i];var depth=Math.max(.4,pd.p.s);var gr=sc*.28*depth;gw(ctx,(pd.col)+'0.9)',depth*20);ctx.beginPath();ctx.arc(pd.p.x,pd.p.y,gr,0,Math.PI*2);ctx.strokeStyle=(pd.col)+(depth*.7)+')';ctx.lineWidth=1.4;ctx.stroke();ng(ctx);ctx.font='bold '+(gr*1.8)+'px Cinzel,serif';ctx.fillStyle=(pd.col)+(depth*.9)+')';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(lbl,pd.p.x,pd.p.y);});spherePhases.forEach(function(ph,i){ctx.save();ctx.strokeStyle=(sphereCols[i])+'0.1)';ctx.lineWidth=.5;ctx.beginPath();var f=true;for(var oi=0;oi<=72;oi++){var a=oi/72*Math.PI*2;var v=rX({x:Math.cos(a)*1.5*sc,y:0,z:Math.sin(a)*1.5*sc},sphereTilts[i]);var p=proj(v.x,v.y,v.z,cx,cy,fov);if(f){ctx.moveTo(p.x,p.y);f=false;}else ctx.lineTo(p.x,p.y);}ctx.stroke();ctx.restore();});});
+</script>
+
+</body>
+</html>
