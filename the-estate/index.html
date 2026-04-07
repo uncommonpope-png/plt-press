@@ -30,6 +30,9 @@ body{background:var(--black);color:var(--text);font-family:'EB Garamond',Georgia
 .g-credit{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.35em;color:var(--muted);margin-top:18px;animation:up 1s ease 2.1s both;}
 @keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes grow{from{opacity:0;width:0}to{opacity:1;width:88px}}
+@keyframes glow-pink{0%,100%{box-shadow:0 0 8px rgba(255,80,180,.4),0 0 20px rgba(255,80,180,.2)}50%{box-shadow:0 0 16px rgba(255,80,180,.7),0 0 40px rgba(255,80,180,.35)}}
+@keyframes glow-teal{0%,100%{box-shadow:0 0 8px rgba(80,220,200,.4),0 0 20px rgba(80,220,200,.2)}50%{box-shadow:0 0 16px rgba(80,220,200,.7),0 0 40px rgba(80,220,200,.35)}}
+@keyframes glow-gold{0%,100%{box-shadow:0 0 8px rgba(196,169,90,.4),0 0 20px rgba(196,169,90,.2)}50%{box-shadow:0 0 16px rgba(196,169,90,.7),0 0 40px rgba(196,169,90,.35)}}
 nav{position:fixed;top:0;left:0;right:0;z-index:200;background:linear-gradient(to bottom,rgba(5,4,3,.97) 0%,transparent 100%);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;justify-content:space-between;align-items:center;}
 .nav-brand{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.35em;color:var(--gold);text-decoration:none;cursor:pointer;}
 .nav-links{display:flex;gap:0;list-style:none;}
@@ -211,6 +214,9 @@ footer{position:relative;z-index:1;background:rgba(5,4,3,.96);border-top:1px sol
     <button class="g-btn" onclick="openGate()">Enter the World</button>
     <div class="g-credit">Craig Jones &nbsp;&middot;&nbsp; Little Bunny &nbsp;&middot;&nbsp; Numbered Distribution Only</div>
     <a href="https://uncommonpope-png.github.io/plt-press/" target="_blank" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.3em;color:var(--gold);margin-top:16px;text-decoration:none;border:1px solid rgba(196,169,90,.4);padding:10px 24px;transition:all .3s;animation:up 1s ease 2.5s both;">VISIT PLT PRESS BOOKSTORE</a>
+    <a href="https://uncommonpope-png.github.io/plt-press/craig-jones-author.html" target="_blank" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.3em;color:rgba(255,80,180,.9);background:rgba(255,80,180,.1);border:1px solid rgba(255,80,180,.35);padding:10px 24px;cursor:pointer;text-decoration:none;animation:up 1s ease 2.8s both,glow-pink 2.5s ease infinite;display:block;text-align:center;margin-top:10px;transition:all .3s;" onmouseover="this.style.background='rgba(255,80,180,.2)';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,80,180,.1)';this.style.transform='none'">CRAIG JONES &nbsp;THE FOUNDER OF THE ESTATE</a>
+    <a href="https://uncommonpope-png.github.io/plt-blog/" target="_blank" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.3em;color:rgba(80,220,200,.9);background:rgba(80,220,200,.1);border:1px solid rgba(80,220,200,.35);padding:10px 24px;cursor:pointer;text-decoration:none;animation:up 1s ease 3.1s both,glow-teal 2.5s ease infinite;display:block;text-align:center;margin-top:10px;transition:all .3s;" onmouseover="this.style.background='rgba(80,220,200,.2)';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(80,220,200,.1)';this.style.transform='none'">BLOGS OF THE UNIVERSE</a>
+    <a href="https://uncommonpope-png.github.io/plt-press/plt-score-calculator.html" target="_blank" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.3em;color:rgba(196,169,90,.9);background:rgba(196,169,90,.1);border:1px solid rgba(196,169,90,.35);padding:10px 24px;cursor:pointer;text-decoration:none;animation:up 1s ease 3.4s both,glow-gold 2.5s ease infinite;display:block;text-align:center;margin-top:10px;transition:all .3s;" onmouseover="this.style.background='rgba(196,169,90,.2)';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(196,169,90,.1)';this.style.transform='none'">PLT SCORE CALCULATOR</a>
   </div>
 </div>
 
