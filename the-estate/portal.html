@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>THE ESTATE</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@1,300;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght @400;600;700&family=Cormorant+Garamond:ital,wght @1,300;1,400&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow:hidden;background:#000;}
@@ -17,7 +17,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
   animation:hint-in 1.5s ease 3.5s forwards;
   text-align:center;
 }
-@keyframes hint-in{to{color:rgba(196,169,90,0.45);}}
+ @keyframes hint-in{to{color:rgba(196,169,90,0.45);}}
 /* ENTERING FLASH */
 #flash{position:fixed;inset:0;z-index:100;background:#fff;opacity:0;pointer-events:none;transition:opacity .08s;}
 #flash.go{opacity:1;}
@@ -27,14 +27,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
   color:rgba(255,100,180,0.9);
   animation:sw-up 1s ease-out forwards;
 }
-@keyframes sw-up{from{opacity:1;transform:translate(-50%,-50%) scale(.7);}to{opacity:0;transform:translate(-50%,-240%) scale(1.4);}}
+ @keyframes sw-up{from{opacity:1;transform:translate(-50%,-50%) scale(.7);}to{opacity:0;transform:translate(-50%,-240%) scale(1.4);}}
 /* RIPPLE */
 .rpl{position:fixed;pointer-events:none;z-index:30;border-radius:50%;
   border:1px solid rgba(255,100,180,.55);
   transform:translate(-50%,-50%);
   animation:rpl .9s ease-out forwards;
 }
-@keyframes rpl{from{width:0;height:0;opacity:.8;}to{width:140px;height:140px;opacity:0;}}
+ @keyframes rpl{from{width:0;height:0;opacity:.8;}to{width:140px;height:140px;opacity:0;}}
 </style>
 </head>
 <body>
@@ -77,7 +77,7 @@ var MATRIX_CHARSET = (function(){
   // Latin scattered
   'PLTABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(c){chars.push(c);});
   // Symbols
-  '$%&*@#!?+=-_/|<>[]{}()^~'.split('').forEach(function(c){chars.push(c);});
+  '$%&* @#!?+=-_/|<>[]{}()^~'.split('').forEach(function(c){chars.push(c);});
   return chars;
 })();
 
@@ -259,6 +259,14 @@ function drawEstate(scale,alpha){
   fg(ecx,ecy,sc*4.5,'rgba(196,169,90,',0.06*(alpha||1));
   fg(ecx,ecy,sc*2,'rgba(255,180,80,',0.08*(alpha||1));
   var tv=EV.map(function(v){var sv=xfv(v,erx,ery,sc);return{p:proj(sv.x,sv.y,sv.z,ecx,ecy,fov),v:sv};});
+  EF.map(function(f){var z=0;f.forEach(function(i){z+=tv[i].v.z;});return{f:f,z:z/f.length};})
+    .sort(function(a,b){return b.z-a.z;})
+    .forEach(function(sf){
+      var pts=sf.f.map(function(i){return tv[i].p;});
+      ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+      for(var i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);
+      ctx.closePath();ctx.fillStyle='rgba(4,2,8,.25)';ctx.fill();
+    });
   EE.forEach(function(e){
     var a=tv[e[0]],b=tv[e[1]];if(!a||!b)return;
     var d=Math.max(0,Math.min(1,(a.v.z+b.v.z+sc*3)/(sc*6)));
