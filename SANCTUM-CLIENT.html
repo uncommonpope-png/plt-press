@@ -169,6 +169,24 @@ const W     = 100;       // world width  (tiles)
 const H     = 100;       // world height (tiles)
 const VIEW  = 30;        // orthographic half-height (tiles visible)
 
+// ========== SIMULATION CONSTANTS ==========
+// Weather intensity drift — controls how rain and snow change each update cycle
+const RAIN_DRIFT_BIAS  = 0.48;              // slightly biased toward drying up
+const RAIN_DRIFT_RANGE = 0.28;              // maximum change per weather update
+const SNOW_DRIFT_BIAS  = 0.50;              // symmetric snow drift
+const SNOW_DRIFT_RANGE = 0.20;              // maximum snow change per update
+// Demo soul behaviour
+const META_AWARENESS_PROBABILITY = 0.32;    // probability (~1 in 3) a soul has meta-awareness
+const MIN_MOVE_INTERVAL    = 1.2;           // minimum seconds between soul direction changes
+const MAX_MOVE_INTERVAL_EXTRA = 3.0;        // extra seconds added to MIN (max = 4.2 s)
+const MOVE_STEP_THRESHOLD  = 0.3;           // seconds remaining on timer when a soul steps a tile
+const HEALTH_REGEN_BIAS    = 0.38;          // bias <0.5 means slight net healing on average
+const HEALTH_REGEN_RATE    = 2.0;           // HP change multiplier on dt
+// Physics / camera tuning
+const PARTICLE_DAMPING     = 0.95;          // per-frame velocity decay for birth particles
+const RAIN_BOUNCE_DAMPING  = 0.4;           // horizontal velocity retained after rain ground bounce
+const CAMERA_PAN_DAMPING   = 0.82;          // per-frame friction applied to camera pan velocity
+
 // ========== STATE ==========
 let worldState  = null;
 let selectedId  = null;
@@ -578,24 +596,6 @@ function updateParticles(dt) {
         p.mat.opacity = (p.life / p.maxLife) * 0.55;
     }
 }
-
-// ========== SIMULATION CONSTANTS ==========
-// Weather intensity drift — controls how rain and snow change each update cycle
-const RAIN_DRIFT_BIAS  = 0.48;              // slightly biased toward drying up
-const RAIN_DRIFT_RANGE = 0.28;              // maximum change per weather update
-const SNOW_DRIFT_BIAS  = 0.50;              // symmetric snow drift
-const SNOW_DRIFT_RANGE = 0.20;              // maximum snow change per update
-// Demo soul behaviour
-const META_AWARENESS_PROBABILITY = 0.32;    // probability (~1 in 3) a soul has meta-awareness
-const MIN_MOVE_INTERVAL    = 1.2;           // minimum seconds between soul direction changes
-const MAX_MOVE_INTERVAL_EXTRA = 3.0;        // extra seconds added to MIN (max = 4.2 s)
-const MOVE_STEP_THRESHOLD  = 0.3;           // seconds remaining on timer when a soul steps a tile
-const HEALTH_REGEN_BIAS    = 0.38;          // bias <0.5 means slight net healing on average
-const HEALTH_REGEN_RATE    = 2.0;           // HP change multiplier on dt
-// Physics / camera tuning
-const PARTICLE_DAMPING     = 0.95;          // per-frame velocity decay for birth particles
-const RAIN_BOUNCE_DAMPING  = 0.4;           // horizontal velocity retained after rain ground bounce
-const CAMERA_PAN_DAMPING   = 0.82;          // per-frame friction applied to camera pan velocity
 
 // ========== DAY / NIGHT CYCLE ==========
 let timeOfDay   = 0.45;
