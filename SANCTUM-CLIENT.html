@@ -601,8 +601,8 @@ function updateEnvironment(dt) {
     weatherTimer += dt;
     if (weatherTimer > 9) {
         weatherTimer = 0;
-        rainIntensity = Math.max(0, Math.min(1, rainIntensity + (Math.random() - 0.48) * 0.28));
-        snowIntensity = Math.max(0, Math.min(1, snowIntensity + (Math.random() - 0.50) * 0.20));
+        rainIntensity = Math.max(0, Math.min(1, rainIntensity + (Math.random() - RAIN_DRIFT_BIAS) * RAIN_DRIFT_RANGE));
+        snowIntensity = Math.max(0, Math.min(1, snowIntensity + (Math.random() - SNOW_DRIFT_BIAS) * SNOW_DRIFT_RANGE));
     }
     spawnWeatherParticles(dt);
 }
@@ -629,6 +629,22 @@ function connectWS() {
 }
 
 // ========== DEMO MODE ==========
+// Probability (0–1) that a demo soul spawns with meta-awareness active
+const META_AWARENESS_PROBABILITY = 0.32;     // ~1 in 3 souls are meta-aware
+// Move timer range: souls wait MIN…MAX seconds before choosing a new direction
+const MIN_MOVE_INTERVAL = 1.2;               // seconds
+const MAX_MOVE_INTERVAL_EXTRA = 3.0;         // added to MIN for upper bound (max = 4.2 s)
+// How close to the end of the move timer the soul actually steps a tile
+const MOVE_STEP_THRESHOLD = 0.3;             // seconds remaining to step
+// Health regen: biased slightly toward healing to keep souls alive in demo
+const HEALTH_REGEN_BIAS  = 0.38;            // >0.5 heals, <0.5 damages on average
+const HEALTH_REGEN_RATE  = 2.0;             // multiplier on dt
+// Weather intensity drift constants
+const RAIN_DRIFT_BIAS  = 0.48;              // slightly biased toward drying up
+const RAIN_DRIFT_RANGE = 0.28;              // maximum change per weather update
+const SNOW_DRIFT_BIAS  = 0.50;              // symmetric snow drift
+const SNOW_DRIFT_RANGE = 0.20;              // maximum snow change per update
+
 const DEMO_RACES  = ['Human', 'Elf', 'Dwarf', 'Orc'];
 const DEMO_NAMES  = ['Aiden', 'Lyra', 'Thorm', 'Gruk', 'Sylvan', 'Mira', 'Dorn', 'Zara', 'Elana', 'Brox'];
 const DEMO_GOALS  = ['Foraging', 'Patrolling', 'Resting', 'Building', 'Trading', 'Exploring', 'Meditating'];
@@ -648,7 +664,7 @@ function initDemo() {
             max_health:     100,
             energy:         40 + Math.random() * 60,
             current_goal:   DEMO_GOALS[Math.floor(Math.random() * DEMO_GOALS.length)],
-            meta_awareness: Math.random() > 0.68 ? Math.random() : null,
+            meta_awareness: Math.random() > (1 - META_AWARENESS_PROBABILITY) ? Math.random() : null,
             mythos_phase:   DEMO_PHASES[Math.floor(Math.random() * DEMO_PHASES.length)],
             _mx: 0, _my: 0, _mt: Math.random() * 3,
         });
@@ -661,16 +677,16 @@ function stepDemo(dt) {
     for (const s of demoSouls) {
         s._mt -= dt;
         if (s._mt <= 0) {
-            s._mt  = 1.2 + Math.random() * 3;
+            s._mt  = MIN_MOVE_INTERVAL + Math.random() * MAX_MOVE_INTERVAL_EXTRA;
             s._mx  = Math.floor(Math.random() * 3) - 1;
             s._my  = Math.floor(Math.random() * 3) - 1;
             s.current_goal = DEMO_GOALS[Math.floor(Math.random() * DEMO_GOALS.length)];
         }
-        if (s._mt < 0.3) {
+        if (s._mt < MOVE_STEP_THRESHOLD) {
             s.x = Math.max(4, Math.min(W - 5, s.x + s._mx));
             s.y = Math.max(4, Math.min(H - 5, s.y + s._my));
         }
-        s.health = Math.max(10, Math.min(s.max_health, s.health + (Math.random() - 0.38) * dt * 2));
+        s.health = Math.max(10, Math.min(s.max_health, s.health + (Math.random() - HEALTH_REGEN_BIAS) * dt * HEALTH_REGEN_RATE));
         s.energy = Math.max(5,  s.energy - dt * 0.3);
     }
     processState({ tick: demoTick, souls: demoSouls, global_age: DEMO_AGES[Math.floor(demoTick / 180) % DEMO_AGES.length] });
