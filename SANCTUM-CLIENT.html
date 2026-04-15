@@ -428,13 +428,13 @@ function spawnSoul(soul) {
 
     // Drop shadow
     const sMat   = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.22, depthWrite: false });
-    const sMesh  = new THREE.Mesh(shadowGeo, sMat);
-    sMesh.rotation.x = -Math.PI / 2;
-    sMesh.position.set(px, 0.005, pz);
-    scene.add(sMesh);
+    const shadowMesh = new THREE.Mesh(shadowGeo, sMat);
+    shadowMesh.rotation.x = -Math.PI / 2;
+    shadowMesh.position.set(px, 0.005, pz);
+    scene.add(shadowMesh);
 
     souls.set(soul.id, {
-        mesh, hpMesh, sMesh,
+        mesh, hpMesh, shadowMesh,
         data: { ...soul },
         animBlend: 0,
         prevPos: new THREE.Vector3(px, 0.12, pz),
@@ -475,14 +475,14 @@ function updateSoul(soul) {
     e.hpMesh.position.set(e.mesh.position.x, 0.03, e.mesh.position.z);
 
     // Shadow
-    e.sMesh.position.set(e.mesh.position.x, 0.005, e.mesh.position.z);
+    e.shadowMesh.position.set(e.mesh.position.x, 0.005, e.mesh.position.z);
     e.data = { ...soul };
 }
 
 function removeSoul(id) {
     const e = souls.get(id);
     if (!e) return;
-    scene.remove(e.mesh, e.hpMesh, e.sMesh);
+    scene.remove(e.mesh, e.hpMesh, e.shadowMesh);
     souls.delete(id);
 }
 
@@ -579,6 +579,20 @@ function updateParticles(dt) {
     }
 }
 
+// ========== SIMULATION CONSTANTS ==========
+// Weather intensity drift — controls how rain and snow change each update cycle
+const RAIN_DRIFT_BIAS  = 0.48;              // slightly biased toward drying up
+const RAIN_DRIFT_RANGE = 0.28;              // maximum change per weather update
+const SNOW_DRIFT_BIAS  = 0.50;              // symmetric snow drift
+const SNOW_DRIFT_RANGE = 0.20;              // maximum snow change per update
+// Demo soul behaviour
+const META_AWARENESS_PROBABILITY = 0.32;    // probability (~1 in 3) a soul has meta-awareness
+const MIN_MOVE_INTERVAL    = 1.2;           // minimum seconds between soul direction changes
+const MAX_MOVE_INTERVAL_EXTRA = 3.0;        // extra seconds added to MIN (max = 4.2 s)
+const MOVE_STEP_THRESHOLD  = 0.3;           // seconds remaining on timer when a soul steps a tile
+const HEALTH_REGEN_BIAS    = 0.38;          // bias <0.5 means slight net healing on average
+const HEALTH_REGEN_RATE    = 2.0;           // HP change multiplier on dt
+
 // ========== DAY / NIGHT CYCLE ==========
 let timeOfDay   = 0.45;
 let weatherTimer = 0;
@@ -629,22 +643,6 @@ function connectWS() {
 }
 
 // ========== DEMO MODE ==========
-// Probability (0–1) that a demo soul spawns with meta-awareness active
-const META_AWARENESS_PROBABILITY = 0.32;     // ~1 in 3 souls are meta-aware
-// Move timer range: souls wait MIN…MAX seconds before choosing a new direction
-const MIN_MOVE_INTERVAL = 1.2;               // seconds
-const MAX_MOVE_INTERVAL_EXTRA = 3.0;         // added to MIN for upper bound (max = 4.2 s)
-// How close to the end of the move timer the soul actually steps a tile
-const MOVE_STEP_THRESHOLD = 0.3;             // seconds remaining to step
-// Health regen: biased slightly toward healing to keep souls alive in demo
-const HEALTH_REGEN_BIAS  = 0.38;            // >0.5 heals, <0.5 damages on average
-const HEALTH_REGEN_RATE  = 2.0;             // multiplier on dt
-// Weather intensity drift constants
-const RAIN_DRIFT_BIAS  = 0.48;              // slightly biased toward drying up
-const RAIN_DRIFT_RANGE = 0.28;              // maximum change per weather update
-const SNOW_DRIFT_BIAS  = 0.50;              // symmetric snow drift
-const SNOW_DRIFT_RANGE = 0.20;              // maximum snow change per update
-
 const DEMO_RACES  = ['Human', 'Elf', 'Dwarf', 'Orc'];
 const DEMO_NAMES  = ['Aiden', 'Lyra', 'Thorm', 'Gruk', 'Sylvan', 'Mira', 'Dorn', 'Zara', 'Elana', 'Brox'];
 const DEMO_GOALS  = ['Foraging', 'Patrolling', 'Resting', 'Building', 'Trading', 'Exploring', 'Meditating'];
@@ -664,7 +662,7 @@ function initDemo() {
             max_health:     100,
             energy:         40 + Math.random() * 60,
             current_goal:   DEMO_GOALS[Math.floor(Math.random() * DEMO_GOALS.length)],
-            meta_awareness: Math.random() > (1 - META_AWARENESS_PROBABILITY) ? Math.random() : null,
+            meta_awareness: Math.random() < META_AWARENESS_PROBABILITY ? Math.random() : null,
             mythos_phase:   DEMO_PHASES[Math.floor(Math.random() * DEMO_PHASES.length)],
             _mx: 0, _my: 0, _mt: Math.random() * 3,
         });
@@ -740,8 +738,9 @@ document.addEventListener('keydown', e => {
 document.addEventListener('keyup', e => { keys[e.code] = false; });
 
 canvas.addEventListener('wheel', e => {
-    const dir = e.deltaY > 0 ? 1.15 : 0.87;
-    cam.zoom = THREE.MathUtils.clamp(cam.zoom * (1 / dir), 0.28, 3.5);
+    // scroll up (deltaY < 0) → zoom in; scroll down (deltaY > 0) → zoom out
+    const zoomFactor = e.deltaY > 0 ? 0.87 : 1.15;
+    cam.zoom = THREE.MathUtils.clamp(cam.zoom * zoomFactor, 0.28, 3.5);
     cam.updateProjectionMatrix();
 }, { passive: true });
 
