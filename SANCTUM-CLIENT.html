@@ -171,7 +171,7 @@ const VIEW  = 30;        // orthographic half-height (tiles visible)
 
 // ========== SIMULATION CONSTANTS ==========
 // Weather intensity drift — controls how rain and snow change each update cycle
-const RAIN_DRIFT_BIAS  = 0.48;              // slightly biased toward drying up
+const RAIN_DRIFT_BIAS  = 0.55;              // biased above 0.5 so rain trends toward drying up
 const RAIN_DRIFT_RANGE = 0.28;              // maximum change per weather update
 const SNOW_DRIFT_BIAS  = 0.50;              // symmetric snow drift
 const SNOW_DRIFT_RANGE = 0.20;              // maximum snow change per update
@@ -186,6 +186,13 @@ const HEALTH_REGEN_RATE    = 2.0;           // HP change multiplier on dt
 const PARTICLE_DAMPING     = 0.95;          // per-frame velocity decay for birth particles
 const RAIN_BOUNCE_DAMPING  = 0.4;           // horizontal velocity retained after rain ground bounce
 const CAMERA_PAN_DAMPING   = 0.82;          // per-frame friction applied to camera pan velocity
+// Camera zoom step per scroll event
+const ZOOM_IN_FACTOR  = 1.15;              // zoom in  (scroll up)
+const ZOOM_OUT_FACTOR = 0.87;              // zoom out (scroll down)
+// Selected soul highlight pulse parameters
+const HIGHLIGHT_BASE_INTENSITY  = 0.35;    // minimum emissive intensity when selected
+const HIGHLIGHT_PULSE_AMPLITUDE = 0.25;    // oscillation range above base
+const HIGHLIGHT_PULSE_SPEED     = 0.003;   // oscillation frequency (radians per ms)
 
 // ========== STATE ==========
 let worldState  = null;
@@ -636,7 +643,7 @@ function connectWS() {
         ws.send(JSON.stringify({ GetState: null }));
     };
     ws.onmessage = ({ data }) => {
-        try { processState(JSON.parse(data)); } catch {}
+        try { processState(JSON.parse(data)); } catch (e) { console.warn('Failed to parse WebSocket message:', e.message); }
     };
     ws.onclose = ws.onerror = () => {
         wsOpen = false;
@@ -743,7 +750,7 @@ document.addEventListener('keyup', e => { keys[e.code] = false; });
 
 canvas.addEventListener('wheel', e => {
     // scroll up (deltaY < 0) → zoom in; scroll down (deltaY > 0) → zoom out
-    const zoomFactor = e.deltaY > 0 ? 0.87 : 1.15;
+    const zoomFactor = e.deltaY > 0 ? ZOOM_OUT_FACTOR : ZOOM_IN_FACTOR;
     cam.zoom = THREE.MathUtils.clamp(cam.zoom * zoomFactor, 0.28, 3.5);
     cam.updateProjectionMatrix();
 }, { passive: true });
@@ -817,7 +824,7 @@ function highlightSelected(now) {
     if (!selectedId) return;
     const e = souls.get(selectedId);
     if (!e) return;
-    const pulse = 0.35 + 0.25 * Math.sin(now * 0.003);
+    const pulse = HIGHLIGHT_BASE_INTENSITY + HIGHLIGHT_PULSE_AMPLITUDE * Math.sin(now * HIGHLIGHT_PULSE_SPEED);
     e.mesh.material.emissiveIntensity = pulse;
 }
 
