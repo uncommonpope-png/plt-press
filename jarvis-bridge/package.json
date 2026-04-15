@@ -1,0 +1,19 @@
+{
+  "name": "jarvis-bridge",
+  "version": "1.0.0",
+  "description": "Jarvis Bridge — connects the Grand Soul Kernel to the web UI",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

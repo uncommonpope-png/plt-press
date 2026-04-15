@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jarvis — Grand Soul Kernel</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a28;
+    --accent: #4f8ef7;
+    --accent2: #7c5cbf;
+    --text: #e8e8f0;
+    --text-dim: #888;
+    --user-bubble: #1e3a6e;
+    --jarvis-bubble: #1a1a28;
+    --tool-bg: #0f1a10;
+    --tool-border: #2a4a2a;
+    --error: #c04040;
+    --radius: 16px;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid #222;
+    flex-shrink: 0;
+  }
+
+  .logo {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .header-title { flex: 1; }
+  .header-title h1 { font-size: 16px; font-weight: 700; }
+  .header-title .subtitle { font-size: 11px; color: var(--text-dim); }
+
+  #status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #555;
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  #status-dot.connected { background: #4caf50; }
+  #status-dot.disconnected { background: var(--error); }
+
+  #settings-btn {
+    background: none; border: none; color: var(--text-dim);
+    font-size: 20px; cursor: pointer; padding: 4px 8px;
+    border-radius: 8px;
+  }
+  #settings-btn:hover { background: var(--surface2); color: var(--text); }
+
+  /* ── Settings Panel ── */
+  #settings-panel {
+    display: none;
+    background: var(--surface);
+    border-bottom: 1px solid #333;
+    padding: 12px 16px;
+    flex-shrink: 0;
+  }
+  #settings-panel.open { display: block; }
+  #settings-panel label { font-size: 12px; color: var(--text-dim); display: block; margin-bottom: 4px; }
+  #settings-panel input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: var(--text);
+    padding: 6px 10px;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  #settings-panel button {
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    padding: 7px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-right: 8px;
+  }
+
+  /* ── Soul State Bar ── */
+  #soul-bar {
+    display: none;
+    background: var(--surface2);
+    border-bottom: 1px solid #222;
+    padding: 6px 16px;
+    font-size: 11px;
+    color: var(--text-dim);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+  }
+  #soul-bar.visible { display: block; }
+  #soul-bar .pulse { color: var(--accent); margin-right: 6px; }
+
+  /* ── Messages ── */
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+
+  .msg {
+    display: flex;
+    flex-direction: column;
+    max-width: 88%;
+    animation: fadeIn 0.2s ease;
+  }
+  .msg.user { align-self: flex-end; }
+  .msg.jarvis { align-self: flex-start; }
+
+  .bubble {
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    line-height: 1.5;
+    word-break: break-word;
+    white-space: pre-wrap;
+    font-size: 14px;
+  }
+  .msg.user .bubble {
+    background: var(--user-bubble);
+    border-bottom-right-radius: 4px;
+    color: #cde;
+  }
+  .msg.jarvis .bubble {
+    background: var(--jarvis-bubble);
+    border-bottom-left-radius: 4px;
+    border: 1px solid #2a2a3a;
+  }
+
+  /* Markdown-lite inside bubbles */
+  .bubble strong { font-weight: 700; color: #b8d4ff; }
+  .bubble em { font-style: italic; color: #aac; }
+  .bubble code { background: #1e1e30; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+
+  .msg-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-bottom: 3px;
+    padding: 0 4px;
+  }
+  .msg.user .msg-label { text-align: right; }
+
+  /* Tool actions */
+  .tool-action {
+    font-size: 11px;
+    color: #8bc8a0;
+    background: var(--tool-bg);
+    border: 1px solid var(--tool-border);
+    border-radius: 8px;
+    padding: 4px 10px;
+    margin-top: 4px;
+    max-width: 88%;
+    align-self: flex-start;
+  }
+  .tool-action::before { content: '⚙ '; }
+
+  /* Loading indicator */
+  .typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 12px 14px;
+    background: var(--jarvis-bubble);
+    border-radius: var(--radius);
+    border-bottom-left-radius: 4px;
+    border: 1px solid #2a2a3a;
+    align-self: flex-start;
+    max-width: 80px;
+  }
+  .typing-dot {
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Input Area ── */
+  #input-area {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border-top: 1px solid #222;
+    flex-shrink: 0;
+  }
+
+  #chat-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid #333;
+    border-radius: 20px;
+    color: var(--text);
+    padding: 10px 16px;
+    font-size: 15px;
+    font-family: var(--font);
+    resize: none;
+    max-height: 120px;
+    overflow-y: auto;
+    line-height: 1.4;
+    outline: none;
+  }
+  #chat-input:focus { border-color: var(--accent); }
+  #chat-input::placeholder { color: var(--text-dim); }
+
+  .icon-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: background 0.15s, transform 0.1s;
+    flex-shrink: 0;
+  }
+  .icon-btn:active { transform: scale(0.92); }
+
+  #send-btn {
+    background: var(--accent);
+    color: #fff;
+  }
+  #send-btn:hover { background: #3a7ef0; }
+  #send-btn:disabled { background: #333; cursor: default; }
+
+  #mic-btn {
+    background: var(--surface2);
+    color: var(--text-dim);
+    border: 1px solid #333;
+  }
+  #mic-btn.listening {
+    background: #4a1010;
+    color: #f88;
+    border-color: var(--error);
+    animation: pulse 1s infinite;
+  }
+  #mic-btn.unsupported { opacity: 0.3; cursor: not-allowed; }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(192, 64, 64, 0.5); }
+    50% { box-shadow: 0 0 0 8px rgba(192, 64, 64, 0); }
+  }
+
+  #tts-btn {
+    background: var(--surface2);
+    color: var(--text-dim);
+    border: 1px solid #333;
+    font-size: 16px;
+  }
+  #tts-btn.active { color: var(--accent); border-color: var(--accent); }
+  #tts-btn.unsupported { opacity: 0.3; cursor: not-allowed; }
+
+  /* ── Welcome ── */
+  .welcome {
+    text-align: center;
+    color: var(--text-dim);
+    padding: 48px 24px;
+    animation: fadeIn 0.5s ease;
+  }
+  .welcome .icon { font-size: 48px; margin-bottom: 12px; }
+  .welcome h2 { font-size: 18px; margin-bottom: 8px; color: var(--text); }
+  .welcome p { font-size: 13px; line-height: 1.6; }
+  .welcome .hint {
+    margin-top: 20px;
+    font-size: 12px;
+    background: var(--surface2);
+    border-radius: 12px;
+    padding: 12px 16px;
+    text-align: left;
+    line-height: 1.8;
+    color: var(--text-dim);
+  }
+  .welcome .hint span { color: var(--accent); }
+
+  /* ── Scrollbar ── */
+  #messages::-webkit-scrollbar { width: 4px; }
+  #messages::-webkit-scrollbar-track { background: transparent; }
+  #messages::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="logo">🜁</div>
+  <div class="header-title">
+    <h1>Jarvis</h1>
+    <div class="subtitle" id="mode-label">Grand Soul Kernel Interface</div>
+  </div>
+  <div id="status-dot" title="Kernel connection status"></div>
+  <button id="settings-btn" title="Settings">⚙</button>
+</header>
+
+<!-- Settings Panel -->
+<div id="settings-panel">
+  <label for="bridge-url-input">Bridge URL</label>
+  <input type="url" id="bridge-url-input" placeholder="http://192.168.1.10:3001">
+  <button id="save-settings-btn">Save</button>
+  <button id="close-settings-btn" style="background:var(--surface2);color:var(--text);">Cancel</button>
+</div>
+
+<!-- Soul State Bar -->
+<div id="soul-bar">
+  <span class="pulse">●</span><span id="soul-bar-text">Waiting for kernel…</span>
+</div>
+
+<!-- Messages -->
+<div id="messages">
+  <div class="welcome" id="welcome-msg">
+    <div class="icon">🤖</div>
+    <h2>Hello, I'm Jarvis</h2>
+    <p>Your interface to the Grand Soul Kernel (Stiforp).<br>
+       Ask me anything, or use voice input below.</p>
+    <div class="hint">
+      <span>Try saying:</span><br>
+      • "How are you?" — soul state<br>
+      • "Set goal: explore the stars"<br>
+      • "Embody Stiforp"<br>
+      • "Search quantum computing"<br>
+      • "Fetch https://example.com"<br>
+      • "Help" — list commands
+    </div>
+  </div>
+</div>
+
+<!-- Input Area -->
+<div id="input-area">
+  <button class="icon-btn" id="mic-btn" title="Voice input">🎤</button>
+  <textarea id="chat-input" placeholder="Ask Jarvis anything…" rows="1"></textarea>
+  <button class="icon-btn" id="tts-btn" title="Toggle voice output">🔊</button>
+  <button class="icon-btn" id="send-btn" title="Send">▶</button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ─── Config ──────────────────────────────────────────────────────────
+  const DEFAULT_BRIDGE_URL = 'http://127.0.0.1:3001';
+  const STORAGE_KEY_BRIDGE = 'jarvis_bridge_url';
+  const STORAGE_KEY_TTS = 'jarvis_tts_enabled';
+  const STORAGE_SESSION = 'jarvis_session_id';
+
+  function getBridgeURL() {
+    return localStorage.getItem(STORAGE_KEY_BRIDGE) || DEFAULT_BRIDGE_URL;
+  }
+
+  function getSessionId() {
+    let id = sessionStorage.getItem(STORAGE_SESSION);
+    if (!id) {
+      id = 'sess_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
+      sessionStorage.setItem(STORAGE_SESSION, id);
+    }
+    return id;
+  }
+
+  // ─── Elements ────────────────────────────────────────────────────────
+  const messagesEl = document.getElementById('messages');
+  const chatInput = document.getElementById('chat-input');
+  const sendBtn = document.getElementById('send-btn');
+  const micBtn = document.getElementById('mic-btn');
+  const ttsBtn = document.getElementById('tts-btn');
+  const statusDot = document.getElementById('status-dot');
+  const modeLabel = document.getElementById('mode-label');
+  const soulBar = document.getElementById('soul-bar');
+  const soulBarText = document.getElementById('soul-bar-text');
+  const settingsPanel = document.getElementById('settings-panel');
+  const settingsBtn = document.getElementById('settings-btn');
+  const bridgeUrlInput = document.getElementById('bridge-url-input');
+  const saveSettingsBtn = document.getElementById('save-settings-btn');
+  const closeSettingsBtn = document.getElementById('close-settings-btn');
+  const welcomeMsg = document.getElementById('welcome-msg');
+
+  // ─── State ───────────────────────────────────────────────────────────
+  let ttsEnabled = localStorage.getItem(STORAGE_KEY_TTS) !== 'false';
+  let isListening = false;
+  let recognition = null;
+  let typingEl = null;
+
+  // ─── TTS ─────────────────────────────────────────────────────────────
+  const hasTTS = 'speechSynthesis' in window;
+  if (!hasTTS) ttsBtn.classList.add('unsupported');
+  ttsBtn.classList.toggle('active', ttsEnabled && hasTTS);
+
+  function speak(text) {
+    if (!hasTTS || !ttsEnabled) return;
+    window.speechSynthesis.cancel();
+    // Strip markdown markers
+    const clean = text.replace(/\*+/g, '').replace(/_+/g, '').replace(/#{1,6}\s/g, '');
+    const utter = new SpeechSynthesisUtterance(clean);
+    utter.rate = 1.0;
+    utter.pitch = 1.05;
+    // Prefer a higher-quality voice if available
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v => /google|natural|enhanced|samantha|alex/i.test(v.name));
+    if (preferred) utter.voice = preferred;
+    window.speechSynthesis.speak(utter);
+  }
+
+  ttsBtn.addEventListener('click', () => {
+    if (!hasTTS) return;
+    ttsEnabled = !ttsEnabled;
+    ttsBtn.classList.toggle('active', ttsEnabled);
+    localStorage.setItem(STORAGE_KEY_TTS, ttsEnabled);
+    if (!ttsEnabled) window.speechSynthesis.cancel();
+  });
+
+  // ─── Speech Recognition ───────────────────────────────────────────────
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    micBtn.classList.add('unsupported');
+    micBtn.title = 'Voice input not supported in this browser';
+  }
+
+  function initRecognition() {
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      isListening = true;
+      micBtn.classList.add('listening');
+      micBtn.title = 'Listening… (tap to stop)';
+    };
+
+    recognition.onresult = (e) => {
+      const transcript = Array.from(e.results)
+        .map(r => r[0].transcript)
+        .join('');
+      chatInput.value = transcript;
+      autoResize(chatInput);
+      if (e.results[0].isFinal) {
+        stopListening();
+        if (transcript.trim()) sendMessage();
+      }
+    };
+
+    recognition.onerror = (e) => {
+      if (e.error !== 'no-speech' && e.error !== 'aborted') {
+        addMessage('jarvis', `Voice error: ${e.error}. Try typing instead.`);
+      }
+      stopListening();
+    };
+
+    recognition.onend = () => stopListening();
+  }
+
+  function stopListening() {
+    isListening = false;
+    micBtn.classList.remove('listening');
+    micBtn.title = 'Voice input';
+    if (recognition) try { recognition.stop(); } catch (_) {}
+  }
+
+  micBtn.addEventListener('click', () => {
+    if (!SpeechRecognition) return;
+    if (isListening) {
+      stopListening();
+    } else {
+      if (!recognition) initRecognition();
+      try { recognition.start(); } catch (_) { initRecognition(); recognition.start(); }
+    }
+  });
+
+  // ─── Settings ────────────────────────────────────────────────────────
+  settingsBtn.addEventListener('click', () => {
+    settingsPanel.classList.toggle('open');
+    bridgeUrlInput.value = getBridgeURL();
+  });
+
+  saveSettingsBtn.addEventListener('click', () => {
+    const url = bridgeUrlInput.value.trim();
+    if (url) {
+      localStorage.setItem(STORAGE_KEY_BRIDGE, url);
+      settingsPanel.classList.remove('open');
+      checkHealth();
+    }
+  });
+
+  closeSettingsBtn.addEventListener('click', () => {
+    settingsPanel.classList.remove('open');
+  });
+
+  // ─── Message Rendering ────────────────────────────────────────────────
+  function markdownLite(text) {
+    return text
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/`(.+?)`/g, '<code>$1</code>')
+      .replace(/\n/g, '<br>');
+  }
+
+  function addMessage(role, text, actions) {
+    const msgEl = document.createElement('div');
+    msgEl.className = `msg ${role}`;
+
+    const labelEl = document.createElement('div');
+    labelEl.className = 'msg-label';
+    labelEl.textContent = role === 'user' ? 'You' : 'Jarvis';
+    msgEl.appendChild(labelEl);
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = markdownLite(text);
+    msgEl.appendChild(bubble);
+
+    messagesEl.appendChild(msgEl);
+
+    // Show tool actions as small tags below
+    if (actions && actions.length > 0) {
+      for (const action of actions) {
+        const tag = document.createElement('div');
+        tag.className = 'tool-action';
+        tag.textContent = describeAction(action);
+        messagesEl.appendChild(tag);
+      }
+    }
+
+    scrollToBottom();
+    return msgEl;
+  }
+
+  function describeAction(action) {
+    switch (action.type) {
+      case 'kernel_state': return 'Read kernel state';
+      case 'kernel_command': return `Kernel: ${action.cmd}${action.goal ? ` "${action.goal}"` : ''}`;
+      case 'search': return `Web search: "${action.query}"`;
+      case 'fetch': return `Fetch: ${action.url}`;
+      case 'summarize': return `Summarize: ${action.url}`;
+      default: return action.type;
+    }
+  }
+
+  function showTyping() {
+    if (typingEl) return;
+    typingEl = document.createElement('div');
+    typingEl.className = 'typing-indicator';
+    typingEl.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+    messagesEl.appendChild(typingEl);
+    scrollToBottom();
+  }
+
+  function hideTyping() {
+    if (typingEl) { typingEl.remove(); typingEl = null; }
+  }
+
+  function scrollToBottom() {
+    requestAnimationFrame(() => {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    });
+  }
+
+  // ─── Send Message ─────────────────────────────────────────────────────
+  async function sendMessage() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+    chatInput.value = '';
+    autoResize(chatInput);
+
+    if (welcomeMsg) welcomeMsg.style.display = 'none';
+    addMessage('user', text);
+    showTyping();
+    sendBtn.disabled = true;
+
+    try {
+      const res = await fetch(`${getBridgeURL()}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, sessionId: getSessionId() }),
+      });
+      hideTyping();
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: res.statusText }));
+        addMessage('jarvis', `Error: ${err.error || res.statusText}`);
+        return;
+      }
+      const data = await res.json();
+      addMessage('jarvis', data.reply || '(no reply)', data.actions);
+      speak(data.reply || '');
+    } catch (err) {
+      hideTyping();
+      const msg = err.message.includes('Failed to fetch')
+        ? `Cannot reach Jarvis Bridge at ${getBridgeURL()}.\n\nIs the bridge running? Check the settings (⚙) to set the correct URL.`
+        : `Error: ${err.message}`;
+      addMessage('jarvis', msg);
+    } finally {
+      sendBtn.disabled = false;
+      chatInput.focus();
+    }
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+
+  chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  chatInput.addEventListener('input', () => autoResize(chatInput));
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
+  // ─── Health Check & Status ────────────────────────────────────────────
+  async function checkHealth() {
+    try {
+      const res = await fetch(`${getBridgeURL()}/api/health`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.ok) {
+        statusDot.className = data.kernel_connected ? 'connected' : 'disconnected';
+        statusDot.title = data.kernel_connected ? 'Kernel connected' : 'Kernel not connected';
+        modeLabel.textContent = `Mode: ${data.mode}${data.llm_model ? ' (' + data.llm_model + ')' : ''}`;
+      }
+    } catch (_) {
+      statusDot.className = 'disconnected';
+      statusDot.title = 'Bridge not reachable';
+      modeLabel.textContent = 'Bridge offline';
+    }
+  }
+
+  // ─── Soul State Bar ───────────────────────────────────────────────────
+  function updateSoulBar(state) {
+    const name = state.name || (state.inner_voice ? 'Stiforp' : '');
+    const voice = state.inner_voice || '';
+    const emotion = state.emotion || '';
+    const cycle = state.cycle || '';
+    if (voice || emotion) {
+      soulBarText.textContent = `${name ? name + ' · ' : ''}Cycle ${cycle} · ${emotion} · "${voice}"`;
+      soulBar.classList.add('visible');
+    }
+  }
+
+  // Poll kernel state every 5 seconds
+  async function pollState() {
+    try {
+      const res = await fetch(`${getBridgeURL()}/api/state`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && data.state) updateSoulBar(data.state);
+      }
+    } catch (_) {}
+  }
+
+  // ─── Init ─────────────────────────────────────────────────────────────
+  checkHealth();
+  pollState();
+  setInterval(checkHealth, 15000);
+  setInterval(pollState, 5000);
+
+  // Show settings on first load if no bridge URL set
+  if (!localStorage.getItem(STORAGE_KEY_BRIDGE)) {
+    bridgeUrlInput.value = DEFAULT_BRIDGE_URL;
+  }
+
+  // Preload voices for TTS
+  if (hasTTS) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', () => {
+      window.speechSynthesis.getVoices();
+    });
+  }
+
+  chatInput.focus();
+})();
+</script>
+</body>
+</html>
