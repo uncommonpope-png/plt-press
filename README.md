@@ -254,6 +254,79 @@ Commercial license available with Enterprise tier.
 
 ---
 
+## 🜁 ENTITY RUNTIME — Grand Soul Kernel + Profit Brain
+
+The **Entity Runtime** is a local Node.js server that makes the Soul Kernel act autonomously.
+It integrates the **Profit Brain** doctrine and exposes a mobile-friendly Jarvis-like UI.
+
+### Prerequisites
+
+- **Node.js ≥ 18** — download from [nodejs.org](https://nodejs.org/)
+- **Rust + Cargo** — only needed if you want to run the Rust Soul Kernel directly
+
+### Install & Run
+
+```bash
+cd entity-runtime
+npm install
+npm start
+```
+
+Open in browser: `http://localhost:3000/`
+
+### Connect from Your Phone
+
+Make sure your phone is on the same Wi-Fi. Find your machine's LAN IP:
+
+```bash
+# macOS / Linux
+ifconfig | grep "inet " | grep -v 127.0.0.1
+
+# Windows
+ipconfig
+```
+
+Then open `http://<your-ip>:3000/` on your phone.
+
+### Optional: Enable AI Responses
+
+```bash
+# OpenAI (opt-in)
+export OPENAI_API_KEY="sk-…"
+npm start
+
+# Anthropic (opt-in)
+export ANTHROPIC_API_KEY="sk-ant-…"
+npm start
+```
+
+Without an API key, the entity uses a built-in rule-based engine (works offline).
+
+### Also: Run the Rust Soul Kernel
+
+```bash
+cd grand-soul-kernel
+cargo run --release
+```
+
+Reads/writes `stiforp_soul.json`. The Entity Runtime uses the same file.
+
+### Repository Layout
+
+```
+plt-press/
+├── grand-soul-kernel/    ← Rust Soul Kernel (71 chambers, apotheosis engine)
+├── profit-brain/         ← Vendored Profit Brain doctrine files
+├── entity-runtime/       ← Node.js runtime server (HTTP API + WebSocket + heartbeat)
+├── entity-ui/            ← Mobile-friendly Jarvis UI (served by the runtime)
+├── entity-runtime.html   ← GitHub Pages guide: how to run and connect from phone
+└── ... (Soulverse HTML apps)
+```
+
+📖 Full guide: [entity-runtime.html](https://uncommonpope-png.github.io/plt-press/entity-runtime.html)
+
+---
+
 ## 🙏 CREDITS
 
 Created by **Craig Jones** under **PLT Press**.

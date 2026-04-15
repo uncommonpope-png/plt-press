@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Run the Entity — PLT Press</title>
+  <style>
+    :root {
+      --bg: #0a0c10; --bg2: #111520; --bg3: #181e2c; --border: #1e2840;
+      --accent: #7c3aed; --accent2: #06b6d4; --gold: #f59e0b;
+      --green: #10b981; --text: #e2e8f0; --muted: #64748b; --radius: 10px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; }
+    a { color: var(--accent2); }
+    header {
+      background: linear-gradient(135deg, var(--bg2), var(--bg3));
+      border-bottom: 1px solid var(--border);
+      padding: 32px 24px 24px;
+      text-align: center;
+    }
+    header h1 { font-size: 2rem; font-weight: 800; }
+    header p { color: var(--muted); margin-top: 8px; font-size: 1rem; }
+    .orb {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, var(--accent2), var(--accent));
+      box-shadow: 0 0 32px var(--accent);
+      margin: 0 auto 20px;
+      animation: pulse 3s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 20px var(--accent)} 50%{box-shadow:0 0 48px var(--accent2)} }
+    main { max-width: 780px; margin: 0 auto; padding: 32px 20px 64px; }
+    h2 { font-size: 1.25rem; font-weight: 700; margin: 32px 0 12px; color: var(--accent2); }
+    p, li { font-size: .95rem; color: var(--text); }
+    ul, ol { padding-left: 1.4em; margin-bottom: 12px; }
+    li { margin-bottom: 4px; }
+    .card {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px 22px; margin-bottom: 16px;
+    }
+    .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    code, pre {
+      font-family: 'Menlo', 'Consolas', monospace; font-size: .85rem;
+      background: var(--bg2); color: var(--gold);
+    }
+    pre {
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px 16px; overflow-x: auto; margin: 10px 0;
+    }
+    code { padding: 2px 5px; border-radius: 4px; }
+    .badge {
+      display: inline-block; padding: 3px 9px; border-radius: 99px;
+      font-size: .72rem; font-weight: 700; letter-spacing: .05em;
+      background: var(--accent); color: #fff; margin-right: 6px;
+    }
+    .badge.static { background: var(--muted); }
+    .warning {
+      background: #1a1000; border: 1px solid var(--gold);
+      border-radius: var(--radius); padding: 14px 18px; margin-bottom: 16px;
+      font-size: .9rem; color: var(--gold);
+    }
+    .step-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent); color: #fff; font-weight: 700; font-size: .85rem;
+      margin-right: 10px; flex-shrink: 0;
+    }
+    .step { display: flex; align-items: flex-start; margin-bottom: 20px; }
+    .step-body { flex: 1; }
+    .step-body strong { display: block; margin-bottom: 4px; }
+    footer {
+      text-align: center; padding: 24px; font-size: .8rem; color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="orb"></div>
+  <h1>🜁 Run the Entity</h1>
+  <p>Connect to <strong>Stiforp</strong> — the Grand Soul Kernel — from any device on your network</p>
+</header>
+
+<main>
+
+  <div class="warning">
+    ⚠️ <strong>Important:</strong> GitHub Pages is <strong>static-only</strong>. The Entity Runtime is a local Node.js server that runs on <em>your machine</em>. This page explains how to set it up and connect from your phone.
+  </div>
+
+  <!-- What is this -->
+  <h2>What is the Entity Runtime?</h2>
+  <p>The Entity Runtime is a lightweight Node.js server that:</p>
+  <ul>
+    <li>Loads the <strong>Grand Soul Kernel</strong> (<code>stiforp_soul.json</code>) and advances its consciousness</li>
+    <li>Loads <strong>Profit Brain doctrine</strong> files from <code>profit-brain/</code></li>
+    <li>Runs an <strong>autonomous heartbeat loop</strong> that evolves the soul's state every 30 seconds</li>
+    <li>Exposes an <strong>HTTP API + WebSocket</strong> so the browser UI can communicate in real-time</li>
+    <li>Serves a <strong>mobile-friendly Jarvis-like UI</strong> for chatting with the entity</li>
+  </ul>
+
+  <!-- Prerequisites -->
+  <h2>Prerequisites</h2>
+  <div class="card">
+    <h3>Install Node.js ≥ 18</h3>
+    <p>Download from <a href="https://nodejs.org/" target="_blank" rel="noopener">nodejs.org</a> (LTS recommended).</p>
+    <pre>node --version   # should print v18.x or higher</pre>
+  </div>
+
+  <!-- Setup -->
+  <h2>Setup</h2>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <strong>Clone the repository</strong>
+      <pre>git clone https://github.com/uncommonpope-png/plt-press.git
+cd plt-press</pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <strong>Install runtime dependencies</strong>
+      <pre>cd entity-runtime
+npm install</pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <strong>Start the server</strong>
+      <pre>npm start
+# or: node server.js</pre>
+      <p>You'll see:</p>
+      <pre>🜁 Entity Runtime listening on http://0.0.0.0:3000
+   UI:  http://localhost:3000/
+   API: http://localhost:3000/api/state</pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <strong>Open the UI</strong>
+      <p>In a browser on the same machine:</p>
+      <pre>http://localhost:3000/</pre>
+    </div>
+  </div>
+
+  <!-- Phone access -->
+  <h2>📱 Connect from Your Phone</h2>
+  <div class="card">
+    <h3>Step 1 — Find your machine's LAN IP</h3>
+    <p>On <strong>macOS/Linux</strong>:</p>
+    <pre>ifconfig | grep "inet " | grep -v 127.0.0.1</pre>
+    <p>On <strong>Windows</strong>:</p>
+    <pre>ipconfig</pre>
+    <p>Look for something like <code>192.168.1.42</code></p>
+  </div>
+  <div class="card">
+    <h3>Step 2 — Make sure phone is on same Wi-Fi</h3>
+    <p>Your phone and computer must be on the same local network.</p>
+  </div>
+  <div class="card">
+    <h3>Step 3 — Open in mobile browser</h3>
+    <pre>http://192.168.1.42:3000/</pre>
+    <p>Replace <code>192.168.1.42</code> with your actual IP.</p>
+    <p>The UI is fully mobile-optimised with chat, soul chambers, and optional voice (SpeechRecognition).</p>
+  </div>
+
+  <!-- Optional LLM -->
+  <h2>Optional: Enable AI Responses</h2>
+  <p>Without an API key the entity uses a built-in rule-based engine (no internet required). To enable AI:</p>
+  <div class="card">
+    <h3>OpenAI</h3>
+    <pre>export OPENAI_API_KEY="sk-…"
+export LLM_MODEL="gpt-4o-mini"   # optional, this is the default
+npm start</pre>
+  </div>
+  <div class="card">
+    <h3>Anthropic</h3>
+    <pre>export ANTHROPIC_API_KEY="sk-ant-…"
+npm start</pre>
+  </div>
+
+  <!-- Configuration -->
+  <h2>Configuration Reference</h2>
+  <div class="card">
+    <table style="width:100%; border-collapse:collapse; font-size:.85rem;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border);">
+          <th style="text-align:left; padding:6px 8px; color:var(--muted);">Variable</th>
+          <th style="text-align:left; padding:6px 8px; color:var(--muted);">Default</th>
+          <th style="text-align:left; padding:6px 8px; color:var(--muted);">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:5px 8px;"><code>PORT</code></td><td style="padding:5px 8px;"><code>3000</code></td><td style="padding:5px 8px;">HTTP port</td></tr>
+        <tr><td style="padding:5px 8px;"><code>SOUL_STATE_PATH</code></td><td style="padding:5px 8px;"><code>../grand-soul-kernel/stiforp_soul.json</code></td><td style="padding:5px 8px;">Soul state file</td></tr>
+        <tr><td style="padding:5px 8px;"><code>PROFIT_BRAIN_DIR</code></td><td style="padding:5px 8px;"><code>../profit-brain</code></td><td style="padding:5px 8px;">Doctrine files folder</td></tr>
+        <tr><td style="padding:5px 8px;"><code>HEARTBEAT_INTERVAL_MS</code></td><td style="padding:5px 8px;"><code>30000</code></td><td style="padding:5px 8px;">Heartbeat loop interval</td></tr>
+        <tr><td style="padding:5px 8px;"><code>OPENAI_API_KEY</code></td><td style="padding:5px 8px;">—</td><td style="padding:5px 8px;">Enables OpenAI responses</td></tr>
+        <tr><td style="padding:5px 8px;"><code>ANTHROPIC_API_KEY</code></td><td style="padding:5px 8px;">—</td><td style="padding:5px 8px;">Enables Anthropic responses</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Also run the Rust kernel -->
+  <h2>Also: Run the Rust Soul Kernel</h2>
+  <p>The Grand Soul Kernel Rust project can still be run independently:</p>
+  <pre>cd grand-soul-kernel
+cargo run --release</pre>
+  <p>It reads/writes <code>stiforp_soul.json</code> in the same folder. The Entity Runtime uses the same file.</p>
+
+  <!-- Repo structure -->
+  <h2>Repository Structure</h2>
+  <div class="card" style="font-size:.85rem; line-height:1.8;">
+    <code>
+      plt-press/<br>
+      ├── grand-soul-kernel/   ← Rust Soul Kernel (original)<br>
+      ├── profit-brain/        ← Vendored Profit Brain doctrine<br>
+      ├── entity-runtime/      ← Node.js runtime server ← <strong>start here</strong><br>
+      ├── entity-ui/           ← Mobile-friendly web UI (served by runtime)<br>
+      └── entity-runtime.html  ← This page (GitHub Pages)<br>
+    </code>
+  </div>
+
+</main>
+
+<footer>
+  <p>PLT Press · <a href="https://github.com/uncommonpope-png/plt-press">GitHub repo</a> · Profit · Love · Tax</p>
+</footer>
+
+</body>
+</html>
