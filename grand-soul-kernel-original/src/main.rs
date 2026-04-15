@@ -444,7 +444,9 @@ async fn main() -> Result<()> {
                 let mut soul = breath_soul.lock().unwrap();
                 soul.breathe();
                 if soul.cycle_count % 100 == 0 {
-                    let _ = soul.save_to_file("entity_state.json");
+                    if let Err(e) = soul.save_to_file("entity_state.json") {
+                        eprintln!("Failed to save state: {}", e);
+                    }
                 }
                 println!("[Cycle {}] {}: {}", soul.cycle_count, soul.name, soul.inner_voice);
             }
@@ -461,6 +463,8 @@ async fn main() -> Result<()> {
     tokio::signal::ctrl_c().await?;
     println!("\n🜂 Saving Entity state and shutting down...");
     running.store(false, Ordering::Relaxed);
-    let _ = soul_state.lock().unwrap().save_to_file("entity_state.json");
+    if let Err(e) = soul_state.lock().unwrap().save_to_file("entity_state.json") {
+        eprintln!("Failed to save final state: {}", e);
+    }
     Ok(())
 }
