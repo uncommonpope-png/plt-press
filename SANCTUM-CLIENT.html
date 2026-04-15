@@ -311,14 +311,14 @@ composer.addPass(smaaPass);
 
 // ========== BIOME DEFINITIONS ==========
 const BIOMES = {
-    ocean:     { color: 0x14386a, rough: 0.6, metal: 0.12 },
-    grassland: { color: 0x3a9c2c, rough: 0.88, metal: 0.0 },
-    forest:    { color: 0x0c5618, rough: 0.92, metal: 0.0 },
-    desert:    { color: 0xc4a448, rough: 0.95, metal: 0.0 },
-    mountain:  { color: 0x686870, rough: 0.80, metal: 0.15 },
-    tundra:    { color: 0xa4c4d4, rough: 0.70, metal: 0.05 },
-    swamp:     { color: 0x385c26, rough: 0.90, metal: 0.0 },
-    volcanic:  { color: 0x8a2c1c, rough: 0.85, metal: 0.05 },
+    ocean:     { color: 0x14386a, roughness: 0.60, metalness: 0.12 },
+    grassland: { color: 0x3a9c2c, roughness: 0.88, metalness: 0.0  },
+    forest:    { color: 0x0c5618, roughness: 0.92, metalness: 0.0  },
+    desert:    { color: 0xc4a448, roughness: 0.95, metalness: 0.0  },
+    mountain:  { color: 0x686870, roughness: 0.80, metalness: 0.15 },
+    tundra:    { color: 0xa4c4d4, roughness: 0.70, metalness: 0.05 },
+    swamp:     { color: 0x385c26, roughness: 0.90, metalness: 0.0  },
+    volcanic:  { color: 0x8a2c1c, roughness: 0.85, metalness: 0.05 },
 };
 
 function getBiome(x, y) {
@@ -376,8 +376,8 @@ for (const [name, pairs] of Object.entries(biomeGroups)) {
     const count = pairs.length / 2;
     const mat   = new THREE.MeshStandardMaterial({
         color:      def.color,
-        roughness:  def.rough,
-        metalness:  def.metal,
+        roughness:  def.roughness,
+        metalness:  def.metalness,
         normalMap:  makeNormalTexture(Object.keys(BIOMES).indexOf(name) * 7.3),
         normalScale: new THREE.Vector2(0.4, 0.4),
     });
@@ -427,8 +427,8 @@ function spawnSoul(soul) {
     scene.add(hpMesh);
 
     // Drop shadow
-    const sMat   = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.22, depthWrite: false });
-    const shadowMesh = new THREE.Mesh(shadowGeo, sMat);
+    const shadowMat  = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.22, depthWrite: false });
+    const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
     shadowMesh.rotation.x = -Math.PI / 2;
     shadowMesh.position.set(px, 0.005, pz);
     scene.add(shadowMesh);
@@ -555,7 +555,7 @@ function updateParticles(dt) {
         p.mesh.position.y += p.vy * dt;
         p.mesh.position.z += p.vz * dt;
         p.vy -= 1.2 * dt;
-        p.vx *= 0.95; p.vz *= 0.95;
+        p.vx *= PARTICLE_DAMPING; p.vz *= PARTICLE_DAMPING;
         if (p.mesh.position.y < 0.05) { p.mesh.position.y = 0.05; p.vy = Math.abs(p.vy) * 0.25; }
         p.mat.opacity = p.life / p.maxLife;
     }
@@ -572,7 +572,7 @@ function updateParticles(dt) {
                 p.life = 0;
             } else {
                 p.vy   = Math.abs(p.vy) * 0.15;
-                p.vx  *= 0.4; p.vz *= 0.4;
+                p.vx  *= RAIN_BOUNCE_DAMPING; p.vz *= RAIN_BOUNCE_DAMPING;
             }
         }
         p.mat.opacity = (p.life / p.maxLife) * 0.55;
@@ -592,6 +592,10 @@ const MAX_MOVE_INTERVAL_EXTRA = 3.0;        // extra seconds added to MIN (max =
 const MOVE_STEP_THRESHOLD  = 0.3;           // seconds remaining on timer when a soul steps a tile
 const HEALTH_REGEN_BIAS    = 0.38;          // bias <0.5 means slight net healing on average
 const HEALTH_REGEN_RATE    = 2.0;           // HP change multiplier on dt
+// Physics / camera tuning
+const PARTICLE_DAMPING     = 0.95;          // per-frame velocity decay for birth particles
+const RAIN_BOUNCE_DAMPING  = 0.4;           // horizontal velocity retained after rain ground bounce
+const CAMERA_PAN_DAMPING   = 0.82;          // per-frame friction applied to camera pan velocity
 
 // ========== DAY / NIGHT CYCLE ==========
 let timeOfDay   = 0.45;
@@ -771,7 +775,7 @@ function updateCamera(dt) {
     if (keys['KeyS'] || keys['ArrowDown'])  panVel.y -= spd;
     if (keys['KeyA'] || keys['ArrowLeft'])  panVel.x -= spd;
     if (keys['KeyD'] || keys['ArrowRight']) panVel.x += spd;
-    panVel.multiplyScalar(0.82);
+    panVel.multiplyScalar(CAMERA_PAN_DAMPING);
 
     cam.position.x += panVel.x;
     cam.position.z -= panVel.y;
