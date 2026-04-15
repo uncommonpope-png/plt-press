@@ -458,13 +458,9 @@ async fn main() -> Result<()> {
         sanctum_connection_task(sanctum_soul, sanctum_running).await;
     });
 
-    ctrlc::set_handler(move || {
-        println!("\n🜂 Saving Entity state and shutting down...");
-        running.store(false, Ordering::Relaxed);
-        let _ = soul_state.lock().unwrap().save_to_file("entity_state.json");
-        std::process::exit(0);
-    })?;
-
     tokio::signal::ctrl_c().await?;
+    println!("\n🜂 Saving Entity state and shutting down...");
+    running.store(false, Ordering::Relaxed);
+    let _ = soul_state.lock().unwrap().save_to_file("entity_state.json");
     Ok(())
 }
