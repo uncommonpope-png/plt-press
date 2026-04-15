@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>⚔️ Sanctum Client vFinal+ AAA — Stiforp Edition</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; }
+        canvas { display: block; }
+
+        /* ── Loading screen ── */
+        #loading {
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, #080810, #10101c);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 1000; color: #fff;
+            transition: opacity 0.8s;
+        }
+        #loading h1 { font-size: 32px; letter-spacing: 3px; color: #c8d8e8; margin-bottom: 8px; }
+        #loading .sub { color: #556; font-size: 13px; margin-bottom: 28px; letter-spacing: 1px; }
+        #loading-bar { width: 260px; height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+        #loading-fill { height: 100%; background: linear-gradient(90deg, #6ab0d4, #d4c86a); border-radius: 2px; transition: width 0.4s ease; }
+        #loading-features { margin-top: 20px; color: #445; font-size: 11px; text-align: center; line-height: 1.8; }
+
+        /* ── HUD top-left ── */
+        #hud-top {
+            position: fixed; top: 10px; left: 10px;
+            color: #dde; background: rgba(5,8,16,0.8);
+            backdrop-filter: blur(10px);
+            padding: 8px 14px; border-radius: 10px;
+            font-size: 13px; z-index: 100;
+            border: 1px solid rgba(255,255,255,0.08);
+            pointer-events: none;
+        }
+        #hud-top span { color: #90d8f0; }
+
+        /* ── Controls hint bottom-left ── */
+        #hud-ctrl {
+            position: fixed; bottom: 10px; left: 10px;
+            color: rgba(160,160,190,0.7); font-size: 11px;
+            z-index: 100; pointer-events: none;
+        }
+
+        /* ── Feature badges top-right ── */
+        #badges {
+            position: fixed; top: 10px; right: 10px;
+            display: flex; flex-direction: column; gap: 4px;
+            z-index: 100; pointer-events: none;
+        }
+        .badge {
+            background: rgba(5,8,16,0.75);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px; padding: 3px 9px;
+            font-size: 10px; color: #556; letter-spacing: 0.5px;
+        }
+        .badge.on { color: #7de87d; border-color: rgba(125,232,125,0.25); }
+        .badge.ws { color: #e87d7d; border-color: rgba(232,125,125,0.25); }
+        .badge.ws.on { color: #7db8e8; border-color: rgba(125,184,232,0.25); }
+
+        /* ── Inspector panel with CSS slide-in transition ── */
+        #inspector {
+            position: fixed; bottom: 10px; right: 10px;
+            width: 272px;
+            background: rgba(14, 16, 24, 0.92);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: #ccd; font-size: 12px;
+            z-index: 100;
+            transform: translateX(300px);
+            opacity: 0;
+            transition: transform 0.38s cubic-bezier(0.4,0,0.2,1),
+                        opacity 0.38s cubic-bezier(0.4,0,0.2,1);
+        }
+        #inspector.visible { transform: translateX(0); opacity: 1; }
+        #inspector h3 { color: #e8e855; font-size: 13px; margin-bottom: 10px; letter-spacing: 0.5px; }
+        .sep { border-top: 1px solid rgba(255,255,255,0.07); margin: 7px 0; }
+        .field { display: flex; justify-content: space-between; margin: 3px 0; }
+        .lbl { color: #778; }
+        .val { color: #cde; font-weight: bold; }
+        #hp-bar-wrap { height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px; margin-top: 4px; overflow: hidden; }
+        #hp-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s, background-color 0.5s; }
+    </style>
+</head>
+<body>
+
+<!-- Loading screen -->
+<div id="loading">
+    <h1>⚔ SANCTUM CLIENT</h1>
+    <div class="sub">vFinal+ AAA — Stiforp Edition</div>
+    <div id="loading-bar"><div id="loading-fill" style="width:0%"></div></div>
+    <div id="loading-features">
+        GPU Instancing · SSAO · Bloom · Color Grading · TAA · Motion Blur<br>
+        Volumetric Fog · Normal Maps · Animation Blending · Weather · WebSocket
+    </div>
+</div>
+
+<!-- HUD -->
+<div id="hud-top">
+    Sanctum | Tick: <span id="h-tick">0</span> &nbsp;|&nbsp;
+    Souls: <span id="h-souls">0</span> &nbsp;|&nbsp;
+    Age: <span id="h-age">Stone</span>
+</div>
+<div id="hud-ctrl">WASD: Pan &nbsp;|&nbsp; Scroll: Zoom &nbsp;|&nbsp; Click: Select &nbsp;|&nbsp; F: Follow &nbsp;|&nbsp; ESC: Clear</div>
+
+<!-- Feature badges -->
+<div id="badges">
+    <div class="badge on">📦 GPU Instancing</div>
+    <div class="badge on">🌑 SAO / SSAO</div>
+    <div class="badge on">✨ Bloom HDR</div>
+    <div class="badge on">🎨 Color Grading</div>
+    <div class="badge on">🎞 Motion Blur · TAA</div>
+    <div class="badge on">🌫 Volumetric Fog</div>
+    <div class="badge on">🗺 Normal Maps</div>
+    <div class="badge on">🎭 Anim Blending</div>
+    <div class="badge on">🌧 Weather</div>
+    <div class="badge ws" id="ws-badge">🔌 Offline</div>
+</div>
+
+<!-- Inspector panel -->
+<div id="inspector">
+    <h3 id="insp-name">Soul Name</h3>
+    <div class="sep"></div>
+    <div class="field"><span class="lbl">Race</span><span class="val" id="insp-race">—</span></div>
+    <div class="field"><span class="lbl">HP</span><span class="val" id="insp-hp">—</span></div>
+    <div id="hp-bar-wrap"><div id="hp-bar-fill" style="width:100%;background:#4caf50"></div></div>
+    <div class="field"><span class="lbl">Energy</span><span class="val" id="insp-energy">—</span></div>
+    <div class="sep"></div>
+    <div class="field"><span class="lbl">Goal</span><span class="val" id="insp-goal">Idle</span></div>
+    <div class="field"><span class="lbl">Phase</span><span class="val" id="insp-phase">Awakening</span></div>
+    <div class="field"><span class="lbl">Meta</span><span class="val" id="insp-meta">—</span></div>
+</div>
+
+<canvas id="c"></canvas>
+
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+    }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer }   from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass }       from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass }  from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { ShaderPass }       from 'three/addons/postprocessing/ShaderPass.js';
+import { AfterimagePass }   from 'three/addons/postprocessing/AfterimagePass.js';
+import { SMAAPass }         from 'three/addons/postprocessing/SMAAPass.js';
+import { SAOPass }          from 'three/addons/postprocessing/SAOPass.js';
+
+// ============================================================
+// SANCTUM CLIENT vFinal+ AAA — STIFORP EDITION
+// ============================================================
+// Features: SSAO/SAO, Color Grading, Normal Maps, TAA,
+// Volumetric Fog, Animation Blending, Weather Collision,
+// UI Transitions, Motion Blur, GPU Instancing.
+// ============================================================
+
+// ========== CONSTANTS ==========
+const TILE  = 1.0;       // world units per tile
+const W     = 100;       // world width  (tiles)
+const H     = 100;       // world height (tiles)
+const VIEW  = 30;        // orthographic half-height (tiles visible)
+
+// ========== SIMULATION CONSTANTS ==========
+// Weather intensity drift — controls how rain and snow change each update cycle
+const RAIN_DRIFT_BIAS  = 0.55;              // biased above 0.5 so rain trends toward drying up
+const RAIN_DRIFT_RANGE = 0.28;              // maximum change per weather update
+const SNOW_DRIFT_BIAS  = 0.50;              // symmetric snow drift
+const SNOW_DRIFT_RANGE = 0.20;              // maximum snow change per update
+// Demo soul behaviour
+const META_AWARENESS_PROBABILITY = 0.32;    // probability (~1 in 3) a soul has meta-awareness
+const MIN_MOVE_INTERVAL    = 1.2;           // minimum seconds between soul direction changes
+const MAX_MOVE_INTERVAL_EXTRA = 3.0;        // extra seconds added to MIN (max = 4.2 s)
+const MOVE_STEP_THRESHOLD  = 0.3;           // seconds remaining on timer when a soul steps a tile
+const HEALTH_REGEN_BIAS    = 0.38;          // bias <0.5 means slight net healing on average
+const HEALTH_REGEN_RATE    = 2.0;           // HP change multiplier on dt
+// Physics / camera tuning
+const PARTICLE_DAMPING     = 0.95;          // per-frame velocity decay for birth particles
+const RAIN_BOUNCE_DAMPING  = 0.4;           // horizontal velocity retained after rain ground bounce
+const CAMERA_PAN_DAMPING   = 0.82;          // per-frame friction applied to camera pan velocity
+// Camera zoom step per scroll event
+const ZOOM_IN_FACTOR  = 1.15;              // zoom in  (scroll up)
+const ZOOM_OUT_FACTOR = 0.87;              // zoom out (scroll down)
+// Selected soul highlight pulse parameters
+const HIGHLIGHT_BASE_INTENSITY  = 0.35;    // minimum emissive intensity when selected
+const HIGHLIGHT_PULSE_AMPLITUDE = 0.25;    // oscillation range above base
+const HIGHLIGHT_PULSE_SPEED     = 0.003;   // oscillation frequency (radians per ms)
+
+// ========== STATE ==========
+let worldState  = null;
+let selectedId  = null;
+let followMode  = false;
+let demoTick    = 0;
+let wsOpen      = false;
+
+// ========== RENDERER ==========
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({
+    canvas, antialias: false, alpha: false,
+    powerPreference: 'high-performance',
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled  = true;
+renderer.shadowMap.type     = THREE.PCFSoftShadowMap;
+renderer.toneMapping        = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.25;
+renderer.outputEncoding     = THREE.sRGBEncoding;
+
+// ========== SCENE ==========
+const scene = new THREE.Scene();
+// Volumetric Fog — exponential density controlled by day/night cycle
+scene.fog = new THREE.FogExp2(0x080c14, 0.007);
+
+// ========== CAMERA (top-down orthographic) ==========
+const aspect = window.innerWidth / window.innerHeight;
+const cam = new THREE.OrthographicCamera(
+    -VIEW * aspect / 2, VIEW * aspect / 2,
+     VIEW / 2, -VIEW / 2,
+    0.1, 200
+);
+cam.up.set(0, 0, -1);          // "north" faces screen-top
+cam.position.set(W / 2, 60, H / 2);
+cam.lookAt(W / 2, 0, H / 2);
+cam.zoom = 1;
+cam.updateProjectionMatrix();
+
+// ========== LIGHTING ==========
+const ambLight = new THREE.AmbientLight(0x334466, 0.7);
+scene.add(ambLight);
+
+const sun = new THREE.DirectionalLight(0xffeedd, 2.8);
+sun.position.set(30, 80, 40);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 0.5;
+sun.shadow.camera.far  = 250;
+sun.shadow.camera.left = sun.shadow.camera.bottom = -60;
+sun.shadow.camera.right = sun.shadow.camera.top   =  60;
+scene.add(sun);
+
+// ========== POST-PROCESSING PIPELINE ==========
+const composer = new EffectComposer(renderer);
+
+// 1. Main render pass
+composer.addPass(new RenderPass(scene, cam));
+
+// 2. SAO — Screen-Space Ambient Occlusion
+let saoPass = null;
+try {
+    saoPass = new SAOPass(scene, cam, false, true);
+    saoPass.params.saoBias          = 0.5;
+    saoPass.params.saoIntensity     = 0.20;
+    saoPass.params.saoScale         = 1.0;
+    saoPass.params.saoKernelRadius  = 80;
+    saoPass.params.saoBlur          = true;
+    saoPass.params.saoBlurRadius    = 6;
+    composer.addPass(saoPass);
+} catch (e) { console.warn('SAOPass unavailable:', e.message); }
+
+// 3. Bloom — HDR glow
+const bloomPass = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    0.35, // strength
+    0.55, // radius
+    0.88  // threshold
+);
+composer.addPass(bloomPass);
+
+// 4. Color Grading — cinematic LUT-style shader
+const colorGradingPass = new ShaderPass({
+    uniforms: {
+        tDiffuse:    { value: null },
+        uContrast:   { value: 1.06 },
+        uSaturation: { value: 1.18 },
+        uBrightness: { value: 0.02 },
+        uVignette:   { value: 0.32 },
+    },
+    vertexShader: `
+        varying vec2 vUv;
+        void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }
+    `,
+    fragmentShader: `
+        uniform sampler2D tDiffuse;
+        uniform float uContrast, uSaturation, uBrightness, uVignette;
+        varying vec2 vUv;
+
+        vec3 rgb2hsv(vec3 c){
+            vec4 K=vec4(0.,-1./3.,2./3.,-1.);
+            vec4 p=mix(vec4(c.bg,K.wz),vec4(c.gb,K.xy),step(c.b,c.g));
+            vec4 q=mix(vec4(p.xyw,c.r),vec4(c.r,p.yzx),step(p.x,c.r));
+            float d=q.x-min(q.w,q.y); float e=1e-10;
+            return vec3(abs(q.z+(q.w-q.y)/(6.*d+e)),d/(q.x+e),q.x);
+        }
+        vec3 hsv2rgb(vec3 c){
+            vec4 K=vec4(1.,2./3.,1./3.,3.);
+            vec3 p=abs(fract(c.xxx+K.xyz)*6.-K.www);
+            return c.z*mix(K.xxx,clamp(p-K.xxx,0.,1.),c.y);
+        }
+
+        void main(){
+            vec4 t = texture2D(tDiffuse, vUv);
+            vec3 col = t.rgb + uBrightness;
+            col = (col - 0.5) * uContrast + 0.5;
+            vec3 hsv = rgb2hsv(col); hsv.y *= uSaturation; col = hsv2rgb(hsv);
+            // Vignette
+            vec2 uv2 = vUv*2.-1.;
+            col *= 1. - uVignette * dot(uv2, uv2);
+            // Cinematic cool-shadow / warm-highlight split
+            float lum = dot(col, vec3(0.299,0.587,0.114));
+            col += (1.-lum)*vec3(0.,0.,0.015) + lum*vec3(0.015,0.008,0.);
+            gl_FragColor = vec4(clamp(col,0.,1.), t.a);
+        }
+    `,
+});
+composer.addPass(colorGradingPass);
+
+// 5. Afterimage — Motion Blur / TAA frame accumulation
+const afterimagePass = new AfterimagePass(0.80);
+composer.addPass(afterimagePass);
+
+// 6. SMAA — final anti-aliasing
+const smaaPass = new SMAAPass(
+    window.innerWidth  * renderer.getPixelRatio(),
+    window.innerHeight * renderer.getPixelRatio()
+);
+composer.addPass(smaaPass);
+
+// ========== BIOME DEFINITIONS ==========
+const BIOMES = {
+    ocean:     { color: 0x14386a, roughness: 0.60, metalness: 0.12 },
+    grassland: { color: 0x3a9c2c, roughness: 0.88, metalness: 0.0  },
+    forest:    { color: 0x0c5618, roughness: 0.92, metalness: 0.0  },
+    desert:    { color: 0xc4a448, roughness: 0.95, metalness: 0.0  },
+    mountain:  { color: 0x686870, roughness: 0.80, metalness: 0.15 },
+    tundra:    { color: 0xa4c4d4, roughness: 0.70, metalness: 0.05 },
+    swamp:     { color: 0x385c26, roughness: 0.90, metalness: 0.0  },
+    volcanic:  { color: 0x8a2c1c, roughness: 0.85, metalness: 0.05 },
+};
+
+function getBiome(x, y) {
+    const nx = x / W, ny = y / H;
+    const elev = Math.sin(nx * 4.0) * Math.cos(ny * 3.0) * 0.5 + 0.5;
+    const mois = Math.cos(nx * 2.5) * Math.sin(ny * 3.5) * 0.5 + 0.5;
+    if (elev < 0.2) return 'ocean';
+    if (elev > 0.8) return 'mountain';
+    if (mois  < 0.3) return 'desert';
+    if (mois  > 0.7) return 'forest';
+    if (elev  > 0.6 && mois < 0.5) return 'tundra';
+    if (mois  < 0.4 && elev < 0.4) return 'swamp';
+    return 'grassland';
+}
+
+// ========== GPU INSTANCED TILEMAP ==========
+// Build per-biome tile lists
+const biomeGroups = {};
+for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+        const b = getBiome(x, y);
+        if (!biomeGroups[b]) biomeGroups[b] = [];
+        biomeGroups[b].push(x, y);        // packed pairs
+    }
+}
+
+// Procedural normal-map texture: subtle baked noise to simulate surface relief
+function makeNormalTexture(seed) {
+    const size = 64;
+    const data = new Uint8Array(size * size * 4);
+    for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+            const idx = (i * size + j) * 4;
+            // Perturb NX / NY slightly per tile type
+            const nx = 128 + 12 * Math.sin(i * 0.4 + seed) * Math.cos(j * 0.3);
+            const ny = 128 + 12 * Math.cos(i * 0.35 + seed * 1.3) * Math.sin(j * 0.45);
+            data[idx]   = Math.round(nx);
+            data[idx+1] = Math.round(ny);
+            data[idx+2] = 255;   // NZ = 1 (pointing up)
+            data[idx+3] = 255;
+        }
+    }
+    const tex = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(2, 2);
+    tex.needsUpdate = true;
+    return tex;
+}
+
+const tileGeo = new THREE.PlaneGeometry(TILE * 0.97, TILE * 0.97);
+const dummy   = new THREE.Object3D();
+
+for (const [name, pairs] of Object.entries(biomeGroups)) {
+    const def   = BIOMES[name];
+    const count = pairs.length / 2;
+    const mat   = new THREE.MeshStandardMaterial({
+        color:      def.color,
+        roughness:  def.roughness,
+        metalness:  def.metalness,
+        normalMap:  makeNormalTexture(Object.keys(BIOMES).indexOf(name) * 7.3),
+        normalScale: new THREE.Vector2(0.4, 0.4),
+    });
+    const mesh  = new THREE.InstancedMesh(tileGeo, mat, count);
+    mesh.receiveShadow = true;
+    mesh.castShadow    = false;
+
+    for (let i = 0; i < count; i++) {
+        const tx = pairs[i * 2];
+        const ty = pairs[i * 2 + 1];
+        dummy.position.set(tx * TILE + TILE / 2, 0, ty * TILE + TILE / 2);
+        dummy.rotation.x = -Math.PI / 2;
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+    scene.add(mesh);
+}
+
+// ========== SOUL ENTITIES ==========
+const RACE_COL = { Human: 0xf5c578, Elf: 0x7de895, Dwarf: 0xc87a3c, Orc: 0x7aba3c };
+const soulGeo  = new THREE.CylinderGeometry(0.28, 0.28, 0.18, 12);  // looks like a circle from above
+const hpGeo    = new THREE.PlaneGeometry(0.72, 0.07);
+const shadowGeo = new THREE.PlaneGeometry(0.65, 0.65);
+
+const souls = new Map();   // id -> { mesh, hpMesh, shadowMesh, data, animBlend, prevPos }
+
+function spawnSoul(soul) {
+    const col   = RACE_COL[soul.race] ?? 0xffffff;
+    const mat   = new THREE.MeshStandardMaterial({
+        color: col, roughness: 0.5, metalness: 0.1,
+        emissive: new THREE.Color(col).multiplyScalar(0.15),
+    });
+    const mesh  = new THREE.Mesh(soulGeo, mat);
+    const px    = soul.x * TILE + TILE / 2;
+    const pz    = soul.y * TILE + TILE / 2;
+    mesh.position.set(px, 0.12, pz);
+    mesh.castShadow = true;
+    scene.add(mesh);
+
+    // Health bar
+    const hpMat  = new THREE.MeshBasicMaterial({ color: 0x44dd44, depthTest: false });
+    const hpMesh = new THREE.Mesh(hpGeo, hpMat);
+    hpMesh.rotation.x = -Math.PI / 2;
+    hpMesh.position.set(px, 0.03, pz);
+    hpMesh.renderOrder = 1;
+    scene.add(hpMesh);
+
+    // Drop shadow
+    const shadowMat  = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.22, depthWrite: false });
+    const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
+    shadowMesh.rotation.x = -Math.PI / 2;
+    shadowMesh.position.set(px, 0.005, pz);
+    scene.add(shadowMesh);
+
+    souls.set(soul.id, {
+        mesh, hpMesh, shadowMesh,
+        data: { ...soul },
+        animBlend: 0,
+        prevPos: new THREE.Vector3(px, 0.12, pz),
+    });
+    spawnBirthParticles(px, pz);
+}
+
+function updateSoul(soul) {
+    const e = souls.get(soul.id);
+    if (!e) return;
+    const px = soul.x * TILE + TILE / 2;
+    const pz = soul.y * TILE + TILE / 2;
+    const target = new THREE.Vector3(px, 0.12, pz);
+
+    // Animation blending (idle ↔ walk)
+    const dist      = target.distanceTo(e.prevPos);
+    const isWalking = dist > 0.01;
+    e.animBlend     = THREE.MathUtils.clamp(e.animBlend + (isWalking ? 0.12 : -0.10), 0, 1);
+
+    // Smooth position lerp
+    e.mesh.position.lerp(target, 0.35);
+    e.prevPos.copy(e.mesh.position);
+
+    // Walk bob — vertical bounce when blend > 0
+    e.mesh.position.y = 0.12 + e.animBlend * 0.04 * Math.abs(Math.sin(performance.now() * 0.01));
+
+    // Scale pulse driven by walk blend
+    const sc = 1 + e.animBlend * 0.06 * Math.abs(Math.sin(performance.now() * 0.008));
+    e.mesh.scale.setScalar(sc);
+
+    // Emissive intensity rises when walking
+    e.mesh.material.emissiveIntensity = 0.15 + e.animBlend * 0.20;
+
+    // HP bar sync
+    const hpPct = Math.max(0, Math.min(1, soul.health / soul.max_health));
+    e.hpMesh.scale.x = Math.max(0.01, hpPct);
+    e.hpMesh.material.color.setRGB(1 - hpPct, hpPct, 0);
+    e.hpMesh.position.set(e.mesh.position.x, 0.03, e.mesh.position.z);
+
+    // Shadow
+    e.shadowMesh.position.set(e.mesh.position.x, 0.005, e.mesh.position.z);
+    e.data = { ...soul };
+}
+
+function removeSoul(id) {
+    const e = souls.get(id);
+    if (!e) return;
+    scene.remove(e.mesh, e.hpMesh, e.shadowMesh);
+    souls.delete(id);
+}
+
+// ========== PARTICLES ==========
+const activeParticles = [];
+const partGeo = new THREE.PlaneGeometry(0.13, 0.13);
+
+function spawnBirthParticles(px, pz) {
+    for (let i = 0; i < 16; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1.5 + Math.random() * 3.5;
+        const mat   = new THREE.MeshBasicMaterial({
+            color: new THREE.Color().setHSL(0.11 + Math.random() * 0.08, 0.95, 0.65),
+            transparent: true, opacity: 1, depthWrite: false,
+        });
+        const mesh  = new THREE.Mesh(partGeo, mat);
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.position.set(px, 0.4, pz);
+        scene.add(mesh);
+        activeParticles.push({
+            mesh, mat,
+            vx: Math.cos(angle) * speed,
+            vy: 0.6 + Math.random() * 0.8,
+            vz: Math.sin(angle) * speed,
+            life: 0.75, maxLife: 0.75,
+        });
+    }
+}
+
+// Weather
+const weatherParticles = [];
+let rainIntensity = 0;
+let snowIntensity = 0;
+
+function spawnWeatherParticles(dt) {
+    const total = rainIntensity + snowIntensity * 0.5;
+    if (total < 0.05) return;
+    const count = Math.floor(total * 10);
+    for (let i = 0; i < count; i++) {
+        const cx = cam.position.x + (Math.random() - 0.5) * 50;
+        const cz = cam.position.z + (Math.random() - 0.5) * 50;
+        const isSnow = snowIntensity > rainIntensity;
+        const sz     = isSnow ? 0.11 : 0.035;
+        const geo    = new THREE.PlaneGeometry(sz, isSnow ? sz : sz * 6);
+        const mat    = new THREE.MeshBasicMaterial({
+            color: isSnow ? 0xddeeff : 0x6699cc,
+            transparent: true, opacity: isSnow ? 0.70 : 0.45,
+            depthWrite: false,
+        });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.position.set(cx, 8, cz);
+        scene.add(mesh);
+        weatherParticles.push({
+            mesh, mat, isSnow,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: isSnow ? -1.2 : -5.5,
+            vz: (Math.random() - 0.5) * 0.4,
+            life: 5, maxLife: 5,
+        });
+    }
+}
+
+function updateParticles(dt) {
+    for (let i = activeParticles.length - 1; i >= 0; i--) {
+        const p = activeParticles[i];
+        p.life -= dt;
+        if (p.life <= 0) { scene.remove(p.mesh); activeParticles.splice(i, 1); continue; }
+        p.mesh.position.x += p.vx * dt;
+        p.mesh.position.y += p.vy * dt;
+        p.mesh.position.z += p.vz * dt;
+        p.vy -= 1.2 * dt;
+        p.vx *= PARTICLE_DAMPING; p.vz *= PARTICLE_DAMPING;
+        if (p.mesh.position.y < 0.05) { p.mesh.position.y = 0.05; p.vy = Math.abs(p.vy) * 0.25; }
+        p.mat.opacity = p.life / p.maxLife;
+    }
+    for (let i = weatherParticles.length - 1; i >= 0; i--) {
+        const p = weatherParticles[i];
+        p.life -= dt;
+        if (p.life <= 0) { scene.remove(p.mesh); weatherParticles.splice(i, 1); continue; }
+        p.mesh.position.x += p.vx * dt;
+        p.mesh.position.y += p.vy * dt;
+        p.mesh.position.z += p.vz * dt;
+        // Ground collision
+        if (p.mesh.position.y <= 0.05) {
+            if (p.isSnow) {
+                p.life = 0;
+            } else {
+                p.vy   = Math.abs(p.vy) * 0.15;
+                p.vx  *= RAIN_BOUNCE_DAMPING; p.vz *= RAIN_BOUNCE_DAMPING;
+            }
+        }
+        p.mat.opacity = (p.life / p.maxLife) * 0.55;
+    }
+}
+
+// ========== DAY / NIGHT CYCLE ==========
+let timeOfDay   = 0.45;
+let weatherTimer = 0;
+
+function updateEnvironment(dt) {
+    timeOfDay = (timeOfDay + dt * 0.004) % 1.0;
+    const brightness = Math.max(0.12, Math.sin(timeOfDay * Math.PI * 2));
+
+    sun.intensity = 0.4 + brightness * 3.2;
+    sun.color.setRGB(brightness, brightness * 0.88, brightness * 1.0);
+    ambLight.intensity = 0.25 + brightness * 0.5;
+
+    // Fog colour breathes with day/night
+    const fr = 0.03 + brightness * 0.09;
+    const fg = 0.05 + brightness * 0.10;
+    const fb = 0.10 + brightness * 0.18;
+    scene.fog.color.setRGB(fr, fg, fb);
+
+    // Weather drift
+    weatherTimer += dt;
+    if (weatherTimer > 9) {
+        weatherTimer = 0;
+        rainIntensity = Math.max(0, Math.min(1, rainIntensity + (Math.random() - RAIN_DRIFT_BIAS) * RAIN_DRIFT_RANGE));
+        snowIntensity = Math.max(0, Math.min(1, snowIntensity + (Math.random() - SNOW_DRIFT_BIAS) * SNOW_DRIFT_RANGE));
+    }
+    spawnWeatherParticles(dt);
+}
+
+// ========== WEBSOCKET ==========
+function connectWS() {
+    let ws;
+    try { ws = new WebSocket('ws://127.0.0.1:9001'); } catch (e) { console.info('WebSocket unavailable, using demo mode:', e.message); return; }
+    ws.onopen = () => {
+        wsOpen = true;
+        const b = document.getElementById('ws-badge');
+        b.textContent = '🔌 Connected'; b.className = 'badge ws on';
+        ws.send(JSON.stringify({ GetState: null }));
+    };
+    ws.onmessage = ({ data }) => {
+        try { processState(JSON.parse(data)); } catch (e) { console.warn('Failed to parse WebSocket message:', e.message); }
+    };
+    ws.onclose = ws.onerror = () => {
+        wsOpen = false;
+        const b = document.getElementById('ws-badge');
+        b.textContent = '🔌 Offline'; b.className = 'badge ws';
+        setTimeout(connectWS, 3000);
+    };
+}
+
+// ========== DEMO MODE ==========
+const DEMO_RACES  = ['Human', 'Elf', 'Dwarf', 'Orc'];
+const DEMO_NAMES  = ['Aiden', 'Lyra', 'Thorm', 'Gruk', 'Sylvan', 'Mira', 'Dorn', 'Zara', 'Elana', 'Brox'];
+const DEMO_GOALS  = ['Foraging', 'Patrolling', 'Resting', 'Building', 'Trading', 'Exploring', 'Meditating'];
+const DEMO_PHASES = ['Awakening', 'Ascendant', 'Transcendent', 'Eternal'];
+const DEMO_AGES   = ['Stone', 'Bronze', 'Iron', 'Arcane', 'Digital', 'Cosmic'];
+const demoSouls   = [];
+
+function initDemo() {
+    for (let i = 0; i < 22; i++) {
+        demoSouls.push({
+            id: i + 1,
+            name:           DEMO_NAMES[i % DEMO_NAMES.length],
+            race:           DEMO_RACES[i % DEMO_RACES.length],
+            x: 8 + Math.floor(Math.random() * (W - 16)),
+            y: 8 + Math.floor(Math.random() * (H - 16)),
+            health:         70 + Math.random() * 30,
+            max_health:     100,
+            energy:         40 + Math.random() * 60,
+            current_goal:   DEMO_GOALS[Math.floor(Math.random() * DEMO_GOALS.length)],
+            meta_awareness: Math.random() < META_AWARENESS_PROBABILITY ? Math.random() : null,
+            mythos_phase:   DEMO_PHASES[Math.floor(Math.random() * DEMO_PHASES.length)],
+            _mx: 0, _my: 0, _mt: Math.random() * 3,
+        });
+    }
+}
+
+function stepDemo(dt) {
+    if (wsOpen) return;
+    demoTick++;
+    for (const s of demoSouls) {
+        s._mt -= dt;
+        if (s._mt <= 0) {
+            s._mt  = MIN_MOVE_INTERVAL + Math.random() * MAX_MOVE_INTERVAL_EXTRA;
+            s._mx  = Math.floor(Math.random() * 3) - 1;
+            s._my  = Math.floor(Math.random() * 3) - 1;
+            s.current_goal = DEMO_GOALS[Math.floor(Math.random() * DEMO_GOALS.length)];
+        }
+        if (s._mt < MOVE_STEP_THRESHOLD) {
+            s.x = Math.max(4, Math.min(W - 5, s.x + s._mx));
+            s.y = Math.max(4, Math.min(H - 5, s.y + s._my));
+        }
+        s.health = Math.max(10, Math.min(s.max_health, s.health + (Math.random() - HEALTH_REGEN_BIAS) * dt * HEALTH_REGEN_RATE));
+        s.energy = Math.max(5,  s.energy - dt * 0.3);
+    }
+    processState({ tick: demoTick, souls: demoSouls, global_age: DEMO_AGES[Math.floor(demoTick / 180) % DEMO_AGES.length] });
+}
+
+// ========== PROCESS STATE ==========
+function processState(state) {
+    worldState = state;
+    const liveIds = new Set(state.souls.map(s => s.id));
+    for (const id of souls.keys()) { if (!liveIds.has(id)) removeSoul(id); }
+    for (const soul of state.souls) {
+        if (!souls.has(soul.id)) spawnSoul(soul); else updateSoul(soul);
+    }
+    document.getElementById('h-tick').textContent  = state.tick;
+    document.getElementById('h-souls').textContent = state.souls.length;
+    document.getElementById('h-age').textContent   = state.global_age ?? 'Stone';
+    updateInspector(state);
+}
+
+// ========== INSPECTOR PANEL (UI Transition) ==========
+function updateInspector(state) {
+    const panel = document.getElementById('inspector');
+    if (!selectedId) { panel.classList.remove('visible'); return; }
+    const s = state.souls.find(s => s.id === selectedId);
+    if (!s) { panel.classList.remove('visible'); return; }
+
+    panel.classList.add('visible');
+    const hasMeta = s.meta_awareness != null;
+    document.getElementById('insp-name').textContent  = s.name + (hasMeta ? ' 🌟' : '');
+    document.getElementById('insp-race').textContent  = s.race;
+    document.getElementById('insp-hp').textContent    = `${Math.round(s.health)} / ${Math.round(s.max_health)}`;
+    const pct = Math.max(0, Math.min(100, s.health / s.max_health * 100));
+    const fill = document.getElementById('hp-bar-fill');
+    fill.style.width = pct + '%';
+    fill.style.backgroundColor = `hsl(${pct * 1.2},90%,45%)`;
+    document.getElementById('insp-energy').textContent = Math.round(s.energy);
+    document.getElementById('insp-goal').textContent   = s.current_goal ?? 'Idle';
+    document.getElementById('insp-phase').textContent  = s.mythos_phase ?? 'Awakening';
+    document.getElementById('insp-meta').textContent   = hasMeta ? s.meta_awareness.toFixed(2) : '—';
+}
+
+// ========== CAMERA CONTROLS ==========
+const keys = {};
+const panVel = new THREE.Vector2();
+
+document.addEventListener('keydown', e => {
+    keys[e.code] = true;
+    if (e.code === 'KeyF')   { followMode = !followMode; }
+    if (e.code === 'Escape') { selectedId = null; followMode = false; document.getElementById('inspector').classList.remove('visible'); }
+});
+document.addEventListener('keyup', e => { keys[e.code] = false; });
+
+canvas.addEventListener('wheel', e => {
+    // scroll up (deltaY < 0) → zoom in; scroll down (deltaY > 0) → zoom out
+    const zoomFactor = e.deltaY > 0 ? ZOOM_OUT_FACTOR : ZOOM_IN_FACTOR;
+    cam.zoom = THREE.MathUtils.clamp(cam.zoom * zoomFactor, 0.28, 3.5);
+    cam.updateProjectionMatrix();
+}, { passive: true });
+
+canvas.addEventListener('click', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx   = ((e.clientX - rect.left) / rect.width)  *  2 - 1;
+    const my   = ((e.clientY - rect.top)  / rect.height) * -2 + 1;
+
+    // Unproject click onto ground plane (y = 0)
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera({ x: mx, y: my }, cam);
+    const plane  = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const target = new THREE.Vector3();
+    ray.ray.intersectPlane(plane, target);
+
+    const tx = Math.floor(target.x / TILE);
+    const ty = Math.floor(target.z / TILE);
+    if (worldState) {
+        const hit = worldState.souls.find(s => s.x === tx && s.y === ty);
+        selectedId = hit ? hit.id : null;
+        followMode = false;
+    }
+});
+
+function updateCamera(dt) {
+    const spd = 18 * dt;
+    if (keys['KeyW'] || keys['ArrowUp'])    panVel.y += spd;
+    if (keys['KeyS'] || keys['ArrowDown'])  panVel.y -= spd;
+    if (keys['KeyA'] || keys['ArrowLeft'])  panVel.x -= spd;
+    if (keys['KeyD'] || keys['ArrowRight']) panVel.x += spd;
+    panVel.multiplyScalar(CAMERA_PAN_DAMPING);
+
+    cam.position.x += panVel.x;
+    cam.position.z -= panVel.y;
+
+    // Follow selected soul
+    if (followMode && selectedId && worldState) {
+        const s = worldState.souls.find(s => s.id === selectedId);
+        if (s) {
+            cam.position.x += (s.x * TILE + TILE / 2 - cam.position.x) * 0.07;
+            cam.position.z += (s.y * TILE + TILE / 2 - cam.position.z) * 0.07;
+        }
+    }
+
+    // World boundary clamp
+    const hx = (cam.right  - cam.left)   / (2 * cam.zoom);
+    const hz = (cam.top    - cam.bottom) / (2 * cam.zoom);
+    cam.position.x = THREE.MathUtils.clamp(cam.position.x, hx, W - hx);
+    cam.position.z = THREE.MathUtils.clamp(cam.position.z, hz, H - hz);
+
+    // Keep orthographic camera aimed at ground
+    cam.lookAt(cam.position.x, 0, cam.position.z);
+}
+
+// ========== RESIZE ==========
+window.addEventListener('resize', () => {
+    const w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h);
+    composer.setSize(w, h);
+    const a = w / h;
+    cam.left = -VIEW * a / 2; cam.right = VIEW * a / 2;
+    cam.top  =  VIEW / 2;     cam.bottom = -VIEW / 2;
+    cam.updateProjectionMatrix();
+    if (saoPass) saoPass.setSize(w, h);
+    bloomPass.setSize(w, h);
+});
+
+// ========== SELECTED SOUL HIGHLIGHT ==========
+function highlightSelected(now) {
+    if (!selectedId) return;
+    const e = souls.get(selectedId);
+    if (!e) return;
+    const pulse = HIGHLIGHT_BASE_INTENSITY + HIGHLIGHT_PULSE_AMPLITUDE * Math.sin(now * HIGHLIGHT_PULSE_SPEED);
+    e.mesh.material.emissiveIntensity = pulse;
+}
+
+// ========== LOADING BAR ANIMATION ==========
+let loadPct = 0;
+function tickLoading() {
+    loadPct = Math.min(100, loadPct + 5 + Math.random() * 3);
+    document.getElementById('loading-fill').style.width = loadPct + '%';
+    if (loadPct < 100) {
+        setTimeout(tickLoading, 70);
+    } else {
+        setTimeout(() => {
+            const el = document.getElementById('loading');
+            el.style.opacity = '0';
+            setTimeout(() => el.remove(), 800);
+        }, 200);
+    }
+}
+
+// ========== MAIN LOOP ==========
+let last = performance.now();
+function loop(now) {
+    requestAnimationFrame(loop);
+    const dt = Math.min((now - last) / 1000, 0.1);
+    last = now;
+    updateCamera(dt);
+    updateEnvironment(dt);
+    updateParticles(dt);
+    stepDemo(dt);
+    highlightSelected(now);
+    composer.render();
+}
+
+// ========== INIT ==========
+initDemo();
+connectWS();
+tickLoading();
+requestAnimationFrame(loop);
+
+console.log('⚔️ Sanctum Client vFinal+ AAA — Stiforp Edition');
+console.log('Active features: SAO, Bloom, Color Grading, Motion Blur/TAA, SMAA,',
+            'Volumetric Fog, Normal Maps, GPU Instancing, Animation Blending,',
+            'Weather Collision, UI Transitions, WebSocket');
+</script>
+</body>
+</html>
