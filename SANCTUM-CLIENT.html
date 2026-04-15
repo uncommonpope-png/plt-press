@@ -635,7 +635,7 @@ function updateEnvironment(dt) {
 // ========== WEBSOCKET ==========
 function connectWS() {
     let ws;
-    try { ws = new WebSocket('ws://127.0.0.1:9001'); } catch { return; }
+    try { ws = new WebSocket('ws://127.0.0.1:9001'); } catch (e) { console.info('WebSocket unavailable, using demo mode:', e.message); return; }
     ws.onopen = () => {
         wsOpen = true;
         const b = document.getElementById('ws-badge');
