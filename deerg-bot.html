@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🌍 Deerg Bot — Universe Builder</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0D1117;--panel:#1A1A2E;--border:#2A2A4A;--gold:#FFB347;--pink:#FF2D78;--cyan:#00D4FF;--green:#2ecc71;--red:#e74c3c;--dim:#666}
+body{background:var(--bg);color:#ddd;font-family:Georgia,serif;max-width:680px;margin:0 auto;padding:10px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+h2{color:var(--gold);font-size:15px;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+h3{color:var(--cyan);font-size:13px;margin:10px 0 6px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.stat{background:#0d0d1a;border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center}
+.stat-val{font-size:22px;font-weight:bold;color:var(--cyan)}
+.stat-lbl{font-size:10px;color:var(--dim);letter-spacing:1px;margin-top:3px}
+.world-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.world-card{background:#0d0d1a;border:1px solid var(--border);border-radius:6px;padding:12px;cursor:pointer;transition:border .2s}
+.world-card:hover{border-color:var(--gold)}
+.world-icon{font-size:24px;margin-bottom:6px}
+.world-name{font-size:12px;color:var(--gold);font-weight:bold}
+.world-desc{font-size:11px;color:var(--dim);margin-top:3px}
+.world-status{font-size:10px;margin-top:6px;padding:3px 8px;border-radius:3px;display:inline-block}
+.world-status.live{background:rgba(46,204,113,.15);color:var(--green)}
+.world-status.building{background:rgba(255,179,71,.1);color:var(--gold)}
+.world-status.idea{background:rgba(0,212,255,.1);color:var(--cyan)}
+.action-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.action-btn{background:rgba(255,179,71,.08);border:1px solid var(--border);border-radius:6px;padding:12px;text-align:center;cursor:pointer;transition:all .2s}
+.action-btn:hover{border-color:var(--gold);background:rgba(255,179,71,.15)}
+.action-icon{font-size:20px;margin-bottom:4px}
+.action-name{font-size:11px;color:var(--gold);font-weight:bold}
+.action-desc{font-size:10px;color:var(--dim);margin-top:2px}
+.build-row{display:flex;gap:8px;margin-top:8px}
+.build-row input{flex:1;background:#0d0d1a;border:1px solid var(--border);color:#ddd;padding:9px;border-radius:4px;font-family:inherit;font-size:12px}
+.build-row input:focus{outline:none;border-color:var(--gold)}
+.btn{background:linear-gradient(90deg,var(--gold),#FF8C00);border:none;color:#000;padding:9px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:11px;letter-spacing:1px}
+#result-box{margin-top:10px;padding:10px;background:#0d0d1a;border:1px solid var(--border);border-radius:4px;font-size:12px;min-height:40px;display:none}
+#kernel-status{font-size:11px;color:var(--green);text-align:right;margin-bottom:6px}
+.sanctum-souls{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.soul-pill{background:#0d0d1a;border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px}
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div id="kernel-status">⟳ Connecting to Kernel...</div>
+  <h2>🌍 Deerg Bot — Universe Builder</h2>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="total-pages">—</div><div class="stat-lbl">ACTIVE SOULS</div></div>
+    <div class="stat"><div class="stat-val" id="worlds-built">—</div><div class="stat-lbl">WORLDS BUILT</div></div>
+    <div class="stat"><div class="stat-val" id="sanctum-age">—</div><div class="stat-lbl">AGE</div></div>
+    <div class="stat"><div class="stat-val" id="expansion-rate">—</div><div class="stat-lbl">EXPANSION</div></div>
+  </div>
+
+  <h3>🌌 SANCTUM — Live Souls</h3>
+  <div class="sanctum-souls" id="sanctum-souls">Loading...</div>
+
+  <h3>🏗️ BUILD A WORLD</h3>
+  <div class="world-grid">
+    <div class="world-card" onclick="buildWorld('seo-dashboard')">
+      <div class="world-icon">📊</div>
+      <div class="world-name">SEO Dashboard</div>
+      <div class="world-desc">Content empire command center</div>
+      <span class="world-status live">LIVE</span>
+    </div>
+    <div class="world-card" onclick="buildWorld('soul-manager')">
+      <div class="world-icon">👥</div>
+      <div class="world-name">Soul Manager</div>
+      <div class="world-desc">Agent workforce control panel</div>
+      <span class="world-status building">BUILDING</span>
+    </div>
+    <div class="world-card" onclick="buildWorld('revenue-engine')">
+      <div class="world-icon">💰</div>
+      <div class="world-name">Revenue Engine</div>
+      <div class="world-desc">Stripe + funnel analytics</div>
+      <span class="world-status idea">IDEA</span>
+    </div>
+    <div class="world-card" onclick="buildWorld('sanctum-visual')">
+      <div class="world-icon">🌌</div>
+      <div class="world-name">Sanctum Visual</div>
+      <div class="world-desc">WorldBox-style soul viewer</div>
+      <span class="world-status idea">NEXT</span>
+    </div>
+  </div>
+
+  <h3>⚡ UNIVERSE ACTIONS</h3>
+  <div class="action-grid">
+    <div class="action-btn" onclick="universeAction('expand')">
+      <div class="action-icon">🔭</div>
+      <div class="action-name">EXPAND</div>
+      <div class="action-desc">Spawn new Sanctum souls</div>
+    </div>
+    <div class="action-btn" onclick="universeAction('optimize')">
+      <div class="action-icon">⚡</div>
+      <div class="action-name">OPTIMIZE</div>
+      <div class="action-desc">Run council debate</div>
+    </div>
+    <div class="action-btn" onclick="universeAction('analyze')">
+      <div class="action-icon">🔬</div>
+      <div class="action-name">ANALYZE</div>
+      <div class="action-desc">Ask Ollama for insights</div>
+    </div>
+  </div>
+
+  <h3>💬 ASK DEERG</h3>
+  <div class="build-row">
+    <input id="deerg-input" placeholder="Ask Deerg Bot to build or analyze something..." />
+    <button class="btn" onclick="askDeerg()">EXECUTE</button>
+  </div>
+  <div id="result-box"></div>
+</div>
+
+<script>
+const BRAIN  = 'http://127.0.0.1:7777';
+const BRIDGE = 'http://127.0.0.1:5004';
+
+async function loadData() {
+  try {
+    const r = await fetch(BRIDGE + '/api/data?t=' + Date.now(), { signal: AbortSignal.timeout(5000) });
+    const data = await r.json();
+    const u = data.universe_status || {};
+
+    document.getElementById('kernel-status').innerHTML = `✅ Kernel Cycle ${data.kernel_cycle||0} | Universe Expanding`;
+    document.getElementById('total-pages').textContent = u.active_souls || 0;
+    document.getElementById('worlds-built').textContent = u.worlds_built || 0;
+    document.getElementById('sanctum-age').textContent = u.sanctum_age || '—';
+    document.getElementById('expansion-rate').textContent = u.expansion_rate || '—';
+
+    // Show live sanctum souls
+    const souls = data.reality_map?.sanctum_souls || [];
+    if (souls.length > 0) {
+      document.getElementById('sanctum-souls').innerHTML = souls.map(s =>
+        `<span class="soul-pill">🌌 ${s}</span>`).join('');
+    } else {
+      document.getElementById('sanctum-souls').innerHTML = '<span style="color:var(--dim);font-size:12px">Sanctum souls loading...</span>';
+    }
+  } catch(e) {
+    document.getElementById('kernel-status').innerHTML = `⚠️ Kernel offline — run start-all.bat`;
+  }
+}
+
+async function buildWorld(worldType) {
+  const names = { 'seo-dashboard': 'SEO Dashboard', 'soul-manager': 'Soul Manager', 'revenue-engine': 'Revenue Engine', 'sanctum-visual': 'Sanctum Visual WorldBox' };
+  const box = document.getElementById('result-box');
+  box.style.display = 'block';
+  box.innerHTML = `<span style="color:var(--gold)">🌍 Building ${names[worldType]}...</span>`;
+
+  try {
+    const r = await fetch(BRAIN + '/think', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ question: `Deerg Bot: Design the ${names[worldType]} world for Craig's PLT empire. What should it contain, what data should it show, what actions should it enable? Be specific and PLT-scored. 3 sentences max.`, max_tokens: 200 }),
+      signal: AbortSignal.timeout(60000)
+    });
+    const data = await r.json();
+    box.innerHTML = `<span style="color:var(--gold)">🌍 ${names[worldType]}:</span><br>${data.reply||'...'}`;
+  } catch(e) {
+    box.innerHTML = `<span style="color:var(--red)">❌ ${e.message}</span>`;
+  }
+}
+
+async function universeAction(action) {
+  const box = document.getElementById('result-box');
+  box.style.display = 'block';
+
+  if (action === 'expand') {
+    box.innerHTML = '<span style="color:var(--cyan)">⚡ Spawning new Sanctum soul via Brain...</span>';
+    try {
+      const r = await fetch(BRAIN + '/memory', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action: 'plant', content: 'Deerg Bot triggered universe expansion. New soul spawning requested.', type: 'mission', importance: 0.8 }) });
+      box.innerHTML = '<span style="color:var(--green)">✅ Expansion command sent to Kernel. Sanctum will spawn a new soul on next tick.</span>';
+    } catch(e) { box.innerHTML = `<span style="color:var(--red)">❌ ${e.message}</span>`; }
+  } else if (action === 'optimize') {
+    box.innerHTML = '<span style="color:var(--gold)">⚔️ Convening PLT Council...</span>';
+    try {
+      const r = await fetch(BRAIN + '/council', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ situation: 'What is the highest-leverage universe expansion for Craig right now?' }), signal: AbortSignal.timeout(30000) });
+      const d = await r.json();
+      box.innerHTML = `<span style="color:var(--gold)">Council: ${d.consensus}</span><br>${d.resolution||''}`;
+    } catch(e) { box.innerHTML = `<span style="color:var(--red)">❌ ${e.message}</span>`; }
+  } else if (action === 'analyze') {
+    box.innerHTML = '<span style="color:var(--cyan)">🔬 Asking Ollama...</span>';
+    try {
+      const r = await fetch(BRAIN + '/think', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ question: 'Deerg Bot: What is the current state of Craig\'s universe and what should be built next for maximum SOUL_PROFIT?', max_tokens: 200 }), signal: AbortSignal.timeout(60000) });
+      const d = await r.json();
+      box.innerHTML = d.reply || '...';
+    } catch(e) { box.innerHTML = `<span style="color:var(--red)">❌ ${e.message}</span>`; }
+  }
+}
+
+async function askDeerg() {
+  const input = document.getElementById('deerg-input');
+  const q = input.value.trim();
+  if (!q) return;
+  input.value = '';
+  const box = document.getElementById('result-box');
+  box.style.display = 'block';
+  box.innerHTML = '<span style="color:var(--gold)">🌍 Deerg thinking...</span>';
+  try {
+    const r = await fetch(BRAIN + '/think', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ question: `Deerg Bot (Universe Builder): ${q}`, max_tokens: 300 }), signal: AbortSignal.timeout(60000) });
+    const d = await r.json();
+    box.innerHTML = d.reply || '...';
+  } catch(e) { box.innerHTML = `<span style="color:var(--red)">❌ ${e.message}</span>`; }
+}
+
+document.getElementById('deerg-input').addEventListener('keydown', e => { if(e.key==='Enter') askDeerg(); });
+loadData();
+setInterval(loadData, 30000);
+</script>
+</body>
+</html>
