@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>⚔️ Soul Army Command — Kernel Agent Control</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0D1117;--panel:#1A1A2E;--border:#2A2A4A;--gold:#FFB347;--pink:#FF2D78;--cyan:#00D4FF;--green:#2ecc71;--red:#e74c3c;--dim:#666}
+body{background:var(--bg);color:#ddd;font-family:Georgia,serif;max-width:680px;margin:0 auto;padding:10px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+h2{color:var(--gold);font-size:15px;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+h3{color:var(--cyan);font-size:13px;margin-bottom:8px;margin-top:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.stat{background:#0d0d1a;border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center}
+.stat-val{font-size:22px;font-weight:bold;color:var(--cyan)}
+.stat-lbl{font-size:10px;color:var(--dim);letter-spacing:1px;margin-top:3px}
+.soul-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.soul-card{background:#0d0d1a;border:1px solid var(--border);border-radius:6px;padding:12px}
+.soul-name{color:var(--gold);font-weight:bold;font-size:13px}
+.soul-role{font-size:11px;color:var(--dim);margin-top:2px}
+.soul-tier{font-size:10px;letter-spacing:1px;margin-top:4px}
+.tier-Divine{color:#FFD700}
+.tier-Gold{color:#FFA500}
+.tier-Silver{color:#C0C0C0}
+.tier-Bronze{color:#CD7F32}
+.soul-status{font-size:10px;margin-top:4px}
+.soul-status.Active{color:var(--green)}
+.soul-status.Idle{color:var(--dim)}
+.soul-skills{font-size:10px;color:var(--dim);margin-top:3px}
+.mission-list{display:flex;flex-direction:column;gap:6px}
+.mission-item{background:#0d0d1a;border:1px solid var(--border);border-radius:4px;padding:10px}
+.m-head{display:flex;justify-content:space-between;align-items:center}
+.m-name{font-size:12px;color:#ddd}
+.m-agent{font-size:11px;color:var(--cyan)}
+.m-plt{font-size:11px;color:var(--gold);margin-top:4px}
+.badge{font-size:9px;padding:2px 7px;border-radius:3px;letter-spacing:1px}
+.badge-Active{background:rgba(46,204,113,.15);color:var(--green);border:1px solid var(--green)}
+.badge-Pending{background:rgba(255,179,71,.1);color:var(--gold);border:1px solid var(--gold)}
+.badge-Complete{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid var(--cyan)}
+.delegate-row{display:flex;gap:8px;margin-top:8px}
+.delegate-row input{flex:1;background:#0d0d1a;border:1px solid var(--border);color:#ddd;padding:9px;border-radius:4px;font-family:inherit;font-size:12px}
+.delegate-row input:focus{outline:none;border-color:var(--cyan)}
+.soul-select{background:#0d0d1a;border:1px solid var(--border);color:#ddd;padding:8px;border-radius:4px;font-size:12px}
+.btn{background:linear-gradient(90deg,var(--pink),#FF6B35);border:none;color:#000;padding:9px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:11px;letter-spacing:1px}
+.btn:hover{opacity:.85}
+.status-line{font-size:11px;color:var(--dim);margin-top:6px;min-height:18px}
+#kernel-status{font-size:11px;color:var(--green);text-align:right;margin-bottom:6px}
+.tokens-saved{color:var(--green);font-size:12px;text-align:center;padding:8px;background:rgba(46,204,113,.05);border-radius:4px;margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div id="kernel-status">⟳ Connecting to Kernel...</div>
+  <h2>⚔️ Soul Army Command — Live Agent Control</h2>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="total-souls">—</div><div class="stat-lbl">SOULS</div></div>
+    <div class="stat"><div class="stat-val" id="active-missions">—</div><div class="stat-lbl">ACTIVE</div></div>
+    <div class="stat"><div class="stat-val" id="completed-missions">—</div><div class="stat-lbl">COMPLETE</div></div>
+    <div class="stat"><div class="stat-val" id="tokens-saved">—</div><div class="stat-lbl">TOKENS SAVED</div></div>
+  </div>
+
+  <div id="tokens-banner" class="tokens-saved">Loading soul army status...</div>
+
+  <h3>⚡ DELEGATE A MISSION</h3>
+  <div class="delegate-row">
+    <input id="new-task" placeholder="Describe the mission..." />
+    <select class="soul-select" id="target-soul">
+      <option value="">Best available</option>
+      <option value="Seshat-SEO">📜 Seshat-SEO</option>
+      <option value="Scribe">✍️ Scribe</option>
+      <option value="Vault">🏦 Vault</option>
+      <option value="Forge">⚒️ Forge</option>
+      <option value="Apex">🎯 Apex</option>
+    </select>
+    <button class="btn" onclick="delegateTask()">DELEGATE</button>
+  </div>
+  <div id="delegation-status" class="status-line"></div>
+
+  <h3>🤖 SOUL ARMY</h3>
+  <div class="soul-grid" id="soul-grid">
+    <div style="color:var(--dim);font-size:12px">Loading souls...</div>
+  </div>
+
+  <h3>📋 ACTIVE MISSIONS</h3>
+  <div class="mission-list" id="mission-list">
+    <div style="color:var(--dim);font-size:12px">Loading missions...</div>
+  </div>
+</div>
+
+<script>
+const BRAIN  = 'http://127.0.0.1:7777';
+const BRIDGE = 'http://127.0.0.1:5004';
+
+const TIER_EMOJI = { Divine:'👑', Gold:'🥇', Silver:'🥈', Bronze:'🥉' };
+
+async function delegateTask() {
+  const task = document.getElementById('new-task').value.trim();
+  const soul = document.getElementById('target-soul').value;
+  if (!task) { document.getElementById('delegation-status').innerHTML = '<span style="color:var(--red)">Enter a task first</span>'; return; }
+
+  document.getElementById('delegation-status').innerHTML = '<span style="color:var(--gold)">⚡ Delegating to Brain...</span>';
+
+  try {
+    const r = await fetch(BRAIN + '/delegate', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ task, soul: soul || 'profit', type: 'delegate' }),
+      signal: AbortSignal.timeout(30000)
+    });
+    const data = await r.json();
+    document.getElementById('delegation-status').innerHTML = `<span style="color:var(--green)">✅ Delegated to ${soul||'best agent'}. Bridge: ${data.bridge_online ? 'online' : 'offline'}</span>`;
+    document.getElementById('new-task').value = '';
+    setTimeout(loadLiveData, 2000);
+  } catch(e) {
+    document.getElementById('delegation-status').innerHTML = `<span style="color:var(--red)">❌ ${e.message}</span>`;
+  }
+}
+
+async function loadLiveData() {
+  try {
+    const r = await fetch(BRIDGE + '/api/data?t=' + Date.now(), { signal: AbortSignal.timeout(5000) });
+    const data = await r.json();
+
+    document.getElementById('kernel-status').innerHTML = `✅ Kernel Cycle ${data.kernel_cycle||0} | ${data.soul_army?.total_souls||0} Souls Deployed`;
+
+    const army = data.soul_army || {};
+    document.getElementById('total-souls').textContent = army.total_souls || 0;
+    document.getElementById('active-missions').textContent = army.active_missions || 0;
+    document.getElementById('completed-missions').textContent = army.completed_missions || 0;
+    document.getElementById('tokens-saved').textContent = army.tokens_saved || 0;
+    document.getElementById('tokens-banner').textContent = `💰 ${army.tokens_saved||0} tokens saved through delegation — every task delegated saves compute`;
+
+    // Render soul army
+    const souls = army.souls || [];
+    if (souls.length > 0) {
+      document.getElementById('soul-grid').innerHTML = souls.map(s => `
+        <div class="soul-card">
+          <div class="soul-name">${TIER_EMOJI[s.tier]||'👤'} ${s.name}</div>
+          <div class="soul-role">${s.role}</div>
+          <div class="soul-tier tier-${s.tier}">[${s.tier}]</div>
+          <div class="soul-status ${s.status}">${s.status}</div>
+          <div class="soul-skills">${s.skills} skills | ${s.missions_done} missions done</div>
+        </div>`).join('');
+    }
+
+    // Render missions
+    const missions = data.missions || [];
+    if (missions.length > 0) {
+      document.getElementById('mission-list').innerHTML = missions.slice(0,6).map(m => `
+        <div class="mission-item">
+          <div class="m-head">
+            <span class="m-name">${m.name}</span>
+            <span class="badge badge-${m.status}">${m.status}</span>
+          </div>
+          <div class="m-agent">${m.next_actions?.[0] || 'Queued'}</div>
+        </div>`).join('');
+    }
+
+  } catch(e) {
+    document.getElementById('kernel-status').innerHTML = `⚠️ Kernel offline — run start-all.bat`;
+  }
+}
+
+document.getElementById('new-task').addEventListener('keydown', e => { if(e.key==='Enter') delegateTask(); });
+loadLiveData();
+setInterval(loadLiveData, 20000);
+</script>
+</body>
+</html>
