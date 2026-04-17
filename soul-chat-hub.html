@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>💬 Soul Chat Hub — Live Kernel Communications</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0D1117;--panel:#1A1A2E;--border:#2A2A4A;--gold:#FFB347;--pink:#FF2D78;--cyan:#00D4FF;--green:#2ecc71;--red:#e74c3c;--dim:#666}
+body{background:var(--bg);color:#ddd;font-family:Georgia,serif;max-width:680px;margin:0 auto;padding:10px;min-height:100vh}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+h2{color:var(--gold);font-size:15px;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.stat{background:#0d0d1a;border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center}
+.stat-val{font-size:22px;font-weight:bold;color:var(--cyan)}
+.stat-lbl{font-size:10px;color:var(--dim);letter-spacing:1px;margin-top:3px}
+.controls{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.ctrl-btn{background:rgba(0,212,255,.08);border:1px solid var(--border);color:var(--cyan);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:11px;letter-spacing:1px}
+.ctrl-btn:hover,.ctrl-btn.active{border-color:var(--cyan);background:rgba(0,212,255,.2)}
+#chat-container{max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.chat-message{display:flex;gap:12px;padding:10px;background:#0d0d1a;border-radius:6px;border-left:3px solid var(--border)}
+.chat-message.delegation{border-left-color:var(--gold)}
+.chat-message.status-update{border-left-color:var(--cyan)}
+.chat-message.collaboration{border-left-color:var(--green)}
+.chat-message.command{border-left-color:var(--pink)}
+.soul-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;background:rgba(255,179,71,.15);flex-shrink:0;border:1px solid var(--border)}
+.soul-name{font-size:12px;color:var(--gold);font-weight:bold;margin-bottom:3px}
+.message-text{font-size:12px;color:#bbb;line-height:1.5}
+.message-time{font-size:10px;color:var(--dim);margin-top:4px}
+.msg-type{font-size:9px;padding:2px 6px;border-radius:3px;display:inline-block;margin-bottom:4px}
+.msg-type.delegation{background:rgba(255,179,71,.15);color:var(--gold)}
+.msg-type.status-update{background:rgba(0,212,255,.1);color:var(--cyan)}
+.msg-type.collaboration{background:rgba(46,204,113,.1);color:var(--green)}
+.send-row{display:flex;gap:8px;margin-top:12px}
+.send-row input{flex:1;background:#0d0d1a;border:1px solid var(--border);color:#ddd;padding:10px;border-radius:4px;font-family:inherit;font-size:13px}
+.send-row input:focus{outline:none;border-color:var(--cyan)}
+.send-btn{background:linear-gradient(90deg,var(--pink),var(--cyan));border:none;color:#000;padding:10px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:12px}
+.soul-select{background:#0d0d1a;border:1px solid var(--border);color:#ddd;padding:8px;border-radius:4px;font-size:12px}
+.status-line{font-size:11px;color:var(--dim);text-align:center;padding:6px}
+#kernel-status{font-size:11px;color:var(--green);text-align:right;margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div id="kernel-status">⟳ Connecting to Kernel...</div>
+  <h2>💬 Soul Chat Hub — Live Kernel Communications</h2>
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="messages-count">—</div><div class="stat-lbl">MESSAGES</div></div>
+    <div class="stat"><div class="stat-val" id="active-souls">—</div><div class="stat-lbl">ACTIVE SOULS</div></div>
+    <div class="stat"><div class="stat-val" id="delegations">—</div><div class="stat-lbl">DELEGATIONS</div></div>
+    <div class="stat"><div class="stat-val" id="kernel-cycle">—</div><div class="stat-lbl">KERNEL CYCLE</div></div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn active" onclick="filter('all',this)">All</button>
+    <button class="ctrl-btn" onclick="filter('delegation',this)">Delegations</button>
+    <button class="ctrl-btn" onclick="filter('status-update',this)">Status</button>
+    <button class="ctrl-btn" onclick="filter('collaboration',this)">Collaboration</button>
+    <button class="ctrl-btn" onclick="filter('command',this)">Commands</button>
+  </div>
+
+  <div id="chat-container"></div>
+
+  <div class="send-row" style="margin-top:12px">
+    <select class="soul-select" id="target-soul">
+      <option value="Profit">💰 Profit</option>
+      <option value="Seshat-SEO">📜 Seshat-SEO</option>
+      <option value="Scribe">✍️ Scribe</option>
+      <option value="Vault">🏦 Vault</option>
+      <option value="Forge">⚒️ Forge</option>
+      <option value="Apex">🎯 Apex</option>
+    </select>
+    <input id="chat-input" placeholder="Send a message to a soul..." />
+    <button class="send-btn" onclick="sendMessage()">SEND</button>
+  </div>
+  <div id="send-status" class="status-line"></div>
+</div>
+
+<script>
+const BRAIN = 'http://127.0.0.1:7777';
+const BRIDGE = 'http://127.0.0.1:5004';
+let currentFilter = 'all';
+
+function timeNow(){ return new Date().toLocaleTimeString(); }
+
+function addMessage(soul, emoji, message, type, time) {
+  const c = document.getElementById('chat-container');
+  const d = document.createElement('div');
+  d.className = `chat-message ${type}`;
+  d.dataset.type = type;
+  d.style.display = currentFilter === 'all' || currentFilter === type ? 'flex' : 'none';
+  d.innerHTML = `
+    <div class="soul-avatar">${emoji}</div>
+    <div style="flex:1">
+      <span class="msg-type ${type}">${type.replace('-',' ').toUpperCase()}</span>
+      <div class="soul-name">${soul}</div>
+      <div class="message-text">${message}</div>
+      <div class="message-time">${time || timeNow()}</div>
+    </div>`;
+  c.insertBefore(d, c.firstChild);
+}
+
+function filter(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.chat-message').forEach(m => {
+    m.style.display = (type === 'all' || m.dataset.type === type) ? 'flex' : 'none';
+  });
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const soul  = document.getElementById('target-soul').value;
+  const text  = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  addMessage('Craig', '👤', text, 'command', timeNow());
+  document.getElementById('send-status').innerHTML = `<span style="color:var(--gold)">Thinking...</span>`;
+
+  try {
+    const r = await fetch(BRAIN + '/think', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: `${soul} says: ${text}`, max_tokens: 200 }),
+      signal: AbortSignal.timeout(60000)
+    });
+    const data = await r.json();
+    addMessage(soul, '💰', data.reply || '...', 'status-update', timeNow());
+    document.getElementById('send-status').innerHTML = `<span style="color:var(--green)">✅ ${soul} replied</span>`;
+    setTimeout(() => { document.getElementById('send-status').innerHTML = ''; }, 3000);
+  } catch(e) {
+    document.getElementById('send-status').innerHTML = `<span style="color:var(--red)">❌ ${e.message}</span>`;
+  }
+}
+
+async function loadLiveData() {
+  try {
+    const r = await fetch(BRIDGE + '/api/data?t=' + Date.now(), { signal: AbortSignal.timeout(5000) });
+    const data = await r.json();
+
+    document.getElementById('kernel-status').innerHTML = `✅ Kernel Cycle ${data.kernel_cycle || 0} | Brain Online`;
+    document.getElementById('kernel-cycle').textContent = data.kernel_cycle || 0;
+
+    const chat = data.live_chat || {};
+    document.getElementById('messages-count').textContent = chat.total_messages || 0;
+    document.getElementById('active-souls').textContent = chat.active_souls || 0;
+    document.getElementById('delegations').textContent = chat.delegations || 0;
+
+    // Load recent messages from Kernel memory
+    const msgs = chat.recent_messages || [];
+    const container = document.getElementById('chat-container');
+    if (msgs.length > 0 && container.children.length === 0) {
+      msgs.forEach(m => addMessage(m.soul || 'Profit', '💰', m.message, m.type || 'status-update', m.time));
+    }
+
+  } catch(e) {
+    document.getElementById('kernel-status').innerHTML = `⚠️ Bridge offline — open start-all.bat`;
+  }
+}
+
+document.getElementById('chat-input').addEventListener('keydown', e => { if(e.key==='Enter') sendMessage(); });
+
+// Boot
+loadLiveData();
+setInterval(loadLiveData, 20000);
+
+// Seed some initial messages if no live data
+setTimeout(() => {
+  if (document.getElementById('chat-container').children.length === 0) {
+    addMessage('Profit', '💰', 'SOUL_PROFIT running. Kernel breathing. Empire building.', 'status-update');
+    addMessage('Seshat-SEO', '📜', 'SEO mission active — Traffic Assault targeting PLT Press store.', 'delegation');
+    addMessage('Vault', '🏦', 'Revenue analysis: $49 bundle is highest-leverage offer. Needs traffic.', 'status-update');
+  }
+}, 3000);
+</script>
+</body>
+</html>
