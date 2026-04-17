@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>👨‍⚕️ Doctor Buht Buht — PLT Ecosystem Analyst</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0D1117;--panel:#1A1A2E;--border:#2A2A4A;--gold:#FFB347;--pink:#FF2D78;--cyan:#00D4FF;--green:#2ecc71;--red:#e74c3c;--dim:#666}
+body{background:var(--bg);color:#ddd;font-family:Georgia,serif;max-width:680px;margin:0 auto;padding:10px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+h2{color:var(--pink);font-size:15px;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+h3{color:var(--cyan);font-size:13px;margin:10px 0 6px}
+.score-card{text-align:center;padding:20px;border-radius:8px;margin-bottom:14px;border:2px solid var(--border)}
+.score-card.excellent{border-color:var(--green);background:rgba(46,204,113,.05)}
+.score-card.good{border-color:var(--gold);background:rgba(255,179,71,.05)}
+.score-card.fair{border-color:var(--cyan);background:rgba(0,212,255,.05)}
+.score-card.critical{border-color:var(--red);background:rgba(231,76,60,.05)}
+.final-score{font-size:56px;font-weight:bold;color:var(--gold);line-height:1}
+.diagnosis{font-size:14px;color:var(--cyan);margin-top:8px;letter-spacing:1px}
+.last-analysis{font-size:11px;color:var(--dim);margin-top:6px}
+.plt-breakdown{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.plt-item{background:#0d0d1a;border:1px solid var(--border);border-radius:6px;padding:12px;text-align:center}
+.plt-score{font-size:28px;font-weight:bold}
+.plt-score.profit{color:var(--green)}
+.plt-score.love{color:var(--pink)}
+.plt-score.tax{color:var(--red)}
+.plt-label{font-size:10px;letter-spacing:2px;color:var(--dim);margin-top:3px}
+.plt-notes{font-size:10px;color:#999;margin-top:6px;line-height:1.4}
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.metric-item{background:#0d0d1a;border:1px solid var(--border);border-radius:4px;padding:8px;display:flex;justify-content:space-between;align-items:center}
+.metric-label{font-size:11px;color:var(--dim)}
+.metric-val{font-size:13px;font-weight:bold;color:var(--cyan)}
+.metric-val.online{color:var(--green)}
+.recommendations{background:#0d0d1a;border-left:3px solid var(--gold);padding:12px;border-radius:0 6px 6px 0;font-size:12px;line-height:1.7;color:#bbb}
+.refresh-btn{background:rgba(255,45,120,.1);border:1px solid var(--pink);color:var(--pink);padding:8px 16px;border-radius:4px;cursor:pointer;font-size:11px;letter-spacing:1px;margin-top:10px;width:100%}
+.refresh-btn:hover{background:rgba(255,45,120,.2)}
+#kernel-status{font-size:11px;color:var(--green);text-align:right;margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div id="kernel-status">⟳ Connecting to Kernel...</div>
+  <h2>👨‍⚕️ Doctor Buht Buht — PLT Ecosystem Analysis</h2>
+
+  <div id="plt-score-card" class="score-card good">
+    <div class="final-score" id="final-score">—</div>
+    <div class="diagnosis" id="diagnosis">Analyzing ecosystem...</div>
+    <div class="last-analysis" id="last-analysis">Fetching live data...</div>
+  </div>
+
+  <h3>📊 PLT BREAKDOWN</h3>
+  <div class="plt-breakdown">
+    <div class="plt-item">
+      <div class="plt-score profit" id="profit-score">—</div>
+      <div class="plt-label">PROFIT</div>
+      <div class="plt-notes" id="profit-notes">Loading...</div>
+    </div>
+    <div class="plt-item">
+      <div class="plt-score love" id="love-score">—</div>
+      <div class="plt-label">LOVE</div>
+      <div class="plt-notes" id="love-notes">Loading...</div>
+    </div>
+    <div class="plt-item">
+      <div class="plt-score tax" id="tax-score">—</div>
+      <div class="plt-label">TAX</div>
+      <div class="plt-notes" id="tax-notes">Loading...</div>
+    </div>
+  </div>
+
+  <h3>⚙️ SYSTEM METRICS</h3>
+  <div class="metrics-grid">
+    <div class="metric-item"><span class="metric-label">Kernel Cycle</span><span class="metric-val" id="total-pages">—</span></div>
+    <div class="metric-item"><span class="metric-label">Sanctum Souls</span><span class="metric-val" id="blog-posts">—</span></div>
+    <div class="metric-item"><span class="metric-label">Active Missions</span><span class="metric-val" id="products-count">—</span></div>
+    <div class="metric-item"><span class="metric-label">Missions Done</span><span class="metric-val" id="tools-pages">—</span></div>
+    <div class="metric-item"><span class="metric-label">Brain Memories</span><span class="metric-val" id="brain-memories">—</span></div>
+    <div class="metric-item"><span class="metric-label">Ollama</span><span class="metric-val online" id="ollama-status">—</span></div>
+    <div class="metric-item"><span class="metric-label">Kernel</span><span class="metric-val online" id="autonomous-status">—</span></div>
+    <div class="metric-item"><span class="metric-label">SOUL_PROFIT</span><span class="metric-val" id="soul-profit-live">—</span></div>
+  </div>
+
+  <h3>💡 DOCTOR'S RECOMMENDATIONS</h3>
+  <div class="recommendations" id="recommendations-text">Analyzing...</div>
+
+  <button class="refresh-btn" onclick="loadData()">🔄 REFRESH ANALYSIS</button>
+</div>
+
+<script>
+const BRIDGE = 'http://127.0.0.1:5004';
+
+async function loadData() {
+  try {
+    const r = await fetch(BRIDGE + '/api/data?t=' + Date.now(), { signal: AbortSignal.timeout(5000) });
+    const data = await r.json();
+    const a = data.plt_analysis || {};
+
+    document.getElementById('kernel-status').innerHTML = `✅ Kernel Cycle ${data.kernel_cycle||0} | Analysis live`;
+
+    document.getElementById('final-score').textContent = a.final_score || 0;
+    document.getElementById('diagnosis').textContent = a.diagnosis || 'Analyzing...';
+    document.getElementById('last-analysis').textContent = `Last analysis: ${new Date(a.timestamp||Date.now()).toLocaleString()}`;
+
+    const card = document.getElementById('plt-score-card');
+    const score = a.final_score || 0;
+    card.className = 'score-card ' + (score > 150 ? 'excellent' : score > 100 ? 'good' : score > 50 ? 'fair' : 'critical');
+
+    document.getElementById('profit-score').textContent = a.profit?.score || 0;
+    document.getElementById('profit-notes').textContent = a.profit?.notes || '';
+    document.getElementById('love-score').textContent = a.love?.score || 0;
+    document.getElementById('love-notes').textContent = a.love?.notes || '';
+    document.getElementById('tax-score').textContent = a.tax?.score || 0;
+    document.getElementById('tax-notes').textContent = a.tax?.notes || '';
+
+    const m = a.system_metrics || {};
+    document.getElementById('total-pages').textContent = m.autonomous_status || '—';
+    document.getElementById('blog-posts').textContent = m.sanctum_souls || 0;
+    document.getElementById('products-count').textContent = m.missions_active || 0;
+    document.getElementById('tools-pages').textContent = m.missions_done || 0;
+    document.getElementById('brain-memories').textContent = m.brain_memories || 0;
+    document.getElementById('ollama-status').textContent = m.ollama_status || 'CHECKING';
+    document.getElementById('autonomous-status').textContent = m.autonomous_status?.includes('RUNNING') ? 'RUNNING' : 'OFFLINE';
+    document.getElementById('soul-profit-live').textContent = data.soul_profit || 0;
+
+    document.getElementById('recommendations-text').textContent = a.recommendations || 'No recommendations yet.';
+
+  } catch(e) {
+    document.getElementById('kernel-status').innerHTML = `⚠️ Bridge offline — run start-all.bat`;
+    document.getElementById('recommendations-text').textContent = 'Cannot reach Kernel. Make sure profit-bridge is running on port 5004.';
+  }
+}
+
+loadData();
+setInterval(loadData, 60000);
+</script>
+</body>
+</html>
