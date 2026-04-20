@@ -1,0 +1,6 @@
+[
+  {"id":"quest_first_contact","title":"First Contact","description":"Find and speak to a lost soul in the wilds.","objectives":[{"id":"find_soul","type":"locate","required":1}],"reward":{"xp":50,"plt":{"love":10}}},
+  {"id":"quest_build_habitat","title":"Build Shelter","description":"Construct a habitat to house souls.","objectives":[{"id":"build","type":"construct","required":1,"buildingType":"HABITAT"}],"reward":{"xp":100,"plt":{"profit":50}}},
+  {"id":"quest_collect_souls","title":"Soul Collector","description":"Capture 5 wandering souls.","objectives":[{"id":"capture","type":"capture","required":5}],"reward":{"xp":200,"plt":{"profit":30,"love":30}}},
+  {"id":"quest_tax_duty","title":"Tax Collection","description":"Collect tax from the market.","objectives":[{"id":"collect","type":"trade","required":100,"resource":"tax"}],"reward":{"xp":150,"plt":{"tax":50}}}
+]

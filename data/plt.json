@@ -1,0 +1,27 @@
+{
+  "description": "PLT Doctrine - Profit, Love, Tax",
+  "profit": {
+    "description": "Material wealth, resources, trade value",
+    "color": "#ffaa44",
+    "sources": ["trade", "buildings", "combat_loot", "work"],
+    "sinks": ["building_construction", "tax", "trade_goods"]
+  },
+  "love": {
+    "description": "Social bonds, soul connections, happiness",
+    "color": "#ff77aa",
+    "sources": ["social_interaction", "temples", "soul_bonding", "quests"],
+    "sinks": ["neglect", "combat_losses", "isolation"]
+  },
+  "tax": {
+    "description": "System control, authority, governance",
+    "color": "#44aaff",
+    "sources": ["trade_tax", "buildings", "licenses"],
+    "sinks": ["maintenance", "rewards", "corruption"]
+  },
+  "ratios": {
+    "balanced": { "profit": 33, "love": 33, "tax": 34 },
+    "merchant_kingdom": { "profit": 50, "love": 20, "tax": 30 },
+    "theocracy": { "profit": 20, "love": 50, "tax": 30 },
+    "taxation_state": { "profit": 30, "love": 20, "tax": 50 }
+  }
+}

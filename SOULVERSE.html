@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOULVERSE - The Grand Game</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      background: #0a0a0f; 
+      color: #d4c8ff; 
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+    }
+    #game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    canvas#world {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    #hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      pointer-events: none;
+    }
+    #hud > * {
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="world"></canvas>
+    <div id="hud"></div>
+  </div>
+
+  <script type="module">
+    // Import canonical engine modules
+    import { Engine } from './engine/engine.js';
+    import { Renderer } from './engine/renderer.js';
+    import { Camera } from './engine/camera.js';
+    import { Input } from './engine/input.js';
+    import { World } from './world/world.js';
+    import { Terrain } from './world/terrain.js';
+    import { Player } from './entities/player.js';
+    import { Soul } from './entities/soul.js';
+    import { AI } from './systems/ai-system.js';
+    import { Economy } from './systems/economy-system.js';
+    import { HUD } from './ui/hud.js';
+    import { Save } from './save/save.js';
+    import { Load } from './save/load.js';
+
+    // Initialize engine
+    const engine = new Engine();
+    const renderer = new Renderer(document.getElementById('world'));
+    const camera = new Camera();
+    const input = new Input();
+    const world = new World(engine);
+    const terrain = new Terrain();
+    const ai = new AI(engine);
+    const economy = new EconomySystem(engine);
+    const hud = new HUD(engine);
+    const save = new SaveSystem(engine);
+    const load = new LoadSystem(engine);
+
+    // Create player
+    const player = new Player(engine, { position: { x: 0, y: 0, z: 0 }});
+
+    // Add to engine
+    engine.addSystem('render', renderer);
+    engine.addSystem('camera', camera);
+    engine.addSystem('input', input);
+    engine.addSystem('world', world);
+    engine.addSystem('ai', ai);
+    engine.addSystem('economy', economy);
+    engine.addEntity(player);
+
+    // Initialize HUD
+    hud.init(document.getElementById('hud'));
+
+    // Main game loop
+    let lastTime = 0;
+    function gameLoop(time) {
+      const dt = Math.min((time - lastTime) / 1000, 0.1);
+      lastTime = time;
+
+      // Update all systems
+      engine.update(dt);
+
+      // Update HUD
+      hud.update(player);
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Start
+    world.generate(terrain);
+    requestAnimationFrame(gameLoop);
+
+    // Export for console
+    window.Soulverse = { engine, player, world, save, load };
+    console.log('SOULVERSE loaded. Type Soulverse.player to access player.');
+  </script>
+</body>
+</html>
