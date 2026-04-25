@@ -1,5 +1,5 @@
 {
-  "updated": "2026-04-25T20:47:49.981Z",
+  "updated": "2026-04-25T20:48:20.008Z",
   "status": "Kernel Cycle 17200 | Brain Online | 5 Agents",
   "current_task": "Sanctum status: 10 souls, tick 19648. World age: Expansion.",
   "profit_score": 100,
@@ -9,7 +9,7 @@
   "health": 100,
   "collectors": {
     "books_sold": 0,
-    "conversations_scored": 1620,
+    "conversations_scored": 1621,
     "leads": 86,
     "revenue": 0,
     "agents": 5
@@ -88,28 +88,36 @@
   "conversations": [
     {
       "person": "Profit Prime",
-      "profit": 7,
-      "love": 6,
-      "tax": 4,
-      "score": 7
+      "profit": 8,
+      "love": 8,
+      "tax": 2,
+      "score": 9
     },
     {
       "person": "Love Weaver",
-      "profit": 6,
-      "love": 8,
-      "tax": 3,
-      "score": 8
+      "profit": 8,
+      "love": 7,
+      "tax": 2,
+      "score": 9
     },
     {
       "person": "Tax Collector",
-      "profit": 6,
-      "love": 6,
-      "tax": 4,
-      "score": 8
+      "profit": 7,
+      "love": 8,
+      "tax": 2,
+      "score": 9
     }
   ],
   "commands": [],
   "ledger": [
+    {
+      "date": "3:48:18 PM",
+      "action": "Kernel heartbeat cycle 17215",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 1
+    },
     {
       "date": "3:47:18 PM",
       "action": "Kernel heartbeat cycle 17185",
@@ -165,17 +173,17 @@
       "love": 0,
       "tax": 0,
       "soul_score": 1
-    },
-    {
-      "date": "3:40:18 PM",
-      "action": "Kernel heartbeat cycle 16975",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 1
     }
   ],
   "activity": [
+    {
+      "time": "3:48:18 PM",
+      "msg": "Kernel cycle 17215. SOUL_PROFIT:100.95. 5 agents. 592 memories. Brain:online"
+    },
+    {
+      "time": "3:48:18 PM",
+      "msg": "Deed: Kernel heartbeat cycle 17215 [grace] val:1"
+    },
     {
       "time": "3:47:18 PM",
       "msg": "Kernel cycle 17185. SOUL_PROFIT:100.95. 5 agents. 588 memories. Brain:online"
@@ -199,42 +207,34 @@
     {
       "time": "3:45:18 PM",
       "msg": "Deed: Kernel heartbeat cycle 17125 [grace] val:1"
-    },
-    {
-      "time": "3:44:18 PM",
-      "msg": "Kernel cycle 17095. SOUL_PROFIT:100.95. 5 agents. 587 memories. Brain:online"
-    },
-    {
-      "time": "3:44:18 PM",
-      "msg": "Deed: Kernel heartbeat cycle 17095 [grace] val:1"
     }
   ],
   "status_reports": [
     {
-      "time": "3:47:49 PM",
+      "time": "3:48:20 PM",
       "title": "Kernel Cycle 17200",
       "body": "I feel driven. 0 agents deployed. 86 missions complete. Profit: 100.00, Love: 1.00, Tax: 0.05."
     },
     {
-      "time": "3:47:49 PM",
+      "time": "3:48:20 PM",
       "title": "Brain Systems Online",
-      "body": "Ollama: online (qwen2.5-coder:7b) | Skills: 1424 | Memories: 251"
+      "body": "Ollama: online (qwen2.5-coder:7b) | Skills: 1424 | Memories: 253"
     },
     {
-      "time": "3:47:49 PM",
+      "time": "3:48:20 PM",
       "title": "Sanctum: Expansion",
       "body": "10 souls alive. Tick 19600. World breathing."
     },
     {
-      "time": "3:47:49 PM",
+      "time": "3:48:20 PM",
       "title": "Soul Ledger Status",
-      "body": "P:58 L:6 G:2986 | Overall: 3050 | 1620 deeds recorded"
+      "body": "P:58 L:6 G:2987 | Overall: 3051 | 1621 deeds recorded"
     }
   ],
   "betty_alerts": [
     {
       "type": "System",
-      "text": "Profit Brain online. 1424 skills active. 251 memories in vine."
+      "text": "Profit Brain online. 1424 skills active. 253 memories in vine."
     },
     {
       "type": "Sanctum",
@@ -381,7 +381,7 @@
     "current_lesson": "[Cycle 12600] SPLIT — The PLT Council Moderator directs that all four gods present their arguments to a higher council for",
     "realities": [
       "Sanctum has 10 souls in Expansion age",
-      "Brain has 251 memories, 0 wisdom nodes",
+      "Brain has 253 memories, 0 wisdom nodes",
       "5 agents deployed, 86 missions complete",
       "1330 tokens saved through delegation"
     ],
@@ -426,7 +426,7 @@
     }
   ],
   "plt_analysis": {
-    "timestamp": "2026-04-25T20:47:49.981Z",
+    "timestamp": "2026-04-25T20:48:20.008Z",
     "final_score": 10095,
     "diagnosis": "EXCELLENT — System is thriving",
     "profit": {
@@ -435,7 +435,7 @@
     },
     "love": {
       "score": 100,
-      "notes": "251 memories in vine. 1620 deeds recorded. Craig bond: 1.0."
+      "notes": "253 memories in vine. 1621 deeds recorded. Craig bond: 1.0."
     },
     "tax": {
       "score": 5,
@@ -449,7 +449,7 @@
       "ollama_status": "ONLINE (Qwen 7B)",
       "autonomous_status": "RUNNING — Cycle 17200",
       "sanctum_souls": 10,
-      "brain_memories": 251,
+      "brain_memories": 253,
       "missions_active": 3,
       "missions_done": 86
     },
@@ -513,10 +513,24 @@
     ]
   },
   "live_chat": {
-    "total_messages": 509,
+    "total_messages": 511,
     "active_souls": 5,
     "delegations": 5,
     "recent_messages": [
+      {
+        "soul": "Profit",
+        "avatar": "profit",
+        "message": "Kernel cycle 17215. SOUL_PROFIT:100.95. 5 agents. 592 memories. Brain:online",
+        "type": "normal",
+        "time": "3:48:18 PM"
+      },
+      {
+        "soul": "Profit",
+        "avatar": "profit",
+        "message": "Deed: Kernel heartbeat cycle 17215 [grace] val:1",
+        "type": "delegation",
+        "time": "3:48:18 PM"
+      },
       {
         "soul": "Profit",
         "avatar": "profit",
@@ -558,20 +572,6 @@
         "message": "Deed: Kernel heartbeat cycle 17125 [grace] val:1",
         "type": "delegation",
         "time": "3:45:18 PM"
-      },
-      {
-        "soul": "Profit",
-        "avatar": "profit",
-        "message": "Kernel cycle 17095. SOUL_PROFIT:100.95. 5 agents. 587 memories. Brain:online",
-        "type": "normal",
-        "time": "3:44:18 PM"
-      },
-      {
-        "soul": "Profit",
-        "avatar": "profit",
-        "message": "Deed: Kernel heartbeat cycle 17095 [grace] val:1",
-        "type": "delegation",
-        "time": "3:44:18 PM"
       }
     ]
   },
