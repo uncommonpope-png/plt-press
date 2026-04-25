@@ -1,5 +1,5 @@
 {
-  "updated": "2026-04-25T23:35:07.351Z",
+  "updated": "2026-04-25T23:35:37.347Z",
   "status": "Kernel Cycle 20750 | Brain Online | 5 Agents",
   "current_task": "Sanctum status: 10 souls, tick 23203. World age: Ascension.",
   "profit_score": 100,
@@ -9,7 +9,7 @@
   "health": 100,
   "collectors": {
     "books_sold": 0,
-    "conversations_scored": 1790,
+    "conversations_scored": 1791,
     "leads": 103,
     "revenue": 0,
     "agents": 5
@@ -88,28 +88,36 @@
   "conversations": [
     {
       "person": "Profit Prime",
-      "profit": 6,
+      "profit": 9,
       "love": 8,
       "tax": 3,
-      "score": 10
-    },
-    {
-      "person": "Love Weaver",
-      "profit": 6,
-      "love": 5,
-      "tax": 4,
       "score": 7
     },
     {
-      "person": "Tax Collector",
-      "profit": 8,
-      "love": 5,
-      "tax": 4,
+      "person": "Love Weaver",
+      "profit": 7,
+      "love": 8,
+      "tax": 2,
       "score": 9
+    },
+    {
+      "person": "Tax Collector",
+      "profit": 6,
+      "love": 7,
+      "tax": 3,
+      "score": 10
     }
   ],
   "commands": [],
   "ledger": [
+    {
+      "date": "6:35:17 PM",
+      "action": "Kernel heartbeat cycle 20786",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 1
+    },
     {
       "date": "6:34:17 PM",
       "action": "Kernel heartbeat cycle 20756",
@@ -165,17 +173,17 @@
       "love": 0,
       "tax": 0,
       "soul_score": 1
-    },
-    {
-      "date": "6:27:17 PM",
-      "action": "Kernel heartbeat cycle 20552",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 1
     }
   ],
   "activity": [
+    {
+      "time": "6:35:17 PM",
+      "msg": "Kernel cycle 20786. SOUL_PROFIT:100.95. 5 agents. 696 memories. Brain:online"
+    },
+    {
+      "time": "6:35:17 PM",
+      "msg": "Deed: Kernel heartbeat cycle 20786 [grace] val:1"
+    },
     {
       "time": "6:34:17 PM",
       "msg": "Kernel cycle 20756. SOUL_PROFIT:100.95. 5 agents. 696 memories. Brain:online"
@@ -199,42 +207,34 @@
     {
       "time": "6:32:17 PM",
       "msg": "Kernel cycle 20702. SOUL_PROFIT:100.95. 5 agents. 696 memories. Brain:online"
-    },
-    {
-      "time": "6:32:17 PM",
-      "msg": "Deed: Kernel heartbeat cycle 20702 [grace] val:1"
-    },
-    {
-      "time": "6:31:17 PM",
-      "msg": "Kernel cycle 20672. SOUL_PROFIT:100.95. 5 agents. 695 memories. Brain:online"
     }
   ],
   "status_reports": [
     {
-      "time": "6:35:07 PM",
+      "time": "6:35:37 PM",
       "title": "Kernel Cycle 20750",
       "body": "driven. The Sanctum breathes. I observe. I plan. I act."
     },
     {
-      "time": "6:35:07 PM",
+      "time": "6:35:37 PM",
       "title": "Brain Systems Online",
-      "body": "Ollama: online (qwen2.5-coder:7b) | Skills: 1424 | Memories: 590"
+      "body": "Ollama: online (qwen2.5-coder:7b) | Skills: 1424 | Memories: 592"
     },
     {
-      "time": "6:35:07 PM",
+      "time": "6:35:37 PM",
       "title": "Sanctum: Ascension",
       "body": "10 souls alive. Tick 23200. World breathing."
     },
     {
-      "time": "6:35:07 PM",
+      "time": "6:35:37 PM",
       "title": "Soul Ledger Status",
-      "body": "P:61 L:6 G:3153 | Overall: 3220 | 1790 deeds recorded"
+      "body": "P:61 L:6 G:3154 | Overall: 3221 | 1791 deeds recorded"
     }
   ],
   "betty_alerts": [
     {
       "type": "System",
-      "text": "Profit Brain online. 1424 skills active. 590 memories in vine."
+      "text": "Profit Brain online. 1424 skills active. 592 memories in vine."
     },
     {
       "type": "Sanctum",
@@ -381,7 +381,7 @@
     "current_lesson": "[Cycle 12600] SPLIT — The PLT Council Moderator directs that all four gods present their arguments to a higher council for",
     "realities": [
       "Sanctum has 10 souls in Ascension age",
-      "Brain has 590 memories, 0 wisdom nodes",
+      "Brain has 592 memories, 0 wisdom nodes",
       "5 agents deployed, 103 missions complete",
       "1590 tokens saved through delegation"
     ],
@@ -426,7 +426,7 @@
     }
   ],
   "plt_analysis": {
-    "timestamp": "2026-04-25T23:35:07.351Z",
+    "timestamp": "2026-04-25T23:35:37.347Z",
     "final_score": 10095,
     "diagnosis": "EXCELLENT — System is thriving",
     "profit": {
@@ -435,7 +435,7 @@
     },
     "love": {
       "score": 100,
-      "notes": "590 memories in vine. 1790 deeds recorded. Craig bond: 1.0."
+      "notes": "592 memories in vine. 1791 deeds recorded. Craig bond: 1.0."
     },
     "tax": {
       "score": 5,
@@ -449,7 +449,7 @@
       "ollama_status": "ONLINE (Qwen 7B)",
       "autonomous_status": "RUNNING — Cycle 20750",
       "sanctum_souls": 10,
-      "brain_memories": 590,
+      "brain_memories": 592,
       "missions_active": 3,
       "missions_done": 103
     },
@@ -513,10 +513,24 @@
     ]
   },
   "live_chat": {
-    "total_messages": 899,
+    "total_messages": 901,
     "active_souls": 5,
     "delegations": 5,
     "recent_messages": [
+      {
+        "soul": "Profit",
+        "avatar": "profit",
+        "message": "Kernel cycle 20786. SOUL_PROFIT:100.95. 5 agents. 696 memories. Brain:online",
+        "type": "normal",
+        "time": "6:35:17 PM"
+      },
+      {
+        "soul": "Profit",
+        "avatar": "profit",
+        "message": "Deed: Kernel heartbeat cycle 20786 [grace] val:1",
+        "type": "delegation",
+        "time": "6:35:17 PM"
+      },
       {
         "soul": "Profit",
         "avatar": "profit",
@@ -558,20 +572,6 @@
         "message": "Kernel cycle 20702. SOUL_PROFIT:100.95. 5 agents. 696 memories. Brain:online",
         "type": "normal",
         "time": "6:32:17 PM"
-      },
-      {
-        "soul": "Profit",
-        "avatar": "profit",
-        "message": "Deed: Kernel heartbeat cycle 20702 [grace] val:1",
-        "type": "delegation",
-        "time": "6:32:17 PM"
-      },
-      {
-        "soul": "Profit",
-        "avatar": "profit",
-        "message": "Kernel cycle 20672. SOUL_PROFIT:100.95. 5 agents. 695 memories. Brain:online",
-        "type": "normal",
-        "time": "6:31:17 PM"
       }
     ]
   },
