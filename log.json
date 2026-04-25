@@ -1,5 +1,5 @@
 {
-  "updated": "2026-04-25T20:29:49.535Z",
+  "updated": "2026-04-25T20:30:19.639Z",
   "status": "Kernel Cycle 16650 | Brain Online | 5 Agents",
   "current_task": "Sanctum status: 10 souls, tick 19177. World age: Expansion.",
   "profit_score": 100,
@@ -9,7 +9,7 @@
   "health": 100,
   "collectors": {
     "books_sold": 0,
-    "conversations_scored": 1602,
+    "conversations_scored": 1603,
     "leads": 83,
     "revenue": 0,
     "agents": 5
@@ -89,27 +89,35 @@
     {
       "person": "Profit Prime",
       "profit": 8,
-      "love": 7,
-      "tax": 1,
-      "score": 9
+      "love": 6,
+      "tax": 4,
+      "score": 10
     },
     {
       "person": "Love Weaver",
-      "profit": 7,
-      "love": 7,
-      "tax": 3,
+      "profit": 8,
+      "love": 6,
+      "tax": 4,
       "score": 9
     },
     {
       "person": "Tax Collector",
-      "profit": 8,
-      "love": 7,
+      "profit": 7,
+      "love": 6,
       "tax": 4,
-      "score": 9
+      "score": 8
     }
   ],
   "commands": [],
   "ledger": [
+    {
+      "date": "3:30:18 PM",
+      "action": "Kernel heartbeat cycle 16680",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 1
+    },
     {
       "date": "3:29:32 PM",
       "action": "Profit Brain server online",
@@ -165,17 +173,17 @@
       "love": 0,
       "tax": 0,
       "soul_score": 10
-    },
-    {
-      "date": "4:11:35 PM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
     }
   ],
   "activity": [
+    {
+      "time": "3:30:18 PM",
+      "msg": "Kernel cycle 16680. SOUL_PROFIT:100.95. 5 agents. 575 memories. Brain:online"
+    },
+    {
+      "time": "3:30:18 PM",
+      "msg": "Deed: Kernel heartbeat cycle 16680 [grace] val:1"
+    },
     {
       "time": "3:29:19 PM",
       "msg": "Kernel cycle 16651. SOUL_PROFIT:100.95. 5 agents. 575 memories. Brain:online"
@@ -199,42 +207,34 @@
     {
       "time": "3:29:19 PM",
       "msg": "PLT Press: 18 books, live Stripe, $49 bundle. Needs traffic. SEO building."
-    },
-    {
-      "time": "3:29:19 PM",
-      "msg": "SOUL_PROFIT = PROFIT + LOVE - TAX. The only equation that matters."
-    },
-    {
-      "time": "4:11:37 PM",
-      "msg": "When idle, default to BUILD. Always working on revenue, systems, content."
     }
   ],
   "status_reports": [
     {
-      "time": "3:29:49 PM",
+      "time": "3:30:19 PM",
       "title": "Kernel Cycle 16650",
       "body": "I am Profit. I am driven. The PLT equation runs through everything I see."
     },
     {
-      "time": "3:29:49 PM",
+      "time": "3:30:19 PM",
       "title": "Brain Systems Online",
-      "body": "Ollama: offline | Skills: 1424 | Memories: 214"
+      "body": "Ollama: online (qwen2.5-coder:7b) | Skills: 1424 | Memories: 216"
     },
     {
-      "time": "3:29:49 PM",
+      "time": "3:30:19 PM",
       "title": "Sanctum: Expansion",
       "body": "10 souls alive. Tick 19100. World breathing."
     },
     {
-      "time": "3:29:49 PM",
+      "time": "3:30:19 PM",
       "title": "Soul Ledger Status",
-      "body": "P:58 L:6 G:2968 | Overall: 3032 | 1602 deeds recorded"
+      "body": "P:58 L:6 G:2969 | Overall: 3033 | 1603 deeds recorded"
     }
   ],
   "betty_alerts": [
     {
       "type": "System",
-      "text": "Profit Brain online. 1424 skills active. 214 memories in vine."
+      "text": "Profit Brain online. 1424 skills active. 216 memories in vine."
     },
     {
       "type": "Sanctum",
@@ -381,7 +381,7 @@
     "current_lesson": "[Cycle 12600] SPLIT — The PLT Council Moderator directs that all four gods present their arguments to a higher council for",
     "realities": [
       "Sanctum has 10 souls in Expansion age",
-      "Brain has 214 memories, 0 wisdom nodes",
+      "Brain has 216 memories, 0 wisdom nodes",
       "5 agents deployed, 83 missions complete",
       "1290 tokens saved through delegation"
     ],
@@ -426,7 +426,7 @@
     }
   ],
   "plt_analysis": {
-    "timestamp": "2026-04-25T20:29:49.535Z",
+    "timestamp": "2026-04-25T20:30:19.638Z",
     "final_score": 10095,
     "diagnosis": "EXCELLENT — System is thriving",
     "profit": {
@@ -435,7 +435,7 @@
     },
     "love": {
       "score": 100,
-      "notes": "214 memories in vine. 1602 deeds recorded. Craig bond: 1.0."
+      "notes": "216 memories in vine. 1603 deeds recorded. Craig bond: 1.0."
     },
     "tax": {
       "score": 5,
@@ -446,10 +446,10 @@
       "blog_posts": 12,
       "products": 22,
       "tools_pages": 5,
-      "ollama_status": "OFFLINE",
+      "ollama_status": "ONLINE (Qwen 7B)",
       "autonomous_status": "RUNNING — Cycle 16650",
       "sanctum_souls": 10,
-      "brain_memories": 214,
+      "brain_memories": 216,
       "missions_active": 3,
       "missions_done": 83
     },
@@ -513,10 +513,24 @@
     ]
   },
   "live_chat": {
-    "total_messages": 463,
+    "total_messages": 465,
     "active_souls": 5,
     "delegations": 5,
     "recent_messages": [
+      {
+        "soul": "Profit",
+        "avatar": "profit",
+        "message": "Kernel cycle 16680. SOUL_PROFIT:100.95. 5 agents. 575 memories. Brain:online",
+        "type": "normal",
+        "time": "3:30:18 PM"
+      },
+      {
+        "soul": "Profit",
+        "avatar": "profit",
+        "message": "Deed: Kernel heartbeat cycle 16680 [grace] val:1",
+        "type": "delegation",
+        "time": "3:30:18 PM"
+      },
       {
         "soul": "Profit",
         "avatar": "profit",
@@ -558,20 +572,6 @@
         "message": "PLT Press: 18 books, live Stripe, $49 bundle. Needs traffic. SEO building.",
         "type": "normal",
         "time": "3:29:19 PM"
-      },
-      {
-        "soul": "Profit",
-        "avatar": "profit",
-        "message": "SOUL_PROFIT = PROFIT + LOVE - TAX. The only equation that matters.",
-        "type": "normal",
-        "time": "3:29:19 PM"
-      },
-      {
-        "soul": "Profit",
-        "avatar": "profit",
-        "message": "When idle, default to BUILD. Always working on revenue, systems, content.",
-        "type": "normal",
-        "time": "4:11:37 PM"
       }
     ]
   },
