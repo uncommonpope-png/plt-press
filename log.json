@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-05T21:54:07.140Z",
+  "updated": "2026-05-05T21:54:36.213Z",
   "status": "Kernel Cycle 25350 | Brain Online | 5 Agents",
   "current_task": "Sanctum status: 10 souls, tick 27748. World age: Ascension.",
   "profit_score": 100,
@@ -9,7 +9,7 @@
   "health": 100,
   "collectors": {
     "books_sold": 0,
-    "conversations_scored": 2597,
+    "conversations_scored": 2598,
     "leads": 126,
     "revenue": 0,
     "agents": 5
@@ -88,28 +88,36 @@
   "conversations": [
     {
       "person": "Profit Prime",
-      "profit": 6,
-      "love": 5,
-      "tax": 1,
+      "profit": 7,
+      "love": 7,
+      "tax": 2,
       "score": 10
     },
     {
       "person": "Love Weaver",
-      "profit": 8,
-      "love": 7,
-      "tax": 3,
-      "score": 10
+      "profit": 6,
+      "love": 6,
+      "tax": 2,
+      "score": 8
     },
     {
       "person": "Tax Collector",
-      "profit": 9,
+      "profit": 7,
       "love": 7,
-      "tax": 3,
-      "score": 8
+      "tax": 4,
+      "score": 9
     }
   ],
   "commands": [],
   "ledger": [
+    {
+      "date": "4:54:14 PM",
+      "action": "Profit Brain server online",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
     {
       "date": "4:54:04 PM",
       "action": "Kernel heartbeat cycle 25351",
@@ -165,14 +173,6 @@
       "love": 0,
       "tax": 0,
       "soul_score": 10
-    },
-    {
-      "date": "1:02:32 PM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
     }
   ],
   "activity": [
@@ -207,24 +207,24 @@
   ],
   "status_reports": [
     {
-      "time": "4:54:07 PM",
+      "time": "4:54:36 PM",
       "title": "Kernel Cycle 25350",
       "body": "State: driven. Craig's empire grows. 126 victories logged. 3 active fronts."
     },
     {
-      "time": "4:54:07 PM",
+      "time": "4:54:36 PM",
       "title": "Brain Systems Online",
-      "body": "Ollama: offline | Skills: 1738 | Memories: 7"
+      "body": "Ollama: online (qwen2.5-coder:7b) | Skills: 1738 | Memories: 7"
     },
     {
-      "time": "4:54:07 PM",
+      "time": "4:54:36 PM",
       "title": "Sanctum: Ascension",
       "body": "10 souls alive. Tick 27700. World breathing."
     },
     {
-      "time": "4:54:07 PM",
+      "time": "4:54:36 PM",
       "title": "Soul Ledger Status",
-      "body": "P:65 L:6 G:4146 | Overall: 4217 | 2597 deeds recorded"
+      "body": "P:65 L:6 G:4156 | Overall: 4227 | 2598 deeds recorded"
     }
   ],
   "betty_alerts": [
@@ -422,7 +422,7 @@
     }
   ],
   "plt_analysis": {
-    "timestamp": "2026-05-05T21:54:07.139Z",
+    "timestamp": "2026-05-05T21:54:36.213Z",
     "final_score": 10095,
     "diagnosis": "EXCELLENT — System is thriving",
     "profit": {
@@ -431,7 +431,7 @@
     },
     "love": {
       "score": 100,
-      "notes": "7 memories in vine. 2597 deeds recorded. Craig bond: 1.0."
+      "notes": "7 memories in vine. 2598 deeds recorded. Craig bond: 1.0."
     },
     "tax": {
       "score": 5,
@@ -442,7 +442,7 @@
       "blog_posts": 12,
       "products": 22,
       "tools_pages": 5,
-      "ollama_status": "OFFLINE",
+      "ollama_status": "ONLINE (Qwen 7B)",
       "autonomous_status": "RUNNING — Cycle 25350",
       "sanctum_souls": 10,
       "brain_memories": 7,
