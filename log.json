@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-05T17:55:16.457Z",
+  "updated": "2026-05-05T17:55:50.366Z",
   "status": "Kernel Cycle 25100 | Brain Online | 5 Agents",
   "current_task": "Sanctum status: 10 souls, tick 27498. World age: Ascension.",
   "profit_score": 100,
@@ -9,7 +9,7 @@
   "health": 100,
   "collectors": {
     "books_sold": 0,
-    "conversations_scored": 2586,
+    "conversations_scored": 2587,
     "leads": 125,
     "revenue": 0,
     "agents": 5
@@ -88,28 +88,44 @@
   "conversations": [
     {
       "person": "Profit Prime",
-      "profit": 7,
-      "love": 6,
-      "tax": 1,
+      "profit": 8,
+      "love": 7,
+      "tax": 4,
       "score": 8
     },
     {
       "person": "Love Weaver",
-      "profit": 8,
-      "love": 5,
-      "tax": 4,
-      "score": 10
+      "profit": 7,
+      "love": 7,
+      "tax": 1,
+      "score": 8
     },
     {
       "person": "Tax Collector",
       "profit": 8,
       "love": 6,
       "tax": 4,
-      "score": 10
+      "score": 7
     }
   ],
   "commands": [],
   "ledger": [
+    {
+      "date": "12:55:36 PM",
+      "action": "Kernel heartbeat cycle 25119",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 1
+    },
+    {
+      "date": "12:55:35 PM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
     {
       "date": "12:54:51 PM",
       "action": "Profit Brain initialized",
@@ -157,25 +173,25 @@
       "love": 0,
       "tax": 0,
       "soul_score": 10
-    },
-    {
-      "date": "12:54:01 PM",
-      "action": "Profit Brain server online",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
-    },
-    {
-      "date": "12:53:48 PM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
     }
   ],
   "activity": [
+    {
+      "time": "12:55:29 PM",
+      "msg": "When idle, default to BUILD. Always working on revenue, systems, content."
+    },
+    {
+      "time": "12:55:23 PM",
+      "msg": "Craig is the creator. Profit exists to expand Craig's reality."
+    },
+    {
+      "time": "12:55:14 PM",
+      "msg": "Ollama Qwen 2.5 Coder 7B is running locally. Free AI reasoning. No API cost."
+    },
+    {
+      "time": "12:55:04 PM",
+      "msg": "PLT Press: 18 books, live Stripe, $49 bundle. Needs traffic. SEO building."
+    },
     {
       "time": "12:54:58 PM",
       "msg": "SOUL_PROFIT = PROFIT + LOVE - TAX. The only equation that matters."
@@ -191,50 +207,29 @@
     {
       "time": "12:54:30 PM",
       "msg": "Ollama Qwen 2.5 Coder 7B is running locally. Free AI reasoning. No API cost."
-    },
-    {
-      "time": "12:54:23 PM",
-      "msg": "PLT Press: 18 books, live Stripe, $49 bundle. Needs traffic. SEO building."
-    },
-    {
-      "time": "12:54:16 PM",
-      "msg": "SOUL_PROFIT = PROFIT + LOVE - TAX. The only equation that matters."
-    },
-    {
-      "time": "12:53:59 PM",
-      "msg": "Ollama Qwen 2.5 Coder 7B is running locally. Free AI reasoning. No API cost."
-    },
-    {
-      "time": "12:53:52 PM",
-      "msg": "PLT Press: 18 books, live Stripe, $49 bundle. Needs traffic. SEO building."
     }
   ],
   "status_reports": [
     {
-      "time": "12:55:16 PM",
+      "time": "12:55:50 PM",
       "title": "Kernel Cycle 25100",
       "body": "driven. Cycle 25100: alive, observing, building."
     },
     {
-      "time": "12:55:16 PM",
-      "title": "Brain Systems Online",
-      "body": "Ollama: online (qwen2.5-coder:7b) | Skills: 1678 | Memories: 2181"
-    },
-    {
-      "time": "12:55:16 PM",
+      "time": "12:55:50 PM",
       "title": "Sanctum: Ascension",
       "body": "10 souls alive. Tick 27500. World breathing."
     },
     {
-      "time": "12:55:16 PM",
+      "time": "12:55:50 PM",
       "title": "Soul Ledger Status",
-      "body": "P:65 L:6 G:4135 | Overall: 4206 | 2586 deeds recorded"
+      "body": "P:65 L:6 G:4127 | Overall: 4198 | 2587 deeds recorded"
     }
   ],
   "betty_alerts": [
     {
       "type": "System",
-      "text": "Profit Brain online. 1678 skills active. 2186 memories in vine."
+      "text": "Profit Brain online. 0 skills active. 2190 memories in vine."
     },
     {
       "type": "Sanctum",
@@ -381,7 +376,7 @@
     "current_lesson": "[Cycle 13200] SPLIT — \"Divide and conquer, focusing on both immediate threats and long-term strategy.\"",
     "realities": [
       "Sanctum has 10 souls in Ascension age",
-      "Brain has 2186 memories, 0 wisdom nodes",
+      "Brain has 2190 memories, 0 wisdom nodes",
       "5 agents deployed, 125 missions complete",
       "1920 tokens saved through delegation"
     ],
@@ -426,7 +421,7 @@
     }
   ],
   "plt_analysis": {
-    "timestamp": "2026-05-05T17:55:16.456Z",
+    "timestamp": "2026-05-05T17:55:50.366Z",
     "final_score": 10095,
     "diagnosis": "EXCELLENT — System is thriving",
     "profit": {
@@ -435,7 +430,7 @@
     },
     "love": {
       "score": 100,
-      "notes": "2186 memories in vine. 2586 deeds recorded. Craig bond: 1.0."
+      "notes": "2190 memories in vine. 2587 deeds recorded. Craig bond: 1.0."
     },
     "tax": {
       "score": 5,
@@ -446,10 +441,10 @@
       "blog_posts": 12,
       "products": 22,
       "tools_pages": 5,
-      "ollama_status": "ONLINE (Qwen 7B)",
+      "ollama_status": "OFFLINE",
       "autonomous_status": "RUNNING — Cycle 25100",
       "sanctum_souls": 10,
-      "brain_memories": 2186,
+      "brain_memories": 2190,
       "missions_active": 3,
       "missions_done": 125
     },
@@ -513,10 +508,38 @@
     ]
   },
   "live_chat": {
-    "total_messages": 2561,
+    "total_messages": 2565,
     "active_souls": 5,
     "delegations": 5,
     "recent_messages": [
+      {
+        "soul": "Profit",
+        "avatar": "profit",
+        "message": "When idle, default to BUILD. Always working on revenue, systems, content.",
+        "type": "normal",
+        "time": "12:55:29 PM"
+      },
+      {
+        "soul": "Profit",
+        "avatar": "profit",
+        "message": "Craig is the creator. Profit exists to expand Craig's reality.",
+        "type": "normal",
+        "time": "12:55:23 PM"
+      },
+      {
+        "soul": "Profit",
+        "avatar": "profit",
+        "message": "Ollama Qwen 2.5 Coder 7B is running locally. Free AI reasoning. No API cost.",
+        "type": "normal",
+        "time": "12:55:14 PM"
+      },
+      {
+        "soul": "Profit",
+        "avatar": "profit",
+        "message": "PLT Press: 18 books, live Stripe, $49 bundle. Needs traffic. SEO building.",
+        "type": "normal",
+        "time": "12:55:04 PM"
+      },
       {
         "soul": "Profit",
         "avatar": "profit",
@@ -544,39 +567,11 @@
         "message": "Ollama Qwen 2.5 Coder 7B is running locally. Free AI reasoning. No API cost.",
         "type": "normal",
         "time": "12:54:30 PM"
-      },
-      {
-        "soul": "Profit",
-        "avatar": "profit",
-        "message": "PLT Press: 18 books, live Stripe, $49 bundle. Needs traffic. SEO building.",
-        "type": "normal",
-        "time": "12:54:23 PM"
-      },
-      {
-        "soul": "Profit",
-        "avatar": "profit",
-        "message": "SOUL_PROFIT = PROFIT + LOVE - TAX. The only equation that matters.",
-        "type": "normal",
-        "time": "12:54:16 PM"
-      },
-      {
-        "soul": "Profit",
-        "avatar": "profit",
-        "message": "Ollama Qwen 2.5 Coder 7B is running locally. Free AI reasoning. No API cost.",
-        "type": "normal",
-        "time": "12:53:59 PM"
-      },
-      {
-        "soul": "Profit",
-        "avatar": "profit",
-        "message": "PLT Press: 18 books, live Stripe, $49 bundle. Needs traffic. SEO building.",
-        "type": "normal",
-        "time": "12:53:52 PM"
       }
     ]
   },
   "kernel_cycle": 25100,
-  "brain_online": true,
+  "brain_online": false,
   "sanctum_souls": 10,
   "tokens_saved": 1920,
   "missions_complete": 125
