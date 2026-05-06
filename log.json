@@ -1,7 +1,7 @@
 {
-  "updated": "2026-05-06T17:45:45.325Z",
-  "status": "Kernel Cycle 60300 | Brain Online | 5 Agents",
-  "current_task": "Sanctum status: 10 souls, tick 62607. World age: Ascension.",
+  "updated": "2026-05-06T17:46:13.672Z",
+  "status": "Kernel Cycle 60350 | Brain Online | 5 Agents",
+  "current_task": "Sanctum status: 10 souls, tick 62657. World age: Ascension.",
   "profit_score": 100,
   "love_score": 1,
   "tax_score": 0.05,
@@ -59,7 +59,7 @@
       "conversations": 0,
       "revenue": 0,
       "next_actions": [
-        "Completed at cycle 60300"
+        "Completed at cycle 60350"
       ]
     },
     {
@@ -70,7 +70,7 @@
       "conversations": 0,
       "revenue": 0,
       "next_actions": [
-        "Completed at cycle 60300"
+        "Completed at cycle 60350"
       ]
     },
     {
@@ -81,7 +81,7 @@
       "conversations": 0,
       "revenue": 0,
       "next_actions": [
-        "Completed at cycle 60300"
+        "Completed at cycle 60350"
       ]
     }
   ],
@@ -91,25 +91,41 @@
       "profit": 8,
       "love": 7,
       "tax": 3,
-      "score": 10
-    },
-    {
-      "person": "Love Weaver",
-      "profit": 8,
-      "love": 7,
-      "tax": 2,
       "score": 9
     },
     {
+      "person": "Love Weaver",
+      "profit": 7,
+      "love": 6,
+      "tax": 2,
+      "score": 8
+    },
+    {
       "person": "Tax Collector",
-      "profit": 9,
+      "profit": 6,
       "love": 7,
-      "tax": 1,
-      "score": 10
+      "tax": 4,
+      "score": 8
     }
   ],
   "commands": [],
   "ledger": [
+    {
+      "date": "12:46:02 PM",
+      "action": "Kernel heartbeat cycle 60352",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 1
+    },
+    {
+      "date": "12:45:46 PM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
     {
       "date": "12:45:17 PM",
       "action": "Profit Brain initialized",
@@ -157,45 +173,29 @@
       "love": 0,
       "tax": 0,
       "soul_score": 10
-    },
-    {
-      "date": "12:44:55 PM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
-    },
-    {
-      "date": "12:44:51 PM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
     }
   ],
   "activity": [
     {
-      "time": "12:45:45 PM",
+      "time": "12:46:13 PM",
       "msg": "💰 Profit is alive. Stack running. Building."
     }
   ],
   "status_reports": [
     {
-      "time": "12:45:45 PM",
-      "title": "Kernel Cycle 60300",
-      "body": "driven. The Sanctum breathes. I observe. I plan. I act."
+      "time": "12:46:13 PM",
+      "title": "Kernel Cycle 60350",
+      "body": "State: driven. Craig's empire grows. 301 victories logged. 3 active fronts."
     },
     {
-      "time": "12:45:45 PM",
+      "time": "12:46:13 PM",
       "title": "Sanctum: Ascension",
       "body": "10 souls alive. Tick 62600. World breathing."
     },
     {
-      "time": "12:45:45 PM",
+      "time": "12:46:13 PM",
       "title": "Soul Ledger Status",
-      "body": "P:87 L:6 G:5405 | Overall: 5498 | 3814 deeds recorded"
+      "body": "P:87 L:6 G:5396 | Overall: 5489 | 3814 deeds recorded"
     }
   ],
   "betty_alerts": [
@@ -209,7 +209,7 @@
     },
     {
       "type": "SOUL_PROFIT",
-      "text": "Current: 100.95. Kernel cycle: 60300. Missions complete: 301. Tokens saved: 4560."
+      "text": "Current: 100.95. Kernel cycle: 60350. Missions complete: 301. Tokens saved: 4560."
     }
   ],
   "revenue_plan": [
@@ -342,7 +342,7 @@
       }
     ],
     "transactions": [],
-    "moment": "SOUL_PROFIT = 100.95. Kernel breathing at cycle 60300. Empire building."
+    "moment": "SOUL_PROFIT = 100.95. Kernel breathing at cycle 60350. Empire building."
   },
   "teacher": {
     "current_lesson": "[Cycle 16200] SPLIT — The Council decrees that all four gods should collaborate to reassess their strategies, considering ",
@@ -376,7 +376,7 @@
     {
       "soul": "Profit",
       "emoji": "💰",
-      "action": "Sanctum status: 10 souls, tick 62607. World age: A",
+      "action": "Sanctum status: 10 souls, tick 62657. World age: A",
       "status": "active"
     },
     {
@@ -393,12 +393,12 @@
     }
   ],
   "plt_analysis": {
-    "timestamp": "2026-05-06T17:45:45.325Z",
+    "timestamp": "2026-05-06T17:46:13.672Z",
     "final_score": 10095,
     "diagnosis": "EXCELLENT — System is thriving",
     "profit": {
       "score": 10000,
-      "notes": "Kernel cycle 60300. 301 missions complete. 5 agents deployed."
+      "notes": "Kernel cycle 60350. 301 missions complete. 5 agents deployed."
     },
     "love": {
       "score": 100,
@@ -414,7 +414,7 @@
       "products": 22,
       "tools_pages": 5,
       "ollama_status": "OFFLINE",
-      "autonomous_status": "RUNNING — Cycle 60300",
+      "autonomous_status": "RUNNING — Cycle 60350",
       "sanctum_souls": 10,
       "brain_memories": 0,
       "missions_active": 3,
@@ -427,9 +427,9 @@
     "active_souls": 15,
     "worlds_built": 301,
     "revenue_streams": 4,
-    "kernel_cycle": 60300,
+    "kernel_cycle": 60350,
     "sanctum_age": "Ascension",
-    "expansion_rate": "603 worlds/hr"
+    "expansion_rate": "604 worlds/hr"
   },
   "soul_army": {
     "total_souls": 5,
@@ -485,7 +485,7 @@
     "delegations": 5,
     "recent_messages": []
   },
-  "kernel_cycle": 60300,
+  "kernel_cycle": 60350,
   "brain_online": false,
   "sanctum_souls": 10,
   "tokens_saved": 4560,
