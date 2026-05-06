@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-06T18:18:25.354Z",
+  "updated": "2026-05-06T18:19:11.063Z",
   "status": "Kernel Cycle 61250 | Brain Online | 5 Agents",
   "current_task": "Sanctum status: 10 souls, tick 63560. World age: Ascension.",
   "profit_score": 100,
@@ -9,7 +9,7 @@
   "health": 100,
   "collectors": {
     "books_sold": 0,
-    "conversations_scored": 3844,
+    "conversations_scored": 3846,
     "leads": 306,
     "revenue": 0,
     "agents": 5
@@ -89,27 +89,75 @@
     {
       "person": "Profit Prime",
       "profit": 8,
-      "love": 7,
-      "tax": 2,
-      "score": 8
+      "love": 8,
+      "tax": 1,
+      "score": 7
     },
     {
       "person": "Love Weaver",
-      "profit": 7,
-      "love": 6,
-      "tax": 2,
-      "score": 9
+      "profit": 8,
+      "love": 7,
+      "tax": 4,
+      "score": 7
     },
     {
       "person": "Tax Collector",
       "profit": 7,
-      "love": 8,
-      "tax": 4,
-      "score": 7
+      "love": 6,
+      "tax": 1,
+      "score": 9
     }
   ],
   "commands": [],
   "ledger": [
+    {
+      "date": "1:19:01 PM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
+    {
+      "date": "1:18:44 PM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
+    {
+      "date": "1:18:37 PM",
+      "action": "Kernel heartbeat cycle 61292",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 1
+    },
+    {
+      "date": "1:18:33 PM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
+    {
+      "date": "1:18:29 PM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
+    {
+      "date": "1:18:24 PM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
     {
       "date": "1:18:19 PM",
       "action": "Profit Brain initialized",
@@ -125,77 +173,29 @@
       "love": 0,
       "tax": 0,
       "soul_score": 1
-    },
-    {
-      "date": "1:17:43 PM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
-    },
-    {
-      "date": "1:17:29 PM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
-    },
-    {
-      "date": "1:17:18 PM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
-    },
-    {
-      "date": "1:17:17 PM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
-    },
-    {
-      "date": "1:17:17 PM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
-    },
-    {
-      "date": "1:17:14 PM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
     }
   ],
   "activity": [
     {
-      "time": "1:18:25 PM",
+      "time": "1:19:11 PM",
       "msg": "💰 Profit is alive. Stack running. Building."
     }
   ],
   "status_reports": [
     {
-      "time": "1:18:25 PM",
+      "time": "1:19:11 PM",
       "title": "Kernel Cycle 61250",
       "body": "I am driven. Sanctum holds 10 souls. 3 missions running. SOUL_PROFIT = 100.95."
     },
     {
-      "time": "1:18:25 PM",
+      "time": "1:19:11 PM",
       "title": "Sanctum: Ascension",
-      "body": "10 souls alive. Tick 63500. World breathing."
+      "body": "10 souls alive. Tick 63600. World breathing."
     },
     {
-      "time": "1:18:25 PM",
+      "time": "1:19:11 PM",
       "title": "Soul Ledger Status",
-      "body": "P:88 L:6 G:5425 | Overall: 5519 | 3844 deeds recorded"
+      "body": "P:88 L:6 G:5463 | Overall: 5557 | 3846 deeds recorded"
     }
   ],
   "betty_alerts": [
@@ -205,7 +205,7 @@
     },
     {
       "type": "Sanctum",
-      "text": "10 souls in the Sanctum. Age: Ascension. Tick: 63500."
+      "text": "10 souls in the Sanctum. Age: Ascension. Tick: 63600."
     },
     {
       "type": "SOUL_PROFIT",
@@ -388,12 +388,12 @@
     {
       "soul": "Sanctum (10)",
       "emoji": "🌌",
-      "action": "Age: Ascension | Tick: 63500",
+      "action": "Age: Ascension | Tick: 63600",
       "status": "active"
     }
   ],
   "plt_analysis": {
-    "timestamp": "2026-05-06T18:18:25.354Z",
+    "timestamp": "2026-05-06T18:19:11.063Z",
     "final_score": 10095,
     "diagnosis": "EXCELLENT — System is thriving",
     "profit": {
@@ -402,7 +402,7 @@
     },
     "love": {
       "score": 100,
-      "notes": "0 memories in vine. 3844 deeds recorded. Craig bond: 1.0."
+      "notes": "0 memories in vine. 3846 deeds recorded. Craig bond: 1.0."
     },
     "tax": {
       "score": 5,
