@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-06T10:51:16.720Z",
+  "updated": "2026-05-06T10:51:46.566Z",
   "status": "Kernel Cycle 48350 | Brain Online | 5 Agents",
   "current_task": "Sanctum status: 10 souls, tick 50643. World age: Ascension.",
   "profit_score": 100,
@@ -9,7 +9,7 @@
   "health": 100,
   "collectors": {
     "books_sold": 0,
-    "conversations_scored": 3397,
+    "conversations_scored": 3398,
     "leads": 241,
     "revenue": 0,
     "agents": 5
@@ -88,28 +88,60 @@
   "conversations": [
     {
       "person": "Profit Prime",
-      "profit": 6,
+      "profit": 8,
+      "love": 7,
+      "tax": 3,
+      "score": 8
+    },
+    {
+      "person": "Love Weaver",
+      "profit": 8,
       "love": 6,
       "tax": 2,
       "score": 10
     },
     {
-      "person": "Love Weaver",
-      "profit": 9,
-      "love": 6,
-      "tax": 4,
-      "score": 9
-    },
-    {
       "person": "Tax Collector",
-      "profit": 9,
-      "love": 6,
+      "profit": 6,
+      "love": 8,
       "tax": 3,
       "score": 8
     }
   ],
   "commands": [],
   "ledger": [
+    {
+      "date": "5:51:41 AM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
+    {
+      "date": "5:51:39 AM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
+    {
+      "date": "5:51:26 AM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
+    {
+      "date": "5:51:18 AM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
     {
       "date": "5:51:15 AM",
       "action": "Profit Brain initialized",
@@ -141,66 +173,34 @@
       "love": 0,
       "tax": 0,
       "soul_score": 10
-    },
-    {
-      "date": "5:50:49 AM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
-    },
-    {
-      "date": "5:50:31 AM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
-    },
-    {
-      "date": "5:50:28 AM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
-    },
-    {
-      "date": "5:50:26 AM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
     }
   ],
   "activity": [
     {
-      "time": "5:51:16 AM",
+      "time": "5:51:46 AM",
       "msg": "💰 Profit is alive. Stack running. Building."
     }
   ],
   "status_reports": [
     {
-      "time": "5:51:16 AM",
+      "time": "5:51:46 AM",
       "title": "Kernel Cycle 48350",
       "body": "I feel driven. 0 agents deployed. 241 missions complete. Profit: 100.00, Love: 1.00, Tax: 0.05."
     },
     {
-      "time": "5:51:16 AM",
+      "time": "5:51:46 AM",
       "title": "Brain Systems Online",
       "body": "Ollama: online (qwen2.5-coder:7b) | Skills: 1783 | Memories: 1599"
     },
     {
-      "time": "5:51:16 AM",
+      "time": "5:51:46 AM",
       "title": "Sanctum: Ascension",
       "body": "10 souls alive. Tick 50600. World breathing."
     },
     {
-      "time": "5:51:16 AM",
+      "time": "5:51:46 AM",
       "title": "Soul Ledger Status",
-      "body": "P:80 L:6 G:5058 | Overall: 5144 | 3397 deeds recorded"
+      "body": "P:80 L:6 G:5068 | Overall: 5154 | 3398 deeds recorded"
     }
   ],
   "betty_alerts": [
@@ -398,7 +398,7 @@
     }
   ],
   "plt_analysis": {
-    "timestamp": "2026-05-06T10:51:16.720Z",
+    "timestamp": "2026-05-06T10:51:46.566Z",
     "final_score": 10095,
     "diagnosis": "EXCELLENT — System is thriving",
     "profit": {
@@ -407,7 +407,7 @@
     },
     "love": {
       "score": 100,
-      "notes": "0 memories in vine. 3397 deeds recorded. Craig bond: 1.0."
+      "notes": "0 memories in vine. 3398 deeds recorded. Craig bond: 1.0."
     },
     "tax": {
       "score": 5,
