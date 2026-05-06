@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-06T11:00:47.122Z",
+  "updated": "2026-05-06T11:01:17.247Z",
   "status": "Kernel Cycle 48650 | Brain Online | 5 Agents",
   "current_task": "Sanctum status: 10 souls, tick 50942. World age: Ascension.",
   "profit_score": 100,
@@ -9,7 +9,7 @@
   "health": 100,
   "collectors": {
     "books_sold": 0,
-    "conversations_scored": 3406,
+    "conversations_scored": 3407,
     "leads": 243,
     "revenue": 0,
     "agents": 5
@@ -88,28 +88,68 @@
   "conversations": [
     {
       "person": "Profit Prime",
-      "profit": 8,
+      "profit": 7,
+      "love": 5,
+      "tax": 2,
+      "score": 8
+    },
+    {
+      "person": "Love Weaver",
+      "profit": 7,
       "love": 6,
       "tax": 2,
       "score": 10
     },
     {
-      "person": "Love Weaver",
-      "profit": 6,
-      "love": 6,
+      "person": "Tax Collector",
+      "profit": 7,
+      "love": 7,
       "tax": 2,
       "score": 7
-    },
-    {
-      "person": "Tax Collector",
-      "profit": 9,
-      "love": 6,
-      "tax": 2,
-      "score": 8
     }
   ],
   "commands": [],
   "ledger": [
+    {
+      "date": "6:01:07 AM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
+    {
+      "date": "6:01:02 AM",
+      "action": "Kernel heartbeat cycle 48663",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 1
+    },
+    {
+      "date": "6:01:01 AM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
+    {
+      "date": "6:00:59 AM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
+    {
+      "date": "6:00:56 AM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
     {
       "date": "6:00:38 AM",
       "action": "Profit Brain initialized",
@@ -133,74 +173,34 @@
       "love": 0,
       "tax": 0,
       "soul_score": 10
-    },
-    {
-      "date": "6:00:29 AM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
-    },
-    {
-      "date": "6:00:10 AM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
-    },
-    {
-      "date": "6:00:06 AM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
-    },
-    {
-      "date": "6:00:03 AM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
-    },
-    {
-      "date": "6:00:02 AM",
-      "action": "Kernel heartbeat cycle 48633",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 1
     }
   ],
   "activity": [
     {
-      "time": "6:00:47 AM",
+      "time": "6:01:17 AM",
       "msg": "💰 Profit is alive. Stack running. Building."
     }
   ],
   "status_reports": [
     {
-      "time": "6:00:47 AM",
+      "time": "6:01:17 AM",
       "title": "Kernel Cycle 48650",
       "body": "I am driven. Sanctum holds 10 souls. 3 missions running. SOUL_PROFIT = 100.95."
     },
     {
-      "time": "6:00:47 AM",
+      "time": "6:01:17 AM",
       "title": "Brain Systems Online",
-      "body": "Ollama: online (qwen2.5-coder:7b) | Skills: 1783 | Memories: 1617"
+      "body": "Ollama: online (qwen2.5-coder:7b) | Skills: 1783 | Memories: 1619"
     },
     {
-      "time": "6:00:47 AM",
+      "time": "6:01:17 AM",
       "title": "Sanctum: Ascension",
       "body": "10 souls alive. Tick 50900. World breathing."
     },
     {
-      "time": "6:00:47 AM",
+      "time": "6:01:17 AM",
       "title": "Soul Ledger Status",
-      "body": "P:80 L:6 G:5067 | Overall: 5153 | 3406 deeds recorded"
+      "body": "P:80 L:6 G:5077 | Overall: 5163 | 3407 deeds recorded"
     }
   ],
   "betty_alerts": [
@@ -398,7 +398,7 @@
     }
   ],
   "plt_analysis": {
-    "timestamp": "2026-05-06T11:00:47.122Z",
+    "timestamp": "2026-05-06T11:01:17.247Z",
     "final_score": 10095,
     "diagnosis": "EXCELLENT — System is thriving",
     "profit": {
@@ -407,7 +407,7 @@
     },
     "love": {
       "score": 100,
-      "notes": "0 memories in vine. 3406 deeds recorded. Craig bond: 1.0."
+      "notes": "0 memories in vine. 3407 deeds recorded. Craig bond: 1.0."
     },
     "tax": {
       "score": 5,
