@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-06T09:04:35.954Z",
+  "updated": "2026-05-06T09:05:16.224Z",
   "status": "Kernel Cycle 45200 | Brain Online | 5 Agents",
   "current_task": "Sanctum status: 10 souls, tick 47506. World age: Ascension.",
   "profit_score": 100,
@@ -9,7 +9,7 @@
   "health": 100,
   "collectors": {
     "books_sold": 0,
-    "conversations_scored": 3281,
+    "conversations_scored": 3282,
     "leads": 226,
     "revenue": 0,
     "agents": 5
@@ -88,28 +88,36 @@
   "conversations": [
     {
       "person": "Profit Prime",
-      "profit": 6,
-      "love": 6,
-      "tax": 1,
-      "score": 7
-    },
-    {
-      "person": "Love Weaver",
       "profit": 7,
-      "love": 6,
+      "love": 8,
       "tax": 3,
       "score": 7
     },
     {
+      "person": "Love Weaver",
+      "profit": 8,
+      "love": 7,
+      "tax": 4,
+      "score": 8
+    },
+    {
       "person": "Tax Collector",
-      "profit": 7,
+      "profit": 9,
       "love": 6,
-      "tax": 1,
-      "score": 9
+      "tax": 3,
+      "score": 8
     }
   ],
   "commands": [],
   "ledger": [
+    {
+      "date": "4:05:02 AM",
+      "action": "Kernel heartbeat cycle 45227",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 1
+    },
     {
       "date": "4:04:27 AM",
       "action": "Autonomous council session #13",
@@ -165,14 +173,6 @@
       "love": 0,
       "tax": 0,
       "soul_score": 1
-    },
-    {
-      "date": "3:58:02 AM",
-      "action": "Kernel heartbeat cycle 45017",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 1
     }
   ],
   "activity": [
@@ -211,30 +211,25 @@
   ],
   "status_reports": [
     {
-      "time": "4:04:35 AM",
+      "time": "4:05:16 AM",
       "title": "Kernel Cycle 45200",
       "body": "I feel driven. 0 agents deployed. 226 missions complete. Profit: 100.00, Love: 1.00, Tax: 0.05."
     },
     {
-      "time": "4:04:35 AM",
-      "title": "Brain Systems Online",
-      "body": "Ollama: online (qwen2.5-coder:7b) | Skills: 1738 | Memories: 1371"
-    },
-    {
-      "time": "4:04:35 AM",
+      "time": "4:05:16 AM",
       "title": "Sanctum: Ascension",
       "body": "10 souls alive. Tick 47500. World breathing."
     },
     {
-      "time": "4:04:35 AM",
+      "time": "4:05:16 AM",
       "title": "Soul Ledger Status",
-      "body": "P:79 L:6 G:4826 | Overall: 4911 | 3281 deeds recorded"
+      "body": "P:79 L:6 G:4827 | Overall: 4912 | 3282 deeds recorded"
     }
   ],
   "betty_alerts": [
     {
       "type": "System",
-      "text": "Profit Brain online. 1738 skills active. 1371 memories in vine."
+      "text": "Profit Brain online. 0 skills active. 1371 memories in vine."
     },
     {
       "type": "Sanctum",
@@ -426,7 +421,7 @@
     }
   ],
   "plt_analysis": {
-    "timestamp": "2026-05-06T09:04:35.954Z",
+    "timestamp": "2026-05-06T09:05:16.224Z",
     "final_score": 10095,
     "diagnosis": "EXCELLENT — System is thriving",
     "profit": {
@@ -435,7 +430,7 @@
     },
     "love": {
       "score": 100,
-      "notes": "1371 memories in vine. 3281 deeds recorded. Craig bond: 1.0."
+      "notes": "1371 memories in vine. 3282 deeds recorded. Craig bond: 1.0."
     },
     "tax": {
       "score": 5,
@@ -446,7 +441,7 @@
       "blog_posts": 12,
       "products": 22,
       "tools_pages": 5,
-      "ollama_status": "ONLINE (Qwen 7B)",
+      "ollama_status": "OFFLINE",
       "autonomous_status": "RUNNING — Cycle 45200",
       "sanctum_souls": 10,
       "brain_memories": 1371,
@@ -576,7 +571,7 @@
     ]
   },
   "kernel_cycle": 45200,
-  "brain_online": true,
+  "brain_online": false,
   "sanctum_souls": 10,
   "tokens_saved": 3430,
   "missions_complete": 226
