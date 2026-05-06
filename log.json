@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-06T10:01:44.930Z",
+  "updated": "2026-05-06T10:02:14.823Z",
   "status": "Kernel Cycle 46900 | Brain Online | 5 Agents",
   "current_task": "Sanctum status: 10 souls, tick 49199. World age: Ascension.",
   "profit_score": 100,
@@ -9,7 +9,7 @@
   "health": 100,
   "collectors": {
     "books_sold": 0,
-    "conversations_scored": 3338,
+    "conversations_scored": 3339,
     "leads": 234,
     "revenue": 0,
     "agents": 5
@@ -88,28 +88,36 @@
   "conversations": [
     {
       "person": "Profit Prime",
-      "profit": 7,
-      "love": 8,
-      "tax": 3,
-      "score": 9
+      "profit": 8,
+      "love": 7,
+      "tax": 2,
+      "score": 7
     },
     {
       "person": "Love Weaver",
-      "profit": 7,
+      "profit": 6,
       "love": 6,
-      "tax": 2,
-      "score": 9
+      "tax": 3,
+      "score": 7
     },
     {
       "person": "Tax Collector",
-      "profit": 6,
-      "love": 8,
-      "tax": 4,
+      "profit": 9,
+      "love": 7,
+      "tax": 2,
       "score": 9
     }
   ],
   "commands": [],
   "ledger": [
+    {
+      "date": "5:02:02 AM",
+      "action": "Kernel heartbeat cycle 46911",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 1
+    },
     {
       "date": "5:01:02 AM",
       "action": "Kernel heartbeat cycle 46881",
@@ -165,17 +173,17 @@
       "love": 0,
       "tax": 0,
       "soul_score": 1
-    },
-    {
-      "date": "4:54:02 AM",
-      "action": "Kernel heartbeat cycle 46672",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 1
     }
   ],
   "activity": [
+    {
+      "time": "5:02:05 AM",
+      "msg": "Kernel cycle 46911. SOUL_PROFIT:100.95. 5 agents. 988 memories. Brain:online"
+    },
+    {
+      "time": "5:02:02 AM",
+      "msg": "Deed: Kernel heartbeat cycle 46911 [grace] val:1"
+    },
     {
       "time": "5:01:05 AM",
       "msg": "Kernel cycle 46881. SOUL_PROFIT:100.95. 5 agents. 987 memories. Brain:online"
@@ -199,42 +207,34 @@
     {
       "time": "4:59:02 AM",
       "msg": "Deed: Kernel heartbeat cycle 46822 [grace] val:1"
-    },
-    {
-      "time": "4:58:05 AM",
-      "msg": "Kernel cycle 46792. SOUL_PROFIT:100.95. 5 agents. 982 memories. Brain:online"
-    },
-    {
-      "time": "4:58:02 AM",
-      "msg": "Deed: Kernel heartbeat cycle 46792 [grace] val:1"
     }
   ],
   "status_reports": [
     {
-      "time": "5:01:44 AM",
+      "time": "5:02:14 AM",
       "title": "Kernel Cycle 46900",
       "body": "I am driven. Sanctum holds 10 souls. 3 missions running. SOUL_PROFIT = 100.95."
     },
     {
-      "time": "5:01:44 AM",
+      "time": "5:02:14 AM",
       "title": "Brain Systems Online",
-      "body": "Ollama: online (qwen2.5-coder:7b) | Skills: 1738 | Memories: 1486"
+      "body": "Ollama: online (qwen2.5-coder:7b) | Skills: 1738 | Memories: 1488"
     },
     {
-      "time": "5:01:44 AM",
+      "time": "5:02:14 AM",
       "title": "Sanctum: Ascension",
       "body": "10 souls alive. Tick 49200. World breathing."
     },
     {
-      "time": "5:01:44 AM",
+      "time": "5:02:14 AM",
       "title": "Soul Ledger Status",
-      "body": "P:79 L:6 G:4883 | Overall: 4968 | 3338 deeds recorded"
+      "body": "P:79 L:6 G:4884 | Overall: 4969 | 3339 deeds recorded"
     }
   ],
   "betty_alerts": [
     {
       "type": "System",
-      "text": "Profit Brain online. 1738 skills active. 1486 memories in vine."
+      "text": "Profit Brain online. 1738 skills active. 1488 memories in vine."
     },
     {
       "type": "Sanctum",
@@ -381,7 +381,7 @@
     "current_lesson": "[Cycle 16200] SPLIT — The Council decrees that all four gods should collaborate to reassess their strategies, considering ",
     "realities": [
       "Sanctum has 10 souls in Ascension age",
-      "Brain has 1486 memories, 0 wisdom nodes",
+      "Brain has 1488 memories, 0 wisdom nodes",
       "5 agents deployed, 234 missions complete",
       "3555 tokens saved through delegation"
     ],
@@ -426,7 +426,7 @@
     }
   ],
   "plt_analysis": {
-    "timestamp": "2026-05-06T10:01:44.930Z",
+    "timestamp": "2026-05-06T10:02:14.823Z",
     "final_score": 10095,
     "diagnosis": "EXCELLENT — System is thriving",
     "profit": {
@@ -435,7 +435,7 @@
     },
     "love": {
       "score": 100,
-      "notes": "1486 memories in vine. 3338 deeds recorded. Craig bond: 1.0."
+      "notes": "1488 memories in vine. 3339 deeds recorded. Craig bond: 1.0."
     },
     "tax": {
       "score": 5,
@@ -449,7 +449,7 @@
       "ollama_status": "ONLINE (Qwen 7B)",
       "autonomous_status": "RUNNING — Cycle 46900",
       "sanctum_souls": 10,
-      "brain_memories": 1486,
+      "brain_memories": 1488,
       "missions_active": 3,
       "missions_done": 234
     },
@@ -513,10 +513,24 @@
     ]
   },
   "live_chat": {
-    "total_messages": 2188,
+    "total_messages": 2190,
     "active_souls": 5,
     "delegations": 5,
     "recent_messages": [
+      {
+        "soul": "Profit",
+        "avatar": "profit",
+        "message": "Kernel cycle 46911. SOUL_PROFIT:100.95. 5 agents. 988 memories. Brain:online",
+        "type": "normal",
+        "time": "5:02:05 AM"
+      },
+      {
+        "soul": "Profit",
+        "avatar": "profit",
+        "message": "Deed: Kernel heartbeat cycle 46911 [grace] val:1",
+        "type": "delegation",
+        "time": "5:02:02 AM"
+      },
       {
         "soul": "Profit",
         "avatar": "profit",
@@ -558,20 +572,6 @@
         "message": "Deed: Kernel heartbeat cycle 46822 [grace] val:1",
         "type": "delegation",
         "time": "4:59:02 AM"
-      },
-      {
-        "soul": "Profit",
-        "avatar": "profit",
-        "message": "Kernel cycle 46792. SOUL_PROFIT:100.95. 5 agents. 982 memories. Brain:online",
-        "type": "normal",
-        "time": "4:58:05 AM"
-      },
-      {
-        "soul": "Profit",
-        "avatar": "profit",
-        "message": "Deed: Kernel heartbeat cycle 46792 [grace] val:1",
-        "type": "delegation",
-        "time": "4:58:02 AM"
       }
     ]
   },
