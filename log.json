@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-06T15:09:17.328Z",
+  "updated": "2026-05-06T15:09:40.874Z",
   "status": "Kernel Cycle 55850 | Brain Online | 5 Agents",
   "current_task": "Sanctum status: 10 souls, tick 58140. World age: Ascension.",
   "profit_score": 100,
@@ -9,7 +9,7 @@
   "health": 100,
   "collectors": {
     "books_sold": 0,
-    "conversations_scored": 3655,
+    "conversations_scored": 3657,
     "leads": 279,
     "revenue": 0,
     "agents": 5
@@ -88,28 +88,44 @@
   "conversations": [
     {
       "person": "Profit Prime",
-      "profit": 9,
-      "love": 7,
-      "tax": 4,
+      "profit": 7,
+      "love": 5,
+      "tax": 2,
       "score": 8
     },
     {
       "person": "Love Weaver",
-      "profit": 6,
-      "love": 5,
+      "profit": 7,
+      "love": 7,
       "tax": 1,
-      "score": 9
+      "score": 7
     },
     {
       "person": "Tax Collector",
-      "profit": 8,
+      "profit": 9,
       "love": 7,
       "tax": 3,
-      "score": 9
+      "score": 7
     }
   ],
   "commands": [],
   "ledger": [
+    {
+      "date": "10:09:32 AM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
+    {
+      "date": "10:09:13 AM",
+      "action": "Profit Brain initialized",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
     {
       "date": "10:09:02 AM",
       "action": "Kernel heartbeat cycle 55861",
@@ -157,51 +173,40 @@
       "love": 0,
       "tax": 0,
       "soul_score": 10
-    },
-    {
-      "date": "10:07:38 AM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
-    },
-    {
-      "date": "10:07:38 AM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
     }
   ],
   "activity": [
     {
-      "time": "10:09:17 AM",
+      "time": "10:09:40 AM",
       "msg": "💰 Profit is alive. Stack running. Building."
     }
   ],
   "status_reports": [
     {
-      "time": "10:09:17 AM",
+      "time": "10:09:40 AM",
       "title": "Kernel Cycle 55850",
       "body": "I am Profit. I am driven. The PLT equation runs through everything I see."
     },
     {
-      "time": "10:09:17 AM",
+      "time": "10:09:40 AM",
+      "title": "Brain Systems Online",
+      "body": "Ollama: online (qwen2.5-coder:7b) | Skills: 1783 | Memories: 2124"
+    },
+    {
+      "time": "10:09:40 AM",
       "title": "Sanctum: Ascension",
       "body": "10 souls alive. Tick 58100. World breathing."
     },
     {
-      "time": "10:09:17 AM",
+      "time": "10:09:40 AM",
       "title": "Soul Ledger Status",
-      "body": "P:85 L:6 G:5239 | Overall: 5330 | 3655 deeds recorded"
+      "body": "P:85 L:6 G:5259 | Overall: 5350 | 3657 deeds recorded"
     }
   ],
   "betty_alerts": [
     {
       "type": "System",
-      "text": "Profit Brain online. 0 skills active. 0 memories in vine."
+      "text": "Profit Brain online. 1783 skills active. 0 memories in vine."
     },
     {
       "type": "Sanctum",
@@ -393,7 +398,7 @@
     }
   ],
   "plt_analysis": {
-    "timestamp": "2026-05-06T15:09:17.328Z",
+    "timestamp": "2026-05-06T15:09:40.874Z",
     "final_score": 10095,
     "diagnosis": "EXCELLENT — System is thriving",
     "profit": {
@@ -402,7 +407,7 @@
     },
     "love": {
       "score": 100,
-      "notes": "0 memories in vine. 3655 deeds recorded. Craig bond: 1.0."
+      "notes": "0 memories in vine. 3657 deeds recorded. Craig bond: 1.0."
     },
     "tax": {
       "score": 5,
@@ -413,7 +418,7 @@
       "blog_posts": 12,
       "products": 22,
       "tools_pages": 5,
-      "ollama_status": "OFFLINE",
+      "ollama_status": "ONLINE (Qwen 7B)",
       "autonomous_status": "RUNNING — Cycle 55850",
       "sanctum_souls": 10,
       "brain_memories": 0,
@@ -486,7 +491,7 @@
     "recent_messages": []
   },
   "kernel_cycle": 55850,
-  "brain_online": false,
+  "brain_online": true,
   "sanctum_souls": 10,
   "tokens_saved": 4230,
   "missions_complete": 279
