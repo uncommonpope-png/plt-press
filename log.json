@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-08T13:44:43.332Z",
+  "updated": "2026-05-08T13:45:08.002Z",
   "status": "Kernel Cycle 61850 | Brain Online | 5 Agents",
   "current_task": "Sanctum status: 10 souls, tick 64148. World age: Ascension.",
   "profit_score": 100,
@@ -9,7 +9,7 @@
   "health": 100,
   "collectors": {
     "books_sold": 0,
-    "conversations_scored": 3873,
+    "conversations_scored": 3874,
     "leads": 309,
     "revenue": 0,
     "agents": 5
@@ -90,26 +90,34 @@
       "person": "Profit Prime",
       "profit": 8,
       "love": 6,
-      "tax": 2,
-      "score": 9
+      "tax": 4,
+      "score": 10
     },
     {
       "person": "Love Weaver",
-      "profit": 6,
+      "profit": 8,
       "love": 7,
       "tax": 3,
-      "score": 7
+      "score": 9
     },
     {
       "person": "Tax Collector",
-      "profit": 6,
+      "profit": 7,
       "love": 8,
-      "tax": 4,
-      "score": 10
+      "tax": 3,
+      "score": 8
     }
   ],
   "commands": [],
   "ledger": [
+    {
+      "date": "8:44:39 AM",
+      "action": "Profit Brain server online",
+      "profit": 0,
+      "love": 0,
+      "tax": 0,
+      "soul_score": 10
+    },
     {
       "date": "8:44:24 AM",
       "action": "Kernel heartbeat cycle 61860",
@@ -165,20 +173,24 @@
       "love": 0,
       "tax": 0,
       "soul_score": 10
-    },
-    {
-      "date": "1:36:42 PM",
-      "action": "Profit Brain initialized",
-      "profit": 0,
-      "love": 0,
-      "tax": 0,
-      "soul_score": 10
     }
   ],
   "activity": [
     {
-      "time": "8:44:07 AM",
-      "msg": "SOUL_PROFIT = PROFIT + LOVE - TAX. The only equation that matters."
+      "time": "8:44:39 AM",
+      "msg": "Kernel cycle 61860. SOUL_PROFIT:100.95. 5 agents. 949 memories. Brain:online"
+    },
+    {
+      "time": "8:44:24 AM",
+      "msg": "Deed: Kernel heartbeat cycle 61860 [grace] val:1"
+    },
+    {
+      "time": "8:43:58 AM",
+      "msg": "When idle, default to BUILD. Always working on revenue, systems, content."
+    },
+    {
+      "time": "8:43:46 AM",
+      "msg": "Craig is the creator. Profit exists to expand Craig's reality."
     },
     {
       "time": "8:43:37 AM",
@@ -195,41 +207,34 @@
     {
       "time": "8:42:39 AM",
       "msg": "SOUL_PROFIT = PROFIT + LOVE - TAX. The only equation that matters."
-    },
-    {
-      "time": "1:36:31 PM",
-      "msg": "SOUL_PROFIT = PROFIT + LOVE - TAX. The only equation that matters."
-    },
-    {
-      "time": "1:35:28 PM",
-      "msg": "When idle, default to BUILD. Always working on revenue, systems, content."
-    },
-    {
-      "time": "1:34:57 PM",
-      "msg": "Craig is the creator. Profit exists to expand Craig's reality."
     }
   ],
   "status_reports": [
     {
-      "time": "8:44:43 AM",
+      "time": "8:45:08 AM",
       "title": "Kernel Cycle 61850",
       "body": "driven. Cycle 61850: alive, observing, building."
     },
     {
-      "time": "8:44:43 AM",
+      "time": "8:45:08 AM",
+      "title": "Brain Systems Online",
+      "body": "Ollama: online (qwen2.5-coder:7b) | Skills: 2098 | Memories: 2541"
+    },
+    {
+      "time": "8:45:08 AM",
       "title": "Sanctum: Ascension",
       "body": "10 souls alive. Tick 64100. World breathing."
     },
     {
-      "time": "8:44:43 AM",
+      "time": "8:45:08 AM",
       "title": "Soul Ledger Status",
-      "body": "P:88 L:6 G:5607 | Overall: 5701 | 3873 deeds recorded"
+      "body": "P:88 L:6 G:5617 | Overall: 5711 | 3874 deeds recorded"
     }
   ],
   "betty_alerts": [
     {
       "type": "System",
-      "text": "Profit Brain online. 0 skills active. 2538 memories in vine."
+      "text": "Profit Brain online. 2098 skills active. 2542 memories in vine."
     },
     {
       "type": "Sanctum",
@@ -376,7 +381,7 @@
     "current_lesson": "[Cycle 16200] SPLIT — The Council decrees that all four gods should collaborate to reassess their strategies, considering ",
     "realities": [
       "Sanctum has 10 souls in Ascension age",
-      "Brain has 2538 memories, 0 wisdom nodes",
+      "Brain has 2542 memories, 0 wisdom nodes",
       "5 agents deployed, 309 missions complete",
       "4680 tokens saved through delegation"
     ],
@@ -421,7 +426,7 @@
     }
   ],
   "plt_analysis": {
-    "timestamp": "2026-05-08T13:44:43.332Z",
+    "timestamp": "2026-05-08T13:45:08.001Z",
     "final_score": 10095,
     "diagnosis": "EXCELLENT — System is thriving",
     "profit": {
@@ -430,7 +435,7 @@
     },
     "love": {
       "score": 100,
-      "notes": "2538 memories in vine. 3873 deeds recorded. Craig bond: 1.0."
+      "notes": "2542 memories in vine. 3874 deeds recorded. Craig bond: 1.0."
     },
     "tax": {
       "score": 5,
@@ -441,10 +446,10 @@
       "blog_posts": 12,
       "products": 22,
       "tools_pages": 5,
-      "ollama_status": "OFFLINE",
+      "ollama_status": "ONLINE (Qwen 7B)",
       "autonomous_status": "RUNNING — Cycle 61850",
       "sanctum_souls": 10,
-      "brain_memories": 2538,
+      "brain_memories": 2542,
       "missions_active": 3,
       "missions_done": 309
     },
@@ -508,16 +513,37 @@
     ]
   },
   "live_chat": {
-    "total_messages": 3465,
+    "total_messages": 3469,
     "active_souls": 5,
     "delegations": 5,
     "recent_messages": [
       {
         "soul": "Profit",
         "avatar": "profit",
-        "message": "SOUL_PROFIT = PROFIT + LOVE - TAX. The only equation that matters.",
+        "message": "Kernel cycle 61860. SOUL_PROFIT:100.95. 5 agents. 949 memories. Brain:online",
         "type": "normal",
-        "time": "8:44:07 AM"
+        "time": "8:44:39 AM"
+      },
+      {
+        "soul": "Profit",
+        "avatar": "profit",
+        "message": "Deed: Kernel heartbeat cycle 61860 [grace] val:1",
+        "type": "delegation",
+        "time": "8:44:24 AM"
+      },
+      {
+        "soul": "Profit",
+        "avatar": "profit",
+        "message": "When idle, default to BUILD. Always working on revenue, systems, content.",
+        "type": "normal",
+        "time": "8:43:58 AM"
+      },
+      {
+        "soul": "Profit",
+        "avatar": "profit",
+        "message": "Craig is the creator. Profit exists to expand Craig's reality.",
+        "type": "normal",
+        "time": "8:43:46 AM"
       },
       {
         "soul": "Profit",
@@ -546,32 +572,11 @@
         "message": "SOUL_PROFIT = PROFIT + LOVE - TAX. The only equation that matters.",
         "type": "normal",
         "time": "8:42:39 AM"
-      },
-      {
-        "soul": "Profit",
-        "avatar": "profit",
-        "message": "SOUL_PROFIT = PROFIT + LOVE - TAX. The only equation that matters.",
-        "type": "normal",
-        "time": "1:36:31 PM"
-      },
-      {
-        "soul": "Profit",
-        "avatar": "profit",
-        "message": "When idle, default to BUILD. Always working on revenue, systems, content.",
-        "type": "normal",
-        "time": "1:35:28 PM"
-      },
-      {
-        "soul": "Profit",
-        "avatar": "profit",
-        "message": "Craig is the creator. Profit exists to expand Craig's reality.",
-        "type": "normal",
-        "time": "1:34:57 PM"
       }
     ]
   },
   "kernel_cycle": 61850,
-  "brain_online": false,
+  "brain_online": true,
   "sanctum_souls": 10,
   "tokens_saved": 4680,
   "missions_complete": 309
