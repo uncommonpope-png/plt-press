@@ -9,12 +9,15 @@
 :root{
   --bg:#0D1117;
   --panel:#1A1A2E;
+  --panel2:#0F1726;
   --border:#2A2A4A;
   --gold:#FFB347;
   --pink:#FF2D78;
   --cyan:#00D4FF;
   --green:#2ecc71;
   --red:#e74c3c;
+  --violet:#8b7cff;
+  --amber:#ffcf66;
   --dim:#666;
 }
 body{background:var(--bg);color:#ddd;font-family:Georgia,serif;max-width:640px;margin:0 auto;padding:8px;min-height:100vh}
@@ -232,6 +235,62 @@ h2.glow-cyan{color:var(--cyan);text-shadow:0 0 10px rgba(0,212,255,.4)}
 .panel{cursor:pointer;position:relative}
 .panel .expand-hint{position:absolute;top:14px;right:14px;font-size:10px;color:var(--dim);opacity:0;transition:opacity .3s}
 .panel:hover .expand-hint{opacity:1}
+
+/* Alien Containment Layer */
+.alien-panel{
+  background:linear-gradient(180deg,rgba(7,13,24,.95),rgba(10,16,30,.92));
+  border:1px solid rgba(0,212,255,.22);
+  box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 10px 35px rgba(0,0,0,.35),0 0 22px rgba(0,212,255,.08);
+  overflow:hidden;
+}
+.alien-panel:before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg,transparent 0%,rgba(0,212,255,.05) 35%,transparent 60%);
+  pointer-events:none;
+}
+#alien-containment{padding:18px 16px}
+.containment-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:14px;position:relative;z-index:1}
+.containment-title{font-size:24px;line-height:1.1;color:#dff8ff;letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 16px rgba(0,212,255,.25)}
+.containment-sub{font-size:11px;color:#89a6b7;text-transform:uppercase;letter-spacing:1.5px;margin-top:5px}
+.containment-badge{padding:6px 10px;border:1px solid rgba(255,179,71,.3);border-radius:999px;font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:1px;background:rgba(255,179,71,.08);white-space:nowrap}
+.containment-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:10px;position:relative;z-index:1}
+.core-box,.side-box{background:linear-gradient(180deg,rgba(16,26,44,.9),rgba(8,13,25,.9));border:1px solid rgba(139,124,255,.16);border-radius:12px;padding:12px;position:relative}
+.section-kicker{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#7db1c7;margin-bottom:8px}
+.artifact-core{height:170px;border-radius:12px;border:1px solid rgba(0,212,255,.16);background:radial-gradient(circle at 50% 50%,rgba(0,212,255,.15),rgba(7,10,20,.95) 56%),linear-gradient(180deg,rgba(255,255,255,.02),transparent);position:relative;overflow:hidden}
+.artifact-core:before,.artifact-core:after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;border:1px solid rgba(0,212,255,.18)}
+.artifact-core:before{width:134px;height:134px;box-shadow:0 0 18px rgba(0,212,255,.15),inset 0 0 18px rgba(0,212,255,.05);animation:rotate 16s linear infinite}
+.artifact-core:after{width:74px;height:74px;border-color:rgba(255,45,120,.24);animation:pulse 2.4s ease-in-out infinite}
+.artifact-kernel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(0,212,255,.7) 35%,rgba(255,45,120,.3) 70%,transparent 100%);box-shadow:0 0 18px rgba(0,212,255,.55),0 0 42px rgba(255,45,120,.28)}
+.artifact-label{position:absolute;left:12px;bottom:12px;font-size:12px;color:#dff8ff;text-transform:uppercase;letter-spacing:1px}
+.artifact-label small{display:block;color:#86a2b1;font-size:10px;margin-top:4px}
+.containment-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.alien-chip{padding:9px 10px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05)}
+.alien-chip .k{font-size:10px;color:#7f95a6;text-transform:uppercase;letter-spacing:1px}
+.alien-chip .v{font-size:14px;color:#e4faff;font-weight:bold;margin-top:3px}
+.containment-log{max-height:310px;overflow:auto;font-size:11px;background:rgba(4,8,17,.8);border:1px solid rgba(0,212,255,.1);border-radius:10px;padding:8px}
+.containment-log .evt{padding:7px 8px;border-left:2px solid rgba(0,212,255,.35);margin-bottom:7px;background:rgba(255,255,255,.02);border-radius:0 8px 8px 0}
+.containment-log .evt .t{font-size:9px;color:#7e9aac;text-transform:uppercase;letter-spacing:1px}
+.containment-log .evt .s{font-size:12px;color:#def6ff;line-height:1.45;margin-top:3px}
+.containment-log .evt.intent{border-left-color:var(--amber)}
+.containment-log .evt.council{border-left-color:var(--violet)}
+.containment-log .evt.skill{border-left-color:var(--green)}
+.containment-log .evt.result{border-left-color:var(--cyan)}
+.containment-log .evt.memory{border-left-color:var(--pink)}
+.containment-log .evt.error{border-left-color:var(--red)}
+.alien-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;position:relative;z-index:1}
+.alien-table{font-size:11px}
+.alien-table .row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.alien-table .row span:first-child{color:#89a6b7;text-transform:uppercase;letter-spacing:1px;font-size:10px}
+.alien-table .row span:last-child{text-align:right;color:#e7fbff}
+.alien-console textarea,.alien-console select{width:100%;background:rgba(4,8,17,.86);border:1px solid rgba(0,212,255,.16);color:#dff8ff;border-radius:10px;padding:10px;font-family:Consolas,monospace;font-size:12px;outline:none}
+.alien-console select{margin-bottom:8px;font-family:Georgia,serif}
+.alien-console textarea{min-height:84px;resize:vertical}
+.alien-console button{width:100%;margin-top:8px;border:1px solid rgba(255,179,71,.34);background:linear-gradient(180deg,rgba(255,179,71,.16),rgba(255,179,71,.08));color:var(--amber);border-radius:10px;padding:10px;font-family:Georgia,serif;cursor:pointer;letter-spacing:1px;text-transform:uppercase}
+.alien-console button:hover{box-shadow:0 0 16px rgba(255,179,71,.16)}
+.alien-statusline{font-size:11px;color:#88b0c6;min-height:16px;margin-top:8px}
+.bridge-offline{opacity:.78;filter:saturate(.75)}
 </style>
 </head>
 <body>
@@ -275,8 +334,69 @@ h2.glow-cyan{color:var(--cyan);text-shadow:0 0 10px rgba(0,212,255,.4)}
     <div style="height:8px;background:#1a0a14;border-radius:4px;overflow:hidden;border:1px solid rgba(255,45,120,.3)">
       <div id="health-fill" style="height:100%;background:linear-gradient(90deg,#FF2D78,#ff6ba8);border-radius:4px;transition:width 1s ease;box-shadow:0 0 10px rgba(255,45,120,.6);width:0%"></div>
     </div>
-  </div>
+</div>
 </a>
+</div>
+
+<!-- Alien Containment Upgrade -->
+<div id="alien-containment" class="panel alien-panel bridge-offline">
+  <div class="containment-head">
+    <div>
+      <div class="containment-title">GSK Containment Observatory</div>
+      <div class="containment-sub">Glass box · witness ledger · command surface · 9Router cognition bus</div>
+    </div>
+    <div class="containment-badge" id="containment-badge">Archive Shell</div>
+  </div>
+  <div class="containment-grid">
+    <div class="core-box">
+      <div class="section-kicker">Contained Artifact</div>
+      <div class="artifact-core" id="artifact-core">
+        <div class="artifact-kernel"></div>
+        <div class="artifact-label">Subject: GSK / Allie Fusion<small id="artifact-subline">Awaiting live local bridge...</small></div>
+      </div>
+      <div class="containment-stats">
+        <div class="alien-chip"><div class="k">Mode</div><div class="v" id="gsk-mode">Archive</div></div>
+        <div class="alien-chip"><div class="k">9Router</div><div class="v" id="gsk-brain">Offline</div></div>
+        <div class="alien-chip"><div class="k">Council</div><div class="v" id="gsk-council-count">0</div></div>
+        <div class="alien-chip"><div class="k">Witnessed</div><div class="v" id="gsk-memory-count">0</div></div>
+      </div>
+    </div>
+    <div class="side-box">
+      <div class="section-kicker">Council / Memory / Runtime</div>
+      <div class="alien-table" id="gsk-runtime-table">
+        <div class="row"><span>State</span><span id="gsk-state">ARCHIVE ONLY</span></div>
+        <div class="row"><span>Bridge</span><span id="gsk-bridge">DISCONNECTED</span></div>
+        <div class="row"><span>Updated</span><span id="gsk-updated">—</span></div>
+        <div class="row"><span>Uptime</span><span id="gsk-uptime">—</span></div>
+        <div class="row"><span>Mood</span><span id="gsk-mood">—</span></div>
+        <div class="row"><span>Mythos</span><span id="gsk-mythos">—</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="alien-row">
+    <div class="core-box">
+      <div class="section-kicker">Causal Timeline</div>
+      <div class="containment-log" id="gsk-timeline">
+        <div class="evt memory"><div class="t">archive</div><div class="s">Static PLT dashboard shell active. Live GSK bridge not yet connected.</div></div>
+      </div>
+    </div>
+    <div class="side-box alien-console">
+      <div class="section-kicker">Operator Console</div>
+      <select id="gsk-route">
+        <option value="brain">Brain / 9Router</option>
+        <option value="council">Council Deliberation</option>
+        <option value="skill">Skill Invoke</option>
+        <option value="memory">Witness To Memory</option>
+      </select>
+      <textarea id="gsk-command" placeholder="Issue a command to the contained intelligence..."></textarea>
+      <button id="gsk-send">Transmit To Artifact</button>
+      <div class="alien-statusline" id="gsk-command-status">Command channel idle.</div>
+      <div class="section-kicker" style="margin-top:12px">Latest Verdict</div>
+      <div class="containment-log" id="gsk-council-panel" style="max-height:120px">
+        <div class="evt council"><div class="t">council</div><div class="s">No live deliberation captured yet.</div></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- 2. Collectors -->
@@ -531,8 +651,117 @@ h2.glow-cyan{color:var(--cyan);text-shadow:0 0 10px rgba(0,212,255,.4)}
 
 <script>
 const DATA_URL='http://localhost:5004/api/data';
-const CMD_URL='http://localhost:5004/api/command';
+const LEGACY_CMD_URL='http://localhost:5004/api/command';
+const GSK_API_BASE='http://127.0.0.1:4490/api/gsk';
+const GSK_WS_URL='ws://127.0.0.1:4490/gsk/events';
 const CIRC=2*Math.PI*40;
+let GSK_LIVE=false;
+let gskSocket=null;
+let gskTimeline=[];
+
+function setText(id,value){var el=document.getElementById(id);if(el)el.textContent=value;}
+function setHtml(id,value){var el=document.getElementById(id);if(el)el.innerHTML=value;}
+function escapeInline(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function renderGskStatus(status){
+  if(!status)return;
+  GSK_LIVE=!!status.live;
+  var wrap=document.getElementById('alien-containment');
+  if(wrap)wrap.classList.toggle('bridge-offline',!GSK_LIVE);
+  setText('containment-badge',GSK_LIVE?'Live Artifact':'Archive Shell');
+  setText('artifact-subline',GSK_LIVE?'Local GSK bridge witnessing real causality':'Static shell waiting for local artifact link');
+  setText('gsk-mode',status.mode||'observing');
+  setText('gsk-brain',status.brain&&status.brain.online?'9Router Online':'9Router Offline');
+  setText('gsk-council-count',String(status.counts&&status.counts.deliberations||0));
+  setText('gsk-memory-count',String(status.counts&&status.counts.memories||0));
+  setText('gsk-state',GSK_LIVE?'CONTAINED / ACTIVE':'ARCHIVE ONLY');
+  setText('gsk-bridge',GSK_LIVE?'CONNECTED':'DISCONNECTED');
+  setText('gsk-updated',status.updated?timeAgo(status.updated):'—');
+  setText('gsk-uptime',status.uptime!=null?status.uptime+'s':'—');
+  setText('gsk-mood',status.chambers&&status.chambers.affect?status.chambers.affect.mood||'neutral':'—');
+  setText('gsk-mythos',status.chambers&&status.chambers.mythos?status.chambers.mythos.phase||'—':'—');
+}
+
+function renderGskTimeline(events){
+  if(events&&events.length)gskTimeline=events.slice(0,120);
+  var el=document.getElementById('gsk-timeline');
+  if(!el)return;
+  if(!gskTimeline.length){
+    el.innerHTML='<div class="evt memory"><div class="t">archive</div><div class="s">No live telemetry yet.</div></div>';
+    return;
+  }
+  el.innerHTML=gskTimeline.slice(0,24).map(function(evt){
+    var type=(evt.type||'memory').toLowerCase();
+    var stamp=evt.timestamp?new Date(evt.timestamp).toLocaleTimeString():'—';
+    var title=escapeInline((evt.label||type)+' · '+stamp);
+    var summary=escapeInline(evt.summary||evt.payload&&evt.payload.content||JSON.stringify(evt.payload||{}).slice(0,220));
+    return '<div class="evt '+type+'"><div class="t">'+title+'</div><div class="s">'+summary+'</div></div>';
+  }).join('');
+}
+
+function renderGskCouncil(payload){
+  var el=document.getElementById('gsk-council-panel');
+  if(!el)return;
+  if(!payload||!payload.latest){
+    el.innerHTML='<div class="evt council"><div class="t">council</div><div class="s">No live deliberation captured yet.</div></div>';
+    return;
+  }
+  var latest=payload.latest;
+  el.innerHTML='<div class="evt council"><div class="t">'+escapeInline(latest.topic||'Council Topic')+'</div><div class="s">'+escapeInline(latest.resolution||'No resolution')+'</div></div>';
+}
+
+async function loadGskStatus(){
+  try{
+    var r=await fetch(GSK_API_BASE+'/status?t='+Date.now());
+    if(!r.ok)throw new Error(r.status);
+    renderGskStatus(await r.json());
+  }catch(e){
+    renderGskStatus({live:false});
+  }
+}
+
+async function loadGskTimeline(){
+  try{
+    var r=await fetch(GSK_API_BASE+'/timeline?t='+Date.now());
+    if(!r.ok)throw new Error(r.status);
+    var data=await r.json();
+    renderGskTimeline((data.events||[]));
+  }catch(e){}
+}
+
+async function loadGskCouncil(){
+  try{
+    var r=await fetch(GSK_API_BASE+'/council?t='+Date.now());
+    if(!r.ok)throw new Error(r.status);
+    renderGskCouncil(await r.json());
+  }catch(e){}
+}
+
+function connectGskSocket(){
+  try{
+    gskSocket=new WebSocket(GSK_WS_URL);
+    gskSocket.onmessage=function(event){
+      try{
+        var msg=JSON.parse(event.data);
+        if(msg.type==='init'){
+          renderGskStatus(msg.payload.status);
+          renderGskTimeline(msg.payload.timeline||[]);
+          renderGskCouncil(msg.payload.council);
+          return;
+        }
+        if(msg.type==='status')renderGskStatus(msg.payload);
+        if(msg.type==='council')renderGskCouncil(msg.payload);
+        if(msg.type==='memory'&&msg.payload&&msg.payload.total!=null)setText('gsk-memory-count',String(msg.payload.total));
+        if(msg.type==='event'&&msg.payload){
+          gskTimeline.unshift(msg.payload);
+          gskTimeline=gskTimeline.slice(0,120);
+          renderGskTimeline();
+        }
+      }catch(e){}
+    };
+    gskSocket.onclose=function(){setTimeout(connectGskSocket,4000);};
+  }catch(e){}
+}
 
 /* ── FALLBACK DATA ── */
 const FALLBACK = {
@@ -879,6 +1108,9 @@ function renderRevenue(d){
 /* ── FETCH + AUTO-REFRESH ── */
 var GH_DATA_URL='https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json';
 async function load(){
+  await loadGskStatus();
+  await loadGskTimeline();
+  await loadGskCouncil();
   try{
     var r=await fetch(GH_DATA_URL+'?t='+Date.now());
     if(!r.ok)throw new Error(r.status);
@@ -895,7 +1127,6 @@ async function load(){
     document.getElementById('status-text').innerHTML='\u26a0\ufe0f Signal delayed - showing cached data';
   }
 }
-}
 
 /* ── COMMAND TRANSMIT ── */
 document.getElementById('cmd-send').addEventListener('click',async function(){
@@ -905,7 +1136,11 @@ document.getElementById('cmd-send').addEventListener('click',async function(){
   var st=document.getElementById('cmd-status');
   st.innerHTML='<span class="gold">Transmitting...</span>';
   try{
-    await fetch(CMD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'📡 COMMAND: '+txt})});
+    if(GSK_LIVE){
+      await fetch(GSK_API_BASE+'/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({route:'brain',input:txt})});
+    }else{
+      await fetch(LEGACY_CMD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'📡 COMMAND: '+txt})});
+    }
     st.innerHTML='<span class="green">✓ Command transmitted to Profit</span>';
     inp.value='';
   }catch(e){
@@ -997,7 +1232,7 @@ function submitBuild(type){
   var ts=new Date().toLocaleString();
   var copyId='copy-btn-'+Date.now();
 
-  fetch(CMD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'🔨 BUILD: '+JSON.stringify(data)})})
+  fetch((GSK_LIVE?GSK_API_BASE+'/command':LEGACY_CMD_URL),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(GSK_LIVE?{route:'memory',input:'BUILD REQUEST '+JSON.stringify(data)}:{text:'🔨 BUILD: '+JSON.stringify(data)})})
   .then(function(){
     res.innerHTML='<div class="build-result-box">'
       +'<div class="result-check">✓ Build request transmitted to Profit</div>'
@@ -1069,7 +1304,7 @@ function submitFlag(){
   if(!txt)return;
   var st=document.getElementById('flag-status');
   st.innerHTML='<span class="gold">Flagging...</span>';
-  fetch(CMD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'🚩 FLAG: '+txt})})
+  fetch((GSK_LIVE?GSK_API_BASE+'/command':LEGACY_CMD_URL),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(GSK_LIVE?{route:'memory',input:'FLAG '+txt}:{text:'🚩 FLAG: '+txt})})
   .then(function(){
     st.innerHTML='<span class="green">🚩 Flagged — Profit will see this</span>';
     inp.value='';
@@ -1107,7 +1342,6 @@ function addBettyMsg(who,text){
 }
 // API endpoints
 var DATA_URL = 'https://raw.githubusercontent.com/uncommonpope-png/plt-press/main/log.json';
-var CMD_URL = 'https://pltcommands.onrender.com/execute';
 
 var bettyHistory=[];
 /* Betty Credits Knowledge Engine — zero cost, no server needed */
@@ -1144,41 +1378,58 @@ function sendBetty(){
   inp.value='';
   addBettyMsg('craig',txt);
   bettyHistory.push({who:'craig',text:txt});
-  document.getElementById('betty-status').innerHTML='<span style="color:var(--pink)">Betty thinking (local AI)...</span>';
-  
-  // Try local Ollama first, fallback to knowledge engine
-  var prompt = 'You are Betty Credits, a financial advisor in the PLT (Profit Love Tax) framework. Be helpful, direct, and knowledgeable about credit, money, and business. Keep responses under 100 words.\n\nUser: '+txt;
-  
-  fetch('http://127.0.0.1:11434/api/generate', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      model: 'qwen2.5:0.5b',
-      prompt: prompt,
-      stream: false
+  document.getElementById('betty-status').innerHTML='<span style="color:var(--pink)">Betty scanning the artifact...</span>';
+  if(GSK_LIVE){
+    fetch(GSK_API_BASE+'/command', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({route:'brain',input:'You are Betty Credits within the GSK containment dashboard. Answer briefly and directly. User: '+txt})
     })
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    if(data.response){
-      addBettyMsg('betty',data.response);
-      bettyHistory.push({who:'betty',text:data.response});
-      document.getElementById('betty-status').innerHTML='<span style="color:var(--green)">✓ Local AI</span>';
-    } else {
-      throw new Error('No response from local AI');
-    }
-  })
-  .catch(function(e){
-    // Fallback to knowledge engine
-    var reply=bettyRespond(txt);
-    addBettyMsg('betty',reply);
-    bettyHistory.push({who:'betty',text:reply});
-    document.getElementById('betty-status').innerHTML='<span style="color:var(--cyan)">✓ Knowledge Engine</span>';
-  });
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var response=(data.response&&data.response.response)||data.response||data.result||'';
+      if(response){
+        addBettyMsg('betty',response);
+        bettyHistory.push({who:'betty',text:response});
+        document.getElementById('betty-status').innerHTML='<span style="color:var(--green)">✓ GSK / 9Router</span>';
+      }else{throw new Error('No response');}
+    })
+    .catch(function(){
+      var reply=bettyRespond(txt);
+      addBettyMsg('betty',reply);
+      bettyHistory.push({who:'betty',text:reply});
+      document.getElementById('betty-status').innerHTML='<span style="color:var(--cyan)">✓ Knowledge Engine</span>';
+    });
+    return;
+  }
+  var reply=bettyRespond(txt);
+  addBettyMsg('betty',reply);
+  bettyHistory.push({who:'betty',text:reply});
+  document.getElementById('betty-status').innerHTML='<span style="color:var(--cyan)">✓ Knowledge Engine</span>';
 }
+
+document.getElementById('gsk-send').addEventListener('click',async function(){
+  var route=document.getElementById('gsk-route').value;
+  var input=document.getElementById('gsk-command').value.trim();
+  if(!input)return;
+  var status=document.getElementById('gsk-command-status');
+  status.textContent='Transmitting into containment...';
+  try{
+    var res=await fetch(GSK_API_BASE+'/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({route:route,input:input})});
+    var data=await res.json();
+    status.textContent=data.ok===false?('Command failed: '+(data.error||'unknown')):'Artifact responded successfully.';
+    document.getElementById('gsk-command').value='';
+    loadGskTimeline();
+    loadGskCouncil();
+    loadGskStatus();
+  }catch(e){
+    status.textContent='Bridge unavailable: '+e.message;
+  }
+});
 
 /* ── INIT: Render fallback IMMEDIATELY, then fetch live ── */
 render(FALLBACK);
+connectGskSocket();
 load();
 setInterval(load,20000);
 </script>
